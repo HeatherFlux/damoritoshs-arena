@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import ThreatSearch from './components/ThreatSearch.vue'
 import EncounterBuilder from './components/EncounterBuilder.vue'
 import EncounterList from './components/EncounterList.vue'
@@ -10,10 +10,20 @@ import SettingsModal from './components/SettingsModal.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
+import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
 
 const store = useEncounterStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
+
+// Initialize Discord webhook integration
+onMounted(() => {
+  initDiscordIntegration()
+})
+
+onUnmounted(() => {
+  destroyDiscordIntegration()
+})
 
 const showSettingsModal = ref(false)
 

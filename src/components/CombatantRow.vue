@@ -19,8 +19,6 @@ const emit = defineEmits<{
 const combatStore = useCombatStore()
 
 const damageAmount = ref<number | null>(null)
-const editingInit = ref(false)
-const newInit = ref(0)
 const showStatblock = ref(false)
 
 const hpPercentage = computed(() => {
@@ -69,16 +67,6 @@ function applyQuickHeal() {
   damageAmount.value = null
 }
 
-function startEditInit() {
-  newInit.value = props.combatant.initiative
-  editingInit.value = true
-}
-
-function saveInit() {
-  combatStore.setInitiative(props.combatant.id, newInit.value)
-  editingInit.value = false
-}
-
 function decrementCondition(condition: string) {
   const cond = props.combatant.conditions.find(c => c.name === condition)
   if (cond?.value !== undefined) {
@@ -115,32 +103,19 @@ const hasExpandableDetails = computed(() => {
     >
       <!-- Initiative -->
       <div class="flex items-center gap-1">
-        <template v-if="editingInit">
-          <input
-            v-model.number="newInit"
-            type="number"
-            class="input w-10 text-center font-bold"
-            @blur="saveInit"
-            @keyup.enter="saveInit"
-            autofocus
-          />
-        </template>
-        <template v-else>
-          <span
-            class="font-bold text-lg cursor-pointer px-1 py-0.5 rounded text-text hover:bg-elevated"
-            @click="startEditInit"
-            title="Click to edit"
-          >
-            {{ combatant.initiative }}
-          </span>
-          <button
-            class="px-1 py-0.5 text-xs bg-transparent border-none opacity-50 hover:opacity-100"
-            @click="combatStore.rollInitiative(combatant.id)"
-            title="Roll initiative"
-          >
-            🎲
-          </button>
-        </template>
+        <input
+          :value="combatant.initiative"
+          type="number"
+          class="init-input"
+          @change="combatStore.setInitiative(combatant.id, Number(($event.target as HTMLInputElement).value))"
+        />
+        <button
+          class="roll-init-btn"
+          @click="combatStore.rollInitiative(combatant.id)"
+          title="Roll initiative"
+        >
+          🎲
+        </button>
       </div>
 
       <!-- Name (clickable for statblock/hazard details) -->
@@ -364,6 +339,45 @@ const hasExpandableDetails = computed(() => {
 </template>
 
 <style scoped>
+/* Initiative input */
+.init-input {
+  width: 2.5rem;
+  padding: 0.25rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  -moz-appearance: textfield;
+}
+
+.init-input::-webkit-outer-spin-button,
+.init-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.init-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.roll-init-btn {
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  background: transparent;
+  border: none;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.roll-init-btn:hover {
+  opacity: 1;
+}
+
 /* Statblock animation */
 .statblock-enter-active {
   animation: expandDown 0.25s ease;

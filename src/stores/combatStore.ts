@@ -4,6 +4,7 @@ import type { Hazard } from '../types/hazard'
 import type { Combat, Combatant } from '../types/combat'
 import { getAdjustedHP, getAdjustedAC } from '../types/combat'
 import { parsePathbuilderJSON, type ImportResult } from '../utils/pathbuilderImport'
+import { sendTurnChange } from '../utils/discordIntegration'
 
 const STORAGE_KEY = 'sf2e-combat'
 
@@ -262,6 +263,12 @@ function nextTurn() {
 
   state.combat.turn = nextIndex
   saveToStorage(state.combat)
+
+  // Send turn change to Discord
+  const nextCombatant = sorted[nextIndex]
+  if (nextCombatant) {
+    sendTurnChange(nextCombatant.name, state.combat.round, nextCombatant.isPlayer)
+  }
 }
 
 function previousTurn() {

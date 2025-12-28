@@ -83,7 +83,7 @@ function formatTime(date: Date): string {
       <div
         v-for="roll in rolls"
         :key="roll.id"
-        class="relative px-3 py-3 mb-2 bg-elevated rounded-md border-l-3 transition-all duration-150 hover:bg-border"
+        class="relative px-3 py-3 pr-14 mb-2 bg-elevated rounded-md border-l-3 transition-all duration-150 hover:bg-border"
         :class="{
           'border-l-success bg-success/10': roll.isNat20,
           'border-l-danger bg-danger/10': roll.isNat1 || roll.isCriticalHit,
@@ -124,14 +124,14 @@ function formatTime(date: Date): string {
           <span class="text-[0.6875rem] text-muted">{{ formatTime(roll.timestamp) }}</span>
         </div>
 
-        <div class="absolute top-2 right-2 flex gap-1 opacity-0 hover:opacity-100 transition-opacity duration-150 group-hover:opacity-100 roll-actions">
+        <div class="absolute top-1 right-1 flex gap-0.5 roll-actions">
           <div class="relative">
             <button
-              class="btn-icon btn-sm"
+              class="action-btn"
               @click="toggleExportMenu(roll.id)"
-              title="Export roll"
+              title="Copy to clipboard"
             >
-              📋
+              #
             </button>
 
             <Transition name="menu">
@@ -165,11 +165,11 @@ function formatTime(date: Date): string {
           </div>
 
           <button
-            class="btn-icon btn-sm text-dim hover:text-danger hover:bg-danger/10"
+            class="action-btn action-btn-danger"
             @click="handleDelete(roll.id)"
             title="Delete roll"
           >
-            ×
+            −
           </button>
         </div>
 
@@ -187,6 +187,35 @@ function formatTime(date: Date): string {
 /* Show actions on hover */
 .relative:hover .roll-actions {
   opacity: 1;
+}
+
+/* Action buttons */
+.action-btn {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.action-btn:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.action-btn-danger:hover {
+  background: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 /* Animations */

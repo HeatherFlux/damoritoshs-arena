@@ -7,11 +7,16 @@ export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'dange
 export interface Settings {
   autoRollDamage: boolean
   theme: ThemeId
+  // Discord Integration
+  discordWebhookEnabled: boolean
+  discordWebhookUrl: string
 }
 
 const defaultSettings: Settings = {
   autoRollDamage: true,
   theme: 'cyber-cyan',
+  discordWebhookEnabled: false,
+  discordWebhookUrl: '',
 }
 
 // Theme definitions
@@ -311,6 +316,39 @@ watch(
   { deep: true }
 )
 
+// Discord webhook helper
+export interface DiscordMessage {
+  content?: string
+  embeds?: Array<{
+    title?: string
+    description?: string
+    color?: number
+    fields?: Array<{ name: string; value: string; inline?: boolean }>
+    footer?: { text: string }
+    timestamp?: string
+  }>
+  username?: string
+  avatar_url?: string
+}
+
+async function sendToDiscord(message: DiscordMessage): Promise<boolean> {
+  if (!settings.discordWebhookEnabled || !settings.discordWebhookUrl) {
+    return false
+  }
+
+  try {
+    const response = await fetch(settings.discordWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    })
+    return response.ok
+  } catch (error) {
+    console.error('Failed to send Discord message:', error)
+    return false
+  }
+}
+
 // Export the store
 export function useSettingsStore() {
   return {
@@ -333,6 +371,31 @@ export function useSettingsStore() {
 
     resetSettings() {
       Object.assign(settings, defaultSettings)
+    },
+
+    // Discord integration
+    sendToDiscord,
+
+    async testDiscordWebhook(): Promise<boolean> {
+      if (!settings.discordWebhookUrl) return false
+
+      // Temporarily enable to test
+      const wasEnabled = settings.discordWebhookEnabled
+      settings.discordWebhookEnabled = true
+
+      const result = await sendToDiscord({
+        embeds: [{
+          title: '🎮 Damoritosh\'s Arena Connected!',
+          description: 'Your Discord webhook is working. Combat logs will appear here.',
+          color: 0x00d4ff,
+          footer: { text: 'Starfinder 2E Encounter Builder' },
+          timestamp: new Date().toISOString(),
+        }],
+        username: 'Damoritosh\'s Arena',
+      })
+
+      settings.discordWebhookEnabled = wasEnabled
+      return result
     },
   }
 }

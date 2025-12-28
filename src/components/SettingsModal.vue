@@ -1,13 +1,26 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useSettingsStore, themes, type ThemeId } from '../stores/settingsStore'
 
-const { settings, toggleSetting, setTheme } = useSettingsStore()
+const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
 
 defineEmits<{
   (e: 'close'): void
 }>()
 
 const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
+
+// Discord webhook state
+const webhookTestStatus = ref<'idle' | 'testing' | 'success' | 'error'>('idle')
+
+async function handleTestWebhook() {
+  webhookTestStatus.value = 'testing'
+  const success = await testDiscordWebhook()
+  webhookTestStatus.value = success ? 'success' : 'error'
+  setTimeout(() => {
+    webhookTestStatus.value = 'idle'
+  }, 3000)
+}
 </script>
 
 <template>
@@ -69,6 +82,57 @@ const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
               <span class="toggle-thumb" :class="{ 'toggle-thumb-on': settings.autoRollDamage }"></span>
             </button>
           </label>
+        </div>
+
+        <!-- Integrations Section -->
+        <div>
+          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Integrations</h3>
+
+          <div class="space-y-3">
+            <!-- Discord Webhook URL -->
+            <div class="p-3 bg-elevated">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-text">Discord Webhook</span>
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="settings.discordWebhookEnabled"
+                  @click="toggleSetting('discordWebhookEnabled')"
+                  class="toggle-switch"
+                  :class="{ 'toggle-on': settings.discordWebhookEnabled }"
+                  :disabled="!settings.discordWebhookUrl"
+                >
+                  <span class="toggle-thumb" :class="{ 'toggle-thumb-on': settings.discordWebhookEnabled }"></span>
+                </button>
+              </div>
+              <p class="text-xs text-dim mb-3">Send combat logs and rolls to a Discord channel</p>
+
+              <div class="flex gap-2">
+                <input
+                  type="url"
+                  :value="settings.discordWebhookUrl"
+                  @input="setSetting('discordWebhookUrl', ($event.target as HTMLInputElement).value)"
+                  placeholder="https://discord.com/api/webhooks/..."
+                  class="input flex-1 text-sm"
+                />
+                <button
+                  type="button"
+                  class="btn-secondary text-sm px-3 whitespace-nowrap"
+                  :class="{
+                    'btn-success': webhookTestStatus === 'success',
+                    'btn-danger': webhookTestStatus === 'error',
+                  }"
+                  :disabled="!settings.discordWebhookUrl || webhookTestStatus === 'testing'"
+                  @click="handleTestWebhook"
+                >
+                  <span v-if="webhookTestStatus === 'idle'">Test</span>
+                  <span v-else-if="webhookTestStatus === 'testing'">...</span>
+                  <span v-else-if="webhookTestStatus === 'success'">✓</span>
+                  <span v-else-if="webhookTestStatus === 'error'">✗</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
