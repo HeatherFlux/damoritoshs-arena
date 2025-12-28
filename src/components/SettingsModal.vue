@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useSettingsStore, themes, type ThemeId } from '../stores/settingsStore'
-import { useEncounterStore } from '../stores/encounterStore'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
-const encounterStore = useEncounterStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -22,46 +20,6 @@ async function handleTestWebhook() {
   setTimeout(() => {
     webhookTestStatus.value = 'idle'
   }, 3000)
-}
-
-// Creature import state
-const creatureCount = computed(() => encounterStore.getCreatureCount())
-const showCreatureImport = ref(false)
-const creatureImportText = ref('')
-const creatureImportStatus = ref<'idle' | 'success' | 'error'>('idle')
-const creatureImportMessage = ref('')
-
-function handleCreatureImport() {
-  try {
-    const result = encounterStore.importCreatures(creatureImportText.value)
-    creatureImportStatus.value = 'success'
-    creatureImportMessage.value = `Added ${result.added} creatures${result.duplicates > 0 ? `, ${result.duplicates} duplicates skipped` : ''}`
-    creatureImportText.value = ''
-    setTimeout(() => {
-      creatureImportStatus.value = 'idle'
-      showCreatureImport.value = false
-    }, 2000)
-  } catch (e) {
-    creatureImportStatus.value = 'error'
-    creatureImportMessage.value = 'Invalid JSON data'
-  }
-}
-
-function handleCreatureExport() {
-  const json = encounterStore.exportCreatures()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'sf2e-creatures.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function handleClearCreatures() {
-  if (confirm('Delete all creatures? This cannot be undone.')) {
-    encounterStore.clearAllCreatures()
-  }
 }
 </script>
 
@@ -124,70 +82,6 @@ function handleClearCreatures() {
               <span class="toggle-thumb" :class="{ 'toggle-thumb-on': settings.autoRollDamage }"></span>
             </button>
           </label>
-        </div>
-
-        <!-- Data Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Creature Data</h3>
-
-          <div class="p-3 bg-elevated">
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-medium text-text">Creatures Loaded</span>
-              <span class="text-accent font-bold">{{ creatureCount }}</span>
-            </div>
-            <p class="text-xs text-dim mb-3">Import creature JSON to use in encounters</p>
-
-            <div class="flex gap-2">
-              <button
-                class="btn-secondary text-sm flex-1"
-                @click="showCreatureImport = !showCreatureImport"
-              >
-                Import
-              </button>
-              <button
-                class="btn-secondary text-sm flex-1"
-                :disabled="creatureCount === 0"
-                @click="handleCreatureExport"
-              >
-                Export
-              </button>
-              <button
-                class="btn-secondary text-sm px-3 text-danger"
-                :disabled="creatureCount === 0"
-                @click="handleClearCreatures"
-                title="Clear all creatures"
-              >
-                Clear
-              </button>
-            </div>
-
-            <!-- Import textarea -->
-            <div v-if="showCreatureImport" class="mt-3">
-              <textarea
-                v-model="creatureImportText"
-                class="input w-full font-mono text-xs p-2 resize-y"
-                rows="6"
-                placeholder='[{"id": "...", "name": "...", "level": 1, ...}]'
-              ></textarea>
-              <div class="flex items-center justify-between mt-2">
-                <span
-                  v-if="creatureImportStatus !== 'idle'"
-                  class="text-xs"
-                  :class="{ 'text-success': creatureImportStatus === 'success', 'text-danger': creatureImportStatus === 'error' }"
-                >
-                  {{ creatureImportMessage }}
-                </span>
-                <span v-else></span>
-                <button
-                  class="btn-primary text-sm"
-                  :disabled="!creatureImportText"
-                  @click="handleCreatureImport"
-                >
-                  Import Creatures
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Integrations Section -->

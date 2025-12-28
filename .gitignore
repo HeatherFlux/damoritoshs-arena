@@ -49,6 +49,3 @@ coverage/
 
 # Optional eslint cache
 .eslintcache
-
-# Creature data (not ORC licensed yet)
-src/data/creatures.json

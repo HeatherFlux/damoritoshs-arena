@@ -67,7 +67,9 @@ Use Export to backup your data or move between devices.
 
 ### v1.1 (planned)
 - [ ] Party export/import
+- [ ] More condition effects (clumsy, enfeebled, etc)
 - [ ] Encounter templates/presets
+- [ ] Better mobile layout
 
 ### v2.0 (future)
 - [ ] **Starship Combat Tab**
