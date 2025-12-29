@@ -265,11 +265,25 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): C
 }
 
 /**
+ * Filter out attack entries from ability names
+ * AoN sometimes includes attacks in the creature_ability array
+ */
+function filterAbilityNames(names: string[]): string[] {
+  return names.filter(name => {
+    // Filter out entries that look like attacks (e.g., "sting +5", "laser ray +5")
+    if (/\+\d+$/.test(name.trim())) return false
+    if (/\s+\d+$/.test(name.trim())) return false // SF2e format without +
+    return true
+  })
+}
+
+/**
  * Adapt AoN Elasticsearch creature hit to our Creature format
  */
 export function adaptAoNCreature(hit: { _id: string; _source: Record<string, unknown> }): Creature {
   const src = hit._source as Record<string, any>
   const markdown = (src.markdown || src.text || '') as string
+  const abilityNames = filterAbilityNames(ensureArray(src.creature_ability))
 
   return {
     id: `aon-${hit._id}`,
@@ -303,7 +317,7 @@ export function adaptAoNCreature(hit: { _id: string; _source: Record<string, unk
     weaknesses: ensureArray(src.weakness_raw),
     speed: src.speed_raw || src.speed_markdown || '30 feet',
     attacks: parseAttacksFromMarkdown(markdown),
-    specialAbilities: parseAbilitiesFromMarkdown(markdown, ensureArray(src.creature_ability)),
+    specialAbilities: parseAbilitiesFromMarkdown(markdown, abilityNames),
     description: src.summary || '',
     rawText: src.text || ''
   }
