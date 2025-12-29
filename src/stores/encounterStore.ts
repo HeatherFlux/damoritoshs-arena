@@ -436,6 +436,23 @@ function clearCustomCreatures() {
   localStorage.removeItem(AON_CACHE_TIME_KEY)
 }
 
+async function refreshAoNCreatures(): Promise<number> {
+  // Clear AoN cache
+  localStorage.removeItem(AON_CACHE_KEY)
+  localStorage.removeItem(AON_CACHE_TIME_KEY)
+
+  // Remove existing AoN creatures from state
+  state.creatures = state.creatures.filter(c => !c.id.startsWith('aon-'))
+
+  // Re-fetch from AoN
+  const aonCreatures = await fetchAoNCreatures()
+  if (aonCreatures.length > 0) {
+    state.creatures.push(...aonCreatures)
+  }
+
+  return aonCreatures.length
+}
+
 function getCreatureStats() {
   const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
   const bundledCount = state.creatures.filter(c => bundledIds.has(c.id)).length
@@ -479,5 +496,6 @@ export const useEncounterStore = () => ({
   importCustomCreatures,
   exportCustomCreatures,
   clearCustomCreatures,
+  refreshAoNCreatures,
   getCreatureStats,
 })

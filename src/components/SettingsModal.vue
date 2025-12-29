@@ -4,7 +4,7 @@ import { useSettingsStore, themes, backgroundStyles, type ThemeId, type Backgrou
 import { useEncounterStore } from '../stores/encounterStore'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
-const encounterStore = useEncounterStore()
+const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, refreshAoNCreatures } = useEncounterStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -17,10 +17,12 @@ const bgStyleList = Object.entries(backgroundStyles) as [BackgroundStyle, typeof
 const webhookTestStatus = ref<'idle' | 'testing' | 'success' | 'error'>('idle')
 
 // Creature data state
-const creatureStats = computed(() => encounterStore.getCreatureStats())
+const creatureStats = computed(() => getCreatureStats())
 const importStatus = ref<'idle' | 'success' | 'error'>('idle')
 const importMessage = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const refreshStatus = ref<'idle' | 'refreshing' | 'success' | 'error'>('idle')
+const refreshMessage = ref('')
 
 async function handleTestWebhook() {
   webhookTestStatus.value = 'testing'
@@ -44,7 +46,7 @@ function handleFileSelect(event: Event) {
   reader.onload = (e) => {
     try {
       const json = e.target?.result as string
-      const count = encounterStore.importCustomCreatures(json)
+      const count = importCustomCreatures(json)
       importStatus.value = 'success'
       importMessage.value = `Imported ${count} creatures`
     } catch (err) {
@@ -61,7 +63,7 @@ function handleFileSelect(event: Event) {
 }
 
 function handleExport() {
-  const json = encounterStore.exportCustomCreatures()
+  const json = exportCustomCreatures()
   const blob = new Blob([json], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -73,8 +75,25 @@ function handleExport() {
 
 function handleClearCustom() {
   if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
-    encounterStore.clearCustomCreatures()
+    clearCustomCreatures()
   }
+}
+
+async function handleRefreshAoN() {
+  refreshStatus.value = 'refreshing'
+  refreshMessage.value = ''
+  try {
+    const count = await refreshAoNCreatures()
+    refreshStatus.value = 'success'
+    refreshMessage.value = `Loaded ${count} creatures`
+  } catch {
+    refreshStatus.value = 'error'
+    refreshMessage.value = 'Failed to fetch'
+  }
+  setTimeout(() => {
+    refreshStatus.value = 'idle'
+    refreshMessage.value = ''
+  }, 3000)
 }
 </script>
 
@@ -228,6 +247,21 @@ function handleClearCustom() {
             <p class="text-xs text-dim">
               AoN creatures auto-fetch daily. Import JSON to add your own custom creatures.
             </p>
+
+            <button
+              type="button"
+              class="btn-secondary text-sm w-full"
+              :class="{
+                'btn-success': refreshStatus === 'success',
+                'btn-danger': refreshStatus === 'error',
+              }"
+              :disabled="refreshStatus === 'refreshing'"
+              @click="handleRefreshAoN"
+            >
+              <span v-if="refreshStatus === 'idle'">↻ Refresh AoN Data</span>
+              <span v-else-if="refreshStatus === 'refreshing'">Fetching...</span>
+              <span v-else>{{ refreshMessage }}</span>
+            </button>
 
             <div class="flex gap-2">
               <input
