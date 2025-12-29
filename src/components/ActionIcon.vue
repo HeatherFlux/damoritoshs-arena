@@ -34,5 +34,10 @@ const actionLigatures: Record<ActionType, string> = {
   line-height: 1;
   vertical-align: middle;
   margin-left: 0.25em;
+  /* Enable ligatures - required for the font to work */
+  font-variant-ligatures: common-ligatures discretionary-ligatures;
+  font-feature-settings: "liga" 1, "dlig" 1;
+  -webkit-font-feature-settings: "liga" 1, "dlig" 1;
+  -moz-font-feature-settings: "liga" 1, "dlig" 1;
 }
 </style>

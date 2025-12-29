@@ -12,9 +12,14 @@
 /* Action icon class - uses ligatures */
 .action-icon {
   font-family: 'Pathfinder-Icons', sans-serif;
-  font-size: 1em;
+  font-size: 1.1em;
   line-height: 1;
   vertical-align: middle;
+  /* Enable ligatures - required for the font to work */
+  font-variant-ligatures: common-ligatures discretionary-ligatures;
+  font-feature-settings: "liga" 1, "dlig" 1;
+  -webkit-font-feature-settings: "liga" 1, "dlig" 1;
+  -moz-font-feature-settings: "liga" 1, "dlig" 1;
 }
 
 /* ============================================
