@@ -263,8 +263,10 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[], cr
     // Try to find the ability description in markdown
     // Format: **Ability Name** description or **Ability Name** <actions> description
     // Note: AoN sometimes has malformed markdown like "Name**" instead of "**Name**"
+    // The description continues until we hit a paragraph break (double newline) or new section
+    // NOT just any bold text (since **Trigger** and **Effect** are part of descriptions)
     const regex = new RegExp(
-      `(?:\\*\\*)?${searchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
+      `(?:\\*\\*)?${searchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\r?\\n\\r?\\n|\\r?\\n---|\\r?\\n<|$)`,
       'is'
     )
     const match = markdown.match(regex)

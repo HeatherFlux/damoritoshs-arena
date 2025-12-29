@@ -13,7 +13,7 @@ const STORAGE_KEY = 'sf2e-encounters'
 const CREATURES_STORAGE_KEY = 'sf2e-custom-creatures'
 
 // Cache version - increment when adapter format changes to invalidate old caches
-const AON_CACHE_VERSION = 6
+const AON_CACHE_VERSION = 7
 const AON_CACHE_KEY = `sf2e-aon-creatures-v${AON_CACHE_VERSION}`
 const AON_CACHE_TIME_KEY = `sf2e-aon-cache-time-v${AON_CACHE_VERSION}`
 const AON_CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
