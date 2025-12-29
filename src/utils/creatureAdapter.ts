@@ -244,19 +244,27 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
 /**
  * Parse special abilities from markdown
  */
-function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): Creature['specialAbilities'] {
+function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[], creatureName: string): Creature['specialAbilities'] {
   const abilities: Creature['specialAbilities'] = []
   if (!markdown || !abilityNames.length) return abilities
 
   for (const rawName of abilityNames) {
     // Parse the ability name - extract action type from {{reaction}} etc.
-    const { name: cleanName, actions: nameActions } = parseAbilityName(rawName)
+    let { name: parsedName, actions: nameActions } = parseAbilityName(rawName)
+
+    // AoN sometimes includes creature name in ability name (e.g., "Media Lore Zo!")
+    // We use the full name for searching markdown but display the cleaned name
+    const searchName = parsedName
+    let displayName = parsedName
+    if (creatureName && parsedName.endsWith(creatureName)) {
+      displayName = parsedName.slice(0, -creatureName.length).trim()
+    }
 
     // Try to find the ability description in markdown
     // Format: **Ability Name** description or **Ability Name** <actions> description
     // Note: AoN sometimes has malformed markdown like "Name**" instead of "**Name**"
     const regex = new RegExp(
-      `(?:\\*\\*)?${cleanName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
+      `(?:\\*\\*)?${searchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
       'is'
     )
     const match = markdown.match(regex)
@@ -276,6 +284,8 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): C
       }
       description = (match[2] || '')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+        .replace(/<br\s*\/?>/gi, ' ')            // Remove <br> tags
+        .replace(/<[^>]+>/g, '')                 // Remove any other HTML tags
         .replace(/\r?\n/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
@@ -283,7 +293,7 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): C
     }
 
     abilities.push({
-      name: cleanName,
+      name: displayName,
       actions,
       description
     })
@@ -337,10 +347,11 @@ export function adaptAoNCreature(hit: { _id: string; _source: Record<string, unk
   const src = hit._source as Record<string, any>
   const markdown = (src.markdown || src.text || '') as string
   const abilityNames = filterAbilityNames(ensureArray(src.creature_ability))
+  const creatureName = src.name || 'Unknown Creature'
 
   return {
     id: `aon-${hit._id}`,
-    name: src.name || 'Unknown Creature',
+    name: creatureName,
     level: typeof src.level === 'number' ? src.level : 0,
     traits: ensureArray(src.trait_raw || src.trait),
     size: normalizeSize(src.size),
@@ -370,7 +381,7 @@ export function adaptAoNCreature(hit: { _id: string; _source: Record<string, unk
     weaknesses: ensureArray(src.weakness_raw),
     speed: src.speed_raw || src.speed_markdown || '30 feet',
     attacks: parseAttacksFromMarkdown(markdown),
-    specialAbilities: parseAbilitiesFromMarkdown(markdown, abilityNames),
+    specialAbilities: parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName),
     description: src.summary || '',
     rawText: src.text || ''
   }
