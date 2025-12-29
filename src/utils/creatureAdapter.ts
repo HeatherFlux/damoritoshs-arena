@@ -2,7 +2,7 @@
  * Creature Adapter - Converts AoN Elasticsearch data to our Creature format
  */
 
-import type { Creature } from '../types/creature'
+import type { Creature, Attack } from '../types/creature'
 
 /**
  * Normalize size string to valid Creature size
@@ -36,10 +36,215 @@ function ensureSkills(value: unknown): Record<string, number> {
 }
 
 /**
+ * Parse action count from AoN action string
+ */
+function parseActions(actionStr: string): 1 | 2 | 3 {
+  if (actionStr.includes('Three') || actionStr.includes('3')) return 3
+  if (actionStr.includes('Two') || actionStr.includes('2')) return 2
+  return 1
+}
+
+/**
+ * Extract traits from a string like "[Fire](/Traits.aspx?ID=72), [Magical](/Traits.aspx?ID=103)"
+ * or "Agile, Magical, reach 10 feet"
+ */
+function extractTraits(traitStr: string): string[] {
+  const traits: string[] = []
+
+  // Try markdown link format first: [Trait](/Traits.aspx?ID=XX)
+  const linkMatches = traitStr.match(/\[([^\]]+)\]\([^)]+\)/g)
+  if (linkMatches) {
+    for (const m of linkMatches) {
+      const match = m.match(/\[([^\]]+)\]/)
+      if (match) {
+        const trait = match[1].toLowerCase()
+        // Filter out reach notation and other non-traits
+        if (!trait.includes('feet') && !trait.includes('reach')) {
+          traits.push(trait)
+        }
+      }
+    }
+  }
+
+  // Also try plain text traits (for some formats)
+  if (traits.length === 0) {
+    const parts = traitStr.split(',').map(s => s.trim().toLowerCase())
+    for (const part of parts) {
+      // Skip reach/range notations
+      if (part && !part.includes('feet') && !part.includes('reach') && !part.includes('range')) {
+        traits.push(part)
+      }
+    }
+  }
+
+  return traits
+}
+
+/**
+ * Parse attacks from AoN markdown
+ * Format:
+ * **Melee**
+ * <actions string="Single Action" />
+ * jaws +29 ([Fire], [Magical], [reach 15 feet]),
+ * **Damage** 3d12+15 piercing plus 2d6 fire
+ */
+function parseAttacksFromMarkdown(markdown: string): Attack[] {
+  const attacks: Attack[] = []
+  if (!markdown) return attacks
+
+  // Split into lines and process
+  const lines = markdown.split(/\r?\n/)
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // Look for **Melee** or **Ranged**
+    if (line.includes('**Melee**') || line.includes('**Ranged**')) {
+      const attackType: 'melee' | 'ranged' = line.includes('**Ranged**') ? 'ranged' : 'melee'
+
+      // Next line should have actions
+      i++
+      if (i >= lines.length) break
+
+      let actionsLine = lines[i]
+      let actions: 1 | 2 | 3 = 1
+
+      // Check for action string
+      const actionMatch = actionsLine.match(/<actions string="([^"]+)"/)
+      if (actionMatch) {
+        actions = parseActions(actionMatch[1])
+        i++
+        if (i >= lines.length) break
+      }
+
+      // Now we should have the attack line: "jaws +29 ([traits]),"
+      let attackLine = lines[i]
+
+      // Sometimes the attack is on the same line as actions, check previous
+      if (!attackLine.match(/\+\d+/) && actionsLine.match(/\+\d+/)) {
+        attackLine = actionsLine
+      }
+
+      // Parse attack name and bonus
+      // Format: "name +bonus" or "name +bonus ([traits]),"
+      const attackMatch = attackLine.match(/^([a-zA-Z][a-zA-Z\s'-]*?)\s*\+(\d+)/)
+      if (!attackMatch) {
+        i++
+        continue
+      }
+
+      const attackName = attackMatch[1].trim()
+      const bonus = parseInt(attackMatch[2], 10)
+
+      // Extract traits from the line - look for parentheses containing traits
+      // Format: ([Fire](/Traits.aspx?ID=72), [Magical](/Traits.aspx?ID=103), [reach 15 feet](/Traits.aspx?ID=192))
+      const traitsMatch = attackLine.match(/\((\[[^\]]+\]\([^)]+\)(?:,\s*\[[^\]]+\]\([^)]+\))*)\)/)
+      const traits = traitsMatch ? extractTraits(traitsMatch[1]) : []
+
+      // Check for range in ranged attacks
+      let range: string | undefined
+      const rangeMatch = attackLine.match(/range(?:\s+increment)?\s+(\d+\s*feet)/i)
+      if (rangeMatch) {
+        range = rangeMatch[1]
+      }
+
+      // Look for damage on next line or same line
+      i++
+      let damage = ''
+
+      while (i < lines.length) {
+        const damageLine = lines[i]
+        if (damageLine.includes('**Damage**')) {
+          // Extract damage after **Damage**
+          const damageMatch = damageLine.match(/\*\*Damage\*\*\s*(.+)/)
+          if (damageMatch) {
+            damage = damageMatch[1]
+              .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+              .replace(/\*\*/g, '') // Remove bold
+              .trim()
+          }
+          i++
+          break
+        }
+        // If we hit another section header, stop looking
+        if (damageLine.match(/^\*\*[A-Z]/)) {
+          break
+        }
+        i++
+      }
+
+      if (attackName && bonus) {
+        attacks.push({
+          name: attackName.charAt(0).toUpperCase() + attackName.slice(1),
+          type: attackType,
+          bonus,
+          damage: damage || '1d6',
+          traits,
+          actions,
+          range
+        })
+      }
+    } else {
+      i++
+    }
+  }
+
+  return attacks
+}
+
+/**
+ * Parse special abilities from markdown
+ */
+function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): Creature['specialAbilities'] {
+  const abilities: Creature['specialAbilities'] = []
+  if (!markdown || !abilityNames.length) return abilities
+
+  for (const name of abilityNames) {
+    // Try to find the ability description in markdown
+    // Format: **Ability Name** description or **Ability Name** <actions> description
+    const regex = new RegExp(
+      `\\*\\*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
+      'is'
+    )
+    const match = markdown.match(regex)
+
+    let actions: 0 | 1 | 2 | 3 | 'reaction' | 'free' | undefined
+    let description = ''
+
+    if (match) {
+      if (match[1]) {
+        const actionStr = match[1].toLowerCase()
+        if (actionStr.includes('reaction')) actions = 'reaction'
+        else if (actionStr.includes('free')) actions = 'free'
+        else if (actionStr.includes('three') || actionStr.includes('3')) actions = 3
+        else if (actionStr.includes('two') || actionStr.includes('2')) actions = 2
+        else if (actionStr.includes('single') || actionStr.includes('1')) actions = 1
+      }
+      description = (match[2] || '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+        .replace(/\r?\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 500) // Truncate long descriptions
+    }
+
+    abilities.push({
+      name,
+      actions,
+      description
+    })
+  }
+
+  return abilities
+}
+
+/**
  * Adapt AoN Elasticsearch creature hit to our Creature format
  */
-export function adaptAoNCreature(hit: { _id: string; _source: Record<string, any> }): Creature {
-  const src = hit._source
+export function adaptAoNCreature(hit: { _id: string; _source: Record<string, unknown> }): Creature {
+  const src = hit._source as Record<string, any>
+  const markdown = (src.markdown || src.text || '') as string
 
   return {
     id: `aon-${hit._id}`,
@@ -72,11 +277,8 @@ export function adaptAoNCreature(hit: { _id: string; _source: Record<string, any
     resistances: ensureArray(src.resistance_raw),
     weaknesses: ensureArray(src.weakness_raw),
     speed: src.speed_raw || src.speed_markdown || '30 feet',
-    attacks: [], // AoN doesn't expose structured attack data easily
-    specialAbilities: ensureArray(src.creature_ability).map(name => ({
-      name,
-      description: ''
-    })),
+    attacks: parseAttacksFromMarkdown(markdown),
+    specialAbilities: parseAbilitiesFromMarkdown(markdown, ensureArray(src.creature_ability)),
     description: src.summary || '',
     rawText: src.text || ''
   }
