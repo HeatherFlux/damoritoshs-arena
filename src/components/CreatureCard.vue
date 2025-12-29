@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Creature } from '../types/creature'
 import { rollD20, rollDamage, formatModifier, getRecallKnowledgeDCs, getRecallKnowledgeSkill } from '../utils/dice'
 import { useSettingsStore } from '../stores/settingsStore'
+import ActionIcon from './ActionIcon.vue'
 
 const props = defineProps<{
   creature: Creature
@@ -57,16 +58,6 @@ const parseAttackDamage = computed(() => {
     return { dice: clean, type: '' }
   }
 })
-
-function formatActions(actions: number | string | undefined): string {
-  if (actions === undefined) return ''
-  if (actions === 'reaction') return '⟲'
-  if (actions === 'free') return '⭘'
-  if (actions === 1) return '◆'
-  if (actions === 2) return '◆◆'
-  if (actions === 3) return '◆◆◆'
-  return ''
-}
 
 // Get rarity from traits
 const rarity = props.creature.traits.find(t =>
@@ -216,7 +207,7 @@ function isValidTrait(trait: string): boolean {
       <div class="flex items-center gap-1.5 flex-wrap">
         <span class="rollable inline-flex items-center gap-1.5" @click="rollAttack(attack.name, attack.bonus, attack.damage)" title="Roll attack + damage">
           <strong>{{ attack.type === 'melee' ? 'Melee' : 'Ranged' }}</strong>
-          <span class="text-accent font-bold">◆</span>
+          <ActionIcon :action="attack.actions ?? 1" class="text-accent" />
           <span class="text-text">{{ attack.name }}</span>
           <span class="roll-value">{{ formatModifier(attack.bonus) }}</span>
         </span>
@@ -242,7 +233,7 @@ function isValidTrait(trait: string): boolean {
     <div v-for="ability in creature.specialAbilities" :key="ability.name" class="ability-block mt-2">
       <div class="flex items-center gap-1.5 flex-wrap">
         <strong>{{ ability.name }}</strong>
-        <span v-if="ability.actions" class="text-accent font-bold">{{ formatActions(ability.actions) }}</span>
+        <ActionIcon v-if="ability.actions" :action="ability.actions" class="text-accent" />
         <span v-if="ability.traits?.length" class="text-xs text-dim">({{ ability.traits.join(', ') }})</span>
       </div>
       <div class="mt-1 text-[0.8125rem] text-dim">{{ ability.description }}</div>

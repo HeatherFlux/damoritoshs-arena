@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Paizo Pathfinder Icons Font - Action Symbols */
+@font-face {
+  font-family: 'Pathfinder-Icons';
+  src: url('/fonts/Pathfinder-Icons.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Action icon class - uses ligatures */
+.action-icon {
+  font-family: 'Pathfinder-Icons', sans-serif;
+  font-size: 1em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 /* ============================================
    THEME - Angular Sci-Fi Design System
    Inspired by COMP/CON & mech interfaces
