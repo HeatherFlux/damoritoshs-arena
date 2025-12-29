@@ -45,6 +45,25 @@ function parseActions(actionStr: string): 1 | 2 | 3 {
 }
 
 /**
+ * Fix malformed dice notation from AoN SF2e data
+ * AoN strips '+' from damage, so "1d6+2" becomes "1d62"
+ * This detects patterns like "1d62" and converts to "1d6+2"
+ */
+function fixDiceNotation(damage: string): string {
+  // Pattern: XdY followed by more digits where Y is a valid die size
+  // Order matters: longest first (100 before 10, 20 before 2)
+  // "1d62" -> "1d6+2", "4d420" -> "4d4+20", "2d1015" -> "2d10+15"
+  return damage.replace(/(\d+d)(100|20|12|10|8|6|4)(\d+)/g, (match, prefix, die, modifier) => {
+    // Only fix if modifier is reasonable (1-99)
+    const mod = parseInt(modifier, 10)
+    if (mod > 0 && mod < 100) {
+      return `${prefix}${die}+${modifier}`
+    }
+    return match
+  })
+}
+
+/**
  * Extract traits from a string like "[Fire](/Traits.aspx?ID=72), [Magical](/Traits.aspx?ID=103)"
  * or "Agile, Magical, reach 10 feet"
  */
@@ -161,10 +180,12 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
         if (damageLine.includes('**Damage**')) {
           const damageMatch = damageLine.match(/\*\*Damage\*\*\s*(.+)/)
           if (damageMatch) {
-            damage = damageMatch[1]
-              .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-              .replace(/\*\*/g, '') // Remove bold
-              .trim()
+            damage = fixDiceNotation(
+              damageMatch[1]
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+                .replace(/\*\*/g, '') // Remove bold
+                .trim()
+            )
           }
           i++
           break
@@ -173,10 +194,12 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
         // SF2e format: damage is on the line after attack, no **Damage** prefix
         // Look for dice notation like "1d6" or "2d8+4"
         if (damageLine.match(/^\d+d\d+/)) {
-          damage = damageLine
-            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-            .replace(/\*\*/g, '') // Remove bold
-            .trim()
+          damage = fixDiceNotation(
+            damageLine
+              .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+              .replace(/\*\*/g, '') // Remove bold
+              .trim()
+          )
           i++
           break
         }
@@ -225,19 +248,24 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): C
   const abilities: Creature['specialAbilities'] = []
   if (!markdown || !abilityNames.length) return abilities
 
-  for (const name of abilityNames) {
+  for (const rawName of abilityNames) {
+    // Parse the ability name - extract action type from {{reaction}} etc.
+    const { name: cleanName, actions: nameActions } = parseAbilityName(rawName)
+
     // Try to find the ability description in markdown
     // Format: **Ability Name** description or **Ability Name** <actions> description
+    // Note: AoN sometimes has malformed markdown like "Name**" instead of "**Name**"
     const regex = new RegExp(
-      `\\*\\*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
+      `(?:\\*\\*)?${cleanName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\*\\*[A-Z]|$)`,
       'is'
     )
     const match = markdown.match(regex)
 
-    let actions: 0 | 1 | 2 | 3 | 'reaction' | 'free' | undefined
+    let actions: 0 | 1 | 2 | 3 | 'reaction' | 'free' | undefined = nameActions
     let description = ''
 
     if (match) {
+      // Actions from markdown override name-based actions
       if (match[1]) {
         const actionStr = match[1].toLowerCase()
         if (actionStr.includes('reaction')) actions = 'reaction'
@@ -255,7 +283,7 @@ function parseAbilitiesFromMarkdown(markdown: string, abilityNames: string[]): C
     }
 
     abilities.push({
-      name,
+      name: cleanName,
       actions,
       description
     })
@@ -275,6 +303,31 @@ function filterAbilityNames(names: string[]): string[] {
     if (/\s+\d+$/.test(name.trim())) return false // SF2e format without +
     return true
   })
+}
+
+/**
+ * Parse ability name and extract action type from template placeholders
+ * AoN uses {{reaction}}, {{free}}, {{1}}, {{2}}, {{3}} in ability names
+ */
+function parseAbilityName(rawName: string): { name: string; actions?: 0 | 1 | 2 | 3 | 'reaction' | 'free' } {
+  let name = rawName.trim()
+  let actions: 0 | 1 | 2 | 3 | 'reaction' | 'free' | undefined
+
+  // Check for action placeholders
+  const actionMatch = name.match(/\{\{(reaction|free|1|2|3)\}\}/i)
+  if (actionMatch) {
+    const actionStr = actionMatch[1].toLowerCase()
+    if (actionStr === 'reaction') actions = 'reaction'
+    else if (actionStr === 'free') actions = 'free'
+    else if (actionStr === '1') actions = 1
+    else if (actionStr === '2') actions = 2
+    else if (actionStr === '3') actions = 3
+
+    // Remove the placeholder from the name
+    name = name.replace(/\s*\{\{(reaction|free|1|2|3)\}\}\s*/gi, '').trim()
+  }
+
+  return { name, actions }
 }
 
 /**
