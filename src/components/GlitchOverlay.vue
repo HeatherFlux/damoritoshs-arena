@@ -8,8 +8,10 @@ const glitchType = ref<'nat20' | 'nat1' | null>(null)
 const glitchText = ref('')
 const currentAscii = ref('')
 const asciiPlayerRef = ref<InstanceType<typeof AsciiPlayer> | null>(null)
+const glitchPhase = ref<'scramble' | 'message' | null>(null)
 let unsubscribe: (() => void) | null = null
 let timeoutId: ReturnType<typeof setTimeout> | null = null
+let phaseTimeouts: ReturnType<typeof setTimeout>[] = []
 
 const nat20Asciis = [
   '/ascii-simpsons.json',
@@ -32,13 +34,15 @@ const nat1Messages = [
   'CRITICAL ERROR',
   'MALFUNCTION',
   'CORE BREACH',
-  'FAILURE IMMINENT',
-  'SYSTEM SHUTDOWN',
-  "YOU'VE BEEN PWNED!", 
+  'FATAL EXCEPTION',
+  'STACK OVERFLOW',
+  "YOU'VE BEEN PWNED!",
 ]
 
 function triggerGlitch(type: 'nat20' | 'nat1') {
   if (timeoutId) clearTimeout(timeoutId)
+  phaseTimeouts.forEach(t => clearTimeout(t))
+  phaseTimeouts = []
 
   glitchType.value = type
   const messages = type === 'nat20' ? nat20Messages : nat1Messages
@@ -48,22 +52,41 @@ function triggerGlitch(type: 'nat20' | 'nat1') {
   if (type === 'nat20') {
     // Pick random ASCII animation - component auto-plays on mount
     currentAscii.value = nat20Asciis[Math.floor(Math.random() * nat20Asciis.length)]
-  }
 
-  // Auto-dismiss
-  const duration = type === 'nat20' ? 15000 : 2000
-  timeoutId = setTimeout(() => {
-    dismiss()
-  }, duration)
+    // Auto-dismiss after animation
+    timeoutId = setTimeout(dismiss, 15000)
+  } else {
+    // NAT 1 - Glitch the whole app
+    glitchPhase.value = 'scramble'
+    document.body.classList.add('glitch-mode')
+
+    // Phase 1: Scramble (0-500ms) - just the glitched app
+    phaseTimeouts.push(setTimeout(() => {
+      glitchPhase.value = 'message'
+    }, 500))
+
+    // Phase 2: Message visible, then dismiss
+    phaseTimeouts.push(setTimeout(() => {
+      dismiss()
+    }, 2500))
+  }
 }
 
 function dismiss() {
   if (timeoutId) clearTimeout(timeoutId)
+  phaseTimeouts.forEach(t => clearTimeout(t))
+  phaseTimeouts = []
+
   if (asciiPlayerRef.value) {
     asciiPlayerRef.value.stop()
   }
+
+  // Remove glitch mode from body
+  document.body.classList.remove('glitch-mode')
+
   isActive.value = false
   glitchType.value = null
+  glitchPhase.value = null
 }
 
 function onAsciiEnded() {
@@ -83,6 +106,8 @@ onMounted(() => {
 onUnmounted(() => {
   if (unsubscribe) unsubscribe()
   if (timeoutId) clearTimeout(timeoutId)
+  phaseTimeouts.forEach(t => clearTimeout(t))
+  document.body.classList.remove('glitch-mode')
 })
 </script>
 
@@ -109,32 +134,26 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <!-- NAT 1 - Heavy glitch effect -->
+    <!-- NAT 1 - App-wide glitch + message overlay -->
     <Transition name="glitch-overlay">
       <div
         v-if="isActive && glitchType === 'nat1'"
-        class="overlay-container glitch-container"
+        class="failure-overlay"
+        :class="{
+          'phase-scramble': glitchPhase === 'scramble',
+          'phase-message': glitchPhase === 'message'
+        }"
         @click="dismiss"
       >
-        <div class="scanlines"></div>
-        <div class="screen-tear tear-1"></div>
-        <div class="screen-tear tear-2"></div>
-        <div class="screen-tear tear-3"></div>
+        <!-- Scanlines over everything -->
+        <div class="failure-scanlines"></div>
 
-        <div class="glitch-text-wrapper">
-          <span class="glitch-text glitch-r">{{ glitchText }}</span>
-          <span class="glitch-text glitch-g">{{ glitchText }}</span>
-          <span class="glitch-text glitch-b">{{ glitchText }}</span>
-          <span class="glitch-text glitch-main">{{ glitchText }}</span>
-        </div>
-
-        <div class="noise"></div>
-        <div class="glitch-bars">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
+        <!-- The error message -->
+        <div v-if="glitchPhase === 'message'" class="failure-message-container">
+          <div class="failure-message">
+            <span class="failure-icon">⚠</span>
+            <span class="failure-text">{{ glitchText }}</span>
+          </div>
         </div>
 
         <div class="click-hint">click to dismiss</div>
@@ -184,7 +203,6 @@ onUnmounted(() => {
 }
 
 .ascii-wrapper :deep(.ascii-player) {
-  /* Scale to fill viewport - 160 cols at ~0.6vw = ~96% viewport width */
   font-size: clamp(6px, 0.58vw, 12px);
   line-height: 1.15;
   letter-spacing: 0.02em;
@@ -260,22 +278,36 @@ onUnmounted(() => {
 }
 
 /* ============================================
-   NAT 1 - Heavy Glitch Effect
+   NAT 1 - App-Wide Glitch + Failure Message
    ============================================ */
-.glitch-container {
-  background: rgba(0, 0, 0, 0.9);
-  animation: screenShake 0.08s ease-in-out infinite;
+.failure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: all;
 }
 
-.scanlines {
+.phase-scramble {
+  background: transparent;
+}
+
+.phase-message {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.failure-scanlines {
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.3) 2px,
-    rgba(0, 0, 0, 0.3) 4px
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
   );
   pointer-events: none;
   animation: scanlineScroll 0.1s linear infinite;
@@ -286,163 +318,112 @@ onUnmounted(() => {
   to { transform: translateY(4px); }
 }
 
-.screen-tear {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(255, 0, 68, 0.15) 20%,
-    rgba(0, 255, 255, 0.1) 40%,
-    rgba(255, 0, 68, 0.2) 60%,
-    transparent 100%
-  );
-  animation: tearMove 0.15s ease-in-out infinite alternate;
-}
-
-.tear-1 { top: 20%; animation-delay: 0s; }
-.tear-2 { top: 50%; animation-delay: 0.05s; }
-.tear-3 { top: 75%; animation-delay: 0.1s; }
-
-@keyframes tearMove {
-  from { transform: translateX(-10px) skewX(-3deg); }
-  to { transform: translateX(10px) skewX(3deg); }
-}
-
-.glitch-text-wrapper {
+.failure-message-container {
   position: relative;
+  z-index: 10;
+  animation: messageAppear 0.15s ease-out;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.failure-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 4rem;
+  background: rgba(20, 0, 0, 0.9);
+  border: 3px solid #ff0044;
+  box-shadow:
+    0 0 20px rgba(255, 0, 68, 0.5),
+    0 0 40px rgba(255, 0, 68, 0.3),
+    inset 0 0 20px rgba(255, 0, 68, 0.1);
+  animation: messageGlitch 0.1s ease-in-out infinite;
+}
+
+@keyframes messageGlitch {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+
+.failure-icon {
+  font-size: 4rem;
+  color: #ff0044;
+  animation: iconPulse 0.5s ease-in-out infinite;
+  text-shadow: 0 0 20px #ff0044;
+}
+
+@keyframes iconPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.failure-text {
   font-family: var(--font-mono, monospace);
-  font-size: clamp(2rem, 8vw, 5rem);
+  font-size: clamp(1.5rem, 6vw, 3.5rem);
   font-weight: 900;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-}
-
-.glitch-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  text-align: center;
-}
-
-.glitch-main {
-  position: relative;
   color: #ff0044;
-  text-shadow: 0 0 30px #ff0044;
-  animation: glitchMain 0.1s ease-in-out infinite;
+  text-shadow:
+    0 0 10px #ff0044,
+    0 0 20px #ff0044,
+    0 0 40px rgba(255, 0, 68, 0.5),
+    2px 2px 0 #000,
+    -2px -2px 0 #000;
 }
 
-.glitch-r {
-  color: #ff0000;
-  opacity: 0.8;
-  animation: glitchR 0.08s ease-in-out infinite;
-}
-
-.glitch-g {
-  color: #00ff00;
-  opacity: 0.8;
-  animation: glitchG 0.08s ease-in-out infinite;
-}
-
-.glitch-b {
-  color: #0000ff;
-  opacity: 0.8;
-  animation: glitchB 0.08s ease-in-out infinite;
-}
-
-@keyframes glitchMain {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-3px, 2px); }
-  40% { transform: translate(3px, -2px); }
-  60% { transform: translate(-2px, -2px); }
-  80% { transform: translate(2px, 2px); }
-}
-
-@keyframes glitchR {
-  0%, 100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-  25% { transform: translate(-5px, 3px); clip-path: inset(10% 0 80% 0); }
-  50% { transform: translate(4px, -2px); clip-path: inset(40% 0 40% 0); }
-  75% { transform: translate(-3px, 2px); clip-path: inset(70% 0 10% 0); }
-}
-
-@keyframes glitchG {
-  0%, 100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-  25% { transform: translate(4px, -3px); clip-path: inset(20% 0 60% 0); }
-  50% { transform: translate(-5px, 2px); clip-path: inset(50% 0 30% 0); }
-  75% { transform: translate(3px, -2px); clip-path: inset(80% 0 5% 0); }
-}
-
-@keyframes glitchB {
-  0%, 100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-  25% { transform: translate(-4px, -2px); clip-path: inset(5% 0 85% 0); }
-  50% { transform: translate(3px, 3px); clip-path: inset(35% 0 55% 0); }
-  75% { transform: translate(-2px, -3px); clip-path: inset(65% 0 25% 0); }
-}
-
-.noise {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.1;
-  pointer-events: none;
-  animation: noiseShift 0.05s steps(3) infinite;
-}
-
-@keyframes noiseShift {
-  0% { transform: translate(0, 0); }
-  33% { transform: translate(-2px, 2px); }
-  66% { transform: translate(2px, -2px); }
-}
-
-.glitch-bars {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #ff0044, #00ffff, #ff0044, transparent);
-  animation: barSweep 0.2s ease-out infinite;
-}
-
-.bar:nth-child(1) { top: 15%; animation-delay: 0s; }
-.bar:nth-child(2) { top: 35%; animation-delay: 0.04s; }
-.bar:nth-child(3) { top: 55%; animation-delay: 0.08s; }
-.bar:nth-child(4) { top: 70%; animation-delay: 0.12s; }
-.bar:nth-child(5) { top: 85%; animation-delay: 0.16s; }
-
-@keyframes barSweep {
-  0% { transform: translateX(-100%); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
-}
-
-@keyframes screenShake {
-  0%, 100% { transform: translate(0, 0) rotate(0); }
-  10% { transform: translate(-4px, 3px) rotate(-0.5deg); }
-  30% { transform: translate(4px, -3px) rotate(0.5deg); }
-  50% { transform: translate(-3px, -3px) rotate(-0.3deg); }
-  70% { transform: translate(3px, 2px) rotate(0.3deg); }
-  90% { transform: translate(-2px, 3px) rotate(-0.2deg); }
-}
-
-.glitch-overlay-enter-active { animation: glitchIn 0.1s ease-out; }
-.glitch-overlay-leave-active { animation: glitchOut 0.15s ease-in; }
+.glitch-overlay-enter-active { animation: glitchIn 0.05s ease-out; }
+.glitch-overlay-leave-active { animation: glitchOut 0.2s ease-in; }
 
 @keyframes glitchIn {
-  from { opacity: 0; transform: scale(1.05); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes glitchOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+</style>
+
+<!-- Global styles for glitch mode - affects entire app -->
+<style>
+/* Glitch mode - swap all text to unreadable symbols */
+body.glitch-mode {
+  animation: bodyShake 0.05s ease-in-out infinite;
+}
+
+body.glitch-mode * {
+  font-family: 'Wingdings', 'Webdings', 'Symbol', fantasy !important;
+}
+
+/* Keep the failure message readable */
+body.glitch-mode .failure-message,
+body.glitch-mode .failure-message * {
+  font-family: var(--font-mono, 'Courier New', monospace) !important;
+}
+
+body.glitch-mode .click-hint {
+  font-family: var(--font-mono, 'Courier New', monospace) !important;
+}
+
+@keyframes bodyShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -2px); }
+  80% { transform: translate(1px, 2px); }
 }
 </style>
