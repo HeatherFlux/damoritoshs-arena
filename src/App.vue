@@ -8,6 +8,7 @@ import RollHistory from './components/RollHistory.vue'
 import StatusBar from './components/StatusBar.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import AnimatedBackground from './components/AnimatedBackground.vue'
+import GlitchOverlay from './components/GlitchOverlay.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
@@ -233,5 +234,8 @@ function handleRunEncounter() {
 
     <!-- Settings Modal -->
     <SettingsModal v-if="showSettingsModal" @close="showSettingsModal = false" />
+
+    <!-- Glitch Effect Overlay for Nat 20/1 -->
+    <GlitchOverlay />
   </div>
 </template>

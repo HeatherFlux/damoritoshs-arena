@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
+import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
   mode: 'builder' | 'combat'
@@ -125,6 +126,89 @@ const encounterStats = computed(() => {
   const difficulty = encounterStore.difficulty.value
   return { creatures, hazards, totalXP, difficulty }
 })
+
+// Latest roll tracking with typewriter animation
+const latestRoll = ref<RollResult | null>(null)
+const rollDisplayText = ref('')
+const rollCursorVisible = ref(true)
+const rollSpecial = ref<{ isNat20: boolean; isNat1: boolean; isCrit: boolean } | null>(null)
+let rollUnsubscribe: (() => void) | null = null
+let rollTypeInterval: ReturnType<typeof setInterval> | null = null
+let rollCursorInterval: ReturnType<typeof setInterval> | null = null
+let rollCharIndex = 0
+let fullRollText = ''
+
+// Format a roll into display text
+function formatRollText(r: RollResult): string {
+  const source = r.source.length > 10 ? r.source.substring(0, 10) + '…' : r.source
+  const name = r.name.length > 12 ? r.name.substring(0, 12) + '…' : r.name
+  let text = `${source} :: ${name} → ${r.total}`
+  if (r.isNat20) text += ' NAT20!'
+  else if (r.isNat1) text += ' NAT1!'
+  else if (r.isCriticalHit) text += ' CRIT!'
+  return text
+}
+
+// Type out the roll text
+function typeRollEffect() {
+  if (rollCharIndex < fullRollText.length) {
+    rollDisplayText.value = fullRollText.substring(0, rollCharIndex + 1)
+    rollCharIndex++
+  }
+}
+
+// Start typing a new roll
+function startRollTypeAnimation(roll: RollResult) {
+  // Clear any existing interval
+  if (rollTypeInterval) {
+    clearInterval(rollTypeInterval)
+  }
+
+  // Reset and start fresh
+  rollCharIndex = 0
+  rollDisplayText.value = ''
+  fullRollText = formatRollText(roll)
+  rollSpecial.value = {
+    isNat20: roll.isNat20,
+    isNat1: roll.isNat1,
+    isCrit: roll.isCriticalHit || false
+  }
+
+  // Type at 30ms per character (fast but visible)
+  rollTypeInterval = setInterval(typeRollEffect, 30)
+}
+
+// Initialize with most recent roll if any
+const history = getRollHistory()
+if (history.length > 0) {
+  latestRoll.value = history[0]
+  fullRollText = formatRollText(history[0])
+  rollDisplayText.value = fullRollText
+  rollSpecial.value = {
+    isNat20: history[0].isNat20,
+    isNat1: history[0].isNat1,
+    isCrit: history[0].isCriticalHit || false
+  }
+}
+
+// Subscribe to new rolls
+onMounted(() => {
+  // Cursor blink for roll display
+  rollCursorInterval = setInterval(() => {
+    rollCursorVisible.value = !rollCursorVisible.value
+  }, 530)
+
+  rollUnsubscribe = onRoll((roll) => {
+    latestRoll.value = roll
+    startRollTypeAnimation(roll)
+  })
+})
+
+onUnmounted(() => {
+  if (rollUnsubscribe) rollUnsubscribe()
+  if (rollTypeInterval) clearInterval(rollTypeInterval)
+  if (rollCursorInterval) clearInterval(rollCursorInterval)
+})
 </script>
 
 <template>
@@ -197,6 +281,17 @@ const encounterStats = computed(() => {
         <span class="status-muted">NO ACTIVE COMBAT</span>
       </div>
     </template>
+
+    <!-- Latest Roll Display (Typewriter Style) - positioned left of spacer -->
+    <div v-if="latestRoll" class="roll-display" :class="{
+      'roll-nat20': rollSpecial?.isNat20,
+      'roll-nat1': rollSpecial?.isNat1,
+      'roll-crit': rollSpecial?.isCrit && !rollSpecial?.isNat20 && !rollSpecial?.isNat1
+    }">
+      <span class="roll-prefix">&gt;</span>
+      <span class="roll-text">{{ rollDisplayText }}</span>
+      <span class="roll-cursor" :class="{ 'cursor-visible': rollCursorVisible }">_</span>
+    </div>
 
     <!-- Spacer -->
     <div class="flex-1"></div>
@@ -413,5 +508,47 @@ const encounterStats = computed(() => {
   50% {
     box-shadow: 0 0 6px var(--color-danger), 0 0 12px var(--color-danger);
   }
+}
+
+/* Roll display - typewriter terminal style */
+.roll-display {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 200px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.roll-display.roll-nat20 {
+  color: var(--color-success);
+}
+
+.roll-display.roll-nat1 {
+  color: var(--color-danger);
+}
+
+.roll-display.roll-crit {
+  color: var(--color-warning);
+}
+
+.roll-prefix {
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
+.roll-text {
+  white-space: nowrap;
+}
+
+.roll-cursor {
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.roll-cursor.cursor-visible {
+  opacity: 1;
 }
 </style>
