@@ -13,7 +13,7 @@ const STORAGE_KEY = 'sf2e-encounters'
 const CREATURES_STORAGE_KEY = 'sf2e-custom-creatures'
 
 // Cache version - increment when adapter format changes to invalidate old caches
-const AON_CACHE_VERSION = 2
+const AON_CACHE_VERSION = 3
 const AON_CACHE_KEY = `sf2e-aon-creatures-v${AON_CACHE_VERSION}`
 const AON_CACHE_TIME_KEY = `sf2e-aon-cache-time-v${AON_CACHE_VERSION}`
 const AON_CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
@@ -24,6 +24,8 @@ try {
   localStorage.removeItem('sf2e-aon-cache-time')
   localStorage.removeItem('sf2e-aon-creatures-v1')
   localStorage.removeItem('sf2e-aon-cache-time-v1')
+  localStorage.removeItem('sf2e-aon-creatures-v2')
+  localStorage.removeItem('sf2e-aon-cache-time-v2')
 } catch { /* ignore */ }
 
 // Load custom creatures from localStorage

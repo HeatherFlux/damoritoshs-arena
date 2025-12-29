@@ -127,8 +127,9 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
       }
 
       // Parse attack name and bonus
-      // Format: "name +bonus" or "name +bonus ([traits]),"
-      const attackMatch = attackLine.match(/^([a-zA-Z][a-zA-Z\s'-]*?)\s*\+(\d+)/)
+      // PF2e format: "name +bonus ([traits]),"
+      // SF2e format: "name bonus," (no + sign)
+      const attackMatch = attackLine.match(/^([a-zA-Z][a-zA-Z\s'-]*?)\s*\+?(\d+)/)
       if (!attackMatch) {
         i++
         continue
@@ -155,8 +156,9 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
 
       while (i < lines.length) {
         const damageLine = lines[i]
+
+        // PF2e format: **Damage** 3d12+15 piercing
         if (damageLine.includes('**Damage**')) {
-          // Extract damage after **Damage**
           const damageMatch = damageLine.match(/\*\*Damage\*\*\s*(.+)/)
           if (damageMatch) {
             damage = damageMatch[1]
@@ -167,6 +169,18 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
           i++
           break
         }
+
+        // SF2e format: damage is on the line after attack, no **Damage** prefix
+        // Look for dice notation like "1d6" or "2d8+4"
+        if (damageLine.match(/^\d+d\d+/)) {
+          damage = damageLine
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+            .replace(/\*\*/g, '') // Remove bold
+            .trim()
+          i++
+          break
+        }
+
         // If we hit another section header, stop looking
         if (damageLine.match(/^\*\*[A-Z]/)) {
           break
@@ -175,7 +189,7 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
       }
 
       if (attackName && bonus) {
-        attacks.push({
+        const attack: Attack = {
           name: attackName.charAt(0).toUpperCase() + attackName.slice(1),
           type: attackType,
           bonus,
@@ -183,7 +197,18 @@ function parseAttacksFromMarkdown(markdown: string): Attack[] {
           traits,
           actions,
           range
-        })
+        }
+
+        // Dedupe - check if we already have this exact attack
+        const isDupe = attacks.some(a =>
+          a.name === attack.name &&
+          a.type === attack.type &&
+          a.bonus === attack.bonus &&
+          a.damage === attack.damage
+        )
+        if (!isDupe) {
+          attacks.push(attack)
+        }
       }
     } else {
       i++
