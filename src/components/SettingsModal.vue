@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useSettingsStore, themes, type ThemeId } from '../stores/settingsStore'
+import { ref, computed } from 'vue'
+import { useSettingsStore, themes, backgroundStyles, type ThemeId, type BackgroundStyle } from '../stores/settingsStore'
+import { useEncounterStore } from '../stores/encounterStore'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
+const encounterStore = useEncounterStore()
 
 defineEmits<{
   (e: 'close'): void
 }>()
 
 const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
+const bgStyleList = Object.entries(backgroundStyles) as [BackgroundStyle, typeof backgroundStyles[BackgroundStyle]][]
 
 // Discord webhook state
 const webhookTestStatus = ref<'idle' | 'testing' | 'success' | 'error'>('idle')
+
+// Creature data state
+const creatureStats = computed(() => encounterStore.getCreatureStats())
+const importStatus = ref<'idle' | 'success' | 'error'>('idle')
+const importMessage = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
 
 async function handleTestWebhook() {
   webhookTestStatus.value = 'testing'
@@ -21,11 +30,57 @@ async function handleTestWebhook() {
     webhookTestStatus.value = 'idle'
   }, 3000)
 }
+
+function handleImportClick() {
+  fileInput.value?.click()
+}
+
+function handleFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = e.target?.result as string
+      const count = encounterStore.importCustomCreatures(json)
+      importStatus.value = 'success'
+      importMessage.value = `Imported ${count} creatures`
+    } catch (err) {
+      importStatus.value = 'error'
+      importMessage.value = 'Invalid JSON file'
+    }
+    setTimeout(() => {
+      importStatus.value = 'idle'
+      importMessage.value = ''
+    }, 3000)
+  }
+  reader.readAsText(file)
+  target.value = '' // Reset so same file can be selected again
+}
+
+function handleExport() {
+  const json = encounterStore.exportCustomCreatures()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'custom-creatures.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleClearCustom() {
+  if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
+    encounterStore.clearCustomCreatures()
+  }
+}
 </script>
 
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal-content w-full max-w-md">
+    <div class="modal-content w-full max-w-md max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-text uppercase tracking-wide">
           <span class="text-accent">//</span> Settings
@@ -57,6 +112,27 @@ async function handleTestWebhook() {
               <div class="flex-1 text-left">
                 <span class="block text-sm font-semibold">{{ theme.name }}</span>
                 <span class="block text-xs text-dim">{{ theme.description }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Background Animation Section -->
+        <div>
+          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Background Animation</h3>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              v-for="[id, bgStyle] in bgStyleList"
+              :key="id"
+              @click="setSetting('backgroundStyle', id)"
+              class="bg-option"
+              :class="{ 'bg-option-active': settings.backgroundStyle === id }"
+            >
+              <span class="bg-icon" :class="`bg-icon-${id}`"></span>
+              <div class="flex-1 text-left">
+                <span class="block text-sm font-semibold">{{ bgStyle.name }}</span>
+                <span class="block text-xs text-dim">{{ bgStyle.description }}</span>
               </div>
             </button>
           </div>
@@ -132,6 +208,64 @@ async function handleTestWebhook() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Creature Data Section -->
+        <div>
+          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Creature Data</h3>
+
+          <div class="p-3 bg-elevated space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium text-text">Loaded Creatures</span>
+                <p class="text-xs text-dim mt-0.5">
+                  {{ creatureStats.total }} total ({{ creatureStats.bundled }} bundled, {{ creatureStats.custom }} custom/AoN)
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-dim">
+              AoN creatures auto-fetch daily. Import JSON to add your own custom creatures.
+            </p>
+
+            <div class="flex gap-2">
+              <input
+                ref="fileInput"
+                type="file"
+                accept=".json"
+                class="hidden"
+                @change="handleFileSelect"
+              />
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :class="{
+                  'btn-success': importStatus === 'success',
+                  'btn-danger': importStatus === 'error',
+                }"
+                @click="handleImportClick"
+              >
+                {{ importMessage || 'Import JSON' }}
+              </button>
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :disabled="creatureStats.custom === 0"
+                @click="handleExport"
+              >
+                Export Custom
+              </button>
+            </div>
+
+            <button
+              v-if="creatureStats.custom > 0"
+              type="button"
+              class="btn-danger text-sm w-full"
+              @click="handleClearCustom"
+            >
+              Clear Custom Creatures
+            </button>
           </div>
         </div>
       </div>
@@ -215,5 +349,149 @@ async function handleTestWebhook() {
 
 .toggle-thumb.toggle-thumb-on {
   transform: translateX(1.25rem);
+}
+
+/* Background Options */
+.bg-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+}
+
+.bg-option:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent);
+}
+
+.bg-option-active {
+  border-color: var(--color-accent);
+  box-shadow:
+    inset 0 2px 0 var(--color-accent),
+    inset 2px 0 0 var(--color-accent),
+    inset -2px 0 0 var(--color-accent),
+    inset 0 -2px 0 var(--color-accent);
+}
+
+.bg-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mini previews for each background style */
+.bg-icon-none {
+  background: var(--color-bg);
+}
+
+.bg-icon-gradient-wave {
+  background: linear-gradient(-45deg, var(--color-bg), var(--color-accent-subtle), var(--color-bg));
+  background-size: 200% 200%;
+  animation: miniGradient 2s ease infinite;
+}
+
+.bg-icon-dot-matrix::before {
+  content: '···';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-accent);
+  font-size: 8px;
+  letter-spacing: -1px;
+  animation: miniPulse 1.5s ease infinite;
+}
+
+.bg-icon-particle-field::before,
+.bg-icon-particle-field::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+.bg-icon-particle-field::before {
+  top: 4px;
+  left: 5px;
+}
+.bg-icon-particle-field::after {
+  bottom: 5px;
+  right: 4px;
+}
+
+.bg-icon-cyber-grid {
+  background-image:
+    linear-gradient(var(--color-accent-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-accent-subtle) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+.bg-icon-floating-blobs::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 8px;
+  background: var(--color-accent);
+  opacity: 0.3;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  filter: blur(2px);
+}
+
+.bg-icon-random-dots::before,
+.bg-icon-random-dots::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  animation: miniBlink 1s ease infinite;
+}
+.bg-icon-random-dots::before {
+  top: 6px;
+  left: 8px;
+  animation-delay: 0.2s;
+}
+.bg-icon-random-dots::after {
+  bottom: 8px;
+  right: 6px;
+  animation-delay: 0.5s;
+}
+
+@keyframes miniGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes miniPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes miniBlink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
 }
 </style>

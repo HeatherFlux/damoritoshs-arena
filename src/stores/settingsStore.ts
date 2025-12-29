@@ -4,17 +4,53 @@ const STORAGE_KEY = 'sf2e-settings'
 
 export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'danger-red' | 'glam-pink' | 'light-rose' | 'light-violet'
 
+export type BackgroundStyle = 'none' | 'gradient-wave' | 'dot-matrix' | 'particle-field' | 'cyber-grid' | 'floating-blobs' | 'random-dots'
+
 export interface Settings {
   autoRollDamage: boolean
   theme: ThemeId
+  backgroundStyle: BackgroundStyle
   // Discord Integration
   discordWebhookEnabled: boolean
   discordWebhookUrl: string
 }
 
+// Background style definitions
+export const backgroundStyles: Record<BackgroundStyle, { name: string; description: string }> = {
+  'none': {
+    name: 'Static',
+    description: 'No animation'
+  },
+  'gradient-wave': {
+    name: 'Gradient Wave',
+    description: 'Flowing color gradient'
+  },
+  'dot-matrix': {
+    name: 'Dot Matrix',
+    description: 'Pulsing character grid'
+  },
+  'particle-field': {
+    name: 'Particle Field',
+    description: 'Connected floating particles'
+  },
+  'cyber-grid': {
+    name: 'Cyber Grid',
+    description: 'Animated wireframe mesh'
+  },
+  'floating-blobs': {
+    name: 'Floating Blobs',
+    description: 'Glassmorphism style'
+  },
+  'random-dots': {
+    name: 'Random Dots',
+    description: 'Flickering dot field'
+  }
+}
+
 const defaultSettings: Settings = {
   autoRollDamage: true,
   theme: 'cyber-cyan',
+  backgroundStyle: 'cyber-grid',
   discordWebhookEnabled: false,
   discordWebhookUrl: '',
 }
@@ -354,6 +390,7 @@ export function useSettingsStore() {
   return {
     settings,
     themes,
+    backgroundStyles,
 
     setSetting<K extends keyof Settings>(key: K, value: Settings[K]) {
       settings[key] = value

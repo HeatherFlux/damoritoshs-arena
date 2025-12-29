@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ThreatSearch from './components/ThreatSearch.vue'
 import EncounterBuilder from './components/EncounterBuilder.vue'
 import EncounterList from './components/EncounterList.vue'
@@ -7,14 +7,20 @@ import CombatTracker from './components/CombatTracker.vue'
 import RollHistory from './components/RollHistory.vue'
 import StatusBar from './components/StatusBar.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import AnimatedBackground from './components/AnimatedBackground.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
+import { useSettingsStore, themes } from './stores/settingsStore'
 import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
 
 const store = useEncounterStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
+const { settings } = useSettingsStore()
+
+// Get current theme's accent color for the background animation
+const currentAccentColor = computed(() => themes[settings.theme].accent)
 
 // Initialize Discord webhook integration
 onMounted(() => {
@@ -64,6 +70,13 @@ function handleRunEncounter() {
 
 <template>
   <div class="flex flex-col h-screen overflow-hidden">
+    <!-- Animated Background -->
+    <AnimatedBackground
+      v-if="settings.backgroundStyle !== 'none'"
+      :style="settings.backgroundStyle"
+      :accent-color="currentAccentColor"
+    />
+
     <header class="header-bar flex justify-between items-center px-6 py-3 bg-surface border-b border-border relative">
       <!-- Accent line -->
       <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent via-accent to-transparent"></div>
