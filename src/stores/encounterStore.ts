@@ -3,30 +3,13 @@ import type { Creature, Encounter, CreatureAdjustment, EncounterHazard } from '.
 import type { Hazard } from '../types/hazard'
 import { calculateEncounterXP, type EncounterXPResult } from '../types/encounter'
 import { usePartyStore } from './partyStore'
-import { adaptAoNCreature } from '../utils/creatureAdapter'
 
-// Import bundled creature data as fallback
+// Import bundled creature data (pre-fetched from AoN)
 import bundledCreatures from '../data/creatures.json'
 import { HAZARDS } from '../data/hazards'
 
 const STORAGE_KEY = 'sf2e-encounters'
 const CREATURES_STORAGE_KEY = 'sf2e-custom-creatures'
-
-// Cache version - increment when adapter format changes to invalidate old caches
-const AON_CACHE_VERSION = 7
-const AON_CACHE_KEY = `sf2e-aon-creatures-v${AON_CACHE_VERSION}`
-const AON_CACHE_TIME_KEY = `sf2e-aon-cache-time-v${AON_CACHE_VERSION}`
-const AON_CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
-
-// Clean up old cache keys on load
-try {
-  localStorage.removeItem('sf2e-aon-creatures')
-  localStorage.removeItem('sf2e-aon-cache-time')
-  for (let v = 1; v < AON_CACHE_VERSION; v++) {
-    localStorage.removeItem(`sf2e-aon-creatures-v${v}`)
-    localStorage.removeItem(`sf2e-aon-cache-time-v${v}`)
-  }
-} catch { /* ignore */ }
 
 // Load custom creatures from localStorage
 function loadCustomCreatures(): Creature[] {
@@ -44,54 +27,6 @@ function saveCustomCreatures(creatures: Creature[]) {
     localStorage.setItem(CREATURES_STORAGE_KEY, JSON.stringify(creatures))
   } catch (e) {
     console.error('Failed to save custom creatures:', e)
-  }
-}
-
-// Fetch creatures from AoN Elasticsearch
-async function fetchAoNCreatures(): Promise<Creature[]> {
-  try {
-    // Check cache first
-    const cacheTime = localStorage.getItem(AON_CACHE_TIME_KEY)
-    const cached = localStorage.getItem(AON_CACHE_KEY)
-
-    if (cacheTime && cached) {
-      const age = Date.now() - parseInt(cacheTime)
-      if (age < AON_CACHE_DURATION) {
-        const parsed = JSON.parse(cached)
-        if (parsed.length > 0) return parsed
-      }
-    }
-
-    // Fetch from AoN Elasticsearch (aonsf index for Starfinder 2E)
-    const response = await fetch('https://elasticsearch.aonprd.com/aonsf/_search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        size: 1000,
-        query: { match: { category: 'creature' } }
-      })
-    })
-
-    if (!response.ok) return []
-
-    const data = await response.json()
-    const hits = data.hits?.hits || []
-
-    // Transform ES results using adapter
-    const creatures: Creature[] = hits
-      .map((hit: any) => adaptAoNCreature(hit))
-      .filter((c: Creature | null): c is Creature => c !== null)
-
-    // Cache results
-    if (creatures.length > 0) {
-      localStorage.setItem(AON_CACHE_KEY, JSON.stringify(creatures))
-      localStorage.setItem(AON_CACHE_TIME_KEY, Date.now().toString())
-    }
-
-    return creatures
-  } catch (e) {
-    console.error('Failed to fetch AoN creatures:', e)
-    return []
   }
 }
 
@@ -155,18 +90,6 @@ const state = reactive<EncounterState>({
   activeEncounterId: null,
   partyLevel: savedState.partyLevel ?? 1,
   partySize: savedState.partySize ?? 4,
-})
-
-// Fetch AoN creatures on startup (async, non-blocking)
-fetchAoNCreatures().then(aonCreatures => {
-  if (aonCreatures.length > 0) {
-    const existingIds = new Set(state.creatures.map(c => c.id))
-    const newCreatures = aonCreatures.filter(c => !existingIds.has(c.id))
-    if (newCreatures.length > 0) {
-      state.creatures.push(...newCreatures)
-      console.log(`Loaded ${newCreatures.length} creatures from AoN`)
-    }
-  }
 })
 
 // Auto-save on changes
@@ -432,25 +355,6 @@ function clearCustomCreatures() {
   const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
   state.creatures = state.creatures.filter(c => bundledIds.has(c.id))
   localStorage.removeItem(CREATURES_STORAGE_KEY)
-  localStorage.removeItem(AON_CACHE_KEY)
-  localStorage.removeItem(AON_CACHE_TIME_KEY)
-}
-
-async function refreshAoNCreatures(): Promise<number> {
-  // Clear AoN cache
-  localStorage.removeItem(AON_CACHE_KEY)
-  localStorage.removeItem(AON_CACHE_TIME_KEY)
-
-  // Remove existing AoN creatures from state
-  state.creatures = state.creatures.filter(c => !c.id.startsWith('aon-'))
-
-  // Re-fetch from AoN
-  const aonCreatures = await fetchAoNCreatures()
-  if (aonCreatures.length > 0) {
-    state.creatures.push(...aonCreatures)
-  }
-
-  return aonCreatures.length
 }
 
 function getCreatureStats() {
@@ -496,6 +400,5 @@ export const useEncounterStore = () => ({
   importCustomCreatures,
   exportCustomCreatures,
   clearCustomCreatures,
-  refreshAoNCreatures,
   getCreatureStats,
 })

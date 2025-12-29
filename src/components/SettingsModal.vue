@@ -4,7 +4,7 @@ import { useSettingsStore, themes, backgroundStyles, type ThemeId, type Backgrou
 import { useEncounterStore } from '../stores/encounterStore'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
-const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, refreshAoNCreatures } = useEncounterStore()
+const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures } = useEncounterStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -21,8 +21,6 @@ const creatureStats = computed(() => getCreatureStats())
 const importStatus = ref<'idle' | 'success' | 'error'>('idle')
 const importMessage = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
-const refreshStatus = ref<'idle' | 'refreshing' | 'success' | 'error'>('idle')
-const refreshMessage = ref('')
 
 async function handleTestWebhook() {
   webhookTestStatus.value = 'testing'
@@ -77,23 +75,6 @@ function handleClearCustom() {
   if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
     clearCustomCreatures()
   }
-}
-
-async function handleRefreshAoN() {
-  refreshStatus.value = 'refreshing'
-  refreshMessage.value = ''
-  try {
-    const count = await refreshAoNCreatures()
-    refreshStatus.value = 'success'
-    refreshMessage.value = `Loaded ${count} creatures`
-  } catch {
-    refreshStatus.value = 'error'
-    refreshMessage.value = 'Failed to fetch'
-  }
-  setTimeout(() => {
-    refreshStatus.value = 'idle'
-    refreshMessage.value = ''
-  }, 3000)
 }
 </script>
 
@@ -245,23 +226,8 @@ async function handleRefreshAoN() {
             </div>
 
             <p class="text-xs text-dim">
-              AoN creatures auto-fetch daily. Import JSON to add your own custom creatures.
+              Bundled creatures from AoN. Import JSON to add your own custom creatures.
             </p>
-
-            <button
-              type="button"
-              class="btn-secondary text-sm w-full"
-              :class="{
-                'btn-success': refreshStatus === 'success',
-                'btn-danger': refreshStatus === 'error',
-              }"
-              :disabled="refreshStatus === 'refreshing'"
-              @click="handleRefreshAoN"
-            >
-              <span v-if="refreshStatus === 'idle'">↻ Refresh AoN Data</span>
-              <span v-else-if="refreshStatus === 'refreshing'">Fetching...</span>
-              <span v-else>{{ refreshMessage }}</span>
-            </button>
 
             <div class="flex gap-2">
               <input

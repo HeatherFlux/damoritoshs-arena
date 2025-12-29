@@ -8,7 +8,8 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "deploy": "wrangler pages deploy dist",
-    "parse-pdf": "python3 scripts/pdf_parser.py"
+    "parse-pdf": "python3 scripts/pdf_parser.py",
+    "fetch-aon": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"category\":\"creature\"}},\"size\":1000}' -o /tmp/aon_creatures_raw.json && node scripts/fetch-aon.mjs"
   },
   "dependencies": {
     "fuse.js": "^7.0.0",
