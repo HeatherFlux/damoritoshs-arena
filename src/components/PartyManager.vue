@@ -7,7 +7,9 @@ const store = usePartyStore()
 
 const showAddPlayer = ref(false)
 const showImportModal = ref(false)
+const showPartyImportModal = ref(false)
 const editingPlayer = ref<string | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 // New player form
 const newPlayerName = ref('')
@@ -15,10 +17,15 @@ const newPlayerHP = ref(50)
 const newPlayerAC = ref(18)
 const newPlayerLevel = ref(1)
 
-// Import form
+// Import form (Pathbuilder)
 const importJson = ref('')
 const importError = ref('')
 const importSuccess = ref<string | null>(null)
+
+// Party import form
+const partyImportJson = ref('')
+const partyImportError = ref('')
+const partyImportSuccess = ref<string | null>(null)
 
 // Edit form
 const editName = ref('')
@@ -98,6 +105,53 @@ function savePlayerEdit() {
 function cancelEdit() {
   editingPlayer.value = null
 }
+
+// Export all parties as downloadable JSON file
+function exportAllParties() {
+  const json = store.exportParties()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `sf2e-parties-${new Date().toISOString().split('T')[0]}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// Open party import modal
+function openPartyImportModal() {
+  partyImportJson.value = ''
+  partyImportError.value = ''
+  partyImportSuccess.value = null
+  showPartyImportModal.value = true
+}
+
+// Handle file selection for import
+function handleFileImport(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    partyImportJson.value = e.target?.result as string
+  }
+  reader.readAsText(file)
+}
+
+// Import parties from JSON
+function importAllParties(mode: 'merge' | 'replace') {
+  partyImportError.value = ''
+  partyImportSuccess.value = null
+
+  const result = store.importParties(partyImportJson.value, mode)
+  if (result.success) {
+    partyImportSuccess.value = `Imported ${result.imported} ${result.imported === 1 ? 'party' : 'parties'}`
+    partyImportJson.value = ''
+    if (fileInputRef.value) fileInputRef.value.value = ''
+  } else {
+    partyImportError.value = result.error || 'Import failed'
+  }
+}
 </script>
 
 <template>
@@ -105,7 +159,20 @@ function cancelEdit() {
     <!-- Party Header -->
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-base font-semibold">Party</h3>
-      <button class="btn-primary btn-sm" @click="createNewParty">+ New Party</button>
+      <div class="flex gap-1.5">
+        <button
+          v-if="store.state.parties.length > 0"
+          class="btn-secondary btn-sm"
+          @click="exportAllParties"
+          title="Export all parties"
+        >
+          📤
+        </button>
+        <button class="btn-secondary btn-sm" @click="openPartyImportModal" title="Import parties">
+          📥
+        </button>
+        <button class="btn-primary btn-sm" @click="createNewParty">+ New Party</button>
+      </div>
     </div>
 
     <!-- Party List -->
@@ -272,6 +339,62 @@ function cancelEdit() {
           <button class="btn-primary" @click="importFromPathbuilder" :disabled="!importJson.trim()">
             Import
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Party Import Modal -->
+    <div v-if="showPartyImportModal" class="modal-overlay" @click.self="showPartyImportModal = false">
+      <div class="modal max-w-[500px]">
+        <h3 class="text-lg font-semibold mb-2">Import/Export Parties</h3>
+        <p class="text-dim text-sm mb-4">Backup your parties or restore from a previous export.</p>
+
+        <!-- File Upload -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Load from file:</label>
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept=".json"
+            @change="handleFileImport"
+            class="block w-full text-sm text-dim file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-accent file:text-white hover:file:bg-accent/90 file:cursor-pointer"
+          />
+        </div>
+
+        <!-- Or paste JSON -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Or paste JSON:</label>
+          <textarea
+            v-model="partyImportJson"
+            placeholder='{"version": 1, "parties": [...]}'
+            rows="6"
+            class="input w-full font-mono text-xs resize-y"
+          ></textarea>
+        </div>
+
+        <p v-if="partyImportError" class="text-danger text-sm mb-2">{{ partyImportError }}</p>
+        <p v-if="partyImportSuccess" class="text-success text-sm mb-2">{{ partyImportSuccess }}</p>
+
+        <div class="flex justify-between mt-4">
+          <button class="btn-secondary" @click="showPartyImportModal = false">Close</button>
+          <div class="flex gap-2">
+            <button
+              class="btn-secondary"
+              @click="importAllParties('merge')"
+              :disabled="!partyImportJson.trim()"
+              title="Add imported parties to existing"
+            >
+              Merge
+            </button>
+            <button
+              class="btn-primary"
+              @click="importAllParties('replace')"
+              :disabled="!partyImportJson.trim()"
+              title="Replace all parties with import"
+            >
+              Replace All
+            </button>
+          </div>
         </div>
       </div>
     </div>

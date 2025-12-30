@@ -182,6 +182,56 @@ function getPartyPlayers(): Player[] {
   return activeParty.value?.players ?? []
 }
 
+// Export all parties as JSON for backup
+function exportParties(): string {
+  return JSON.stringify({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    parties: state.parties,
+    activePartyId: state.activePartyId,
+  }, null, 2)
+}
+
+// Import parties from JSON backup
+function importParties(json: string, mode: 'merge' | 'replace' = 'merge'): { success: boolean; imported: number; error?: string } {
+  try {
+    const data = JSON.parse(json)
+
+    // Validate structure
+    if (!data.parties || !Array.isArray(data.parties)) {
+      return { success: false, imported: 0, error: 'Invalid format: missing parties array' }
+    }
+
+    // Convert dates and validate parties
+    const importedParties: Party[] = data.parties.map((p: Party) => ({
+      ...p,
+      id: mode === 'merge' ? generateId() : p.id, // New IDs on merge to avoid conflicts
+      createdAt: new Date(p.createdAt),
+      updatedAt: new Date(p.updatedAt),
+      players: (p.players || []).map(player => ({
+        ...player,
+        id: mode === 'merge' ? generateId() : player.id,
+      })),
+    }))
+
+    if (mode === 'replace') {
+      state.parties = importedParties
+      state.activePartyId = importedParties[0]?.id ?? null
+    } else {
+      // Merge: add imported parties to existing
+      state.parties.push(...importedParties)
+      // Set first imported as active if no active party
+      if (!state.activePartyId && importedParties.length > 0) {
+        state.activePartyId = importedParties[0].id
+      }
+    }
+
+    return { success: true, imported: importedParties.length }
+  } catch (e) {
+    return { success: false, imported: 0, error: `Failed to parse JSON: ${e}` }
+  }
+}
+
 export const usePartyStore = () => ({
   // State
   state,
@@ -203,4 +253,8 @@ export const usePartyStore = () => ({
   updatePlayer,
   importPlayerFromPathbuilder,
   getPartyPlayers,
+
+  // Import/Export
+  exportParties,
+  importParties,
 })
