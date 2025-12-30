@@ -81,6 +81,20 @@ function isValidTrait(trait: string): boolean {
   const clean = cleanTrait(trait)
   return clean.length > 0 && clean.length < 30 && !clean.includes('APPENDIX')
 }
+
+// Check if attack has agile trait (reduces MAP to -4/-8)
+function isAgile(traits: string[]): boolean {
+  return traits.some(t => t.toLowerCase().includes('agile'))
+}
+
+// Get MAP penalties for an attack
+function getMAPPenalties(traits: string[]): { second: number; third: number } {
+  const agile = isAgile(traits)
+  return {
+    second: agile ? -4 : -5,
+    third: agile ? -8 : -10
+  }
+}
 </script>
 
 <template>
@@ -205,11 +219,32 @@ function isValidTrait(trait: string): boolean {
     <!-- Attacks -->
     <div v-for="attack in creature.attacks" :key="attack.name + attack.bonus" class="attack-block">
       <div class="flex items-center gap-1.5 flex-wrap">
-        <span class="rollable inline-flex items-center gap-1.5" @click="rollAttack(attack.name, attack.bonus, attack.damage)" title="Roll attack + damage">
-          <strong>{{ attack.type === 'melee' ? 'Melee' : 'Ranged' }}</strong>
-          <ActionIcon :action="attack.actions ?? 1" class="text-accent" />
-          <span class="text-text">{{ attack.name }}</span>
-          <span class="roll-value">{{ formatModifier(attack.bonus) }}</span>
+        <strong>{{ attack.type === 'melee' ? 'Melee' : 'Ranged' }}</strong>
+        <ActionIcon :action="attack.actions ?? 1" class="text-accent" />
+        <span class="text-text">{{ attack.name }}</span>
+        <!-- MAP Attack Buttons -->
+        <span class="inline-flex gap-1 ml-1">
+          <span
+            class="rollable map-btn"
+            @click="rollAttack(attack.name, attack.bonus, attack.damage)"
+            :title="`1st attack: ${formatModifier(attack.bonus)}`"
+          >
+            {{ formatModifier(attack.bonus) }}
+          </span>
+          <span
+            class="rollable map-btn map-btn-secondary"
+            @click="rollAttack(attack.name + ' (2nd)', attack.bonus + getMAPPenalties(attack.traits).second, attack.damage)"
+            :title="`2nd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).second)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
+          >
+            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).second) }}
+          </span>
+          <span
+            class="rollable map-btn map-btn-tertiary"
+            @click="rollAttack(attack.name + ' (3rd)', attack.bonus + getMAPPenalties(attack.traits).third, attack.damage)"
+            :title="`3rd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).third)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
+          >
+            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).third) }}
+          </span>
         </span>
         <span v-if="attack.traits.filter(isValidTrait).length" class="text-xs text-dim">
           ({{ attack.traits.filter(isValidTrait).map(cleanTrait).join(', ') }})

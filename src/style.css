@@ -884,6 +884,32 @@
     border-color: rgba(239, 68, 68, 0.5);
   }
 
+  /* MAP (Multiple Attack Penalty) buttons */
+  .map-btn {
+    min-width: 2.25rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--color-rollable);
+  }
+
+  .map-btn-secondary {
+    background: rgba(255, 166, 87, 0.08);
+    color: var(--color-dim);
+  }
+
+  .map-btn-secondary:hover {
+    color: var(--color-rollable);
+  }
+
+  .map-btn-tertiary {
+    background: rgba(255, 166, 87, 0.04);
+    color: var(--color-muted);
+  }
+
+  .map-btn-tertiary:hover {
+    color: var(--color-rollable);
+  }
+
   .rollable .roll-label,
   .rollable-label {
     color: var(--color-text);
