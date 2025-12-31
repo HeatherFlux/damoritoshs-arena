@@ -540,7 +540,7 @@
   /* Primary button */
   .btn-primary {
     background: var(--color-accent);
-    color: #000;
+    color: var(--color-bg);
     border-color: var(--color-accent);
   }
 
@@ -598,7 +598,7 @@
   /* Success button */
   .btn-success {
     background: var(--color-success);
-    color: #000;
+    color: var(--color-bg);
     border-color: var(--color-success);
   }
 
@@ -804,17 +804,17 @@
     font-weight: 600;
     text-transform: uppercase;
     border-radius: 3px;
-    background: #8b5cf6;
-    color: white;
+    background: var(--color-secondary);
+    color: var(--color-bg);
     white-space: nowrap;
   }
 
-  .trait-size { background: #7c3aed; }
-  .trait-alignment { background: #6366f1; }
-  .trait-rarity-uncommon { background: #d97706; }
-  .trait-rarity-rare { background: #2563eb; }
-  .trait-rarity-unique { background: #7c3aed; }
-  .trait-creature-type { background: #059669; }
+  .trait-size { background: var(--color-primary); }
+  .trait-alignment { background: var(--color-secondary); }
+  .trait-rarity-uncommon { background: var(--color-tertiary); }
+  .trait-rarity-rare { background: var(--color-quaternary); }
+  .trait-rarity-unique { background: var(--color-primary); }
+  .trait-creature-type { background: var(--color-quaternary); }
 
   /* ---------- Difficulty Badges ---------- */
   .badge-difficulty {

@@ -3,7 +3,7 @@ import { generateThemePalette, hexToHSL, hslToHex } from '../utils/colors'
 
 const STORAGE_KEY = 'sf2e-settings'
 
-export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'danger-red' | 'glam-pink' | 'neon-magenta' | 'light-rose' | 'light-violet'
+export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'danger-red' | 'glam-pink' | 'neon-magenta' | 'light-rose' | 'light-violet' | 'the-gap'
 
 export type BackgroundStyle = 'none' | 'gradient-wave' | 'dot-matrix' | 'particle-field' | 'cyber-grid' | 'floating-blobs' | 'random-dots'
 
@@ -68,8 +68,8 @@ const defaultSettings: Settings = {
 // Tetradic palette (4 colors 90° apart) auto-generated from base
 const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
   'cyber-cyan': {
-    name: 'Cyber Cyan',
-    description: 'Electric blue sci-fi',
+    name: 'Eoxian Royal Cyan',
+    description: 'Eox royalty vibes',
     baseColor: '#1ECBE1',  // Cyan → Purple → Coral → Green
     mode: 'dark'
   },
@@ -80,20 +80,20 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
     mode: 'dark'
   },
   'warning-amber': {
-    name: 'Warning Amber',
+    name: 'Warning Means Run',
     description: 'Caution yellow alert',
     baseColor: '#E1CB1E',  // Gold → Lime → Purple → Red
     mode: 'dark'
   },
   'danger-red': {
-    name: 'Danger Red',
+    name: 'Danger! DANGER!',
     description: 'Red alert mode',
     baseColor: '#E11E3C',  // Red → Orange → Cyan → Green
     mode: 'dark'
   },
   'glam-pink': {
-    name: 'Glam Pink',
-    description: 'Fabulous & fierce',
+    name: 'Strawberry Machine Cake',
+    description: 'If you know you know',
     baseColor: '#E11ECB',  // Magenta → Red → Green → Cyan
     mode: 'dark'
   },
@@ -104,16 +104,22 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
     mode: 'dark'
   },
   'light-rose': {
-    name: 'Light Rose',
+    name: 'Space Cowboy Rose',
     description: 'Soft light with rose',
-    baseColor: '#e11d48',  // Rose → Orange → Teal → Lime
+    baseColor: '#9e4458',  // Deep dusty rose → Terracotta → Teal → Olive
     mode: 'light'
   },
   'light-violet': {
-    name: 'Light Violet',
-    description: 'Soft light with purple',
-    baseColor: '#7c3aed',  // Violet → Blue → Yellow → Orange
+    name: 'InfoSphere 95',
+    description: 'Retro teal nostalgia',
+    baseColor: '#018281',  // Teal → Blue → Red → Yellow
     mode: 'light'
+  },
+  'the-gap': {
+    name: 'The Gap',
+    description: 'What happened? No one knows.',
+    baseColor: '#18181a',  // Abyss black - nearly no color
+    mode: 'dark'
   }
 }
 
@@ -192,16 +198,16 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
     '--color-text-dim': '#7a8b9a',
     '--color-text-muted': '#4a5968',
   } : {
-    // Light mode - neutral grey shades (not white)
-    '--color-bg': '#c8c8c8',           // Base grey
-    '--color-bg-surface': '#d4d4d4',   // Slightly lighter
-    '--color-bg-elevated': '#e0e0e0',  // Cards/modals
-    '--color-bg-hover': '#bababa',     // Hover state (darker)
-    '--color-border': '#a0a0a0',       // Medium grey borders
-    '--color-border-hover': '#888888', // Darker on hover
-    '--color-text': '#1a1a1a',         // Near black text
-    '--color-text-dim': '#4a4a4a',     // Dimmed text
-    '--color-text-muted': '#6a6a6a',   // Muted text
+    // Light mode - soft warm grays
+    '--color-bg': '#d8d4d0',           // Warm light gray base
+    '--color-bg-surface': '#e4e0dc',   // Lighter warm surface
+    '--color-bg-elevated': '#ebe8e4',  // Elevated elements
+    '--color-bg-hover': '#ccc8c4',     // Hover state (slightly darker)
+    '--color-border': '#b0aaa4',       // Warm border
+    '--color-border-hover': '#908a84', // Darker border on hover
+    '--color-text': '#1a1816',         // Near-black warm text
+    '--color-text-dim': '#4a4644',     // Dimmed text
+    '--color-text-muted': '#706c68',   // Muted text
   }
 
   // Use same colors for both modes - no special light mode handling

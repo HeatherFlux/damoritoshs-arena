@@ -9,6 +9,7 @@ const glitchText = ref('')
 const currentAscii = ref('')
 const asciiPlayerRef = ref<InstanceType<typeof AsciiPlayer> | null>(null)
 const glitchPhase = ref<'scramble' | 'message' | null>(null)
+const retroMode = ref(false)
 let unsubscribe: (() => void) | null = null
 let timeoutId: ReturnType<typeof setTimeout> | null = null
 let phaseTimeouts: ReturnType<typeof setTimeout>[] = []
@@ -93,6 +94,31 @@ function onAsciiEnded() {
   setTimeout(dismiss, 300)
 }
 
+function toggleRetroMode() {
+  retroMode.value = !retroMode.value
+  if (retroMode.value) {
+    document.body.classList.add('retro-mode')
+  } else {
+    document.body.classList.remove('retro-mode')
+  }
+}
+
+// Secret keyboard shortcuts: Shift+Option+1 = crit fail, +2 = crit success, +3 = retro mode
+function handleSecretKeys(e: KeyboardEvent) {
+  if (e.shiftKey && e.altKey) {
+    if (e.code === 'Digit1') {
+      e.preventDefault()
+      triggerGlitch('nat1')
+    } else if (e.code === 'Digit2') {
+      e.preventDefault()
+      triggerGlitch('nat20')
+    } else if (e.code === 'Digit3') {
+      e.preventDefault()
+      toggleRetroMode()
+    }
+  }
+}
+
 onMounted(() => {
   unsubscribe = onRoll((roll) => {
     if (roll.isNat20) {
@@ -101,6 +127,8 @@ onMounted(() => {
       triggerGlitch('nat1')
     }
   })
+
+  window.addEventListener('keydown', handleSecretKeys)
 })
 
 onUnmounted(() => {
@@ -108,6 +136,8 @@ onUnmounted(() => {
   if (timeoutId) clearTimeout(timeoutId)
   phaseTimeouts.forEach(t => clearTimeout(t))
   document.body.classList.remove('glitch-mode')
+  document.body.classList.remove('retro-mode')
+  window.removeEventListener('keydown', handleSecretKeys)
 })
 </script>
 
@@ -159,6 +189,13 @@ onUnmounted(() => {
         <div class="click-hint">click to dismiss</div>
       </div>
     </Transition>
+
+    <!-- Retro CRT Mode overlay -->
+    <div v-if="retroMode" class="retro-overlay">
+      <div class="retro-scanlines"></div>
+      <div class="retro-scanline-sweep"></div>
+      <div class="retro-flicker"></div>
+    </div>
   </Teleport>
 </template>
 
@@ -189,7 +226,7 @@ onUnmounted(() => {
    NAT 20 - ASCII Art Animation
    ============================================ */
 .crit-container {
-  background: var(--color-bg);
+  background: #000;  /* Always dark for ASCII glow effect */
 }
 
 .ascii-wrapper {
@@ -229,16 +266,16 @@ onUnmounted(() => {
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: #fff;
   text-shadow:
     0 0 10px var(--color-quaternary),
     0 0 20px var(--color-quaternary),
     0 0 40px var(--color-quaternary),
     0 0 80px var(--color-quaternary),
-    2px 2px 0 var(--color-bg),
-    -2px -2px 0 var(--color-bg),
-    2px -2px 0 var(--color-bg),
-    -2px 2px 0 var(--color-bg);
+    2px 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000;
   animation: textPulse 0.3s ease-in-out infinite alternate;
 }
 
@@ -249,8 +286,8 @@ onUnmounted(() => {
       0 0 10px var(--color-quaternary),
       0 0 20px var(--color-quaternary),
       0 0 40px var(--color-quaternary),
-      2px 2px 0 var(--color-bg),
-      -2px -2px 0 var(--color-bg);
+      2px 2px 0 #000,
+      -2px -2px 0 #000;
   }
   to {
     transform: scale(1.02);
@@ -259,8 +296,8 @@ onUnmounted(() => {
       0 0 40px var(--color-quaternary),
       0 0 80px var(--color-quaternary),
       0 0 120px var(--color-quaternary),
-      2px 2px 0 var(--color-bg),
-      -2px -2px 0 var(--color-bg);
+      2px 2px 0 #000,
+      -2px -2px 0 #000;
   }
 }
 
@@ -398,6 +435,65 @@ onUnmounted(() => {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* ============================================
+   RETRO CRT MODE
+   ============================================ */
+.retro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.retro-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  animation: scanlineScroll 0.1s linear infinite;
+}
+
+.retro-scanline-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(100, 255, 100, 0.15),
+    rgba(150, 255, 150, 0.25),
+    rgba(100, 255, 100, 0.15),
+    transparent
+  );
+  animation: scanlineSweep 4s linear infinite;
+  filter: blur(1px);
+}
+
+@keyframes scanlineSweep {
+  0% { top: -10px; }
+  100% { top: 100%; }
+}
+
+.retro-flicker {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  animation: crtFlicker 0.15s infinite;
+}
+
+@keyframes crtFlicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
 </style>
 
 <!-- Global styles for glitch mode - affects entire app -->
@@ -427,5 +523,48 @@ body.glitch-mode .click-hint {
   40% { transform: translate(2px, -1px); }
   60% { transform: translate(-1px, -2px); }
   80% { transform: translate(1px, 2px); }
+}
+
+/* ============================================
+   RETRO CRT MODE - Global Effects
+   ============================================ */
+body.retro-mode {
+  background: #0a0a0a !important;
+  filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(70deg);
+}
+
+body.retro-mode::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 90%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 9998;
+}
+
+/* Add subtle screen curvature effect */
+body.retro-mode #app {
+  transform: perspective(1000px) rotateX(1deg);
+  transform-origin: center center;
+}
+
+/* Make text more pixelated/blocky */
+body.retro-mode * {
+  text-shadow: 0 0 2px currentColor !important;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+}
+
+/* Phosphor glow on interactive elements */
+body.retro-mode button,
+body.retro-mode input,
+body.retro-mode select,
+body.retro-mode .card {
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3) !important;
 }
 </style>

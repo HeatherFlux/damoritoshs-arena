@@ -115,9 +115,21 @@ export function hslToHex(hsl: HSL): string {
  * Generate tetradic colors from a base color
  * Returns 4 colors that are 90° apart on the color wheel
  * Quaternary is slightly dimmed so success green isn't too vivid
+ * For very low saturation colors (like The Gap), keeps all colors grayscale
  */
 export function getTetradicColors(baseHex: string): TetradicPalette {
   const hsl = hexToHSL(baseHex)
+
+  // For very low saturation (< 10%), keep everything grayscale
+  // Use wider lightness spread for better contrast/readability
+  if (hsl.s < 10) {
+    return {
+      primary: hslToHex({ ...hsl, l: Math.min(100, hsl.l + 25) }),      // Lighter for visibility
+      secondary: hslToHex({ ...hsl, l: Math.min(100, hsl.l + 35) }),    // Even lighter
+      tertiary: hslToHex({ ...hsl, l: Math.min(100, hsl.l + 45) }),     // Brightest for contrast
+      quaternary: hslToHex({ ...hsl, l: Math.min(100, hsl.l + 30) }),   // Mid-bright
+    }
+  }
 
   // Quaternary (success/green) gets dimmed so it's not so vivid
   const quatSat = Math.max(0, hsl.s - 5)
