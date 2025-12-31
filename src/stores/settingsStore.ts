@@ -16,12 +16,16 @@ export interface Settings {
   discordWebhookUrl: string
 }
 
-// Theme definition - just base color and mode, tetradic palette auto-generated
+// Theme definition - base color with optional manual overrides
 interface ThemeDefinition {
   name: string
   description: string
-  baseColor: string  // Single color - tetrad calculated from this
+  baseColor: string  // Primary color - tetrad calculated from this
   mode: 'dark' | 'light'
+  // Optional manual overrides (bypass tetradic calculation)
+  secondary?: string
+  tertiary?: string
+  quaternary?: string
 }
 
 // Background style definitions
@@ -76,7 +80,10 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
   'terminal-green': {
     name: "A Cruel Angel's Green",
     description: '残酷な天使のテーゼ',
-    baseColor: '#a0de59',  // EVA-01 green → Purple → Coral → Teal
+    baseColor: '#a0de59',  // EVA-01 green
+    secondary: '#a976c3',  // EVA-01 purple
+    tertiary: '#f5c024',   // Warning gold
+    quaternary: '#466b5a', // Dark teal
     mode: 'dark'
   },
   'warning-amber': {
@@ -174,6 +181,12 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+// Helper: Create dim variant (lower lightness)
+function dimColor(hex: string): string {
+  const hsl = hexToHSL(hex)
+  return hslToHex({ ...hsl, l: Math.max(0, hsl.l - 10) })
+}
+
 // Helper: Create bright variant (higher lightness)
 function brightColor(hex: string): string {
   const hsl = hexToHSL(hex)
@@ -216,17 +229,17 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
     '--color-text-muted': '#706c68',   // Muted text
   }
 
-  // Use same colors for both modes - no special light mode handling
+  // Use manual overrides if provided, otherwise use generated palette
   const primary = palette.primary
   const primaryDim = palette.primaryDim
   const primaryBright = palette.primaryBright
-  const secondary = palette.secondary
-  const secondaryDim = palette.secondaryDim
-  const tertiary = palette.tertiary
-  const tertiaryDim = palette.tertiaryDim
-  const tertiaryBright = palette.tertiaryBright
-  const quaternary = palette.quaternary
-  const quaternaryDim = palette.quaternaryDim
+  const secondary = def.secondary || palette.secondary
+  const secondaryDim = def.secondary ? dimColor(def.secondary) : palette.secondaryDim
+  const tertiary = def.tertiary || palette.tertiary
+  const tertiaryDim = def.tertiary ? dimColor(def.tertiary) : palette.tertiaryDim
+  const tertiaryBright = def.tertiary ? brightColor(def.tertiary) : palette.tertiaryBright
+  const quaternary = def.quaternary || palette.quaternary
+  const quaternaryDim = def.quaternary ? dimColor(def.quaternary) : palette.quaternaryDim
 
   // Glow/subtle intensity
   const glowAlpha = 0.4
