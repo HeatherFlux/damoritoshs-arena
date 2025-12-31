@@ -16,13 +16,6 @@ const dialRef = ref<HTMLElement | null>(null)
 const isDragging = ref(false)
 const scrollAccumulator = ref(0)
 
-// Calculate angle for current value (270° arc, from -135° to +135°)
-const rotation = computed(() => {
-  const range = props.max - props.min
-  const normalized = (props.modelValue - props.min) / range
-  return -135 + (normalized * 270)
-})
-
 // Progress as percentage (0-1)
 const progress = computed(() => {
   return (props.modelValue - props.min) / (props.max - props.min)
