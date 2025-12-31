@@ -76,7 +76,7 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
   'terminal-green': {
     name: "A Cruel Angel's Green",
     description: '残酷な天使のテーゼ',
-    baseColor: '#1EE14A',  // Green → Cyan → Magenta → Orange
+    baseColor: '#a0de59',  // EVA-01 green → Purple → Coral → Teal
     mode: 'dark'
   },
   'warning-amber': {
