@@ -37,6 +37,7 @@ interface EncounterState {
   activeEncounterId: string | null
   partyLevel: number
   partySize: number
+  useManualOverride: boolean  // When true, use partyLevel/partySize instead of party store
 }
 
 function generateId(): string {
@@ -64,12 +65,13 @@ function loadFromStorage(): Partial<EncounterState> {
   return {}
 }
 
-function saveToStorage(state: Pick<EncounterState, 'encounters' | 'partyLevel' | 'partySize'>) {
+function saveToStorage(state: Pick<EncounterState, 'encounters' | 'partyLevel' | 'partySize' | 'useManualOverride'>) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       encounters: state.encounters,
       partyLevel: state.partyLevel,
       partySize: state.partySize,
+      useManualOverride: state.useManualOverride,
     }))
   } catch (e) {
     console.error('Failed to save encounters:', e)
@@ -90,11 +92,17 @@ const state = reactive<EncounterState>({
   activeEncounterId: null,
   partyLevel: savedState.partyLevel ?? 1,
   partySize: savedState.partySize ?? 4,
+  useManualOverride: savedState.useManualOverride ?? false,
 })
 
 // Auto-save on changes
 watch(
-  () => ({ encounters: state.encounters, partyLevel: state.partyLevel, partySize: state.partySize }),
+  () => ({
+    encounters: state.encounters,
+    partyLevel: state.partyLevel,
+    partySize: state.partySize,
+    useManualOverride: state.useManualOverride
+  }),
   (newVal) => saveToStorage(newVal),
   { deep: true }
 )
@@ -107,13 +115,33 @@ const activeEncounter = computed(() =>
 // Get party info from party store
 const partyStore = usePartyStore()
 
+// Determine effective party level/size (use manual override or party store)
+const effectivePartyLevel = computed(() => {
+  // Use manual values if: override enabled OR no active party OR party has no players
+  const partyPlayers = partyStore.activeParty.value?.players
+  const hasPartyPlayers = partyPlayers && partyPlayers.length > 0
+  if (state.useManualOverride || !hasPartyPlayers) {
+    return state.partyLevel
+  }
+  return partyStore.partyLevel.value
+})
+
+const effectivePartySize = computed(() => {
+  const partyPlayers = partyStore.activeParty.value?.players
+  const hasPartyPlayers = partyPlayers && partyPlayers.length > 0
+  if (state.useManualOverride || !hasPartyPlayers) {
+    return state.partySize
+  }
+  return partyStore.partySize.value
+})
+
 const encounterXP = computed((): EncounterXPResult | null => {
   const encounter = activeEncounter.value
   if (!encounter) return null
   return calculateEncounterXP(
     encounter.creatures,
-    partyStore.partyLevel.value,
-    partyStore.partySize.value,
+    effectivePartyLevel.value,
+    effectivePartySize.value,
     encounter.hazards ?? []
   )
 })
@@ -292,7 +320,11 @@ function setPartyLevel(level: number) {
 }
 
 function setPartySize(size: number) {
-  state.partySize = Math.max(1, Math.min(8, size))
+  state.partySize = Math.max(1, Math.min(12, size))
+}
+
+function setManualOverride(enabled: boolean) {
+  state.useManualOverride = enabled
 }
 
 function exportEncounters(): string {
@@ -373,6 +405,8 @@ export const useEncounterStore = () => ({
   encounterXP,
   totalXP,
   difficulty,
+  effectivePartyLevel,
+  effectivePartySize,
 
   // Creature Actions
   createEncounter,
@@ -389,9 +423,12 @@ export const useEncounterStore = () => ({
   removeHazardFromEncounter,
   updateHazardCount,
 
-  // Settings
+  // Party Settings
   setPartyLevel,
   setPartySize,
+  setManualOverride,
+
+  // Import/Export
   exportEncounters,
   importEncounters,
   clearAllEncounters,

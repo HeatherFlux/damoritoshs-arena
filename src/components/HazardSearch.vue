@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useEncounterStore } from '../stores/encounterStore'
 import type { Hazard } from '../types/hazard'
 import { formatComplexity, formatHazardType, calculateHazardXP } from '../types/hazard'
+import { rollDamage } from '../utils/dice'
 
 const store = useEncounterStore()
 
@@ -69,6 +70,14 @@ function clearFilters() {
 
 function getXP(hazard: Hazard): number {
   return calculateHazardXP(hazard, store.state.partyLevel)
+}
+
+function rollHazardDamage(hazardName: string, actionName: string, damage: string) {
+  rollDamage(damage, actionName, hazardName, false)
+}
+
+function rollHazardCritDamage(hazardName: string, actionName: string, damage: string) {
+  rollDamage(damage, actionName, hazardName, true)
 }
 </script>
 
@@ -220,9 +229,23 @@ function getXP(hazard: Hazard): number {
                 <strong>Trigger</strong> {{ action.trigger }}
               </p>
               <p class="my-1 text-dim">{{ action.effect }}</p>
-              <p v-if="action.damage" class="my-1 text-dim">
-                <strong>Damage</strong> {{ action.damage }}
-                <span v-if="action.dc"> (DC {{ action.dc }} {{ action.save }})</span>
+              <p v-if="action.damage" class="my-1 text-dim flex items-center gap-2 flex-wrap">
+                <span
+                  class="rollable inline-flex items-center gap-1"
+                  @click="rollHazardDamage(hazard.name, action.name, action.damage)"
+                  title="Roll damage"
+                >
+                  <strong>Damage</strong>
+                  <span class="roll-value">{{ action.damage }}</span>
+                </span>
+                <span
+                  class="rollable text-danger text-xs"
+                  @click="rollHazardCritDamage(hazard.name, action.name, action.damage)"
+                  title="Roll critical damage (doubled)"
+                >
+                  ×2
+                </span>
+                <span v-if="action.dc" class="text-dim"> (DC {{ action.dc }} {{ action.save }})</span>
               </p>
             </div>
           </div>

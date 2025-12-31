@@ -12,9 +12,12 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 let animationId: number | null = null
 let ctx: CanvasRenderingContext2D | null = null
 
-// Dot matrix state
-const dotCount = 40
-const dotRows = 25
+// Symbol field for gradient wave (balance density vs performance)
+const symbolCols = 60
+const symbolRows = 30
+
+// Matrix rain configuration
+const matrixFontSize = 20
 
 // Parse hex color to RGB
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -83,7 +86,7 @@ function drawParticles(_time: number) {
     // Draw particle
     ctx!.beginPath()
     ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-    ctx!.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`
+    ctx!.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha+.5})`
     ctx!.fill()
 
     // Draw connections to nearby particles
@@ -283,6 +286,68 @@ function drawRandomDots(time: number) {
   })
 }
 
+// ========== MATRIX RAIN ==========
+// Classic Matrix rain - one character per column, trail from fade effect
+let matrixDrops: number[] = []  // Y position for each column
+let lastMatrixTime = 0
+const matrixFrameDelay = 100  // ms between frames (~20fps for that classic feel)
+
+function initMatrixRain() {
+  if (!canvasRef.value) return
+  const canvas = canvasRef.value
+  const columns = Math.ceil(canvas.width / matrixFontSize)
+
+  matrixDrops = []
+  for (let i = 0; i < columns; i++) {
+    // Start at random positions
+    matrixDrops[i] = Math.random() * -50
+  }
+  lastMatrixTime = 0
+}
+
+function drawMatrixRain(time: number) {
+  if (!ctx || !canvasRef.value) return
+
+  // Throttle to ~10fps for that classic Matrix feel
+  if (time - lastMatrixTime < matrixFrameDelay) return
+  lastMatrixTime = time
+
+  const canvas = canvasRef.value
+  const root = getComputedStyle(document.documentElement)
+
+  // Get colors from CSS variables (tetradic palette)
+  const bgColor = root.getPropertyValue('--color-bg').trim()
+  const secondaryColor = root.getPropertyValue('--color-secondary').trim()
+
+  const bgRgb = hexToRgb(bgColor || '#050608')
+  const secRgb = hexToRgb(secondaryColor || '#8B1EE1')
+
+  // Semi-transparent background creates the trailing fade effect
+  ctx.fillStyle = `rgba(${bgRgb.r}, ${bgRgb.g}, ${bgRgb.b}, 0.05)`
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.font = `${matrixFontSize}px monospace`
+
+  for (let i = 0; i < matrixDrops.length; i++) {
+    // Random 1 or 0
+    const char = Math.random() > 0.5 ? '1' : '0'
+    const x = i * matrixFontSize
+    const y = matrixDrops[i] * matrixFontSize
+
+    // Dimmed secondary color (0.4 opacity)
+    ctx.fillStyle = `rgba(${secRgb.r}, ${secRgb.g}, ${secRgb.b}, 0.4)`
+
+    ctx.fillText(char, x, y)
+
+    // Reset drop when it goes off screen (with some randomness)
+    if (y > canvas.height && Math.random() > 0.975) {
+      matrixDrops[i] = 0
+    }
+
+    matrixDrops[i]++
+  }
+}
+
 // ========== ANIMATION LOOP ==========
 function animate(time: number) {
   if (props.style === 'particle-field') {
@@ -293,6 +358,8 @@ function animate(time: number) {
     drawFloatingBlobs(time)
   } else if (props.style === 'random-dots') {
     drawRandomDots(time)
+  } else if (props.style === 'dot-matrix') {
+    drawMatrixRain(time)
   }
 
   animationId = requestAnimationFrame(animate)
@@ -307,6 +374,7 @@ function resizeCanvas() {
   if (props.style === 'particle-field') initParticles()
   if (props.style === 'floating-blobs') initBlobs()
   if (props.style === 'random-dots') initRandomDots()
+  if (props.style === 'dot-matrix') initMatrixRain()
 }
 
 function startCanvasAnimation() {
@@ -317,6 +385,7 @@ function startCanvasAnimation() {
   if (props.style === 'particle-field') initParticles()
   if (props.style === 'floating-blobs') initBlobs()
   if (props.style === 'random-dots') initRandomDots()
+  if (props.style === 'dot-matrix') initMatrixRain()
 
   animationId = requestAnimationFrame(animate)
 }
@@ -328,17 +397,20 @@ function stopAnimation() {
   }
 }
 
+// Canvas-based styles
+const canvasStyles = ['particle-field', 'cyber-grid', 'floating-blobs', 'random-dots', 'dot-matrix']
+
 // Watch for style changes
 watch(() => props.style, (newStyle) => {
   stopAnimation()
-  if (['particle-field', 'cyber-grid', 'floating-blobs', 'random-dots'].includes(newStyle)) {
+  if (canvasStyles.includes(newStyle)) {
     startCanvasAnimation()
   }
 })
 
 onMounted(() => {
   window.addEventListener('resize', resizeCanvas)
-  if (['particle-field', 'cyber-grid', 'floating-blobs', 'random-dots'].includes(props.style)) {
+  if (canvasStyles.includes(props.style)) {
     startCanvasAnimation()
   }
 })
@@ -350,34 +422,26 @@ onUnmounted(() => {
 
 // Computed classes for CSS-based animations
 const showGradientWave = computed(() => props.style === 'gradient-wave')
-const showDotMatrix = computed(() => props.style === 'dot-matrix')
-const showCanvas = computed(() => ['particle-field', 'cyber-grid', 'floating-blobs', 'random-dots'].includes(props.style))
+const showCanvas = computed(() => canvasStyles.includes(props.style))
 </script>
 
 <template>
   <div class="animated-background" :class="`bg-${style}`">
-    <!-- Gradient Wave (CSS) -->
-    <div v-if="showGradientWave" class="gradient-wave"></div>
-
-    <!-- Dot Matrix Wave (CSS) -->
-    <div v-if="showDotMatrix" class="dot-matrix">
-      <div
-        v-for="row in dotRows"
-        :key="`row-${row}`"
-        class="dot-row"
-      >
-        <span
-          v-for="col in dotCount"
-          :key="`dot-${row}-${col}`"
-          class="dot-char"
-          :style="{
-            animationDelay: `${(row * 0.05) + (col * 0.03)}s`,
-          }"
-        >×</span>
+    <!-- Gradient Wave with Pulsing Symbols -->
+    <div v-if="showGradientWave" class="gradient-wave">
+      <div class="symbol-field">
+        <div v-for="row in symbolRows" :key="`srow-${row}`" class="symbol-row">
+          <span
+            v-for="col in symbolCols"
+            :key="`sym-${row}-${col}`"
+            class="symbol-char"
+            :style="{ animationDelay: `${(row * 0.05) + (col * 0.04)}s` }"
+          >*</span>
+        </div>
       </div>
     </div>
 
-    <!-- Canvas-based animations -->
+    <!-- Canvas-based animations (including Matrix rain) -->
     <canvas
       v-if="showCanvas"
       ref="canvasRef"
@@ -398,60 +462,59 @@ const showCanvas = computed(() => ['particle-field', 'cyber-grid', 'floating-blo
   overflow: hidden;
 }
 
-/* ========== GRADIENT WAVE ========== */
+/* ========== GRADIENT WAVE WITH PULSING SYMBOLS ========== */
 .gradient-wave {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    -45deg,
-    var(--color-bg) 0%,
-    var(--color-bg-surface) 25%,
-    color-mix(in srgb, var(--color-accent) 8%, var(--color-bg)) 50%,
-    var(--color-bg-surface) 75%,
-    var(--color-bg) 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientWave 15s ease infinite;
+  overflow: hidden;
 }
 
-@keyframes gradientWave {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* ========== DOT MATRIX ========== */
-.dot-matrix {
+.symbol-field {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  padding: 20px;
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1;
-  overflow: hidden;
+  padding: 1rem;
 }
 
-.dot-row {
+.symbol-row {
   display: flex;
   justify-content: space-evenly;
 }
 
-.dot-char {
-  color: var(--color-accent);
-  opacity: 0.1;
-  animation: dotPulse 3s ease-in-out infinite;
+.symbol-char {
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  transform: scale(0.5);
+  animation: symbolPulse 8s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-@keyframes dotPulse {
+@keyframes symbolPulse {
   0%, 100% {
-    opacity: 0.08;
-    transform: scale(1);
+    transform: scale(0.5);
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    text-shadow: none;
+  }
+  30% {
+    transform: scale(1.5);
+    color: var(--color-accent);
+    opacity: 0.2;
+    text-shadow: 0 0 8px var(--color-accent);
   }
   50% {
+    transform: scale(2.0);
+    color: var(--color-secondary);
     opacity: 0.4;
-    transform: scale(1.2);
+    text-shadow: 0 0 8px var(--color-accent);
+  }
+  70% {
+    transform: scale(1.5);
+    color: var(--color-accent);
+    opacity: 0.2;
     text-shadow: 0 0 8px var(--color-accent);
   }
 }

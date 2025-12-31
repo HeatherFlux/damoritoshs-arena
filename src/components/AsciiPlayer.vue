@@ -120,7 +120,7 @@ defineExpose({ play, stop, reset })
   white-space: pre;
   margin: 0;
   padding: 0;
-  color: #00ff88;
-  text-shadow: 0 0 10px #00ff88;
+  color: var(--color-quaternary);
+  text-shadow: 0 0 10px var(--color-quaternary);
 }
 </style>

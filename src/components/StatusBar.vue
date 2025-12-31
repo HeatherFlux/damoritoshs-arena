@@ -2,7 +2,6 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
-import { usePartyStore } from '../stores/partyStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
@@ -11,13 +10,11 @@ const props = defineProps<{
 
 const combatStore = useCombatStore()
 const encounterStore = useEncounterStore()
-const partyStore = usePartyStore()
 
 const combat = computed(() => combatStore.state.combat)
 const currentCombatant = computed(() => combatStore.currentCombatant.value)
 const aliveCombatants = computed(() => combatStore.aliveCombatants.value)
 const activeEncounter = computed(() => encounterStore.activeEncounter.value)
-const activeParty = computed(() => partyStore.activeParty.value)
 
 // Calculate party HP status for combat
 const hpStatus = computed(() => {
@@ -240,12 +237,13 @@ onUnmounted(() => {
     <!-- BUILDER MODE -->
     <template v-if="mode === 'builder'">
       <!-- Party Info -->
-      <div v-if="activeParty?.players?.length" class="status-section">
+      <div class="status-section">
         <span class="status-label">PARTY</span>
-        <span class="status-value">{{ partyStore.partySize.value }}</span>
+        <span class="status-value">{{ encounterStore.effectivePartySize.value }}</span>
         <span class="status-divider">//</span>
         <span class="status-label">LVL</span>
-        <span class="status-value text-accent">{{ partyStore.partyLevel.value }}</span>
+        <span class="status-value text-accent">{{ encounterStore.effectivePartyLevel.value }}</span>
+        <span v-if="encounterStore.state.useManualOverride" class="status-label text-warning" title="Using manual override">*</span>
       </div>
 
       <!-- Encounter Stats -->

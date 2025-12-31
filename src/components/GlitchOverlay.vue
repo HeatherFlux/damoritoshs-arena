@@ -14,7 +14,7 @@ let timeoutId: ReturnType<typeof setTimeout> | null = null
 let phaseTimeouts: ReturnType<typeof setTimeout>[] = []
 
 const nat20Asciis = [
-  '/ascii-simpsons.json',
+  '/ascii-gundam.json',
   '/ascii-stormtroopers.json',
   '/ascii-gatsby.json',
 ]
@@ -179,7 +179,7 @@ onUnmounted(() => {
   bottom: 2rem;
   font-family: var(--font-mono, monospace);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-dim);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   z-index: 10;
@@ -189,7 +189,7 @@ onUnmounted(() => {
    NAT 20 - ASCII Art Animation
    ============================================ */
 .crit-container {
-  background: #000;
+  background: var(--color-bg);
 }
 
 .ascii-wrapper {
@@ -206,11 +206,11 @@ onUnmounted(() => {
   font-size: clamp(6px, 0.58vw, 12px);
   line-height: 1.15;
   letter-spacing: 0.02em;
-  color: #00ff88;
+  color: var(--color-quaternary);
   text-shadow:
-    0 0 2px #00ff88,
-    0 0 8px #00ff88,
-    0 0 15px rgba(0, 255, 136, 0.6);
+    0 0 2px var(--color-quaternary),
+    0 0 8px var(--color-quaternary),
+    0 0 15px var(--color-quaternary-subtle);
   filter: contrast(1.2) brightness(1.05);
 }
 
@@ -229,16 +229,16 @@ onUnmounted(() => {
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--color-text);
   text-shadow:
-    0 0 10px #00ff88,
-    0 0 20px #00ff88,
-    0 0 40px #00ff88,
-    0 0 80px #00ff88,
-    2px 2px 0 #000,
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 2px 0 #000;
+    0 0 10px var(--color-quaternary),
+    0 0 20px var(--color-quaternary),
+    0 0 40px var(--color-quaternary),
+    0 0 80px var(--color-quaternary),
+    2px 2px 0 var(--color-bg),
+    -2px -2px 0 var(--color-bg),
+    2px -2px 0 var(--color-bg),
+    -2px 2px 0 var(--color-bg);
   animation: textPulse 0.3s ease-in-out infinite alternate;
 }
 
@@ -246,21 +246,21 @@ onUnmounted(() => {
   from {
     transform: scale(1);
     text-shadow:
-      0 0 10px #00ff88,
-      0 0 20px #00ff88,
-      0 0 40px #00ff88,
-      2px 2px 0 #000,
-      -2px -2px 0 #000;
+      0 0 10px var(--color-quaternary),
+      0 0 20px var(--color-quaternary),
+      0 0 40px var(--color-quaternary),
+      2px 2px 0 var(--color-bg),
+      -2px -2px 0 var(--color-bg);
   }
   to {
     transform: scale(1.02);
     text-shadow:
-      0 0 20px #00ff88,
-      0 0 40px #00ff88,
-      0 0 80px #00ff88,
-      0 0 120px #00ff88,
-      2px 2px 0 #000,
-      -2px -2px 0 #000;
+      0 0 20px var(--color-quaternary),
+      0 0 40px var(--color-quaternary),
+      0 0 80px var(--color-quaternary),
+      0 0 120px var(--color-quaternary),
+      2px 2px 0 var(--color-bg),
+      -2px -2px 0 var(--color-bg);
   }
 }
 
@@ -296,7 +296,8 @@ onUnmounted(() => {
 }
 
 .phase-message {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-bg-surface);
+  opacity: 0.9;
 }
 
 .failure-scanlines {
@@ -306,9 +307,10 @@ onUnmounted(() => {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.15) 2px,
-    rgba(0, 0, 0, 0.15) 4px
+    var(--color-bg) 2px,
+    var(--color-bg) 4px
   );
+  opacity: 0.15;
   pointer-events: none;
   animation: scanlineScroll 0.1s linear infinite;
 }
@@ -341,12 +343,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 2rem 4rem;
-  background: rgba(20, 0, 0, 0.9);
-  border: 3px solid #ff0044;
+  background: var(--color-bg-elevated);
+  border: 3px solid var(--color-tertiary);
   box-shadow:
-    0 0 20px rgba(255, 0, 68, 0.5),
-    0 0 40px rgba(255, 0, 68, 0.3),
-    inset 0 0 20px rgba(255, 0, 68, 0.1);
+    0 0 20px var(--color-tertiary-subtle),
+    0 0 40px var(--color-tertiary-subtle),
+    inset 0 0 20px var(--color-tertiary-subtle);
   animation: messageGlitch 0.1s ease-in-out infinite;
 }
 
@@ -359,9 +361,9 @@ onUnmounted(() => {
 
 .failure-icon {
   font-size: 4rem;
-  color: #ff0044;
+  color: var(--color-tertiary);
   animation: iconPulse 0.5s ease-in-out infinite;
-  text-shadow: 0 0 20px #ff0044;
+  text-shadow: 0 0 20px var(--color-tertiary);
 }
 
 @keyframes iconPulse {
@@ -375,13 +377,13 @@ onUnmounted(() => {
   font-weight: 900;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #ff0044;
+  color: var(--color-tertiary);
   text-shadow:
-    0 0 10px #ff0044,
-    0 0 20px #ff0044,
-    0 0 40px rgba(255, 0, 68, 0.5),
-    2px 2px 0 #000,
-    -2px -2px 0 #000;
+    0 0 10px var(--color-tertiary),
+    0 0 20px var(--color-tertiary),
+    0 0 40px var(--color-tertiary-subtle),
+    2px 2px 0 var(--color-bg),
+    -2px -2px 0 var(--color-bg);
 }
 
 .glitch-overlay-enter-active { animation: glitchIn 0.05s ease-out; }

@@ -4,6 +4,7 @@ import { useCombatStore } from '../stores/combatStore'
 import { usePartyStore } from '../stores/partyStore'
 import { DIFFICULTY_BUDGETS, getAdjustedBudget } from '../types/encounter'
 import { formatComplexity, formatHazardType } from '../types/hazard'
+import SciFiDial from './SciFiDial.vue'
 
 const store = useEncounterStore()
 const combatStore = useCombatStore()
@@ -87,6 +88,56 @@ function getDifficultyBudgets() {
         >
           ▶ Run
         </button>
+      </div>
+
+      <!-- Party Quick Settings -->
+      <div class="flex items-center gap-3 mb-3 p-3 bg-surface border border-border rounded-lg">
+        <!-- Using Party Mode -->
+        <template v-if="partyStore.activeParty.value?.players?.length && !store.state.useManualOverride">
+          <span class="text-xs text-dim uppercase tracking-wide">Party:</span>
+          <span class="font-medium text-accent">{{ partyStore.activeParty.value.name }}</span>
+          <span class="text-xs text-dim">
+            ({{ partyStore.partySize.value }} players, Lvl {{ partyStore.partyLevel.value }})
+          </span>
+          <button
+            class="ml-auto text-xs text-dim hover:text-text transition-colors"
+            @click="store.setManualOverride(true)"
+            title="Use manual level/size instead"
+          >
+            Override
+          </button>
+        </template>
+
+        <!-- Manual Mode -->
+        <template v-else>
+          <div class="flex items-center gap-4">
+            <SciFiDial
+              :model-value="store.state.partySize"
+              @update:model-value="store.setPartySize($event)"
+              :min="1"
+              :max="12"
+              label="Size"
+            />
+            <SciFiDial
+              :model-value="store.state.partyLevel"
+              @update:model-value="store.setPartyLevel($event)"
+              :min="1"
+              :max="20"
+              label="Level"
+            />
+          </div>
+          <button
+            v-if="partyStore.activeParty.value?.players?.length"
+            class="ml-auto text-xs text-accent hover:text-text transition-colors"
+            @click="store.setManualOverride(false)"
+            title="Use party data"
+          >
+            ← Use Party
+          </button>
+          <span v-else class="ml-auto text-xs text-dim italic">
+            No party selected
+          </span>
+        </template>
       </div>
 
       <!-- XP Summary -->

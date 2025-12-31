@@ -35,48 +35,77 @@
 
   --color-border: #1e2832;
   --color-border-hover: #2a3844;
-  --color-border-focus: #00d4ff;
+  --color-border-focus: #1ECBE1;
 
   --color-text: #e8eef4;
   --color-text-dim: #7a8b9a;
   --color-text-muted: #4a5968;
 
-  /* Primary accent - Cyan/Electric blue */
-  --color-accent: #00d4ff;
-  --color-accent-dim: #00a8cc;
-  --color-accent-bright: #5ce1ff;
-  --color-accent-subtle: rgba(0, 212, 255, 0.12);
+  /* ===========================================
+     TETRADIC COLOR PALETTE
+     Based on primary cyan, 90° apart on wheel
+     =========================================== */
 
-  /* Semantic colors */
-  --color-success: #4ade80;
-  --color-success-dim: #22c55e;
-  --color-success-subtle: rgba(74, 222, 128, 0.12);
+  /* Primary - Cyan (UI, links, main accents) */
+  --color-primary: #1ECBE1;
+  --color-primary-dim: #18a2b4;
+  --color-primary-bright: #5ce1ff;
+  --color-primary-subtle: rgba(30, 203, 225, 0.12);
+
+  /* Secondary - Purple (special, arcane, hazards) */
+  --color-secondary: #961EE1;
+  --color-secondary-dim: #7818b4;
+  --color-secondary-bright: #b85cff;
+  --color-secondary-subtle: rgba(150, 30, 225, 0.12);
+
+  /* Tertiary - Coral/Red (controls, alerts, dials) */
+  --color-tertiary: #E1341E;
+  --color-tertiary-dim: #b42a18;
+  --color-tertiary-bright: #ff5c47;
+  --color-tertiary-subtle: rgba(225, 52, 30, 0.12);
+
+  /* Quaternary - Green (success, health, confirms) */
+  --color-quaternary: #6AE11E;
+  --color-quaternary-dim: #55b418;
+  --color-quaternary-bright: #8fff5c;
+  --color-quaternary-subtle: rgba(106, 225, 30, 0.12);
+
+  /* Legacy aliases (for backwards compatibility) */
+  --color-accent: var(--color-primary);
+  --color-accent-dim: var(--color-primary-dim);
+  --color-accent-bright: var(--color-primary-bright);
+  --color-accent-subtle: var(--color-primary-subtle);
+
+  /* Semantic colors (mapped to tetradic) */
+  --color-success: var(--color-quaternary);
+  --color-success-dim: var(--color-quaternary-dim);
+  --color-success-subtle: var(--color-quaternary-subtle);
 
   --color-warning: #ffaa00;
   --color-warning-dim: #cc8800;
   --color-warning-subtle: rgba(255, 170, 0, 0.12);
 
-  --color-danger: #ff3366;
-  --color-danger-dim: #cc2952;
-  --color-danger-subtle: rgba(255, 51, 102, 0.12);
+  --color-danger: var(--color-tertiary);
+  --color-danger-dim: var(--color-tertiary-dim);
+  --color-danger-subtle: var(--color-tertiary-subtle);
 
   /* Difficulty colors (PF2e encounter budgets) */
   --color-trivial: #4a5968;
-  --color-low: #4ade80;
-  --color-moderate: #00d4ff;
+  --color-low: var(--color-quaternary);
+  --color-moderate: var(--color-primary);
   --color-severe: #ffaa00;
-  --color-extreme: #ff3366;
+  --color-extreme: var(--color-tertiary);
 
   /* Special colors */
   --color-rollable: #ffcc00;
   --color-rollable-hover: #ffe566;
   --color-rollable-subtle: rgba(255, 204, 0, 0.12);
 
-  --color-stat-label: #00d4ff;
+  --color-stat-label: var(--color-primary);
   --color-stat-value: #ffcc00;
 
-  --color-hazard: #bf5fff;
-  --color-hazard-subtle: rgba(191, 95, 255, 0.12);
+  --color-hazard: var(--color-secondary);
+  --color-hazard-subtle: var(--color-secondary-subtle);
 
   --color-player: #4ade80;
   --color-player-subtle: rgba(74, 222, 128, 0.12);

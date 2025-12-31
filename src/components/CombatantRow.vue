@@ -6,6 +6,7 @@ import type { Combatant } from '../types/combat'
 import CreatureCard from './CreatureCard.vue'
 import { calculateConditionEffects, getCondition } from '../data/conditions'
 import { formatComplexity, formatHazardType } from '../types/hazard'
+import { rollDamage } from '../utils/dice'
 
 const props = defineProps<{
   combatant: Combatant
@@ -50,6 +51,15 @@ const effectiveAC = computed(() => {
 function getConditionTooltip(condName: string): string {
   const def = getCondition(condName)
   return def?.description || condName
+}
+
+// Hazard damage rolling
+function rollHazardDamage(hazardName: string, actionName: string, damage: string) {
+  rollDamage(damage, actionName, hazardName, false)
+}
+
+function rollHazardCritDamage(hazardName: string, actionName: string, damage: string) {
+  rollDamage(damage, actionName, hazardName, true)
 }
 
 // Quick damage/heal functions
@@ -315,8 +325,22 @@ const hasExpandableDetails = computed(() => {
               <strong>Trigger</strong> {{ action.trigger }}
             </p>
             <p class="text-[0.8125rem] my-1 text-dim">{{ action.effect }}</p>
-            <p v-if="action.damage" class="text-[0.8125rem] my-1 text-dim">
-              <strong>Damage</strong> {{ action.damage }}
+            <p v-if="action.damage" class="text-[0.8125rem] my-1 text-dim flex items-center gap-2 flex-wrap">
+              <span
+                class="rollable inline-flex items-center gap-1"
+                @click="rollHazardDamage(combatant.hazard!.name, action.name, action.damage)"
+                title="Roll damage"
+              >
+                <strong>Damage</strong>
+                <span class="roll-value">{{ action.damage }}</span>
+              </span>
+              <span
+                class="rollable text-danger text-xs"
+                @click="rollHazardCritDamage(combatant.hazard!.name, action.name, action.damage)"
+                title="Roll critical damage (doubled)"
+              >
+                ×2
+              </span>
               <template v-if="action.dc"> (DC {{ action.dc }} {{ action.save }})</template>
             </p>
           </div>
