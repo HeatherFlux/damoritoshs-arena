@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onRoll } from '../utils/dice'
 import AsciiPlayer from './AsciiPlayer.vue'
 
@@ -9,7 +9,11 @@ const glitchText = ref('')
 const currentAscii = ref('')
 const asciiPlayerRef = ref<InstanceType<typeof AsciiPlayer> | null>(null)
 const glitchPhase = ref<'scramble' | 'message' | null>(null)
-const retroMode = ref(false)
+const retroModeManual = ref(false)  // Toggled by secret shortcut
+const retroModeTheme = ref(false)   // Set by CRT theme
+
+// Show CRT effects if either manual toggle or theme is active
+const showRetroOverlay = computed(() => retroModeManual.value || retroModeTheme.value)
 let unsubscribe: (() => void) | null = null
 let timeoutId: ReturnType<typeof setTimeout> | null = null
 let phaseTimeouts: ReturnType<typeof setTimeout>[] = []
@@ -95,12 +99,18 @@ function onAsciiEnded() {
 }
 
 function toggleRetroMode() {
-  retroMode.value = !retroMode.value
-  if (retroMode.value) {
+  retroModeManual.value = !retroModeManual.value
+  // Only toggle body class if not already set by theme
+  if (retroModeManual.value && !retroModeTheme.value) {
     document.body.classList.add('retro-mode')
-  } else {
+  } else if (!retroModeManual.value && !retroModeTheme.value) {
     document.body.classList.remove('retro-mode')
   }
+}
+
+// Watch for theme changes that add/remove retro-mode class
+function checkRetroTheme() {
+  retroModeTheme.value = document.body.classList.contains('retro-mode')
 }
 
 // Secret keyboard shortcuts: Shift+Option+1 = crit fail, +2 = crit success, +3 = retro mode
@@ -119,6 +129,8 @@ function handleSecretKeys(e: KeyboardEvent) {
   }
 }
 
+let classObserver: MutationObserver | null = null
+
 onMounted(() => {
   unsubscribe = onRoll((roll) => {
     if (roll.isNat20) {
@@ -129,14 +141,21 @@ onMounted(() => {
   })
 
   window.addEventListener('keydown', handleSecretKeys)
+
+  // Check initial state and watch for theme changes
+  checkRetroTheme()
+  classObserver = new MutationObserver(() => checkRetroTheme())
+  classObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] })
 })
 
 onUnmounted(() => {
   if (unsubscribe) unsubscribe()
   if (timeoutId) clearTimeout(timeoutId)
+  if (classObserver) classObserver.disconnect()
   phaseTimeouts.forEach(t => clearTimeout(t))
   document.body.classList.remove('glitch-mode')
-  document.body.classList.remove('retro-mode')
+  // Only remove retro-mode if it was set manually, not by theme
+  if (retroModeManual.value) document.body.classList.remove('retro-mode')
   window.removeEventListener('keydown', handleSecretKeys)
 })
 </script>
@@ -191,7 +210,7 @@ onUnmounted(() => {
     </Transition>
 
     <!-- Retro CRT Mode overlay -->
-    <div v-if="retroMode" class="retro-overlay">
+    <div v-if="showRetroOverlay" class="retro-overlay">
       <div class="retro-scanlines"></div>
       <div class="retro-scanline-sweep"></div>
       <div class="retro-flicker"></div>

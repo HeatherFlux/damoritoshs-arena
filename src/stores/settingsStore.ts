@@ -3,7 +3,7 @@ import { generateThemePalette, hexToHSL, hslToHex } from '../utils/colors'
 
 const STORAGE_KEY = 'sf2e-settings'
 
-export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'danger-red' | 'glam-pink' | 'neon-magenta' | 'light-rose' | 'light-violet' | 'the-gap'
+export type ThemeId = 'cyber-cyan' | 'terminal-green' | 'warning-amber' | 'danger-red' | 'glam-pink' | 'neon-magenta' | 'light-rose' | 'light-violet' | 'the-gap' | 'crt-retro'
 
 export type BackgroundStyle = 'none' | 'gradient-wave' | 'dot-matrix' | 'particle-field' | 'cyber-grid' | 'floating-blobs' | 'random-dots'
 
@@ -119,6 +119,12 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
     name: 'The Gap',
     description: 'What happened? No one knows.',
     baseColor: '#18181a',  // Abyss black - nearly no color
+    mode: 'dark'
+  },
+  'crt-retro': {
+    name: 'CRT Monitor',
+    description: 'Retro phosphor scanlines',
+    baseColor: '#33ff33',  // Classic green phosphor
     mode: 'dark'
   }
 }
@@ -296,6 +302,13 @@ function applyTheme(themeId: ThemeId) {
   Object.entries(colors).forEach(([key, value]) => {
     root.style.setProperty(key, value)
   })
+
+  // Toggle CRT retro mode effects
+  if (themeId === 'crt-retro') {
+    document.body.classList.add('retro-mode')
+  } else {
+    document.body.classList.remove('retro-mode')
+  }
 }
 
 // Initialize state
