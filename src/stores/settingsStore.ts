@@ -74,8 +74,8 @@ const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
     mode: 'dark'
   },
   'terminal-green': {
-    name: 'Terminal Green',
-    description: 'Classic hacker terminal',
+    name: "A Cruel Angel's Green",
+    description: '残酷な天使のテーゼ',
     baseColor: '#1EE14A',  // Green → Cyan → Magenta → Orange
     mode: 'dark'
   },
