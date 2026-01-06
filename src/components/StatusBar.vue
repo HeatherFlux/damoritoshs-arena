@@ -5,7 +5,7 @@ import { useEncounterStore } from '../stores/encounterStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
-  mode: 'builder' | 'combat'
+  mode: 'builder' | 'combat' | 'hacking'
 }>()
 
 const combatStore = useCombatStore()
@@ -70,6 +70,25 @@ const combatMessages = [
   'SPACE COWBOY MODE ACTIVE',
 ]
 
+const hackingMessages = [
+  'INTRUSION SUITE ACTIVE',
+  'ACCESS POINT SCAN READY',
+  'ENCRYPTION ANALYZER LOADED',
+  'COUNTERMEASURE DETECTOR ON',
+  'TRACE PROTOCOLS STANDING BY',
+  'VULNERABILITY SCANNER ARMED',
+  'NEURAL INTERFACE ONLINE',
+  'BACKDOOR PROTOCOLS READY',
+  'ICE BREAKER MODULES LOADED',
+  'DATA EXTRACTION QUEUED',
+  'GHOST PROTOCOL ENGAGED',
+  'FIREWALL MAPPER ACTIVE',
+  'EXPLOIT DATABASE SYNCED',
+  'STEALTH MODE: ENABLED',
+  'DECK SYSTEMS: NOMINAL',
+  'READY TO BREACH',
+]
+
 const displayText = ref('')
 const cursorVisible = ref(true)
 let typeInterval: ReturnType<typeof setInterval> | null = null
@@ -79,7 +98,11 @@ let charIndex = 0
 let isDeleting = false
 let pauseCount = 0
 
-const currentMessages = computed(() => props.mode === 'combat' ? combatMessages : builderMessages)
+const currentMessages = computed(() => {
+  if (props.mode === 'combat') return combatMessages
+  if (props.mode === 'hacking') return hackingMessages
+  return builderMessages
+})
 
 function typeEffect() {
   const messages = currentMessages.value
@@ -335,8 +358,8 @@ onUnmounted(() => {
 
     <!-- System Status -->
     <div class="status-section">
-      <span class="status-indicator" :class="{ 'indicator-combat': mode === 'combat' && combat }"></span>
-      <span class="status-label">{{ mode === 'combat' ? 'COMBAT' : 'BUILD' }}</span>
+      <span class="status-indicator" :class="{ 'indicator-combat': mode === 'combat' && combat, 'indicator-hacking': mode === 'hacking' }"></span>
+      <span class="status-label">{{ mode === 'combat' ? 'COMBAT' : mode === 'hacking' ? 'HACK' : 'BUILD' }}</span>
     </div>
   </footer>
 </template>
@@ -505,6 +528,16 @@ onUnmounted(() => {
 .status-indicator.indicator-combat {
   background: var(--color-danger);
   animation: pulse-glow-combat 1s ease-in-out infinite;
+}
+
+.status-indicator.indicator-hacking {
+  background: var(--color-secondary);
+  animation: pulse-glow-hacking 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow-hacking {
+  0%, 100% { box-shadow: 0 0 4px var(--color-secondary); }
+  50% { box-shadow: 0 0 12px var(--color-secondary); }
 }
 
 @keyframes pulse-glow {

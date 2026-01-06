@@ -1,0 +1,814 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useHackingStore } from '../../stores/hackingStore'
+import { useSettingsStore } from '../../stores/settingsStore'
+import type { Computer, AccessPoint, ComputerType, AccessPointType, NodeState } from '../../types/hacking'
+
+const store = useHackingStore()
+const { settings, themes } = useSettingsStore()
+
+const emit = defineEmits<{
+  close: []
+}>()
+
+// Editor state
+const editMode = ref<'select' | 'add' | 'connect' | 'disconnect' | 'delete'>('select')
+const selectedNodeId = ref<string | null>(null)
+const connectingFromId = ref<string | null>(null)
+
+// Computer form
+const computerName = ref('')
+const computerLevel = ref(1)
+const computerType = ref<ComputerType>('tech')
+
+// New node form
+const newNodeName = ref('')
+const newNodeType = ref<AccessPointType>('remote')
+
+// Canvas ref
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+let ctx: CanvasRenderingContext2D | null = null
+let animationId: number | null = null
+
+// Dragging state
+const isDragging = ref(false)
+const dragNodeId = ref<string | null>(null)
+
+// Helper to convert hex to RGB
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 30, g: 203, b: 225 }
+}
+
+// Get theme colors from CSS variables
+const themeColors = computed(() => {
+  const theme = themes[settings.theme]
+  const root = getComputedStyle(document.documentElement)
+  return {
+    accent: hexToRgb(root.getPropertyValue('--color-accent').trim() || theme.accent),
+    success: hexToRgb(root.getPropertyValue('--color-success').trim() || '#6AE11E'),
+    danger: hexToRgb(root.getPropertyValue('--color-danger').trim() || '#E1341E'),
+    secondary: hexToRgb(root.getPropertyValue('--color-secondary').trim() || '#961EE1'),
+  }
+})
+
+// Initialize from current computer
+onMounted(() => {
+  if (store.state.computer) {
+    computerName.value = store.state.computer.name
+    computerLevel.value = store.state.computer.level
+    computerType.value = store.state.computer.type
+  }
+
+  if (canvasRef.value) {
+    ctx = canvasRef.value.getContext('2d')
+    resizeCanvas()
+    animationId = requestAnimationFrame(animate)
+    window.addEventListener('resize', resizeCanvas)
+  }
+})
+
+onUnmounted(() => {
+  if (animationId) cancelAnimationFrame(animationId)
+  window.removeEventListener('resize', resizeCanvas)
+})
+
+// Access points
+const accessPoints = computed(() => store.state.computer?.accessPoints || [])
+
+// Get canvas position from mouse event
+function getCanvasPos(e: MouseEvent) {
+  if (!canvasRef.value) return { x: 0, y: 0 }
+  const rect = canvasRef.value.getBoundingClientRect()
+  return {
+    x: (e.clientX - rect.left) / rect.width,
+    y: (e.clientY - rect.top) / rect.height
+  }
+}
+
+// Convert normalized to canvas coords
+function toCanvasCoords(pos: { x: number; y: number }) {
+  if (!canvasRef.value) return { x: 0, y: 0 }
+  const padding = 40
+  return {
+    x: padding + pos.x * (canvasRef.value.width - padding * 2),
+    y: padding + pos.y * (canvasRef.value.height - padding * 2)
+  }
+}
+
+// Find node at position
+function findNodeAtPos(pos: { x: number; y: number }): AccessPoint | null {
+  for (const node of accessPoints.value) {
+    const nodePos = node.position
+    const dx = pos.x - nodePos.x
+    const dy = pos.y - nodePos.y
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < 0.05) return node
+  }
+  return null
+}
+
+// Canvas click handler
+function handleCanvasClick(e: MouseEvent) {
+  const pos = getCanvasPos(e)
+  const clickedNode = findNodeAtPos(pos)
+
+  switch (editMode.value) {
+    case 'select':
+      selectedNodeId.value = clickedNode?.id || null
+      store.setFocus(clickedNode?.id || null)
+      break
+
+    case 'add':
+      if (!clickedNode && newNodeName.value.trim()) {
+        addNode(pos)
+      }
+      break
+
+    case 'connect':
+      if (clickedNode) {
+        if (!connectingFromId.value) {
+          connectingFromId.value = clickedNode.id
+        } else if (connectingFromId.value !== clickedNode.id) {
+          connectNodes(connectingFromId.value, clickedNode.id)
+          connectingFromId.value = null
+        }
+      } else {
+        connectingFromId.value = null
+      }
+      break
+
+    case 'disconnect':
+      if (clickedNode) {
+        if (!connectingFromId.value) {
+          connectingFromId.value = clickedNode.id
+        } else if (connectingFromId.value !== clickedNode.id) {
+          disconnectNodes(connectingFromId.value, clickedNode.id)
+          connectingFromId.value = null
+        }
+      } else {
+        connectingFromId.value = null
+      }
+      break
+
+    case 'delete':
+      if (clickedNode) {
+        deleteNode(clickedNode.id)
+      }
+      break
+  }
+}
+
+// Mouse down for dragging
+function handleMouseDown(e: MouseEvent) {
+  if (editMode.value !== 'select') return
+
+  const pos = getCanvasPos(e)
+  const clickedNode = findNodeAtPos(pos)
+
+  if (clickedNode) {
+    isDragging.value = true
+    dragNodeId.value = clickedNode.id
+    selectedNodeId.value = clickedNode.id
+    store.setFocus(clickedNode.id)
+  }
+}
+
+// Mouse move for dragging
+function handleMouseMove(e: MouseEvent) {
+  if (!isDragging.value || !dragNodeId.value || !store.state.computer) return
+
+  const pos = getCanvasPos(e)
+  const node = store.state.computer.accessPoints.find(ap => ap.id === dragNodeId.value)
+  if (node) {
+    node.position.x = Math.max(0.05, Math.min(0.95, pos.x))
+    node.position.y = Math.max(0.05, Math.min(0.95, pos.y))
+  }
+}
+
+// Mouse up
+function handleMouseUp() {
+  isDragging.value = false
+  dragNodeId.value = null
+}
+
+// Add new node
+function addNode(pos: { x: number; y: number }) {
+  if (!store.state.computer || !newNodeName.value.trim()) return
+
+  const newNode: AccessPoint = {
+    id: `ap-${Date.now()}`,
+    name: newNodeName.value.trim(),
+    type: newNodeType.value,
+    state: 'locked',
+    position: { x: pos.x, y: pos.y },
+    connectedTo: []
+  }
+
+  store.state.computer.accessPoints.push(newNode)
+  newNodeName.value = ''
+  selectedNodeId.value = newNode.id
+  store.setFocus(newNode.id)
+}
+
+// Connect two nodes
+function connectNodes(fromId: string, toId: string) {
+  if (!store.state.computer) return
+
+  const fromNode = store.state.computer.accessPoints.find(ap => ap.id === fromId)
+  const toNode = store.state.computer.accessPoints.find(ap => ap.id === toId)
+
+  if (fromNode && toNode) {
+    // Add connection if not already exists
+    if (!fromNode.connectedTo.includes(toId)) {
+      fromNode.connectedTo.push(toId)
+    }
+    if (!toNode.connectedTo.includes(fromId)) {
+      toNode.connectedTo.push(fromId)
+    }
+  }
+}
+
+// Delete node
+function deleteNode(nodeId: string) {
+  if (!store.state.computer) return
+
+  // Remove from other nodes' connections
+  for (const node of store.state.computer.accessPoints) {
+    node.connectedTo = node.connectedTo.filter(id => id !== nodeId)
+  }
+
+  // Remove the node
+  store.state.computer.accessPoints = store.state.computer.accessPoints.filter(
+    ap => ap.id !== nodeId
+  )
+
+  if (selectedNodeId.value === nodeId) {
+    selectedNodeId.value = null
+    store.setFocus(null)
+  }
+}
+
+// Disconnect selected node from another
+function disconnectNodes(fromId: string, toId: string) {
+  if (!store.state.computer) return
+
+  const fromNode = store.state.computer.accessPoints.find(ap => ap.id === fromId)
+  const toNode = store.state.computer.accessPoints.find(ap => ap.id === toId)
+
+  if (fromNode) {
+    fromNode.connectedTo = fromNode.connectedTo.filter(id => id !== toId)
+  }
+  if (toNode) {
+    toNode.connectedTo = toNode.connectedTo.filter(id => id !== fromId)
+  }
+}
+
+// Update computer metadata
+function updateComputer() {
+  if (!store.state.computer) return
+  store.state.computer.name = computerName.value
+  store.state.computer.level = computerLevel.value
+  store.state.computer.type = computerType.value
+}
+
+// Create new computer
+function createNewComputer() {
+  const newComputer: Computer = {
+    id: crypto.randomUUID(),
+    name: 'New Computer',
+    level: 1,
+    type: 'tech',
+    accessPoints: []
+  }
+  store.loadComputer(newComputer)
+  computerName.value = newComputer.name
+  computerLevel.value = newComputer.level
+  computerType.value = newComputer.type
+}
+
+// Get node color from theme
+function getNodeColor(state: NodeState): { r: number; g: number; b: number } {
+  const colors = themeColors.value
+  switch (state) {
+    case 'breached': return colors.success
+    case 'alarmed': return colors.danger
+    case 'active': return { r: colors.accent.r + 40, g: colors.accent.g + 20, b: colors.accent.b + 30 }
+    default: return colors.accent
+  }
+}
+
+// Canvas resize
+function resizeCanvas() {
+  if (!canvasRef.value) return
+  const container = canvasRef.value.parentElement
+  if (container) {
+    canvasRef.value.width = container.clientWidth
+    canvasRef.value.height = container.clientHeight
+  }
+}
+
+// Animation loop
+function animate(_time: number) {
+  if (!ctx || !canvasRef.value) {
+    animationId = requestAnimationFrame(animate)
+    return
+  }
+
+  const width = canvasRef.value.width
+  const height = canvasRef.value.height
+  const colors = themeColors.value
+
+  // Clear
+  ctx.fillStyle = '#050608'
+  ctx.fillRect(0, 0, width, height)
+
+  // Draw grid with theme color
+  ctx.strokeStyle = `rgba(${colors.accent.r}, ${colors.accent.g}, ${colors.accent.b}, 0.1)`
+  ctx.lineWidth = 1
+  const gridSize = 30
+  for (let x = 0; x < width; x += gridSize) {
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, height)
+    ctx.stroke()
+  }
+  for (let y = 0; y < height; y += gridSize) {
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    ctx.lineTo(width, y)
+    ctx.stroke()
+  }
+
+  // Draw connections
+  for (const node of accessPoints.value) {
+    const from = toCanvasCoords(node.position)
+    for (const targetId of node.connectedTo) {
+      const target = accessPoints.value.find(ap => ap.id === targetId)
+      if (target && node.id < targetId) { // Draw each connection once
+        const to = toCanvasCoords(target.position)
+        ctx.beginPath()
+        ctx.moveTo(from.x, from.y)
+        ctx.lineTo(to.x, to.y)
+        ctx.strokeStyle = `rgba(${colors.accent.r}, ${colors.accent.g}, ${colors.accent.b}, 0.4)`
+        ctx.lineWidth = 2
+        ctx.stroke()
+      }
+    }
+  }
+
+  // Draw "connecting from" indicator
+  if (connectingFromId.value && canvasRef.value) {
+    const fromNode = accessPoints.value.find(ap => ap.id === connectingFromId.value)
+    if (fromNode) {
+      const from = toCanvasCoords(fromNode.position)
+      // Draw a pulsing ring around the selected node
+      const pulseSize = 30 + Math.sin(_time / 200) * 5
+      ctx.beginPath()
+      ctx.arc(from.x, from.y, pulseSize, 0, Math.PI * 2)
+      ctx.setLineDash([5, 5])
+      // Green for connect, red for disconnect
+      const isDisconnect = editMode.value === 'disconnect'
+      const ringColor = isDisconnect ? colors.danger : colors.success
+      ctx.strokeStyle = `rgba(${ringColor.r}, ${ringColor.g}, ${ringColor.b}, 0.8)`
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.setLineDash([])
+    }
+  }
+
+  // Draw nodes
+  for (const node of accessPoints.value) {
+    const pos = toCanvasCoords(node.position)
+    const color = getNodeColor(node.state)
+    const isSelected = selectedNodeId.value === node.id
+    const isConnecting = connectingFromId.value === node.id
+
+    const radius = 20
+
+    // Outer glow
+    if (isSelected || isConnecting) {
+      const glowColor = isConnecting
+        ? `${colors.secondary.r}, ${colors.secondary.g}, ${colors.secondary.b}`
+        : `${colors.accent.r}, ${colors.accent.g}, ${colors.accent.b}`
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius + 10, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(${glowColor}, 0.3)`
+      ctx.fill()
+    }
+
+    // Node circle
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.3)`
+    ctx.fill()
+    ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${isSelected ? 1 : 0.7})`
+    ctx.lineWidth = isSelected ? 3 : 2
+    ctx.stroke()
+
+    // Center dot
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
+    ctx.fill()
+
+    // Label
+    ctx.font = '11px "JetBrains Mono", monospace'
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`
+    ctx.textAlign = 'center'
+    ctx.fillText(node.name, pos.x, pos.y + radius + 16)
+
+    // Type indicator
+    ctx.font = '9px "JetBrains Mono", monospace'
+    ctx.fillStyle = 'rgba(122, 139, 154, 0.8)'
+    ctx.fillText(node.type, pos.x, pos.y + radius + 28)
+  }
+
+  // Mode indicator
+  ctx.font = '12px "JetBrains Mono", monospace'
+  ctx.fillStyle = `rgba(${colors.accent.r}, ${colors.accent.g}, ${colors.accent.b}, 0.8)`
+  ctx.textAlign = 'left'
+  const modeText: Record<string, string> = {
+    select: 'SELECT MODE - Click to select, drag to move',
+    add: 'ADD MODE - Click to place node',
+    connect: 'LINK MODE - Click two nodes to connect',
+    disconnect: 'UNLINK MODE - Click two nodes to disconnect',
+    delete: 'DELETE MODE - Click node to delete'
+  }
+  ctx.fillText(modeText[editMode.value] || '', 10, height - 10)
+
+  animationId = requestAnimationFrame(animate)
+}
+
+// Selected node info
+const selectedNode = computed(() =>
+  accessPoints.value.find(ap => ap.id === selectedNodeId.value)
+)
+
+// Watch for computer changes
+watch(() => store.state.computer, (newComputer) => {
+  if (newComputer) {
+    computerName.value = newComputer.name
+    computerLevel.value = newComputer.level
+    computerType.value = newComputer.type
+  }
+}, { immediate: true })
+</script>
+
+<template>
+  <div class="computer-editor">
+    <!-- Left Panel: Tools & Properties -->
+    <div class="editor-sidebar panel">
+      <div class="sidebar-section">
+        <h3 class="section-title">Computer</h3>
+        <div class="form-group">
+          <label>Name</label>
+          <input
+            v-model="computerName"
+            class="input"
+            @change="updateComputer"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Level</label>
+            <input
+              v-model.number="computerLevel"
+              type="number"
+              min="0"
+              max="25"
+              class="input"
+              @change="updateComputer"
+            />
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select v-model="computerType" class="input" @change="updateComputer">
+              <option value="tech">Tech</option>
+              <option value="magic">Magic</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm w-full" @click="createNewComputer">
+          New Computer
+        </button>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="sidebar-section">
+        <h3 class="section-title">Edit Mode</h3>
+        <div class="mode-buttons">
+          <button
+            class="mode-btn"
+            :class="{ active: editMode === 'select' }"
+            @click="editMode = 'select'; connectingFromId = null"
+          >
+            <span class="mode-icon">✋</span>
+            Select
+          </button>
+          <button
+            class="mode-btn"
+            :class="{ active: editMode === 'add' }"
+            @click="editMode = 'add'; connectingFromId = null"
+          >
+            <span class="mode-icon">➕</span>
+            Add
+          </button>
+          <button
+            class="mode-btn"
+            :class="{ active: editMode === 'connect' }"
+            @click="editMode = 'connect'"
+          >
+            <span class="mode-icon">🔗</span>
+            Link
+          </button>
+          <button
+            class="mode-btn"
+            :class="{ active: editMode === 'disconnect' }"
+            @click="editMode = 'disconnect'"
+          >
+            <span class="mode-icon">✂️</span>
+            Unlink
+          </button>
+          <button
+            class="mode-btn"
+            :class="{ active: editMode === 'delete' }"
+            @click="editMode = 'delete'; connectingFromId = null"
+          >
+            <span class="mode-icon">🗑️</span>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Node Form (visible in Add mode) -->
+      <div v-if="editMode === 'add'" class="sidebar-section">
+        <h3 class="section-title">New Node</h3>
+        <div class="form-group">
+          <label>Name</label>
+          <input v-model="newNodeName" class="input" placeholder="Terminal Alpha" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select v-model="newNodeType" class="input">
+            <option value="physical">Physical</option>
+            <option value="remote">Remote</option>
+            <option value="magical">Magical</option>
+          </select>
+        </div>
+        <p class="hint">Click on the canvas to place the node</p>
+      </div>
+
+      <!-- Selected Node (visible in Select mode) -->
+      <div v-if="editMode === 'select' && selectedNode" class="sidebar-section">
+        <h3 class="section-title">Selected Node</h3>
+        <div class="form-group">
+          <label>Name</label>
+          <input
+            v-model="selectedNode.name"
+            class="input"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select v-model="selectedNode.type" class="input">
+              <option value="physical">Physical</option>
+              <option value="remote">Remote</option>
+              <option value="magical">Magical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <select v-model="selectedNode.state" class="input state-select-editor" :class="`select-${selectedNode.state}`">
+              <option value="locked">Locked</option>
+              <option value="active">Active</option>
+              <option value="breached">Breached</option>
+              <option value="alarmed">Alarmed</option>
+            </select>
+          </div>
+        </div>
+
+        <div v-if="selectedNode.connectedTo.length > 0" class="connections-list">
+          <label>Connections</label>
+          <div
+            v-for="connId in selectedNode.connectedTo"
+            :key="connId"
+            class="connection-item"
+          >
+            <span>{{ accessPoints.find(ap => ap.id === connId)?.name }}</span>
+            <button
+              class="btn btn-xs btn-danger"
+              @click="disconnectNodes(selectedNode.id, connId)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="sidebar-section">
+        <button class="btn btn-primary w-full" @click="emit('close')">
+          Done Editing
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="editor-canvas">
+      <canvas
+        ref="canvasRef"
+        @click="handleCanvasClick"
+        @mousedown="handleMouseDown"
+        @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
+        @mouseleave="handleMouseUp"
+      ></canvas>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.computer-editor {
+  display: flex;
+  height: 100%;
+  gap: 1rem;
+}
+
+.editor-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.editor-canvas {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.editor-canvas canvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.sidebar-section {
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 0.75rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1rem 0;
+}
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.mode-btn.active {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.mode-icon {
+  font-size: 1.25rem;
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.selected-node-info {
+  padding: 0.75rem;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.node-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.node-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  text-transform: capitalize;
+}
+
+.connections-list {
+  margin-top: 0.75rem;
+}
+
+.connections-list label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.connection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.25rem;
+  font-size: var(--text-sm);
+}
+
+.w-full {
+  width: 100%;
+}
+
+.state-select-editor.select-breached {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.state-select-editor.select-alarmed {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.state-select-editor.select-active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.state-select-editor.select-locked {
+  color: var(--color-text-dim);
+}
+</style>

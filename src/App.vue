@@ -9,6 +9,8 @@ import StatusBar from './components/StatusBar.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import AnimatedBackground from './components/AnimatedBackground.vue'
 import GlitchOverlay from './components/GlitchOverlay.vue'
+import HackingPanel from './components/hacking/HackingPanel.vue'
+import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
@@ -23,18 +25,29 @@ const { settings } = useSettingsStore()
 // Get current theme's accent color for the background animation
 const currentAccentColor = computed(() => themes[settings.theme].accent)
 
+// Check if we're on the hacking player view route
+const isHackingPlayerView = ref(false)
+
+function checkRoute() {
+  const hash = window.location.hash
+  isHackingPlayerView.value = hash.includes('/hacking/view')
+}
+
 // Initialize Discord webhook integration
 onMounted(() => {
   initDiscordIntegration()
+  checkRoute()
+  window.addEventListener('hashchange', checkRoute)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('hashchange', checkRoute)
   destroyDiscordIntegration()
 })
 
 const showSettingsModal = ref(false)
 
-type Tab = 'builder' | 'combat'
+type Tab = 'builder' | 'combat' | 'hacking'
 const activeTab = ref<Tab>('builder')
 
 const showImportModal = ref(false)
@@ -70,7 +83,11 @@ function handleRunEncounter() {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen overflow-hidden">
+  <!-- Hacking Player View (fullscreen, no chrome) -->
+  <HackingPlayerView v-if="isHackingPlayerView" />
+
+  <!-- Main App -->
+  <div v-else class="flex flex-col h-screen overflow-hidden">
     <!-- Animated Background -->
     <AnimatedBackground
       v-if="settings.backgroundStyle !== 'none'"
@@ -107,6 +124,13 @@ function handleRunEncounter() {
             <span class="text-accent mr-1">&gt;</span> COMBAT
             <span v-if="combatStore.state.combat" class="w-2 h-2 bg-success animate-pulse" title="Combat Active"></span>
           </button>
+          <button
+            class="nav-tab"
+            :class="{ 'nav-tab-active': activeTab === 'hacking' }"
+            @click="activeTab = 'hacking'"
+          >
+            <span class="text-accent mr-1">&gt;</span> HACKING
+          </button>
         </nav>
       </div>
       <div class="flex items-center gap-4">
@@ -142,7 +166,7 @@ function handleRunEncounter() {
       </template>
 
       <!-- Combat Tracker Tab -->
-      <template v-else>
+      <template v-else-if="activeTab === 'combat'">
         <aside class="w-70 bg-surface border-r border-border overflow-y-auto p-4">
           <!-- Party Members -->
           <div class="mb-5">
@@ -202,10 +226,20 @@ function handleRunEncounter() {
         <section class="flex-1 overflow-hidden p-6">
           <CombatTracker />
         </section>
+
+        <!-- Roll History Panel (for combat) -->
+        <aside class="w-70 bg-surface border-l border-border overflow-hidden flex flex-col">
+          <RollHistory />
+        </aside>
       </template>
 
-      <!-- Roll History Panel (always visible) -->
-      <aside class="w-70 bg-surface border-l border-border overflow-hidden flex flex-col">
+      <!-- Hacking Encounter Tab -->
+      <template v-else-if="activeTab === 'hacking'">
+        <HackingPanel />
+      </template>
+
+      <!-- Roll History Panel (for builder only) -->
+      <aside v-if="activeTab === 'builder'" class="w-70 bg-surface border-l border-border overflow-hidden flex flex-col">
         <RollHistory />
       </aside>
     </main>
