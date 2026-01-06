@@ -237,3 +237,15 @@ export const THEME_PRESETS = {
 } as const
 
 export type ThemePreset = keyof typeof THEME_PRESETS
+
+/**
+ * Convert hex color to RGB object
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  hex = hex.replace(/^#/, '')
+  return {
+    r: parseInt(hex.slice(0, 2), 16),
+    g: parseInt(hex.slice(2, 4), 16),
+    b: parseInt(hex.slice(4, 6), 16)
+  }
+}
