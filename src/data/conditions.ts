@@ -438,30 +438,143 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     effects: {},
     group: 'death',
   },
+
+  // SF2e Specific Conditions
+  glitching: {
+    name: 'Glitching',
+    hasValue: true,
+    description: 'Your equipment is malfunctioning. At value 1, take -1 to checks with the item. At value 2, the item becomes unusable. At value 3, the item is broken.',
+    shortDescription: 'Equipment malfunction',
+    effects: {
+      allChecksPerValue: -1,
+    },
+    group: 'other',
+  },
+
+  suppressed: {
+    name: 'Suppressed',
+    hasValue: false,
+    description: 'You are being targeted by suppressive fire. You are off-guard and take a -2 circumstance penalty to attack rolls while in the suppressed area.',
+    shortDescription: 'Off-guard; -2 attacks in area',
+    effects: {
+      offGuard: true,
+      attackRolls: -2,
+    },
+    group: 'other',
+  },
+
+  untethered: {
+    name: 'Untethered',
+    hasValue: false,
+    description: 'You have lost your connection to reality, typically from exposure to the Gap. You are confused and take 1d6 mental damage at the start of each turn until the condition ends.',
+    shortDescription: 'Confused; ongoing mental damage',
+    effects: {
+      offGuard: true,
+    },
+    group: 'other',
+  },
+
+  broken: {
+    name: 'Broken',
+    hasValue: false,
+    description: 'This item has been damaged. It cannot be used for its normal function until Repaired.',
+    shortDescription: 'Item cannot function',
+    effects: {},
+    group: 'other',
+  },
+
+  observed: {
+    name: 'Observed',
+    hasValue: false,
+    description: 'You are in plain view. Creatures can see you clearly with no special effort.',
+    shortDescription: 'Clearly visible',
+    effects: {},
+    group: 'detection',
+  },
+
+  unnoticed: {
+    name: 'Unnoticed',
+    hasValue: false,
+    description: 'A creature is entirely unaware of your presence. You are undetected by them and they have no idea you exist.',
+    shortDescription: 'Creature has no idea you exist',
+    effects: {},
+    group: 'detection',
+  },
+
+  friendly: {
+    name: 'Friendly',
+    hasValue: false,
+    description: 'This creature views you positively and will help you if it doesn\'t cost them much.',
+    shortDescription: 'Positively disposed',
+    effects: {},
+    group: 'attitudes',
+  },
+
+  helpful: {
+    name: 'Helpful',
+    hasValue: false,
+    description: 'This creature will go out of their way to help you.',
+    shortDescription: 'Will go out of way to help',
+    effects: {},
+    group: 'attitudes',
+  },
+
+  hostile: {
+    name: 'Hostile',
+    hasValue: false,
+    description: 'This creature views you as an enemy and will actively work against you.',
+    shortDescription: 'Views you as enemy',
+    effects: {},
+    group: 'attitudes',
+  },
+
+  indifferent: {
+    name: 'Indifferent',
+    hasValue: false,
+    description: 'This creature doesn\'t care about you one way or another.',
+    shortDescription: 'Neutral toward you',
+    effects: {},
+    group: 'attitudes',
+  },
+
+  unfriendly: {
+    name: 'Unfriendly',
+    hasValue: false,
+    description: 'This creature dislikes you and won\'t help unless given a good reason.',
+    shortDescription: 'Dislikes you',
+    effects: {},
+    group: 'attitudes',
+  },
 }
 
-// Combat-relevant conditions for the condition picker
+// Combat-relevant conditions for the condition picker (alphabetized)
 export const COMBAT_CONDITIONS = [
   'blinded',
   'clumsy',
   'concealed',
   'confused',
+  'controlled',
   'dazzled',
   'deafened',
   'doomed',
   'drained',
   'dying',
+  'encumbered',
   'enfeebled',
   'fascinated',
   'fatigued',
   'fleeing',
   'frightened',
+  'glitching',
   'grabbed',
   'hidden',
   'immobilized',
+  'invisible',
+  'observed',
   'off-guard',
   'paralyzed',
   'persistent-damage',
+  'petrified',
   'prone',
   'quickened',
   'restrained',
@@ -469,7 +582,11 @@ export const COMBAT_CONDITIONS = [
   'slowed',
   'stunned',
   'stupefied',
+  'suppressed',
   'unconscious',
+  'undetected',
+  'unnoticed',
+  'untethered',
   'wounded',
 ] as const
 
