@@ -217,14 +217,31 @@ function deleteEncounter(encounterId: string) {
 function generateShareUrl(): string {
   if (!state.computer) return window.location.href
 
-  const shareData = {
-    c: state.computer,
+  // Minify computer data for shorter URLs
+  // n=name, l=level, t=type, d=description, ap=accessPoints
+  // Access point: id, n=name, t=type, s=state, p=position, c=connectedTo
+  const minified = {
+    n: state.computer.name,
+    l: state.computer.level,
+    t: state.computer.type,
+    d: state.computer.description,
+    ap: state.computer.accessPoints.map(ap => ({
+      id: ap.id,
+      n: ap.name,
+      t: ap.type,
+      s: ap.state,
+      p: ap.position,
+      c: ap.connectedTo
+    })),
     i: state.ambientIntensity
   }
 
-  const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)))
+  const json = JSON.stringify(minified)
+  const encoded = btoa(encodeURIComponent(json))
   const baseUrl = window.location.origin + window.location.pathname
-  // Include session ID for BroadcastChannel isolation
+
+  console.log('[Hacking] Share URL length:', encoded.length, 'chars')
+
   return `${baseUrl}#/hacking/view?session=${state.sessionId}&state=${encoded}`
 }
 
@@ -235,6 +252,33 @@ function loadFromUrl(): boolean {
   if (match && match[1]) {
     try {
       const decoded = JSON.parse(decodeURIComponent(atob(match[1])))
+
+      // Handle minified format (n=name, l=level, t=type, d=description, ap=accessPoints)
+      // Access point minified: id, n=name, t=type, s=state, p=position, c=connectedTo
+      if (decoded.n && decoded.ap) {
+        state.computer = {
+          id: crypto.randomUUID(),
+          name: decoded.n,
+          level: decoded.l,
+          type: decoded.t,
+          description: decoded.d,
+          accessPoints: decoded.ap.map((ap: { id: string; n: string; t: string; s: string; p: { x: number; y: number }; c: string[] }) => ({
+            id: ap.id,
+            name: ap.n,
+            type: ap.t || 'physical',
+            state: ap.s || 'locked',
+            position: ap.p || { x: 0.5, y: 0.5 },
+            connectedTo: ap.c || []
+          }))
+        }
+        if (typeof decoded.i === 'number') {
+          state.ambientIntensity = decoded.i
+        }
+        console.log('[Hacking] Loaded from URL:', state.computer.name)
+        return true
+      }
+
+      // Handle legacy full format (full Computer object stored as 'c')
       if (decoded.c) {
         state.computer = decoded.c
         if (typeof decoded.i === 'number') {
