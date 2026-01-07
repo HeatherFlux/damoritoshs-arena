@@ -10,6 +10,8 @@ const DEFAULT_DEV_URL = 'http://localhost:8787'
 
 function getEnvSyncUrl(): string | null {
   const envUrl = import.meta.env.VITE_SYNC_SERVER_URL as string | undefined
+  console.log('[SyncTransport] VITE_SYNC_SERVER_URL:', envUrl || '(not set)')
+  console.log('[SyncTransport] DEV mode:', import.meta.env.DEV)
   if (envUrl) {
     return envUrl.replace(/\/$/, '') // Remove trailing slash
   }
@@ -21,6 +23,7 @@ function getEnvSyncUrl(): string | null {
 }
 
 let syncServerUrl: string | null = getEnvSyncUrl()
+console.log('[SyncTransport] Resolved URL:', syncServerUrl || '(none - sync disabled)')
 
 export function setSyncServerUrl(url: string): void {
   syncServerUrl = url.replace(/\/$/, '') // Remove trailing slash
