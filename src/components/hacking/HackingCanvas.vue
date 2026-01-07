@@ -283,14 +283,48 @@ function drawNodes(time: number) {
     ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
     ctx.fill()
 
-    // Draw node label
+    // Draw node label (name)
     const fontSize = props.fullscreen ? 12 : 11
-    const nodeDC = node.dc || node.hackSkills?.[0]?.dc
-    const label = nodeDC ? `${node.name} | DC ${nodeDC}` : node.name
     ctx.font = `${fontSize}px "JetBrains Mono", monospace`
     ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`
     ctx.textAlign = 'center'
-    ctx.fillText(label, pos.x, pos.y + radius + 16)
+    ctx.fillText(node.name, pos.x, pos.y + radius + 16)
+
+    // Draw state label below name
+    const stateLabel = getStateLabel(node)
+    const stateColor = getStateColor(node.state)
+    ctx.font = `bold ${fontSize - 1}px "JetBrains Mono", monospace`
+    ctx.fillStyle = `rgba(${stateColor.r}, ${stateColor.g}, ${stateColor.b}, 0.85)`
+    ctx.fillText(stateLabel, pos.x, pos.y + radius + 30)
+  }
+}
+
+function getStateLabel(node: AccessPoint): string {
+  switch (node.state) {
+    case 'breached':
+      return '✓ BREACHED'
+    case 'alarmed':
+      return '⚠ ALARMED'
+    case 'active':
+      const successes = node.successesRequired || 1
+      return `◐ IN PROGRESS (${successes - 1}/${successes})`
+    default:
+      const req = node.successesRequired || 1
+      return req > 1 ? `◯ ${req} SUCCESSES` : '◯ LOCKED'
+  }
+}
+
+function getStateColor(state: string): { r: number; g: number; b: number } {
+  const colors = themeColors.value
+  switch (state) {
+    case 'breached':
+      return colors.success
+    case 'alarmed':
+      return colors.danger
+    case 'active':
+      return { r: 255, g: 200, b: 100 } // warm yellow/orange for in-progress
+    default:
+      return { r: 150, g: 150, b: 160 } // muted gray for locked
   }
 }
 

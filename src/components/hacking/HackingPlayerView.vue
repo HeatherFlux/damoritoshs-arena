@@ -4,13 +4,11 @@ import { useHackingStore } from '../../stores/hackingStore'
 import { isSyncAvailable } from '../../utils/syncTransport'
 import HackingCanvas from './HackingCanvas.vue'
 import HackingEffectOverlay from './HackingEffectOverlay.vue'
-import type { AccessPoint, SkillCheck } from '../../types/hacking'
+import PlayerDiceRoller from './PlayerDiceRoller.vue'
 
 const store = useHackingStore()
 
-// UI state
-const showStatBlock = ref(true)
-const expandedAccessPoint = ref<string | null>(null)
+// UI state - simplified (no sidebar)
 
 // Connection status for display
 type SyncStatus = 'connecting' | 'connected' | 'local-only' | 'error'
@@ -25,29 +23,6 @@ const statusLabel = computed(() => {
     default: return 'SNAPSHOT'
   }
 })
-
-// Format skill checks for player display (NO DCs - those are GM-only!)
-function formatSkillCheck(check: SkillCheck): string {
-  let text = check.skill
-  if (check.proficiency && check.proficiency !== 'untrained') {
-    text += ` (${check.proficiency})`
-  }
-  return text
-}
-
-function formatSkillChecks(checks: SkillCheck[]): string {
-  return checks.map(formatSkillCheck).join(' or ')
-}
-
-function toggleAccessPoint(id: string) {
-  expandedAccessPoint.value = expandedAccessPoint.value === id ? null : id
-}
-
-function getAccessPointState(ap: AccessPoint): string {
-  if (ap.state === 'breached') return 'BREACHED'
-  if (ap.state === 'alarmed') return 'ALARMED'
-  return `${ap.successesRequired || 1} Success${(ap.successesRequired || 1) > 1 ? 'es' : ''}`
-}
 
 onMounted(async () => {
   store.setGMView(false)
@@ -89,86 +64,17 @@ onUnmounted(() => {
     <!-- Fullscreen canvas -->
     <HackingCanvas :fullscreen="true" />
 
-    <!-- Stat block panel (right side) -->
-    <div v-if="store.state.computer" class="stat-block-panel" :class="{ collapsed: !showStatBlock }">
-      <button class="stat-block-toggle" @click="showStatBlock = !showStatBlock">
-        {{ showStatBlock ? '▶' : '◀' }}
-      </button>
+    <!-- Floating Computer Name Header -->
+    <header v-if="store.state.computer" class="computer-name-header">
+      <span class="header-name">{{ store.state.computer.name }}</span>
+    </header>
 
-      <div v-if="showStatBlock" class="stat-block-content">
-        <!-- Computer Header -->
-        <div class="computer-header">
-          <div class="computer-title">
-            <span class="computer-name">{{ store.state.computer.name }}</span>
-            <span class="computer-level-badge">{{ store.state.computer.level }}</span>
-          </div>
-          <div class="computer-type">{{ store.state.computer.type }} computer</div>
-          <p v-if="store.state.computer.description" class="computer-desc">
-            {{ store.state.computer.description }}
-          </p>
-        </div>
-
-        <!-- Access Points -->
-        <div class="access-points">
-          <div
-            v-for="ap in store.state.computer.accessPoints"
-            :key="ap.id"
-            class="access-point"
-            :class="{ expanded: expandedAccessPoint === ap.id, [`state-${ap.state}`]: true }"
-          >
-            <button class="ap-header" @click="toggleAccessPoint(ap.id)">
-              <span class="ap-type-badge" :class="ap.type">{{ ap.type.charAt(0).toUpperCase() }}</span>
-              <span class="ap-name">{{ ap.name }}</span>
-              <span class="ap-state" :class="ap.state">{{ getAccessPointState(ap) }}</span>
-            </button>
-
-            <div v-if="expandedAccessPoint === ap.id" class="ap-details">
-              <!-- Hack Skills -->
-              <div v-if="ap.hackSkills?.length" class="detail-section">
-                <div class="detail-label">Hack</div>
-                <div class="detail-value">{{ formatSkillChecks(ap.hackSkills) }}</div>
-              </div>
-
-              <!-- Vulnerabilities (player view: no DC reduction shown) -->
-              <div v-if="ap.vulnerabilities?.length" class="detail-section vulnerabilities">
-                <div class="detail-label">Vulnerabilities</div>
-                <div v-for="vuln in ap.vulnerabilities" :key="vuln.id" class="vuln-item">
-                  <span class="vuln-name">{{ vuln.name }}</span>
-                  <span class="vuln-skills">({{ formatSkillChecks(vuln.skills) }})</span>
-                </div>
-              </div>
-
-              <!-- Countermeasures (player view: no DCs shown, just names and skills) -->
-              <div v-if="ap.countermeasures?.length" class="detail-section countermeasures">
-                <div class="detail-label">Countermeasures</div>
-                <div v-for="cm in ap.countermeasures" :key="cm.id" class="cm-item">
-                  <div class="cm-header">
-                    <span class="cm-name">{{ cm.name }}</span>
-                    <span v-if="cm.isPersistent" class="cm-threshold">(persistent)</span>
-                  </div>
-                  <div class="cm-details">
-                    <span v-if="cm.noticeSkills?.length">Notice: {{ cm.noticeSkills.join('/') }}; </span>
-                    <span>Disable: {{ formatSkillChecks(cm.disableSkills) }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Success Descriptions -->
-        <div v-if="store.state.computer.successDescription" class="outcome-section">
-          <div class="outcome-label success">Success</div>
-          <p class="outcome-text">{{ store.state.computer.successDescription }}</p>
-        </div>
-        <div v-if="store.state.computer.criticalSuccessDescription" class="outcome-section">
-          <div class="outcome-label crit">Critical Success</div>
-          <p class="outcome-text">{{ store.state.computer.criticalSuccessDescription }}</p>
-        </div>
-      </div>
+    <!-- Dice Roller (floating, bottom-left) -->
+    <div v-if="store.state.computer" class="dice-roller-container">
+      <PlayerDiceRoller />
     </div>
 
-    <!-- Sync status indicator (bottom left) -->
+    <!-- Sync status indicator -->
     <div v-if="store.state.computer" class="sync-badge" :class="'sync-' + syncStatus">
       <span class="sync-indicator"></span>
       <span class="sync-label">{{ statusLabel }}</span>
@@ -187,298 +93,65 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* Stat Block Panel */
-.stat-block-panel {
+
+/* ========================================
+   FLOATING COMPUTER NAME HEADER
+   ======================================== */
+.computer-name-header {
   position: fixed;
   top: 1rem;
-  right: 1rem;
-  bottom: 1rem;
-  width: 360px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  z-index: 10;
-  transition: width 0.2s ease;
-}
-
-.stat-block-panel.collapsed {
-  width: auto;
-}
-
-.stat-block-toggle {
-  flex-shrink: 0;
-  width: 24px;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.25rem;
   background: rgba(5, 6, 8, 0.9);
-  border: 1px solid var(--color-border);
-  border-right: none;
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-  color: var(--color-text-dim);
-  cursor: pointer;
-  font-size: 10px;
-  transition: all 0.15s;
-}
-
-.stat-block-toggle:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-accent);
-}
-
-.stat-block-content {
-  flex: 1;
-  background: rgba(5, 6, 8, 0.95);
-  border: 1px solid var(--color-border);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px var(--color-accent-glow, rgba(30, 203, 225, 0.3));
   backdrop-filter: blur(12px);
-  overflow-y: auto;
-  padding: 1rem;
+  z-index: 110;
 }
 
-/* Computer Header */
-.computer-header {
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--color-accent);
-  margin-bottom: 0.75rem;
-}
-
-.computer-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.computer-name {
+.header-name {
   font-family: 'JetBrains Mono', monospace;
-  font-size: var(--text-lg);
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-accent);
-  text-shadow: 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.4));
-}
-
-.computer-level-badge {
-  padding: 0.125rem 0.5rem;
-  background: var(--color-accent);
-  color: var(--color-bg);
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-}
-
-.computer-type {
-  font-size: var(--text-xs);
-  color: var(--color-text-dim);
+  text-shadow:
+    0 0 10px var(--color-accent),
+    0 0 30px var(--color-accent-glow, rgba(30, 203, 225, 0.4));
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-top: 0.25rem;
 }
 
-.computer-desc {
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  margin-top: 0.5rem;
-  line-height: 1.4;
-}
-
-/* Access Points */
-.access-points {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.access-point {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.access-point.state-breached {
-  border-color: var(--color-success);
-}
-
-.access-point.state-alarmed {
-  border-color: var(--color-danger);
-}
-
-.ap-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.625rem;
-  background: none;
-  border: none;
-  color: var(--color-text);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s;
-}
-
-.ap-header:hover {
-  background: var(--color-bg-hover);
-}
-
-.ap-type-badge {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.ap-type-badge.physical {
-  background: var(--color-warning);
-  color: var(--color-bg);
-}
-
-.ap-type-badge.remote {
+.header-level {
+  padding: 0.25rem 0.625rem;
   background: var(--color-accent);
   color: var(--color-bg);
-}
-
-.ap-type-badge.magical {
-  background: #9b59b6;
-  color: white;
-}
-
-.ap-name {
-  flex: 1;
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.ap-state {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 0.125rem 0.375rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
   border-radius: var(--radius-sm);
-  background: var(--color-bg);
 }
 
-.ap-state.breached {
-  background: var(--color-success);
-  color: var(--color-bg);
-}
-
-.ap-state.alarmed {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* Access Point Details */
-.ap-details {
-  padding: 0.75rem;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg);
-}
-
-.detail-section {
-  margin-bottom: 0.75rem;
-}
-
-.detail-section:last-child {
-  margin-bottom: 0;
-}
-
-.detail-label {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-accent);
-  margin-bottom: 0.25rem;
-}
-
-.detail-value {
-  font-size: var(--text-sm);
-  color: var(--color-text);
-}
-
-/* Vulnerabilities */
-.vuln-item {
-  font-size: var(--text-sm);
-  margin-bottom: 0.25rem;
-  padding-left: 0.5rem;
-  border-left: 2px solid var(--color-success);
-}
-
-.vuln-name {
-  color: var(--color-text);
-}
-
-.vuln-skills {
-  color: var(--color-text-dim);
-  font-size: var(--text-xs);
-}
-
-/* Countermeasures */
-.cm-item {
-  font-size: var(--text-sm);
-  margin-bottom: 0.375rem;
-  padding-left: 0.5rem;
-  border-left: 2px solid var(--color-danger);
-}
-
-.cm-header {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex-wrap: wrap;
-}
-
-.cm-name {
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.cm-threshold {
-  color: var(--color-danger);
-  font-size: var(--text-xs);
-}
-
-.cm-details {
-  font-size: var(--text-xs);
-  color: var(--color-text-dim);
-  margin-top: 0.125rem;
-}
-
-/* Outcome Sections */
-.outcome-section {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.outcome-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-
-.outcome-label.success {
-  color: var(--color-success);
-}
-
-.outcome-label.crit {
-  color: var(--color-warning);
-}
-
-.outcome-text {
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  line-height: 1.4;
-}
-
-/* Sync Badge (bottom left) */
-.sync-badge {
+/* ========================================
+   DICE ROLLER CONTAINER (Desktop floating)
+   ======================================== */
+.dice-roller-container {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
+  z-index: 105;
+  width: 200px;
+}
+
+/* Sync Badge (bottom-right) */
+.sync-badge {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -486,8 +159,9 @@ onUnmounted(() => {
   background: rgba(5, 6, 8, 0.9);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  z-index: 10;
+  z-index: 101;
 }
+
 
 .sync-indicator {
   width: 0.375rem;
