@@ -1,38 +1,73 @@
 import type { Computer, AccessPoint, ComputerType, AccessPointType } from '../types/hacking'
 
 // Starfinder-themed word lists
-const COMPUTER_PREFIXES = [
+
+// Factions, corporations, and organizations
+const COMPUTER_FACTIONS = [
+  'AbadarCorp', 'Zo!', 'Steward', 'Starfinder', 'Hellknight', 'Aspis',
+  'Azlanti', 'Veskarium', 'Pact Worlds', 'Corpse Fleet', 'Free Captains',
+  'Xenowarden', 'Android Abolitionist', 'Augmented', 'Starstone'
+]
+
+// Planets and locations
+const COMPUTER_LOCATIONS = [
+  'Absalom', 'Akiton', 'Verces', 'Aballon', 'Eox', 'Castrovel', 'Triaxus',
+  'Bretheda', 'Apostae', 'Diaspora', 'Idari', 'Drift', 'Liavara', 'Preluria'
+]
+
+// Tech/sci-fi prefixes
+const COMPUTER_TECH_PREFIXES = [
   'Stellar', 'Quantum', 'Neural', 'Cyber', 'Void', 'Drift', 'Aeon',
   'Plasma', 'Ion', 'Nexus', 'Core', 'Prime', 'Shadow', 'Ghost',
-  'Vesk', 'Azlanti', 'Eoxian', 'Kasathan', 'Shirren', 'Lashunta',
-  'Veskarium', 'Pact', 'Corpse', 'Dark', 'Steward', 'Starfinder',
-  'Absalom', 'Drift', 'Hyperspace', 'Akiton', 'Verces', 'Aballon'
+  'Hyperspace', 'Infosphere', 'Holographic', 'Encrypted', 'Orbital',
+  'Satellite', 'Gravitic', 'Photonic', 'Subspace', 'Tachyon'
+]
+
+// Magic prefixes for hybrid/magic computers
+const COMPUTER_MAGIC_PREFIXES = [
+  'Arcane', 'Mystic', 'Thaumic', 'Eldritch', 'Runic', 'Aetheric',
+  'First World', 'Planar', 'Divine', 'Occult', 'Psionic', 'Bound',
+  'Interdimensional', 'Spirit', 'Aeon Stone', 'Spell Chip'
+]
+
+const COMPUTER_PREFIXES = [
+  ...COMPUTER_FACTIONS,
+  ...COMPUTER_LOCATIONS,
+  ...COMPUTER_TECH_PREFIXES
 ]
 
 const COMPUTER_TYPES_NAMES = [
   'Mainframe', 'Terminal', 'Core', 'Hub', 'Node', 'Matrix', 'Grid',
   'Server', 'Nexus', 'Archive', 'Databank', 'Interface', 'Cortex',
-  'Module', 'Array', 'Cluster', 'Network', 'System', 'Unit', 'Engine'
+  'Module', 'Array', 'Cluster', 'Network', 'System', 'Unit', 'Engine',
+  'Database', 'Account', 'Console', 'Relay', 'Uplink', 'Gateway'
 ]
 
 const COMPUTER_SUFFIXES = [
   'Alpha', 'Beta', 'Gamma', 'Delta', 'Omega', 'Prime', 'Zero',
-  'One', 'X', 'MK-II', 'MK-III', 'V7', 'X9', '2.0', '3.1', 'Plus'
+  'One', 'X', 'MK-II', 'MK-III', 'V7', 'X9', '2.0', '3.1', 'Plus',
+  'Secure', 'Encrypted', 'Pro', 'Enterprise', 'Military'
 ]
 
 // Node name components by type
 const NODE_NAMES = {
   physical: {
-    prefixes: ['Access', 'Console', 'Terminal', 'Port', 'Jack', 'Panel', 'Deck', 'Station'],
-    suffixes: ['A', 'B', 'C', 'Primary', 'Secondary', 'Main', 'Aux', 'Backup', '01', '02', '03']
+    prefixes: ['Access', 'Console', 'Terminal', 'Port', 'Jack', 'Panel', 'Deck', 'Station',
+               'Dongle', 'Autopilot', 'Comm Unit', 'Credstick', 'Keypad', 'Biometric'],
+    suffixes: ['A', 'B', 'C', 'Primary', 'Secondary', 'Main', 'Aux', 'Backup', '01', '02', '03',
+               'Alpha', 'Beta', 'Override', 'Emergency']
   },
   remote: {
-    prefixes: ['Wireless', 'Remote', 'Cloud', 'Drift', 'Satellite', 'Orbital', 'Signal', 'Broadcast'],
-    suffixes: ['Link', 'Relay', 'Node', 'Gateway', 'Bridge', 'Beacon', 'Uplink', 'Channel']
+    prefixes: ['Wireless', 'Remote', 'Cloud', 'Drift', 'Satellite', 'Orbital', 'Signal', 'Broadcast',
+               'Infosphere', 'Cross-Site', 'Backdoor', 'Unpatched', 'Phishing', 'Keylogger'],
+    suffixes: ['Link', 'Relay', 'Node', 'Gateway', 'Bridge', 'Beacon', 'Uplink', 'Channel',
+               'Attack', 'Vector', 'Exploit', 'Vulnerability']
   },
   magical: {
-    prefixes: ['Arcane', 'Mystic', 'Eldritch', 'Runic', 'Thaumic', 'Aether', 'Spirit', 'Psionic'],
-    suffixes: ['Conduit', 'Nexus', 'Focus', 'Anchor', 'Sigil', 'Matrix', 'Core', 'Weave']
+    prefixes: ['Arcane', 'Mystic', 'Eldritch', 'Runic', 'Thaumic', 'Aether', 'Spirit', 'Psionic',
+               'Attunement', 'Ritual', 'Aeon Stone', 'Machine Spirit', 'Divination', 'Magitech'],
+    suffixes: ['Conduit', 'Nexus', 'Focus', 'Anchor', 'Sigil', 'Matrix', 'Core', 'Weave',
+               'Crystal', 'Barrier', 'Ward', 'Binding']
   }
 }
 
@@ -40,16 +75,104 @@ const NODE_NAMES = {
 const NODE_MODIFIERS = [
   'Primary', 'Secondary', 'Tertiary', 'Hidden', 'Secured', 'Open', 'Encrypted',
   'Public', 'Private', 'Admin', 'Root', 'Guest', 'Executive', 'Engineering',
-  'Medical', 'Security', 'Cargo', 'Bridge', 'Engine', 'Weapons', 'Comms', 'Life Support'
+  'Medical', 'Security', 'Cargo', 'Bridge', 'Engine', 'Weapons', 'Comms', 'Life Support',
+  'Personal', 'Corporate', 'Military', 'Classified', 'Restricted', 'Customer'
 ]
 
-// Purpose-based node names
+// Purpose-based node names (inspired by GM Core examples)
 const NODE_PURPOSES = [
+  // Standard starship/station systems
   'Data Storage', 'Comms Hub', 'Security Grid', 'Life Support', 'Navigation',
   'Weapons Control', 'Engine Core', 'Shield Matrix', 'Cargo Manifest',
   'Personnel Records', 'Financial Logs', 'Sensor Array', 'AI Core',
   'Backup Systems', 'Emergency Override', 'Captain\'s Log', 'Crew Quarters',
-  'Medical Bay', 'Research Lab', 'Armory Access', 'Docking Controls'
+  'Medical Bay', 'Research Lab', 'Armory Access', 'Docking Controls',
+  // Corporate/account systems (from AbadarCorp example)
+  'Customer Database', 'Payment Processing', 'Account Records', 'Order History',
+  'Employee Directory', 'Investor Portal', 'Compliance Logs', 'Audit Trail',
+  // Media/entertainment (from Zo! example)
+  'Production Schedules', 'Unreleased Content', 'Personnel Files', 'Show Archives',
+  'Talent Contracts', 'Broadcast Queue', 'Media Library', 'Rating Analytics',
+  // Prison/security (from Azlanti example)
+  'Door Controls', 'Sentry Turrets', 'Alarm Systems', 'Prisoner Records',
+  'Guard Schedules', 'Lockdown Protocol', 'Surveillance Feeds', 'Cell Blocks',
+  // Misc systems
+  'Autopilot Module', 'Gravtrain Controls', 'Server Farm', 'Credstick Access',
+  'Two-Factor Auth', 'Password Vault', 'Encryption Keys', 'Backup Server'
+]
+
+// Sample vulnerability templates from GM Core
+export const VULNERABILITY_TEMPLATES = [
+  // Social engineering
+  { name: 'Deduce username or password', skills: ['Perception', 'Society', 'Lore'] },
+  { name: 'Call customer service for access', skills: ['Deception', 'Diplomacy'] },
+  { name: 'Pretend to be investor or regulator', skills: ['Deception', 'Lore'] },
+  { name: 'Bribe or threaten administrator', skills: ['Diplomacy', 'Intimidation'] },
+  { name: 'Find traces of another hacker', skills: ['Diplomacy', 'Society'] },
+  // Technical exploits
+  { name: 'Steal or spoof two-factor auth device', skills: ['Crafting', 'Thievery'] },
+  { name: 'Program keylogger in media file', skills: ['Computers', 'Performance'] },
+  { name: 'Create fake site to phish password', skills: ['Computers', 'Society'] },
+  { name: 'Clone or steal comm unit', skills: ['Crafting', 'Thievery'] },
+  { name: 'Denial-of-service attack', skills: ['Computers', 'Performance'] },
+  { name: 'Jury-rig electromagnetic winch', skills: ['Crafting', 'Piloting'] },
+  // Physical access
+  { name: 'Survey outside to find buried cable', skills: ['Nature', 'Survival'] },
+  { name: 'Join cleaning crew for building access', skills: ['Deception', 'Society'] },
+  { name: 'Steal comm unit from employee', skills: ['Stealth', 'Thievery'] },
+  { name: 'Scale communication tower', skills: ['Acrobatics', 'Athletics'] },
+  { name: 'Retrieve data from gravtrain autopilot', skills: ['Acrobatics', 'Piloting'] },
+  { name: 'Fake fingerprint authentication', skills: ['Deception', 'Medicine'] },
+  // Magical approaches
+  { name: 'Cast ritual to access magitech', skills: ['Arcana', 'Nature', 'Occultism', 'Religion'] },
+  { name: 'Use divination for password', skills: ['Occultism', 'Religion'] },
+  { name: 'Phreak server with arcane whistle', skills: ['Crafting', 'Performance'] },
+  // Fun/unusual
+  { name: 'Play vidgame to find hidden zone', skills: ['Piloting', 'Lore'] },
+  { name: 'Rally other hackers to aid', skills: ['Diplomacy', 'Performance'] }
+]
+
+// Sample countermeasure templates from GM Core
+export const COUNTERMEASURE_TEMPLATES = [
+  // Account/access denial
+  { name: 'Account banned or locked', noticeSkills: ['Computers', 'Perception'], disableSkills: ['Deception', 'Intimidation'] },
+  { name: 'Account blocked until identity verified', noticeSkills: ['Perception'], disableSkills: ['Crafting', 'Thievery', 'Lore'] },
+  { name: 'Account blocked until in-person visit', noticeSkills: ['Computers', 'Perception'], disableSkills: ['Computers', 'Deception'] },
+  // Deception/misdirection
+  { name: 'Misleading information planted', noticeSkills: ['Computers', 'Crafting', 'Perception'], disableSkills: ['Stealth', 'Thievery'] },
+  { name: 'Files deleted or corrupted', noticeSkills: ['Society', 'Survival'], disableSkills: ['Computers', 'Crafting'] },
+  // Alerts and tracking
+  { name: 'Admin notices and blocks access', noticeSkills: ['Perception'], disableSkills: ['Computers', 'Diplomacy', 'Intimidation'] },
+  { name: 'Alarm triggered, authorities notified', noticeSkills: ['Computers', 'Perception'], disableSkills: ['Stealth', 'Thievery'] },
+  { name: 'Security guard asks for ID', noticeSkills: ['Perception'], disableSkills: ['Deception', 'Stealth'] },
+  { name: 'Hellknight hacker tracks your location', noticeSkills: ['Society'], disableSkills: ['Stealth', 'Survival'] },
+  { name: 'Admin threatens to report you', noticeSkills: ['Perception'], disableSkills: ['Deception', 'Diplomacy', 'Intimidation'] },
+  // Technical countermeasures
+  { name: 'Counter-scam drains credits', noticeSkills: ['Computers'], disableSkills: ['Thievery', 'Computers'], isPersistent: true },
+  { name: 'EMP takes out entire database', noticeSkills: ['Perception'], disableSkills: ['Athletics', 'Thievery'] },
+  { name: 'Need dongle or comm unit to authorize', noticeSkills: ['Perception'], disableSkills: ['Crafting', 'Thievery', 'Lore'] },
+  // Magical countermeasures
+  { name: 'Magitech virus flashes hypnotic visuals', noticeSkills: ['Arcana', 'Occultism'], disableSkills: ['Arcana', 'Occultism'] },
+  { name: 'First World viral curse sprouts plants', noticeSkills: ['Perception'], disableSkills: ['Nature', 'Survival'] }
+]
+
+// Computer description templates
+export const COMPUTER_DESCRIPTIONS = [
+  'A secure database accessed via holographic interface.',
+  'An encrypted server storing sensitive corporate data.',
+  'A magitech console controlled by bound machine spirits.',
+  'A satellite-based server with multiple redundant backups.',
+  'An ancient construct commanded by programmable aeon stones.',
+  'A personal comm unit with administrator access.',
+  'A military-grade terminal with biometric authentication.',
+  'An infosphere node connecting multiple planetary networks.',
+  'A research station mainframe with classified experiment logs.',
+  'A prison security system controlling doors and turrets.',
+  'A media server containing unreleased entertainment content.',
+  'A financial database with encrypted customer records.',
+  'An autopilot module mounted on a high-speed gravtrain.',
+  'A spell chip archive protected by arcane barriers.',
+  'An interdimensional data store accessed through lucid dreaming.'
 ]
 
 // Utility functions
@@ -61,18 +184,23 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-// Generate a random computer name
-export function generateComputerName(): string {
+// Generate a random computer name based on type
+export function generateComputerName(type?: ComputerType): string {
   const style = Math.random()
 
+  // Select appropriate prefix pool based on computer type
+  const prefixes = type === 'magic' ? COMPUTER_MAGIC_PREFIXES :
+                   type === 'hybrid' ? [...COMPUTER_TECH_PREFIXES, ...COMPUTER_MAGIC_PREFIXES] :
+                   COMPUTER_PREFIXES
+
   if (style < 0.3) {
-    return `${pick(COMPUTER_PREFIXES)} ${pick(COMPUTER_TYPES_NAMES)}`
+    return `${pick(prefixes)} ${pick(COMPUTER_TYPES_NAMES)}`
   } else if (style < 0.6) {
-    return `${pick(COMPUTER_PREFIXES)} ${pick(COMPUTER_TYPES_NAMES)} ${pick(COMPUTER_SUFFIXES)}`
+    return `${pick(prefixes)} ${pick(COMPUTER_TYPES_NAMES)} ${pick(COMPUTER_SUFFIXES)}`
   } else if (style < 0.8) {
     return `${pick(COMPUTER_TYPES_NAMES)} ${pick(COMPUTER_SUFFIXES)}`
   } else {
-    return `${pick(COMPUTER_PREFIXES)}-${pick(COMPUTER_PREFIXES)} ${pick(COMPUTER_TYPES_NAMES)}`
+    return `${pick(prefixes)}-${pick(prefixes)} ${pick(COMPUTER_TYPES_NAMES)}`
   }
 }
 
@@ -266,7 +394,7 @@ export function generateRandomComputer(options: GeneratorOptions = {}): Computer
   const partyLevel = options.partyLevel ?? options.level ?? randomInt(1, 10)
   const level = options.level ?? partyLevel
   const type = options.type ?? pick(['tech', 'magic', 'hybrid'] as ComputerType[])
-  const name = options.name ?? generateComputerName()
+  const name = options.name ?? generateComputerName(type)
 
   // Base DC from party level
   const baseDC = getDCForLevel(partyLevel)
