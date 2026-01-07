@@ -2,6 +2,7 @@ import { reactive, watch } from 'vue'
 import type { Computer, NodeState, HackingEffect, HackingEffectType, SavedHackingEncounter } from '../types/hacking'
 import { createHackingEffect, createSampleComputer } from '../types/hacking'
 import { generateRandomComputer, type GeneratorOptions } from '../utils/hackingGenerator'
+import { getSyncTransport, isWebSocketSupported, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 // Generate or retrieve session ID for channel isolation
 function getSessionId(): string {
@@ -31,6 +32,9 @@ interface HackingState {
   savedEncounters: SavedHackingEncounter[]
   showPlayerView: boolean
   sessionId: string
+  // Real-time sync state
+  wsConnectionState: ConnectionState
+  isRemoteSyncEnabled: boolean
 }
 
 // Create reactive state
@@ -42,12 +46,31 @@ const state = reactive<HackingState>({
   isGMView: true,
   savedEncounters: [],
   showPlayerView: false,
-  sessionId: ''
+  sessionId: '',
+  // Real-time sync
+  wsConnectionState: 'disconnected',
+  isRemoteSyncEnabled: false
 })
+
+// WebSocket transport reference
+let wsTransport: ReturnType<typeof getSyncTransport> | null = null
 
 // BroadcastChannel for cross-tab sync
 let channel: BroadcastChannel | null = null
 let currentChannelSession: string | null = null
+
+// Helper to add effect with auto-cleanup (used by both local and remote handlers)
+function addEffectWithCleanup(effect: HackingEffect) {
+  state.activeEffects.push(effect)
+
+  // Auto-remove effect after duration
+  setTimeout(() => {
+    const index = state.activeEffects.findIndex(e => e.id === effect.id)
+    if (index !== -1) {
+      state.activeEffects.splice(index, 1)
+    }
+  }, effect.duration)
+}
 
 function initChannel() {
   if (typeof BroadcastChannel === 'undefined') return
@@ -71,7 +94,7 @@ function initChannel() {
 
       switch (type) {
         case 'effect':
-          state.activeEffects.push(payload)
+          addEffectWithCleanup(payload)
           break
         case 'node-state':
           if (state.computer) {
@@ -100,8 +123,57 @@ function initChannel() {
 
 function broadcast(type: string, payload: unknown) {
   console.log('[Hacking] Broadcasting:', type, 'channel:', currentChannelSession)
+
+  // Local tabs via BroadcastChannel
   if (channel) {
     channel.postMessage({ type, payload })
+  }
+
+  // Remote devices via WebSocket (only if GM and sync enabled)
+  if (wsTransport && state.isGMView && state.isRemoteSyncEnabled) {
+    wsTransport.send({ type, payload })
+  }
+}
+
+// Handle incoming WebSocket messages
+function handleRemoteMessage(message: SyncMessage) {
+  const { type, payload } = message
+  console.log('[Hacking] Remote message:', type)
+
+  // Handle init message (full state sync on connect)
+  if (type === 'init') {
+    const p = payload as { computer: Computer | null; focusedNodeId: string | null; ambientIntensity: number }
+    if (p.computer) state.computer = p.computer
+    state.focusedNodeId = p.focusedNodeId
+    state.ambientIntensity = p.ambientIntensity
+    return
+  }
+
+  // Same handling as BroadcastChannel messages
+  switch (type) {
+    case 'effect':
+      addEffectWithCleanup(payload as HackingEffect)
+      break
+    case 'node-state': {
+      const np = payload as { nodeId: string; state: NodeState }
+      if (state.computer) {
+        const node = state.computer.accessPoints.find(ap => ap.id === np.nodeId)
+        if (node) node.state = np.state
+      }
+      break
+    }
+    case 'focus':
+      state.focusedNodeId = (payload as { nodeId: string | null }).nodeId
+      break
+    case 'intensity':
+      state.ambientIntensity = (payload as { value: number }).value
+      break
+    case 'computer':
+      state.computer = payload as Computer
+      break
+    case 'clear-effects':
+      state.activeEffects = []
+      break
   }
 }
 
@@ -139,9 +211,23 @@ function setNodeState(nodeId: string, newState: NodeState) {
 
   const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
   if (node) {
+    const oldState = node.state
     node.state = newState
     broadcast('node-state', { nodeId, state: newState })
     saveToLocalStorage()
+
+    // Auto-trigger visual effects based on state changes
+    if (newState === 'alarmed' && oldState !== 'alarmed') {
+      triggerEffect('alarm', nodeId)
+    }
+
+    // Check if all nodes are now breached
+    if (newState === 'breached') {
+      const allBreached = state.computer.accessPoints.every(ap => ap.state === 'breached')
+      if (allBreached) {
+        triggerEffect('success')
+      }
+    }
   }
 }
 
@@ -214,7 +300,7 @@ function deleteEncounter(encounterId: string) {
 }
 
 // URL sharing
-function generateShareUrl(): string {
+function generateShareUrl(includeRemoteSync = true): string {
   if (!state.computer) return window.location.href
 
   // Minify computer data for shorter URLs
@@ -240,9 +326,12 @@ function generateShareUrl(): string {
   const encoded = btoa(encodeURIComponent(json))
   const baseUrl = window.location.origin + window.location.pathname
 
-  console.log('[Hacking] Share URL length:', encoded.length, 'chars')
+  // If remote sync is enabled, add hint for player to connect via WebSocket
+  const syncParam = includeRemoteSync && state.isRemoteSyncEnabled ? '&sync=ws' : ''
 
-  return `${baseUrl}#/hacking/view?session=${state.sessionId}&state=${encoded}`
+  console.log('[Hacking] Share URL length:', encoded.length, 'chars', syncParam ? '(with sync)' : '')
+
+  return `${baseUrl}#/hacking/view?session=${state.sessionId}&state=${encoded}${syncParam}`
 }
 
 function loadFromUrl(): boolean {
@@ -291,6 +380,103 @@ function loadFromUrl(): boolean {
     }
   }
   return false
+}
+
+// Check if URL indicates WebSocket sync is available
+function hasRemoteSyncInUrl(): boolean {
+  const hash = window.location.hash
+  return hash.includes('sync=ws')
+}
+
+// Remote sync functions
+
+// Enable remote sync (called by GM to start hosting)
+async function enableRemoteSync(): Promise<boolean> {
+  console.log('[Hacking] ========================================')
+  console.log('[Hacking] enableRemoteSync() called')
+  console.log('[Hacking] Session ID:', state.sessionId)
+  console.log('[Hacking] WebSocket supported:', isWebSocketSupported())
+
+  if (!isWebSocketSupported()) {
+    console.warn('[Hacking] WebSocket not supported in this browser')
+    return false
+  }
+
+  try {
+    wsTransport = getSyncTransport()
+    console.log('[Hacking] Got sync transport, setting up handlers...')
+
+    wsTransport.onMessage = handleRemoteMessage
+    wsTransport.onStateChange = (newState) => {
+      console.log('[Hacking] WebSocket state changed:', newState)
+      state.wsConnectionState = newState
+    }
+
+    console.log('[Hacking] Connecting as GM...')
+    await wsTransport.connect(state.sessionId, 'gm')
+    state.isRemoteSyncEnabled = true
+
+    // Send current state to sync any existing connections
+    if (state.computer) {
+      console.log('[Hacking] Sending initial computer state:', state.computer.name)
+      wsTransport.send({ type: 'computer', payload: state.computer })
+    }
+
+    console.log('[Hacking] Remote sync enabled as GM ✓')
+    return true
+  } catch (e) {
+    console.error('[Hacking] Failed to enable remote sync:', e)
+    state.isRemoteSyncEnabled = false
+    state.wsConnectionState = 'error'
+    return false
+  }
+}
+
+// Join remote session (called by player view)
+async function joinRemoteSession(sessionId: string): Promise<boolean> {
+  console.log('[Hacking] ========================================')
+  console.log('[Hacking] joinRemoteSession() called')
+  console.log('[Hacking] Session ID:', sessionId)
+  console.log('[Hacking] WebSocket supported:', isWebSocketSupported())
+
+  if (!isWebSocketSupported()) {
+    console.warn('[Hacking] WebSocket not supported in this browser')
+    return false
+  }
+
+  try {
+    wsTransport = getSyncTransport()
+    console.log('[Hacking] Got sync transport, setting up handlers...')
+
+    wsTransport.onMessage = handleRemoteMessage
+    wsTransport.onStateChange = (newState) => {
+      console.log('[Hacking] WebSocket state changed:', newState)
+      state.wsConnectionState = newState
+    }
+
+    console.log('[Hacking] Connecting as player...')
+    await wsTransport.connect(sessionId, 'player')
+    state.isRemoteSyncEnabled = true
+
+    console.log('[Hacking] Joined remote session as player ✓')
+    return true
+  } catch (e) {
+    console.error('[Hacking] Failed to join remote session:', e)
+    state.isRemoteSyncEnabled = false
+    state.wsConnectionState = 'error'
+    return false
+  }
+}
+
+// Disable remote sync
+function disableRemoteSync(): void {
+  if (wsTransport) {
+    wsTransport.disconnect()
+    wsTransport = null
+  }
+  state.isRemoteSyncEnabled = false
+  state.wsConnectionState = 'disconnected'
+  console.log('[Hacking] Remote sync disabled')
 }
 
 // LocalStorage persistence
@@ -405,6 +591,11 @@ export function useHackingStore() {
     // URL sharing
     generateShareUrl,
     loadFromUrl,
-    ensureChannel
+    ensureChannel,
+    hasRemoteSyncInUrl,
+    // Remote sync
+    enableRemoteSync,
+    joinRemoteSession,
+    disableRemoteSync
   }
 }

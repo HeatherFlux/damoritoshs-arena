@@ -1,5 +1,6 @@
 import { reactive, watch } from 'vue'
 import { generateThemePalette, hexToHSL, hslToHex } from '../utils/colors'
+import { setSyncServerUrl } from '../utils/syncTransport'
 
 const STORAGE_KEY = 'sf2e-settings'
 
@@ -14,6 +15,8 @@ export interface Settings {
   // Discord Integration
   discordWebhookEnabled: boolean
   discordWebhookUrl: string
+  // Real-time Sync
+  syncServerUrl: string
 }
 
 // Theme definition - base color with optional manual overrides
@@ -66,6 +69,7 @@ const defaultSettings: Settings = {
   backgroundStyle: 'particle-field',
   discordWebhookEnabled: false,
   discordWebhookUrl: '',
+  syncServerUrl: '',
 }
 
 // Theme definitions - simplified to just base color + mode
@@ -334,12 +338,23 @@ const settings = reactive<Settings>({
 // Apply theme on load
 applyTheme(settings.theme)
 
+// Initialize sync server URL if configured
+if (settings.syncServerUrl) {
+  setSyncServerUrl(settings.syncServerUrl)
+}
+
 // Auto-save on changes and apply theme
 watch(
   () => ({ ...settings }),
-  (newVal) => {
+  (newVal, oldVal) => {
     saveToStorage(newVal)
     applyTheme(newVal.theme)
+    // Update sync URL if changed
+    if (newVal.syncServerUrl !== oldVal?.syncServerUrl) {
+      if (newVal.syncServerUrl) {
+        setSyncServerUrl(newVal.syncServerUrl)
+      }
+    }
   },
   { deep: true }
 )

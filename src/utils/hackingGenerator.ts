@@ -239,19 +239,37 @@ function generateConnections(nodeCount: number): Map<number, number[]> {
   return connections
 }
 
+// DC by level table (PF2e/SF2e standard)
+const DC_BY_LEVEL: Record<number, number> = {
+  0: 14, 1: 15, 2: 16, 3: 18, 4: 19, 5: 20,
+  6: 22, 7: 23, 8: 24, 9: 26, 10: 27,
+  11: 28, 12: 30, 13: 31, 14: 32, 15: 34,
+  16: 35, 17: 36, 18: 38, 19: 39, 20: 40
+}
+
+function getDCForLevel(level: number): number {
+  const clampedLevel = Math.max(0, Math.min(20, level))
+  return DC_BY_LEVEL[clampedLevel] ?? 15
+}
+
 // Main generator function
 export interface GeneratorOptions {
   nodeCount?: number
-  level?: number
+  level?: number        // Computer level (for display)
+  partyLevel?: number   // Party level (for DC calculation)
   type?: ComputerType
   name?: string
 }
 
 export function generateRandomComputer(options: GeneratorOptions = {}): Computer {
   const nodeCount = options.nodeCount ?? randomInt(5, 6)
-  const level = options.level ?? randomInt(1, 10)
+  const partyLevel = options.partyLevel ?? options.level ?? randomInt(1, 10)
+  const level = options.level ?? partyLevel
   const type = options.type ?? pick(['tech', 'magic', 'hybrid'] as ComputerType[])
   const name = options.name ?? generateComputerName()
+
+  // Base DC from party level
+  const baseDC = getDCForLevel(partyLevel)
 
   const positions = generateNodePositions(nodeCount)
   const connectionMap = generateConnections(nodeCount)
@@ -282,13 +300,18 @@ export function generateRandomComputer(options: GeneratorOptions = {}): Computer
 
     const nodeId = `ap-${Date.now()}-${i}`
 
+    // Vary DC slightly per node (-2 to +2)
+    const dcVariation = randomInt(-2, 2)
+    const nodeDC = baseDC + dcVariation
+
     accessPoints.push({
       id: nodeId,
       name: nodeName,
       type: nodeType,
       state: 'locked',
       position: positions[i]!,
-      connectedTo: []
+      connectedTo: [],
+      dc: nodeDC
     })
   }
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useHackingStore } from '../../stores/hackingStore'
+import { isSyncAvailable, getSyncServerUrl } from '../../utils/syncTransport'
 import HackingCanvas from './HackingCanvas.vue'
 import HackingEffectOverlay from './HackingEffectOverlay.vue'
-import HackingControls from './HackingControls.vue'
 import AccessPointList from './AccessPointList.vue'
 import ComputerEditor from './ComputerEditor.vue'
 
@@ -11,18 +11,69 @@ const store = useHackingStore()
 
 // UI State
 const showEditor = ref(false)
-const showEncounterMenu = ref(false)
-const showShareModal = ref(false)
-const shareUrl = ref('')
+const showSavedList = ref(false)
 const copySuccess = ref(false)
+const partyLevel = ref(5)
+
+// Remote sync state
+const syncLoading = ref(false)
+const syncAvailable = computed(() => isSyncAvailable())
+const syncEnabled = computed(() => store.state.isRemoteSyncEnabled)
+const syncState = computed(() => store.state.wsConnectionState)
 
 onMounted(() => {
   store.setGMView(true)
+  console.log('[HackingPanel] Mounted. Sync available:', syncAvailable.value, 'Server:', getSyncServerUrl())
+})
+
+onUnmounted(() => {
+  if (store.state.isRemoteSyncEnabled) {
+    store.disableRemoteSync()
+  }
 })
 
 function openPlayerView() {
-  const url = store.generateShareUrl()
+  const url = store.generateShareUrl(false)
+  console.log('[HackingPanel] Opening local player view:', url)
   window.open(url, '_blank', 'width=1920,height=1080')
+}
+
+async function startSessionLink() {
+  if (!syncAvailable.value) {
+    console.warn('[HackingPanel] Sync not available - no server configured')
+    alert('Remote sync is not available. Make sure the sync server is running.')
+    return
+  }
+
+  syncLoading.value = true
+  try {
+    if (!syncEnabled.value) {
+      console.log('[HackingPanel] Enabling remote sync...')
+      const success = await store.enableRemoteSync()
+      if (!success) {
+        console.error('[HackingPanel] Failed to enable remote sync')
+        alert('Failed to connect to sync server. Is it running?')
+        return
+      }
+    }
+
+    const url = store.generateShareUrl(true)
+    console.log('[HackingPanel] Session URL:', url)
+
+    await navigator.clipboard.writeText(url)
+    copySuccess.value = true
+    setTimeout(() => copySuccess.value = false, 3000)
+  } catch (e) {
+    console.error('[HackingPanel] Failed to start session:', e)
+    alert('Failed to create session link')
+  } finally {
+    syncLoading.value = false
+  }
+}
+
+function stopSession() {
+  console.log('[HackingPanel] Stopping remote session')
+  store.disableRemoteSync()
 }
 
 function createNew() {
@@ -31,41 +82,24 @@ function createNew() {
 }
 
 function generateRandom() {
-  store.generateComputer()
+  store.generateComputer({ partyLevel: partyLevel.value })
 }
 
 function saveCurrentEncounter() {
   const name = prompt('Enter a name for this encounter:', store.state.computer?.name || 'Encounter')
   if (name) {
     store.saveEncounter(name)
-    showEncounterMenu.value = false
   }
 }
 
 function loadSelectedEncounter(id: string) {
   store.loadEncounter(id)
-  showEncounterMenu.value = false
+  showSavedList.value = false
 }
 
 function deleteSelectedEncounter(id: string) {
   if (confirm('Delete this saved encounter?')) {
     store.deleteEncounter(id)
-  }
-}
-
-function openShareModal() {
-  shareUrl.value = store.generateShareUrl()
-  showShareModal.value = true
-  copySuccess.value = false
-}
-
-async function copyShareUrl() {
-  try {
-    await navigator.clipboard.writeText(shareUrl.value)
-    copySuccess.value = true
-    setTimeout(() => copySuccess.value = false, 2000)
-  } catch (e) {
-    console.error('Failed to copy:', e)
   }
 }
 
@@ -81,70 +115,111 @@ function formatDate(timestamp: number): string {
 
 <template>
   <div class="hacking-layout">
-    <!-- Header -->
+    <!-- Minimal Header - just computer name -->
     <header class="hacking-header panel">
       <div class="header-content">
-        <div class="header-left">
-          <span v-if="store.state.computer" class="computer-info">
-            <span class="computer-name text-accent font-semibold">{{ store.state.computer.name }}</span>
-            <span class="text-dim ml-2">(Level {{ store.state.computer.level }} {{ store.state.computer.type }})</span>
-          </span>
-        </div>
-        <div class="header-center">
-          <button class="btn btn-secondary btn-sm" @click="createNew">
-            + New
-          </button>
-          <button class="btn btn-primary btn-sm" @click="generateRandom">
-            🎲 Random
-          </button>
-          <button class="btn btn-secondary btn-sm" @click="showEditor = true">
-            ✏️ Edit
-          </button>
-          <div class="dropdown-container">
-            <button class="btn btn-secondary btn-sm" @click="showEncounterMenu = !showEncounterMenu">
-              📁 Encounters
-            </button>
-            <div v-if="showEncounterMenu" class="dropdown-menu">
-              <button class="dropdown-item" @click="saveCurrentEncounter">
-                💾 Save Current
-              </button>
-              <hr class="dropdown-divider" />
-              <div v-if="store.state.savedEncounters.length === 0" class="dropdown-empty">
-                No saved encounters
-              </div>
-              <div
-                v-for="enc in store.state.savedEncounters"
-                :key="enc.id"
-                class="dropdown-item encounter-item"
-              >
-                <div class="encounter-info" @click="loadSelectedEncounter(enc.id)">
-                  <span class="encounter-name">{{ enc.name }}</span>
-                  <span class="encounter-date">{{ formatDate(enc.savedAt) }}</span>
-                </div>
-                <button class="encounter-delete" @click.stop="deleteSelectedEncounter(enc.id)">✕</button>
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-secondary btn-sm" @click="openShareModal">
-            🔗 Share
-          </button>
-        </div>
-        <div class="header-right">
-          <button class="btn btn-primary btn-sm" @click="openPlayerView">
-            Open Player View
-          </button>
-        </div>
+        <span v-if="store.state.computer" class="computer-info">
+          <span class="computer-name">{{ store.state.computer.name }}</span>
+          <span class="computer-meta">Level {{ store.state.computer.level }} {{ store.state.computer.type }}</span>
+        </span>
+        <span v-else class="computer-name text-muted">No Computer</span>
       </div>
     </header>
 
     <!-- Main content -->
     <div class="hacking-content">
-      <!-- Left sidebar: Controls -->
-      <aside class="hacking-sidebar-left">
-        <HackingControls />
+      <!-- Left: Controls sidebar -->
+      <aside class="hacking-sidebar">
+        <!-- Controls Card -->
+        <div class="controls-card panel">
+          <h3 class="card-title">Controls</h3>
+
+          <!-- Computer Actions -->
+          <div class="control-section">
+            <div class="control-row">
+              <button class="btn btn-secondary flex-1" @click="createNew">New</button>
+              <button class="btn btn-secondary flex-1" @click="showEditor = true">Edit</button>
+            </div>
+
+            <div class="control-row random-row">
+              <label class="level-label">
+                <span>Level</span>
+                <input
+                  type="number"
+                  v-model.number="partyLevel"
+                  min="1"
+                  max="20"
+                  class="level-input"
+                />
+              </label>
+              <button class="btn btn-primary flex-1" @click="generateRandom">Random</button>
+            </div>
+          </div>
+
+          <!-- Saved Encounters -->
+          <div class="control-section">
+            <div class="control-row">
+              <button class="btn btn-secondary flex-1" @click="saveCurrentEncounter">Save</button>
+              <button
+                class="btn btn-secondary flex-1"
+                @click="showSavedList = !showSavedList"
+              >
+                Load {{ store.state.savedEncounters.length > 0 ? `(${store.state.savedEncounters.length})` : '' }}
+              </button>
+            </div>
+
+            <div v-if="showSavedList && store.state.savedEncounters.length > 0" class="saved-list">
+              <div
+                v-for="enc in store.state.savedEncounters"
+                :key="enc.id"
+                class="saved-item"
+              >
+                <div class="saved-info" @click="loadSelectedEncounter(enc.id)">
+                  <span class="saved-name">{{ enc.name }}</span>
+                  <span class="saved-date">{{ formatDate(enc.savedAt) }}</span>
+                </div>
+                <button class="saved-delete" @click="deleteSelectedEncounter(enc.id)">×</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Player Sharing -->
+          <div class="control-section">
+            <div class="section-label">Share</div>
+            <div class="control-row">
+              <button
+                class="btn btn-accent flex-1"
+                title="Open a player-facing view in a new window for displaying on a second monitor"
+                @click="openPlayerView"
+              >
+                Player View
+              </button>
+            </div>
+            <div class="control-row">
+              <button
+                v-if="!syncEnabled"
+                class="btn btn-secondary flex-1"
+                :class="{ loading: syncLoading }"
+                :disabled="syncLoading"
+                title="Copy a link to share with players so they can view the hacking encounter on their own device"
+                @click="startSessionLink"
+              >
+                {{ copySuccess ? 'Copied!' : 'Session Link' }}
+              </button>
+              <div v-else class="session-status">
+                <span class="sync-indicator" :class="'sync-' + syncState"></span>
+                <span class="session-label">LIVE</span>
+                <button class="btn btn-danger btn-sm" @click="stopSession">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access Points Card -->
+        <AccessPointList />
       </aside>
 
-      <!-- Center: Canvas preview -->
+      <!-- Right: Canvas -->
       <main class="hacking-main">
         <div class="canvas-container panel">
           <HackingCanvas />
@@ -157,11 +232,6 @@ function formatDate(timestamp: number): string {
           </div>
         </div>
       </main>
-
-      <!-- Right sidebar: Node list -->
-      <aside class="hacking-sidebar-right">
-        <AccessPointList />
-      </aside>
     </div>
 
     <!-- Effect overlay -->
@@ -175,39 +245,6 @@ function formatDate(timestamp: number): string {
         </div>
       </div>
     </Teleport>
-
-    <!-- Share Modal -->
-    <Teleport to="body">
-      <div v-if="showShareModal" class="modal-overlay" @click.self="showShareModal = false">
-        <div class="modal-content share-modal panel">
-          <h3 class="text-lg font-semibold text-accent mb-4">Share with Players</h3>
-          <p class="text-sm text-dim mb-3">
-            Send this link to players - they'll see the current encounter state:
-          </p>
-          <div class="share-url-container">
-            <input
-              type="text"
-              :value="shareUrl"
-              readonly
-              class="input share-url-input"
-              @click="($event.target as HTMLInputElement).select()"
-            />
-            <button class="btn btn-primary" @click="copyShareUrl">
-              {{ copySuccess ? '✓ Copied!' : 'Copy' }}
-            </button>
-          </div>
-          <p class="text-xs text-muted mt-3">
-            Note: The URL contains the full encounter state. Changes you make after sharing won't sync automatically - share a new link for updates.
-          </p>
-          <div class="modal-actions">
-            <button class="btn btn-secondary" @click="showShareModal = false">Close</button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Click outside to close dropdown -->
-    <div v-if="showEncounterMenu" class="dropdown-backdrop" @click="showEncounterMenu = false"></div>
   </div>
 </template>
 
@@ -215,47 +252,54 @@ function formatDate(timestamp: number): string {
 .hacking-layout {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
   height: 100%;
   background: var(--color-bg);
 }
 
 .hacking-header {
   flex-shrink: 0;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--color-border);
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
 }
 
 .computer-info {
-  font-size: var(--text-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.computer-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.computer-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .hacking-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  width: 100%;
 }
 
-.hacking-sidebar-left,
-.hacking-sidebar-right {
-  flex-shrink: 0;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
+/* Right: Canvas display */
 .hacking-main {
   flex: 1;
+  min-width: 50%;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -281,108 +325,224 @@ function formatDate(timestamp: number): string {
   gap: 0.75rem;
 }
 
-/* Header center buttons */
-.header-center {
+/* Left: Controls sidebar */
+.hacking-sidebar {
+  flex-shrink: 0;
+  width: 380px;
+  max-width: 40%;
+  padding: 1rem;
+  overflow-y: auto;
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Controls Card */
+.controls-card {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.control-section {
+  padding-top: 1.25rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.control-section:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.section-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.control-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.control-row:last-child {
+  margin-bottom: 0;
+}
+
+.random-row {
   align-items: center;
 }
 
-/* Dropdown */
-.dropdown-container {
-  position: relative;
+.level-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-dim);
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0.25rem;
-  min-width: 220px;
-  background: var(--color-bg-elevated);
+.level-input {
+  width: 3.5rem;
+  padding: 0.5rem 0.5rem;
+  font-size: var(--text-base);
+  text-align: center;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.level-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Saved List */
+.saved-list {
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
-.dropdown-item {
+.saved-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.625rem 0.75rem;
-  background: none;
-  border: none;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s;
-}
-
-.dropdown-item:hover {
-  background: var(--color-bg-hover);
-}
-
-.dropdown-divider {
-  border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 0.25rem 0;
-}
-
-.dropdown-empty {
   padding: 0.75rem;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  text-align: center;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.dropdown-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
+.saved-item:last-child {
+  border-bottom: none;
 }
 
-/* Encounter items */
-.encounter-item {
-  padding: 0.5rem 0.75rem;
-}
-
-.encounter-info {
+.saved-info {
   flex: 1;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
-  cursor: pointer;
+  gap: 0.25rem;
 }
 
-.encounter-name {
+.saved-info:hover {
+  color: var(--color-accent);
+}
+
+.saved-name {
+  font-size: var(--text-base);
   font-weight: 500;
 }
 
-.encounter-date {
-  font-size: 10px;
+.saved-date {
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
-.encounter-delete {
-  padding: 0.25rem 0.5rem;
+.saved-delete {
+  padding: 0.375rem 0.625rem;
   background: none;
   border: none;
   color: var(--color-text-muted);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s;
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
-.encounter-delete:hover {
+.saved-delete:hover {
+  color: var(--color-danger);
+}
+
+/* Buttons */
+.btn-accent {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border: 1px solid var(--color-accent);
+}
+
+.btn-accent:hover {
+  background: color-mix(in srgb, var(--color-accent) 85%, white);
+}
+
+.btn-danger {
   background: var(--color-danger);
   color: white;
+  border: 1px solid var(--color-danger);
 }
 
-/* Modals */
+.btn-xs {
+  padding: 0.125rem 0.375rem;
+  font-size: 10px;
+  min-width: auto;
+}
+
+.btn.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Session Status */
+.session-status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  flex: 1;
+  justify-content: center;
+}
+
+.session-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-success);
+  letter-spacing: 0.05em;
+}
+
+.sync-indicator {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+}
+
+.sync-indicator.sync-connected {
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.sync-indicator.sync-connecting {
+  background: var(--color-warning);
+}
+
+.sync-indicator.sync-disconnected {
+  background: var(--color-text-muted);
+}
+
+.sync-indicator.sync-error {
+  background: var(--color-danger);
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -406,28 +566,5 @@ function formatDate(timestamp: number): string {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-}
-
-.share-modal {
-  width: 100%;
-  max-width: 500px;
-  padding: 1.5rem;
-}
-
-.share-url-container {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.share-url-input {
-  flex: 1;
-  font-size: var(--text-xs);
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.modal-actions {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

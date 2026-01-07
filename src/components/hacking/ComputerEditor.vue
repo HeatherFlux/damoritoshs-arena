@@ -24,6 +24,7 @@ const computerType = ref<ComputerType>('tech')
 // New node form
 const newNodeName = ref('')
 const newNodeType = ref<AccessPointType>('remote')
+const newNodeDC = ref<number | undefined>(undefined)
 
 // Canvas ref
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -206,11 +207,13 @@ function addNode(pos: { x: number; y: number }) {
     type: newNodeType.value,
     state: 'locked',
     position: { x: pos.x, y: pos.y },
-    connectedTo: []
+    connectedTo: [],
+    dc: newNodeDC.value
   }
 
   store.state.computer.accessPoints.push(newNode)
   newNodeName.value = ''
+  newNodeDC.value = undefined
   selectedNodeId.value = newNode.id
   store.setFocus(newNode.id)
 }
@@ -509,7 +512,6 @@ watch(() => store.state.computer, (newComputer) => {
             :class="{ active: editMode === 'select' }"
             @click="editMode = 'select'; connectingFromId = null"
           >
-            <span class="mode-icon">✋</span>
             Select
           </button>
           <button
@@ -517,7 +519,6 @@ watch(() => store.state.computer, (newComputer) => {
             :class="{ active: editMode === 'add' }"
             @click="editMode = 'add'; connectingFromId = null"
           >
-            <span class="mode-icon">➕</span>
             Add
           </button>
           <button
@@ -525,7 +526,6 @@ watch(() => store.state.computer, (newComputer) => {
             :class="{ active: editMode === 'connect' }"
             @click="editMode = 'connect'"
           >
-            <span class="mode-icon">🔗</span>
             Link
           </button>
           <button
@@ -533,7 +533,6 @@ watch(() => store.state.computer, (newComputer) => {
             :class="{ active: editMode === 'disconnect' }"
             @click="editMode = 'disconnect'"
           >
-            <span class="mode-icon">✂️</span>
             Unlink
           </button>
           <button
@@ -541,7 +540,6 @@ watch(() => store.state.computer, (newComputer) => {
             :class="{ active: editMode === 'delete' }"
             @click="editMode = 'delete'; connectingFromId = null"
           >
-            <span class="mode-icon">🗑️</span>
             Delete
           </button>
         </div>
@@ -554,13 +552,26 @@ watch(() => store.state.computer, (newComputer) => {
           <label>Name</label>
           <input v-model="newNodeName" class="input" placeholder="Terminal Alpha" />
         </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select v-model="newNodeType" class="input">
-            <option value="physical">Physical</option>
-            <option value="remote">Remote</option>
-            <option value="magical">Magical</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select v-model="newNodeType" class="input">
+              <option value="physical">Physical</option>
+              <option value="remote">Remote</option>
+              <option value="magical">Magical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>DC</label>
+            <input
+              v-model.number="newNodeDC"
+              type="number"
+              min="0"
+              max="50"
+              class="input"
+              placeholder="20"
+            />
+          </div>
         </div>
         <p class="hint">Click on the canvas to place the node</p>
       </div>
@@ -593,6 +604,18 @@ watch(() => store.state.computer, (newComputer) => {
               <option value="alarmed">Alarmed</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>DC</label>
+          <input
+            v-model.number="selectedNode.dc"
+            type="number"
+            min="0"
+            max="50"
+            class="input"
+            placeholder="Auto"
+          />
         </div>
 
         <div v-if="selectedNode.connectedTo.length > 0" class="connections-list">
@@ -713,15 +736,17 @@ watch(() => store.state.computer, (newComputer) => {
 
 .mode-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.75rem 0.5rem;
+  justify-content: center;
+  padding: 0.5rem 0.25rem;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-dim);
   font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -736,10 +761,6 @@ watch(() => store.state.computer, (newComputer) => {
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
   color: var(--color-accent);
-}
-
-.mode-icon {
-  font-size: 1.25rem;
 }
 
 .hint {

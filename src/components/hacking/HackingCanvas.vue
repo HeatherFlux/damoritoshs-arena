@@ -63,6 +63,7 @@ interface Particle {
 
 let particles: Particle[] = []
 
+
 function getCanvasDimensions() {
   if (!canvasRef.value) return { width: 800, height: 600 }
   return {
@@ -252,7 +253,8 @@ function drawNodes(time: number) {
 
     let pulse = Math.sin(time * 0.003 + node.position.x * 10) * 0.5 + 0.5
     if (node.state === 'alarmed') {
-      pulse = Math.sin(time * 0.02) * 0.5 + 0.5
+      // Slower pulse for alarmed - still noticeable but not frantic
+      pulse = Math.sin(time * 0.004) * 0.5 + 0.5
     }
 
     const baseRadius = props.fullscreen ? 25 : 18
@@ -281,13 +283,46 @@ function drawNodes(time: number) {
     ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
     ctx.fill()
 
-    if (props.fullscreen) {
-      ctx.font = '12px "JetBrains Mono", monospace'
-      ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`
-      ctx.textAlign = 'center'
-      ctx.fillText(node.name, pos.x, pos.y + radius + 20)
-    }
+    // Draw node label
+    const fontSize = props.fullscreen ? 12 : 11
+    const nodeDC = node.dc || node.hackSkills?.[0]?.dc
+    const label = nodeDC ? `${node.name} | DC ${nodeDC}` : node.name
+    ctx.font = `${fontSize}px "JetBrains Mono", monospace`
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`
+    ctx.textAlign = 'center'
+    ctx.fillText(label, pos.x, pos.y + radius + 16)
   }
+}
+
+function drawFocusRing(time: number) {
+  if (!ctx || !store.state.computer || !store.state.focusedNodeId) return
+
+  const node = store.state.computer.accessPoints.find(ap => ap.id === store.state.focusedNodeId)
+  if (!node) return
+
+  const pos = toCanvasCoords(node.position)
+
+  // Use white/bright color that contrasts with any node state
+  const r = 255, g = 255, b = 255
+
+  // Pulsing ring animation
+  const pulse = (Math.sin(time * 0.005) + 1) / 2  // 0-1 oscillation
+  const radius = 35 + pulse * 10
+  const alpha = 0.5 + pulse * 0.4
+
+  ctx.beginPath()
+  ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
+  ctx.lineWidth = 2
+  ctx.stroke()
+
+  // Outer glow ring
+  const outerRadius = 45 + pulse * 15
+  ctx.beginPath()
+  ctx.arc(pos.x, pos.y, outerRadius, 0, Math.PI * 2)
+  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.3})`
+  ctx.lineWidth = 1
+  ctx.stroke()
 }
 
 function drawEffects(time: number) {
@@ -419,6 +454,7 @@ function animate(time: number) {
   drawConnections(time)
   drawParticles(time)
   drawNodes(time)
+  drawFocusRing(time)
   drawEffects(time)
 
   animationId = requestAnimationFrame(animate)
@@ -445,8 +481,10 @@ function handleClick(event: MouseEvent) {
   if (!store.state.isGMView || !store.state.computer || !canvasRef.value) return
 
   const rect = canvasRef.value.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
+  const scaleX = canvasRef.value.width / rect.width
+  const scaleY = canvasRef.value.height / rect.height
+  const x = (event.clientX - rect.left) * scaleX
+  const y = (event.clientY - rect.top) * scaleY
 
   for (const node of store.state.computer.accessPoints) {
     const pos = toCanvasCoords(node.position)

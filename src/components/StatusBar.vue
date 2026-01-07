@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
+import { useHackingStore } from '../stores/hackingStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
@@ -10,6 +11,11 @@ const props = defineProps<{
 
 const combatStore = useCombatStore()
 const encounterStore = useEncounterStore()
+const hackingStore = useHackingStore()
+
+// Hacking sync status
+const hackingSyncEnabled = computed(() => hackingStore.state.isRemoteSyncEnabled)
+const hackingSyncState = computed(() => hackingStore.state.wsConnectionState)
 
 const combat = computed(() => combatStore.state.combat)
 const currentCombatant = computed(() => combatStore.currentCombatant.value)
@@ -356,6 +362,12 @@ onUnmounted(() => {
       </span>
     </div>
 
+    <!-- Hacking Sync Status (only in hacking mode when sync enabled) -->
+    <div v-if="mode === 'hacking' && hackingSyncEnabled" class="status-section">
+      <span class="sync-indicator" :class="'sync-' + hackingSyncState"></span>
+      <span class="status-label">{{ hackingSyncState === 'connected' ? 'LIVE' : hackingSyncState === 'connecting' ? 'SYNC' : 'LOCAL' }}</span>
+    </div>
+
     <!-- System Status -->
     <div class="status-section">
       <span class="status-indicator" :class="{ 'indicator-combat': mode === 'combat' && combat, 'indicator-hacking': mode === 'hacking' }"></span>
@@ -556,6 +568,42 @@ onUnmounted(() => {
   50% {
     box-shadow: 0 0 6px var(--color-danger), 0 0 12px var(--color-danger);
   }
+}
+
+/* Sync status indicator for hacking mode */
+.sync-indicator {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+}
+
+.sync-indicator.sync-connected {
+  background: var(--color-success);
+  animation: pulse-glow-sync 2s ease-in-out infinite;
+}
+
+.sync-indicator.sync-connecting {
+  background: var(--color-warning);
+  animation: pulse-glow-connecting 1s ease-in-out infinite;
+}
+
+.sync-indicator.sync-disconnected,
+.sync-indicator.sync-error {
+  background: var(--color-text-muted);
+}
+
+@keyframes pulse-glow-sync {
+  0%, 100% {
+    box-shadow: 0 0 2px var(--color-success), 0 0 4px var(--color-success);
+  }
+  50% {
+    box-shadow: 0 0 6px var(--color-success), 0 0 10px var(--color-success);
+  }
+}
+
+@keyframes pulse-glow-connecting {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* Roll display - typewriter terminal style */

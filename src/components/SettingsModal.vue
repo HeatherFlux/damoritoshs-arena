@@ -208,6 +208,20 @@ function handleClearCustom() {
                 </button>
               </div>
             </div>
+
+            <!-- Sync Server URL -->
+            <div class="p-3 bg-elevated">
+              <span class="font-medium text-text block mb-2">Sync Server</span>
+              <p class="text-xs text-dim mb-3">WebSocket server for real-time hacking sync across devices</p>
+              <input
+                type="url"
+                :value="settings.syncServerUrl"
+                @input="setSetting('syncServerUrl', ($event.target as HTMLInputElement).value)"
+                placeholder="https://your-worker.workers.dev or http://localhost:8787"
+                class="input w-full text-sm"
+              />
+              <p class="text-xs text-muted mt-2">Leave empty to disable cross-device sync</p>
+            </div>
           </div>
         </div>
 
