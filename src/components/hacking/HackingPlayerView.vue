@@ -26,9 +26,9 @@ const statusLabel = computed(() => {
   }
 })
 
-// Format skill checks for display
+// Format skill checks for player display (NO DCs - those are GM-only!)
 function formatSkillCheck(check: SkillCheck): string {
-  let text = `${check.skill} DC ${check.dc}`
+  let text = check.skill
   if (check.proficiency && check.proficiency !== 'untrained') {
     text += ` (${check.proficiency})`
   }
@@ -129,26 +129,26 @@ onUnmounted(() => {
                 <div class="detail-value">{{ formatSkillChecks(ap.hackSkills) }}</div>
               </div>
 
-              <!-- Vulnerabilities -->
+              <!-- Vulnerabilities (player view: no DC reduction shown) -->
               <div v-if="ap.vulnerabilities?.length" class="detail-section vulnerabilities">
                 <div class="detail-label">Vulnerabilities</div>
                 <div v-for="vuln in ap.vulnerabilities" :key="vuln.id" class="vuln-item">
                   <span class="vuln-name">{{ vuln.name }}</span>
-                  <span class="vuln-skills">({{ formatSkillChecks(vuln.skills) }}; −{{ vuln.dcReduction }})</span>
+                  <span class="vuln-skills">({{ formatSkillChecks(vuln.skills) }})</span>
                 </div>
               </div>
 
-              <!-- Countermeasures -->
+              <!-- Countermeasures (player view: no DCs shown, just names and skills) -->
               <div v-if="ap.countermeasures?.length" class="detail-section countermeasures">
                 <div class="detail-label">Countermeasures</div>
                 <div v-for="cm in ap.countermeasures" :key="cm.id" class="cm-item">
                   <div class="cm-header">
                     <span class="cm-name">{{ cm.name }}</span>
-                    <span class="cm-threshold">({{ cm.failureThreshold }} Failures{{ cm.isPersistent ? '; persistent' : '' }})</span>
+                    <span v-if="cm.isPersistent" class="cm-threshold">(persistent)</span>
                   </div>
                   <div class="cm-details">
-                    <span v-if="cm.noticeDC">Notice DC {{ cm.noticeDC }} {{ cm.noticeSkills?.join('/') }}; </span>
-                    <span>Disable {{ formatSkillChecks(cm.disableSkills) }}</span>
+                    <span v-if="cm.noticeSkills?.length">Notice: {{ cm.noticeSkills.join('/') }}; </span>
+                    <span>Disable: {{ formatSkillChecks(cm.disableSkills) }}</span>
                   </div>
                 </div>
               </div>

@@ -138,10 +138,16 @@ function broadcast(type: string, payload: unknown) {
 // Handle incoming WebSocket messages
 function handleRemoteMessage(message: SyncMessage) {
   const { type, payload } = message
-  console.log('[Hacking] Remote message:', type)
+  console.log('[Hacking] Remote message:', type, 'isGM:', state.isGMView)
 
   // Handle init message (full state sync on connect)
+  // GM ignores init - they are the source of truth
+  // Players accept init to get the current state
   if (type === 'init') {
+    if (state.isGMView) {
+      console.log('[Hacking] GM ignoring init message - GM is source of truth')
+      return
+    }
     const p = payload as { computer: Computer | null; focusedNodeId: string | null; ambientIntensity: number }
     if (p.computer) state.computer = p.computer
     state.focusedNodeId = p.focusedNodeId
@@ -485,27 +491,37 @@ const ENCOUNTERS_KEY = 'sf2e-hacking-saved'
 
 function saveToLocalStorage() {
   if (state.computer) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    const data = {
       computer: state.computer,
       ambientIntensity: state.ambientIntensity
-    }))
+    }
+    console.log('[Hacking] Saving to localStorage:', state.computer.name)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  } else {
+    console.log('[Hacking] saveToLocalStorage called but no computer')
   }
 }
 
 function loadFromLocalStorage() {
+  console.log('[Hacking] Loading from localStorage...')
   const saved = localStorage.getItem(STORAGE_KEY)
+  console.log('[Hacking] localStorage data exists:', !!saved)
   if (saved) {
     try {
       const data = JSON.parse(saved)
+      console.log('[Hacking] Parsed computer name:', data.computer?.name)
       if (data.computer) {
         state.computer = data.computer
+        console.log('[Hacking] Loaded computer:', data.computer.name)
       }
       if (typeof data.ambientIntensity === 'number') {
         state.ambientIntensity = data.ambientIntensity
       }
     } catch (e) {
-      console.warn('Failed to load saved state:', e)
+      console.warn('[Hacking] Failed to load saved state:', e)
     }
+  } else {
+    console.log('[Hacking] No saved state found in localStorage')
   }
 }
 
@@ -532,22 +548,33 @@ function init() {
   if (initialized) return
   initialized = true
 
+  console.log('[Hacking] ======== INIT START ========')
+  console.log('[Hacking] Current hash:', window.location.hash)
+
   // Set session ID first (needed for channel isolation)
   state.sessionId = getSessionId()
-  console.log('[Hacking] Init with session:', state.sessionId)
+  console.log('[Hacking] Session ID:', state.sessionId)
 
   initChannel()
   loadEncountersFromStorage()
 
+  console.log('[Hacking] Attempting to load from URL...')
   const loadedFromUrl = loadFromUrl()
+  console.log('[Hacking] Loaded from URL:', loadedFromUrl)
 
   if (!loadedFromUrl) {
+    console.log('[Hacking] No URL state, trying localStorage...')
     loadFromLocalStorage()
   }
 
+  console.log('[Hacking] After loading, computer is:', state.computer?.name || '(null)')
+
   if (!state.computer) {
+    console.log('[Hacking] No computer found, loading sample...')
     loadSampleComputer()
   }
+
+  console.log('[Hacking] ======== INIT COMPLETE ========')
 }
 
 // Allow reinitializing channel (for player view after URL parse)
@@ -563,7 +590,14 @@ function ensureChannel() {
 // Watch for changes and save
 watch(
   () => state.computer,
-  () => saveToLocalStorage(),
+  (newVal, oldVal) => {
+    console.log('[Hacking] Computer changed!',
+      'from:', oldVal?.name || '(null)',
+      'to:', newVal?.name || '(null)',
+      'stack:', new Error().stack?.split('\n').slice(2, 5).join(' <- ')
+    )
+    saveToLocalStorage()
+  },
   { deep: true }
 )
 
