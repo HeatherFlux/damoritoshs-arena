@@ -19,9 +19,7 @@ import {
 
 const model = defineModel<Partial<Hazard>>({ required: true })
 
-const emit = defineEmits<{
-  complete: []
-}>()
+// No emits needed - CustomPanel handles add action
 
 // Road map for auto-defaults
 const selectedRoadMap = ref<HazardRoadmap>('high')
@@ -681,13 +679,10 @@ function markdownToHtml(md: string): string {
       </div>
     </Transition>
 
-    <!-- Action Bar -->
-    <div class="action-bar">
-      <button type="button" class="btn btn-ghost" @click="showPreview = true">
-        Preview
-      </button>
-      <button type="button" class="btn btn-primary" @click="emit('complete')">
-        Add to Hazards
+    <!-- Preview Button (action bar is in parent CustomPanel) -->
+    <div class="preview-bar">
+      <button type="button" class="btn btn-ghost btn-sm" @click="showPreview = true">
+        Preview Stat Block
       </button>
     </div>
 
@@ -1034,15 +1029,11 @@ function markdownToHtml(md: string): string {
   margin-bottom: 0.25rem;
 }
 
-/* Action bar */
-.action-bar {
+/* Preview bar */
+.preview-bar {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: 0.25rem;
+  justify-content: center;
+  padding: 0.5rem;
 }
 
 .btn-ghost {

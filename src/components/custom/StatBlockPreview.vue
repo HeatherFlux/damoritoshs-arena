@@ -188,28 +188,36 @@ const sizeDisplay = computed(() => {
       <!-- Header -->
       <div class="stat-header hazard-header">
         <div class="stat-name">{{ hazard.name }}</div>
-        <div class="stat-level">LEVEL {{ hazard.level ?? 1 }}</div>
+        <div class="stat-level">{{ hazard.complexity === 'complex' ? 'COMPLEX' : 'SIMPLE' }} HAZARD {{ hazard.level ?? 1 }}</div>
       </div>
 
       <!-- Traits Row -->
       <div class="stat-traits">
-        <span class="trait-complexity">{{ hazard.complexity === 'complex' ? 'Complex' : 'Simple' }}</span>
         <span class="trait-type">{{ hazard.type }}</span>
+        <span v-for="subtype in hazard.trapSubtypes" :key="subtype" class="trait-subtype">{{ subtype }}</span>
         <span v-for="trait in hazard.traits" :key="trait" class="trait">{{ trait }}</span>
       </div>
 
       <div class="stat-divider hazard-divider"></div>
 
-      <!-- Stealth -->
-      <div v-if="hazard.stealth" class="stat-row">
-        <span class="stat-label">Stealth</span>
-        <span class="stat-value">{{ hazard.stealth }}</span>
+      <!-- Description -->
+      <div v-if="hazard.description" class="stat-description">
+        {{ hazard.description }}
       </div>
 
-      <!-- Description -->
-      <div v-if="hazard.description" class="stat-row">
-        <span class="stat-label">Description</span>
-        <span class="stat-value">{{ hazard.description }}</span>
+      <div class="stat-divider hazard-divider"></div>
+
+      <!-- Stealth -->
+      <div class="stat-row">
+        <span class="stat-label">Stealth</span>
+        <span v-if="hazard.isObvious" class="stat-value">Obvious</span>
+        <span v-else-if="hazard.stealthDC" class="stat-value">
+          DC {{ hazard.stealthDC }} (+{{ hazard.stealthDC - 10 }})
+          <span v-if="hazard.stealthProficiency && hazard.stealthProficiency !== 'untrained'" class="stat-extra">
+            ({{ hazard.stealthProficiency }} to find)
+          </span>
+        </span>
+        <span v-else class="stat-value stat-placeholder">—</span>
       </div>
 
       <!-- Disable -->
@@ -218,20 +226,108 @@ const sizeDisplay = computed(() => {
         <span class="stat-value">{{ hazard.disable }}</span>
       </div>
 
-      <!-- Actions -->
-      <div v-if="hazard.actions?.length" class="stat-section">
+      <!-- Defenses (if physical) -->
+      <template v-if="hazard.hasPhysicalComponent">
         <div class="stat-divider hazard-divider"></div>
-        <div v-for="action in hazard.actions" :key="action.name" class="stat-action">
-          <span class="action-name">{{ action.name }}</span>
-          <span v-if="action.actionType" class="action-type">[{{ action.actionType }}]</span>
-          <div v-if="action.trigger" class="action-trigger">
-            <span class="stat-label">Trigger</span> {{ action.trigger }}
-          </div>
-          <div class="action-effect">
-            <span class="stat-label">Effect</span> {{ action.effect }}
+
+        <div class="stat-row">
+          <span class="stat-label">AC</span>
+          <span class="stat-value stat-highlight">{{ hazard.ac ?? '—' }}</span>
+          <template v-if="hazard.saves?.fortitude || hazard.saves?.reflex">
+            <span class="stat-separator">;</span>
+            <span v-if="hazard.saves?.fortitude" class="stat-inline">
+              <span class="stat-label">Fort</span>
+              <span class="stat-value">{{ formatMod(hazard.saves.fortitude) }}</span>
+            </span>
+            <span v-if="hazard.saves?.reflex" class="stat-inline">
+              <span class="stat-separator">,</span>
+              <span class="stat-label">Ref</span>
+              <span class="stat-value">{{ formatMod(hazard.saves.reflex) }}</span>
+            </span>
+          </template>
+        </div>
+
+        <div class="stat-row">
+          <span v-if="hazard.hardness" class="stat-inline">
+            <span class="stat-label">Hardness</span>
+            <span class="stat-value">{{ hazard.hardness }}</span>
+            <span class="stat-separator">;</span>
+          </span>
+          <span class="stat-label">HP</span>
+          <span class="stat-value stat-highlight">{{ hazard.hp ?? '—' }}</span>
+          <span v-if="hazard.hp" class="stat-extra">(BT {{ hazard.bt ?? Math.floor(hazard.hp / 2) }})</span>
+        </div>
+
+        <div v-if="hazard.immunities?.length" class="stat-row">
+          <span class="stat-label">Immunities</span>
+          <span class="stat-value">{{ hazard.immunities.join(', ') }}</span>
+        </div>
+      </template>
+
+      <div class="stat-divider hazard-divider"></div>
+
+      <!-- Simple Hazard: Trigger & Effect -->
+      <template v-if="hazard.complexity === 'simple'">
+        <div v-if="hazard.trigger" class="stat-row">
+          <span class="stat-label">Trigger</span>
+          <span class="stat-value">{{ hazard.trigger }}</span>
+        </div>
+
+        <div v-if="hazard.effect || hazard.damage" class="stat-row">
+          <span class="stat-label">Effect</span>
+          <span class="stat-value">
+            {{ hazard.effect }}
+            <template v-if="hazard.damage">
+              <span class="damage-info">
+                {{ hazard.damage }}{{ hazard.damageType ? ` ${hazard.damageType}` : '' }} damage
+                <span v-if="hazard.usesAttackRoll && hazard.attackBonus" class="stat-extra">(+{{ hazard.attackBonus }} attack)</span>
+                <span v-else-if="hazard.saveDC" class="stat-extra">(DC {{ hazard.saveDC }} {{ hazard.saveType || 'basic' }})</span>
+              </span>
+            </template>
+          </span>
+        </div>
+
+        <div v-if="hazard.reset" class="stat-row">
+          <span class="stat-label">Reset</span>
+          <span class="stat-value">{{ hazard.reset }}</span>
+        </div>
+      </template>
+
+      <!-- Complex Hazard: Routine & Actions -->
+      <template v-else>
+        <div v-if="hazard.routine" class="stat-row">
+          <span class="stat-label">Routine</span>
+          <span class="stat-value">
+            ({{ hazard.actionsPerRound ?? 1 }} action{{ (hazard.actionsPerRound ?? 1) > 1 ? 's' : '' }}) {{ hazard.routine }}
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div v-if="hazard.actions?.length" class="stat-section">
+          <div v-for="action in hazard.actions" :key="action.name" class="stat-action">
+            <div class="action-header">
+              <span class="action-name">{{ action.name }}</span>
+              <span v-if="action.actionType" class="action-type">
+                {{ action.actionType === 'reaction' ? '[R]' : action.actionType === 'free' ? '[F]' : `[${action.actionType}]` }}
+              </span>
+              <span v-if="action.traits?.length" class="action-traits">({{ action.traits.join(', ') }})</span>
+            </div>
+            <div v-if="action.trigger" class="action-line">
+              <span class="stat-label">Trigger</span> {{ action.trigger }}
+            </div>
+            <div class="action-line">
+              <span class="stat-label">Effect</span> {{ action.effect }}
+              <template v-if="action.damage">
+                <span class="damage-info">
+                  Deals {{ action.damage }}{{ action.damageType ? ` ${action.damageType}` : '' }} damage
+                  <span v-if="action.attackBonus" class="stat-extra">(+{{ action.attackBonus }} attack)</span>
+                  <span v-else-if="action.dc" class="stat-extra">(DC {{ action.dc }} {{ action.save || 'basic' }})</span>
+                </span>
+              </template>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </template>
 
     <!-- Empty State -->
@@ -322,6 +418,11 @@ const sizeDisplay = computed(() => {
 .trait-type {
   color: var(--color-warning);
   border-color: var(--color-warning);
+}
+
+.trait-subtype {
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
 }
 
 .stat-divider {
@@ -513,6 +614,45 @@ const sizeDisplay = computed(() => {
 }
 
 .empty-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Hazard-specific styles */
+.stat-description {
+  padding: 0.5rem 1.25rem;
+  color: var(--color-text-dim);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.stat-inline {
+  display: inline;
+}
+
+.stat-placeholder {
+  color: var(--color-text-muted);
+}
+
+.damage-info {
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.action-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-bottom: 0.25rem;
+}
+
+.action-line {
+  color: var(--color-text-dim);
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+.action-traits {
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }

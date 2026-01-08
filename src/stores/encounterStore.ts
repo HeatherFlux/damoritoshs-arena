@@ -10,6 +10,7 @@ import { HAZARDS } from '../data/hazards'
 
 const STORAGE_KEY = 'sf2e-encounters'
 const CREATURES_STORAGE_KEY = 'sf2e-custom-creatures'
+const HAZARDS_STORAGE_KEY = 'sf2e-custom-hazards'
 
 // Load custom creatures from localStorage
 function loadCustomCreatures(): Creature[] {
@@ -27,6 +28,25 @@ function saveCustomCreatures(creatures: Creature[]) {
     localStorage.setItem(CREATURES_STORAGE_KEY, JSON.stringify(creatures))
   } catch (e) {
     console.error('Failed to save custom creatures:', e)
+  }
+}
+
+// Load custom hazards from localStorage
+function loadCustomHazards(): Hazard[] {
+  try {
+    const saved = localStorage.getItem(HAZARDS_STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch (e) {
+    console.error('Failed to load custom hazards:', e)
+  }
+  return []
+}
+
+function saveCustomHazards(hazards: Hazard[]) {
+  try {
+    localStorage.setItem(HAZARDS_STORAGE_KEY, JSON.stringify(hazards))
+  } catch (e) {
+    console.error('Failed to save custom hazards:', e)
   }
 }
 
@@ -78,16 +98,20 @@ function saveToStorage(state: Pick<EncounterState, 'encounters' | 'partyLevel' |
   }
 }
 
-// Initialize state with bundled + custom creatures
+// Initialize state with bundled + custom creatures/hazards
 const savedState = loadFromStorage()
 const customCreatures = loadCustomCreatures()
+const customHazards = loadCustomHazards()
 
 const state = reactive<EncounterState>({
   creatures: [
     ...(bundledCreatures as unknown as Creature[]),
     ...customCreatures,
   ],
-  hazards: HAZARDS,
+  hazards: [
+    ...HAZARDS,
+    ...customHazards,
+  ],
   encounters: savedState.encounters ?? [],
   activeEncounterId: null,
   partyLevel: savedState.partyLevel ?? 1,
@@ -418,6 +442,36 @@ function getCreatureStats() {
   return { total: state.creatures.length, bundled: bundledCount, custom: customCount }
 }
 
+// Custom hazard management
+function addCustomHazard(hazard: Hazard): void {
+  // Generate a unique ID if not provided
+  if (!hazard.id) {
+    hazard.id = `custom-hazard-${generateId()}`
+  }
+
+  // Check for duplicate
+  const existingIds = new Set(state.hazards.map(h => h.id))
+  if (existingIds.has(hazard.id)) {
+    // Regenerate ID if duplicate
+    hazard.id = `custom-hazard-${generateId()}`
+  }
+
+  // Add to hazards list
+  state.hazards.push(hazard)
+
+  // Save custom hazards
+  const bundledIds = new Set(HAZARDS.map(h => h.id))
+  const customOnly = state.hazards.filter(h => !bundledIds.has(h.id))
+  saveCustomHazards(customOnly)
+}
+
+function getHazardStats() {
+  const bundledIds = new Set(HAZARDS.map(h => h.id))
+  const bundledCount = state.hazards.filter(h => bundledIds.has(h.id)).length
+  const customCount = state.hazards.length - bundledCount
+  return { total: state.hazards.length, bundled: bundledCount, custom: customCount }
+}
+
 export const useEncounterStore = () => ({
   // State
   state,
@@ -461,4 +515,8 @@ export const useEncounterStore = () => ({
   exportCustomCreatures,
   clearCustomCreatures,
   getCreatureStats,
+
+  // Hazard management
+  addCustomHazard,
+  getHazardStats,
 })

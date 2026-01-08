@@ -77,9 +77,9 @@ const canAdd = computed(() => {
            creatureData.value.hp !== undefined &&
            creatureData.value.ac !== undefined
   } else {
+    // Hazard just needs name and level
     return hazardData.value.name?.trim() &&
-           hazardData.value.level !== undefined &&
-           hazardData.value.description?.trim()
+           hazardData.value.level !== undefined
   }
 })
 
@@ -119,8 +119,53 @@ function addToList() {
 
     // Reset form
     resetCreatureForm()
+  } else {
+    // Create a complete hazard object
+    const hazard: Hazard = {
+      id: `custom-hazard-${Date.now()}`,
+      name: hazardData.value.name || 'Unnamed Hazard',
+      level: hazardData.value.level ?? 1,
+      complexity: hazardData.value.complexity || 'simple',
+      type: hazardData.value.type || 'trap',
+      trapSubtypes: hazardData.value.trapSubtypes || [],
+      traits: hazardData.value.traits || [],
+      source: hazardData.value.source || 'Custom',
+      description: hazardData.value.description || '',
+      mainChallenge: hazardData.value.mainChallenge,
+      isObvious: hazardData.value.isObvious,
+      stealthDC: hazardData.value.stealthDC,
+      stealthProficiency: hazardData.value.stealthProficiency,
+      disable: hazardData.value.disable,
+      hasPhysicalComponent: hazardData.value.hasPhysicalComponent,
+      ac: hazardData.value.ac,
+      saves: hazardData.value.saves,
+      hardness: hazardData.value.hardness,
+      hp: hazardData.value.hp,
+      bt: hazardData.value.bt,
+      immunities: hazardData.value.immunities || [],
+      usesAttackRoll: hazardData.value.usesAttackRoll,
+      attackBonus: hazardData.value.attackBonus,
+      saveDC: hazardData.value.saveDC,
+      saveType: hazardData.value.saveType,
+      damage: hazardData.value.damage,
+      damageType: hazardData.value.damageType,
+      targetingModel: hazardData.value.targetingModel,
+      trigger: hazardData.value.trigger,
+      effect: hazardData.value.effect,
+      reset: hazardData.value.reset,
+      routine: hazardData.value.routine,
+      actionsPerRound: hazardData.value.actionsPerRound,
+      actions: hazardData.value.actions || [],
+    }
+
+    encounterStore.addCustomHazard(hazard)
+    successMessage.value = `${hazard.name} added to hazard list!`
+    showSuccess.value = true
+    setTimeout(() => showSuccess.value = false, 3000)
+
+    // Reset form
+    resetHazardForm()
   }
-  // TODO: Add hazard support when hazard store is ready
 }
 
 function resetCreatureForm() {
@@ -147,22 +192,26 @@ function resetCreatureForm() {
   }
 }
 
+function resetHazardForm() {
+  hazardData.value = {
+    name: '',
+    level: 1,
+    complexity: 'simple',
+    type: 'trap',
+    traits: [],
+    source: 'Custom',
+    description: '',
+    actions: [],
+    saves: { fortitude: undefined, reflex: undefined, will: undefined },
+    immunities: [],
+  }
+}
+
 function discardForm() {
   if (buildMode.value === 'creature') {
     resetCreatureForm()
   } else {
-    hazardData.value = {
-      name: '',
-      level: 1,
-      complexity: 'simple',
-      type: 'trap',
-      traits: [],
-      source: 'Custom',
-      description: '',
-      actions: [],
-      saves: { fortitude: undefined, reflex: undefined, will: undefined },
-      immunities: [],
-    }
+    resetHazardForm()
   }
 }
 </script>
