@@ -618,6 +618,16 @@ watch(() => store.state.computer, (newComputer) => {
           />
         </div>
 
+        <div class="form-group">
+          <label>GM Notes</label>
+          <textarea
+            v-model="selectedNode.notes"
+            class="input notes-textarea"
+            placeholder="Effects when breached/alarmed..."
+            rows="3"
+          ></textarea>
+        </div>
+
         <div v-if="selectedNode.connectedTo.length > 0" class="connections-list">
           <label>Connections</label>
           <div
@@ -720,6 +730,13 @@ watch(() => store.state.computer, (newComputer) => {
 
 .form-row .form-group {
   flex: 1;
+}
+
+.notes-textarea {
+  resize: vertical;
+  min-height: 3rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
 }
 
 .divider {

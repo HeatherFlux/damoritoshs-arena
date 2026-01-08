@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { useHackingStore } from '../stores/hackingStore'
+import { useCustomPanelStore } from '../stores/customPanelStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
@@ -12,13 +13,26 @@ const props = defineProps<{
 const combatStore = useCombatStore()
 const encounterStore = useEncounterStore()
 const hackingStore = useHackingStore()
+const customPanelStore = useCustomPanelStore()
 
 // Hacking sync status
 const hackingSyncEnabled = computed(() => hackingStore.state.isRemoteSyncEnabled)
 const hackingSyncState = computed(() => hackingStore.state.wsConnectionState)
 
+// Hacking computer stats
+const hackingComputer = computed(() => hackingStore.state.computer)
+const hackingStats = computed(() => {
+  const computer = hackingStore.state.computer
+  if (!computer) return null
+  const totalNodes = computer.accessPoints.length
+  const breachedNodes = computer.accessPoints.filter(ap => ap.state === 'breached').length
+  const alarmedNodes = computer.accessPoints.filter(ap => ap.state === 'alarmed').length
+  return { totalNodes, breachedNodes, alarmedNodes }
+})
+
 const combat = computed(() => combatStore.state.combat)
 const currentCombatant = computed(() => combatStore.currentCombatant.value)
+const nextCombatant = computed(() => combatStore.nextCombatant.value)
 const aliveCombatants = computed(() => combatStore.aliveCombatants.value)
 const activeEncounter = computed(() => encounterStore.activeEncounter.value)
 
@@ -95,6 +109,44 @@ const hackingMessages = [
   'READY TO BREACH',
 ]
 
+const customMessages = [
+  'CREATURE FORGE ACTIVE',
+  'STAT BLOCK COMPILER READY',
+  'HAZARD DESIGNER ONLINE',
+  'TRAIT ANALYZER LOADED',
+  'ABILITY CALCULATOR ARMED',
+  'DC TABLES SYNCHRONIZED',
+  'DEFENSE OPTIMIZER ACTIVE',
+  'ATTACK BUILDER STANDING BY',
+  'XP CALCULATOR VERIFIED',
+  'TEMPLATE ENGINE LOADED',
+  'CUSTOM DATABASE READY',
+  'EXPORT PROTOCOLS ONLINE',
+  'VALIDATION SUITE ACTIVE',
+  'FORGE SYSTEMS NOMINAL',
+  'READY TO CREATE',
+  'HOMEBREW MODE ENGAGED',
+]
+
+const starshipMessages = [
+  'HELM CONTROLS ONLINE',
+  'DRIFT ENGINE PRIMED',
+  'SHIELDS AT MAXIMUM',
+  'WEAPON SYSTEMS ARMED',
+  'SCANNING FOR HOSTILES',
+  'NAVIGATION CHARTS LOADED',
+  'CREW STATIONS MANNED',
+  'TACTICAL DISPLAY ACTIVE',
+  'POWER CORE STABLE',
+  'COMMS ARRAY OPERATIONAL',
+  'TARGETING COMPUTER READY',
+  'EVASIVE MANEUVERS QUEUED',
+  'BROADSIDE CANNONS CHARGED',
+  'JUMP COORDINATES SET',
+  'ALL HANDS BATTLE STATIONS',
+  'READY FOR VOID COMBAT',
+]
+
 const displayText = ref('')
 const cursorVisible = ref(true)
 let typeInterval: ReturnType<typeof setInterval> | null = null
@@ -107,6 +159,8 @@ let pauseCount = 0
 const currentMessages = computed(() => {
   if (props.mode === 'combat') return combatMessages
   if (props.mode === 'hacking') return hackingMessages
+  if (props.mode === 'custom') return customMessages
+  if (props.mode === 'starship') return starshipMessages
   return builderMessages
 })
 
@@ -168,6 +222,18 @@ const encounterStats = computed(() => {
   const totalXP = encounterStore.totalXP.value
   const difficulty = encounterStore.difficulty.value
   return { creatures, hazards, totalXP, difficulty }
+})
+
+// Custom mode stats
+const customStats = computed(() => {
+  const creatureStats = encounterStore.getCreatureStats()
+  const hazardStats = encounterStore.getHazardStats()
+  return {
+    customCreatures: creatureStats.custom,
+    customHazards: hazardStats.custom,
+    totalCreatures: creatureStats.total,
+    totalHazards: hazardStats.total,
+  }
 })
 
 // Latest roll tracking with typewriter animation
@@ -292,6 +358,74 @@ onUnmounted(() => {
       </div>
     </template>
 
+    <!-- CUSTOM MODE -->
+    <template v-else-if="mode === 'custom'">
+      <!-- Current Editing -->
+      <div class="status-section">
+        <span class="status-label">{{ customPanelStore.state.mode === 'creature' ? 'CREATURE' : 'HAZARD' }}</span>
+        <span v-if="customPanelStore.currentName.value" class="status-value text-accent">{{ customPanelStore.currentName.value }}</span>
+        <span v-else class="status-muted">UNNAMED</span>
+      </div>
+
+      <!-- Validation Status -->
+      <div class="status-section">
+        <span v-if="customPanelStore.isValid.value" class="status-badge status-badge-success">READY</span>
+        <span v-else class="status-badge status-badge-warning">INCOMPLETE</span>
+      </div>
+
+      <!-- Custom Creatures -->
+      <div class="status-section">
+        <span class="status-label">CREATURES</span>
+        <span class="status-value text-accent">{{ customStats.customCreatures }}</span>
+        <span class="status-muted">/ {{ customStats.totalCreatures }}</span>
+      </div>
+
+      <!-- Custom Hazards -->
+      <div class="status-section">
+        <span class="status-label">HAZARDS</span>
+        <span class="status-value text-secondary">{{ customStats.customHazards }}</span>
+        <span class="status-muted">/ {{ customStats.totalHazards }}</span>
+      </div>
+    </template>
+
+    <!-- STARSHIP MODE -->
+    <template v-else-if="mode === 'starship'">
+      <div class="status-section">
+        <span class="status-label">MODE</span>
+        <span class="status-badge status-badge-starship">STARSHIP</span>
+      </div>
+
+      <div class="status-section">
+        <span class="status-muted">VOID COMBAT SYSTEMS READY</span>
+      </div>
+    </template>
+
+    <!-- HACKING MODE -->
+    <template v-else-if="mode === 'hacking'">
+      <!-- Computer Name -->
+      <div v-if="hackingComputer" class="status-section">
+        <span class="status-label">TARGET</span>
+        <span class="status-value text-secondary">{{ hackingComputer.name }}</span>
+        <span class="status-badge status-badge-hacking">LVL {{ hackingComputer.level }}</span>
+      </div>
+
+      <!-- Node Stats -->
+      <div v-if="hackingStats" class="status-section">
+        <span class="status-label">NODES</span>
+        <span class="status-value" :class="{ 'text-success': hackingStats.breachedNodes === hackingStats.totalNodes }">
+          {{ hackingStats.breachedNodes }}/{{ hackingStats.totalNodes }}
+        </span>
+        <span v-if="hackingStats.alarmedNodes > 0" class="status-badge status-badge-danger">
+          {{ hackingStats.alarmedNodes }} ALARMED
+        </span>
+      </div>
+
+      <!-- No Computer -->
+      <div v-if="!hackingComputer" class="status-section">
+        <span class="status-muted">NO TARGET LOADED</span>
+      </div>
+    </template>
+
     <!-- COMBAT MODE -->
     <template v-else>
       <!-- Combat Status -->
@@ -318,6 +452,12 @@ onUnmounted(() => {
         >
           {{ currentCombatant.currentHP }}/{{ currentCombatant.maxHP }}
         </span>
+      </div>
+
+      <!-- On Deck -->
+      <div v-if="combat && nextCombatant" class="status-section">
+        <span class="status-label">ON DECK</span>
+        <span class="status-value text-dim">{{ nextCombatant.name }}</span>
       </div>
 
       <!-- No Combat -->
@@ -370,8 +510,19 @@ onUnmounted(() => {
 
     <!-- System Status -->
     <div class="status-section">
-      <span class="status-indicator" :class="{ 'indicator-combat': mode === 'combat' && combat, 'indicator-hacking': mode === 'hacking' }"></span>
-      <span class="status-label">{{ mode === 'combat' ? 'COMBAT' : mode === 'hacking' ? 'HACK' : 'BUILD' }}</span>
+      <span class="status-indicator" :class="{
+        'indicator-combat': mode === 'combat' && combat,
+        'indicator-hacking': mode === 'hacking',
+        'indicator-custom': mode === 'custom',
+        'indicator-starship': mode === 'starship'
+      }"></span>
+      <span class="status-label">{{
+        mode === 'combat' ? 'COMBAT' :
+        mode === 'hacking' ? 'HACK' :
+        mode === 'custom' ? 'FORGE' :
+        mode === 'starship' ? 'HELM' :
+        'BUILD'
+      }}</span>
     </div>
   </footer>
 </template>
@@ -497,6 +648,8 @@ onUnmounted(() => {
 .status-badge-moderate { background: var(--color-accent-subtle); color: var(--color-accent); }
 .status-badge-severe { background: var(--color-warning-subtle); color: var(--color-warning); }
 .status-badge-extreme { background: var(--color-danger-subtle); color: var(--color-danger); }
+.status-badge-starship { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+.status-badge-hacking { background: var(--color-secondary-subtle, rgba(0, 255, 136, 0.15)); color: var(--color-secondary); border: 1px solid rgba(0, 255, 136, 0.3); }
 
 /* Difficulty badge */
 .difficulty-badge {
@@ -547,9 +700,29 @@ onUnmounted(() => {
   animation: pulse-glow-hacking 1.5s ease-in-out infinite;
 }
 
+.status-indicator.indicator-custom {
+  background: var(--color-warning);
+  animation: pulse-glow-custom 2s ease-in-out infinite;
+}
+
+.status-indicator.indicator-starship {
+  background: #8b5cf6;
+  animation: pulse-glow-starship 1.5s ease-in-out infinite;
+}
+
 @keyframes pulse-glow-hacking {
   0%, 100% { box-shadow: 0 0 4px var(--color-secondary); }
   50% { box-shadow: 0 0 12px var(--color-secondary); }
+}
+
+@keyframes pulse-glow-custom {
+  0%, 100% { box-shadow: 0 0 4px var(--color-warning); }
+  50% { box-shadow: 0 0 12px var(--color-warning); }
+}
+
+@keyframes pulse-glow-starship {
+  0%, 100% { box-shadow: 0 0 4px #8b5cf6; }
+  50% { box-shadow: 0 0 12px #8b5cf6; }
 }
 
 @keyframes pulse-glow {

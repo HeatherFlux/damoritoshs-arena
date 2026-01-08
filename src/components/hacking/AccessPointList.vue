@@ -92,6 +92,12 @@ function getNodeDC(node: AccessPoint): number | undefined {
           <span class="dc-value">{{ node.hackSkills.map(formatSkill).join(' or ') }}</span>
         </div>
 
+        <!-- GM Notes (read-only display) -->
+        <div v-if="node.notes" class="node-notes-display">
+          <span class="notes-label">Notes:</span>
+          <span class="notes-text">{{ node.notes }}</span>
+        </div>
+
         <!-- Expanded Details -->
         <div v-if="expandedNode === node.id" class="node-details">
           <!-- Vulnerabilities -->
@@ -252,7 +258,16 @@ function getNodeDC(node: AccessPoint): number | undefined {
   background: var(--color-bg);
   color: var(--color-text);
   cursor: pointer;
+  /* Remove native select arrows */
+  -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
+  background-image: none;
+}
+
+/* Remove arrows in IE/Edge */
+.state-select::-ms-expand {
+  display: none;
 }
 
 .state-select.select-breached {
@@ -286,6 +301,24 @@ function getNodeDC(node: AccessPoint): number | undefined {
 .dc-value {
   color: var(--color-text);
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* GM Notes (read-only display) */
+.node-notes-display {
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.notes-label {
+  color: var(--color-text-muted);
+  margin-right: 0.5rem;
+}
+
+.notes-text {
+  color: var(--color-text-dim);
+  font-style: italic;
 }
 
 /* Expanded details */

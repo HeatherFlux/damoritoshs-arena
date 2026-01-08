@@ -54,6 +54,9 @@ export interface AccessPoint {
   vulnerabilities?: Vulnerability[]
   countermeasures?: Countermeasure[]
   currentFailures?: number    // Track failures toward countermeasure threshold
+
+  // GM notes for effects when breached/alarmed
+  notes?: string
 }
 
 export interface Computer {

@@ -58,6 +58,13 @@ const currentCombatant = computed(() => {
   return sorted[state.combat.turn % sorted.length] || null
 })
 
+const nextCombatant = computed(() => {
+  if (!state.combat || state.combat.combatants.length <= 1) return null
+  const sorted = sortedCombatants.value
+  const nextIndex = (state.combat.turn + 1) % sorted.length
+  return sorted[nextIndex] || null
+})
+
 const aliveCombatants = computed(() => {
   return sortedCombatants.value.filter(c => !c.isDead)
 })
@@ -527,6 +534,7 @@ export const useCombatStore = () => ({
   state,
   sortedCombatants,
   currentCombatant,
+  nextCombatant,
   aliveCombatants,
 
   startCombat,

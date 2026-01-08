@@ -751,7 +751,23 @@
     border-color: var(--color-border);
   }
 
+  /* Remove native select arrows globally */
+  select,
+  select.input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+  }
+
+  /* IE/Edge */
+  select::-ms-expand {
+    display: none;
+  }
+
   .select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
     appearance: none;
     cursor: pointer;
     padding-right: 2rem;

@@ -237,6 +237,16 @@ function setNodeState(nodeId: string, newState: NodeState) {
   }
 }
 
+function setNodeNotes(nodeId: string, notes: string) {
+  if (!state.computer) return
+
+  const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
+  if (node) {
+    node.notes = notes
+    saveToLocalStorage()
+  }
+}
+
 function triggerEffect(type: HackingEffectType, targetNodeId?: string) {
   const effect = createHackingEffect(type, targetNodeId || state.focusedNodeId || undefined)
   state.activeEffects.push(effect)
@@ -612,6 +622,7 @@ export function useHackingStore() {
     createNewComputer,
     generateComputer,
     setNodeState,
+    setNodeNotes,
     triggerEffect,
     setFocus,
     setAmbientIntensity,

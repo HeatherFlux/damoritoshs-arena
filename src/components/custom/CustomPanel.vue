@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import CreatureForm from './CreatureForm.vue'
 import HazardForm from './HazardForm.vue'
 import StatBlockPreview from './StatBlockPreview.vue'
 import AsciiBackground from './AsciiBackground.vue'
 import { useEncounterStore } from '../../stores/encounterStore'
+import { useCustomPanelStore } from '../../stores/customPanelStore'
 import type { Creature } from '../../types/creature'
 import type { Hazard } from '../../types/hazard'
 
 const encounterStore = useEncounterStore()
+const customPanelStore = useCustomPanelStore()
 
 type BuildMode = 'creature' | 'hazard'
 const buildMode = ref<BuildMode>('creature')
+
+// Sync build mode to store
+watch(buildMode, (mode) => {
+  customPanelStore.setMode(mode)
+}, { immediate: true })
 
 // Success message
 const showSuccess = ref(false)
@@ -82,6 +89,21 @@ const canAdd = computed(() => {
            hazardData.value.level !== undefined
   }
 })
+
+// Sync creature state to store for StatusBar
+watch([() => creatureData.value.name, () => creatureData.value.level, () => creatureData.value.hp, () => creatureData.value.ac], () => {
+  const valid = !!(creatureData.value.name?.trim() &&
+                   creatureData.value.level !== undefined &&
+                   creatureData.value.hp !== undefined &&
+                   creatureData.value.ac !== undefined)
+  customPanelStore.setCreatureState(creatureData.value.name || '', valid)
+}, { immediate: true, deep: true })
+
+// Sync hazard state to store for StatusBar
+watch([() => hazardData.value.name, () => hazardData.value.level], () => {
+  const valid = !!(hazardData.value.name?.trim() && hazardData.value.level !== undefined)
+  customPanelStore.setHazardState(hazardData.value.name || '', valid)
+}, { immediate: true, deep: true })
 
 // Add to list
 function addToList() {
@@ -279,7 +301,7 @@ function discardForm() {
             @click="addToList"
           >
             <span class="text-lg mr-1">+</span>
-            Add to List
+            {{ buildMode === 'creature' ? 'Add to Creatures' : 'Add to Hazards' }}
           </button>
         </div>
       </div>
