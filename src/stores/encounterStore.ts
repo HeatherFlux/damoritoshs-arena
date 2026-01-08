@@ -354,6 +354,28 @@ function clearAllEncounters() {
 }
 
 // Custom creature management
+function addCustomCreature(creature: Creature): void {
+  // Generate a unique ID if not provided
+  if (!creature.id) {
+    creature.id = `custom-${generateId()}`
+  }
+
+  // Check for duplicate
+  const existingIds = new Set(state.creatures.map(c => c.id))
+  if (existingIds.has(creature.id)) {
+    // Regenerate ID if duplicate
+    creature.id = `custom-${generateId()}`
+  }
+
+  // Add to creatures list
+  state.creatures.push(creature)
+
+  // Save custom creatures
+  const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
+  const customOnly = state.creatures.filter(c => !bundledIds.has(c.id))
+  saveCustomCreatures(customOnly)
+}
+
 function importCustomCreatures(json: string): number {
   try {
     const imported = JSON.parse(json) as Creature[]
@@ -434,6 +456,7 @@ export const useEncounterStore = () => ({
   clearAllEncounters,
 
   // Creature management
+  addCustomCreature,
   importCustomCreatures,
   exportCustomCreatures,
   clearCustomCreatures,

@@ -7,6 +7,31 @@
 
 export type HazardComplexity = 'simple' | 'complex'
 export type HazardType = 'trap' | 'environmental' | 'haunt'
+export type TrapSubtype = 'mechanical' | 'magical' | 'tech'
+export type StatBand = 'extreme' | 'high' | 'low'
+export type Proficiency = 'untrained' | 'trained' | 'expert' | 'master' | 'legendary'
+export type MainChallenge = 'find' | 'disable' | 'survive' | 'endure'
+export type TargetingModel = 'single' | 'area' | 'random' | 'range' | 'touch'
+
+export interface DisableMethod {
+  id: string
+  skill: string  // e.g., "Thievery", "Athletics", "dispel magic"
+  proficiency: Proficiency
+  dcBand: StatBand
+  dcOverride?: number  // Manual override
+  notes?: string
+  isSecondary?: boolean  // Secondary/less-efficient method
+}
+
+export interface HazardComponent {
+  id: string
+  name: string
+  ac?: number
+  hardness?: number
+  hp: number
+  bt?: number  // Broken Threshold
+  position?: string  // Where it's located
+}
 
 export interface HazardAction {
   name: string
@@ -17,7 +42,37 @@ export interface HazardAction {
   damageType?: string
   dc?: number
   save?: 'fortitude' | 'reflex' | 'will'
+  attackBonus?: number
   traits?: string[]
+  targetingModel?: TargetingModel
+}
+
+export interface RoutineAction {
+  id: string
+  name: string
+  actionCost: number
+  effect: string
+  damage?: string
+  damageType?: string
+  dc?: number
+  save?: 'fortitude' | 'reflex' | 'will'
+  attackBonus?: number
+  targetingModel?: TargetingModel
+  componentId?: string  // If tied to a component, removed when component destroyed
+}
+
+export interface DegradationRule {
+  componentId: string
+  effect: string  // What happens when this component is disabled/destroyed
+  removeActionIds?: string[]  // Actions to remove
+}
+
+export interface StatBands {
+  stealth?: StatBand
+  ac?: StatBand
+  fortSave?: StatBand
+  refSave?: StatBand
+  attackOrDC?: StatBand  // For offense
 }
 
 export interface Hazard {
@@ -26,27 +81,68 @@ export interface Hazard {
   level: number
   complexity: HazardComplexity
   type: HazardType
+  trapSubtypes?: TrapSubtype[]  // For traps: mechanical, magical, tech (can be multiple)
   traits: string[]
-  stealth?: string  // "Stealth DC 20 (trained)" or "Stealth +15"
+  source: string
+  description: string  // Narrative description
+
+  // Concept
+  mainChallenge?: MainChallenge  // What's the main difficulty?
+
+  // Stealth & Detection
+  isObvious?: boolean  // If true, no Stealth DC needed
   stealthDC?: number
-  description: string
-  disable?: string  // "Thievery DC 18 (trained) to disable"
+  stealthBand?: StatBand
+  stealthProficiency?: Proficiency  // Required to find it
+
+  // Disable methods
+  disableMethods?: DisableMethod[]
+
+  // Stat bands for auto-calculation
+  statBands?: StatBands
+
+  // Defenses (only if physical component)
+  hasPhysicalComponent?: boolean
   ac?: number
   saves?: {
     fortitude?: number
     reflex?: number
     will?: number
   }
+  hardness?: number
   hp?: number
   bt?: number  // Broken Threshold
-  hardness?: number
   immunities?: string[]
   weaknesses?: { type: string; value: number }[]
   resistances?: { type: string; value: number }[]
-  actions: HazardAction[]
-  routine?: string  // For complex hazards
+
+  // Components (for complex hazards with multiple parts)
+  components?: HazardComponent[]
+  degradationRules?: DegradationRule[]
+
+  // Offense
+  usesAttackRoll?: boolean  // true = attack bonus, false = save DC
+  attackBonus?: number
+  saveDC?: number
+  saveType?: 'fortitude' | 'reflex' | 'will'
+  damage?: string
+  damageType?: string
+  targetingModel?: TargetingModel
+
+  // Simple hazard specific
+  trigger?: string
+  effect?: string
   reset?: string
-  source: string
+
+  // Complex hazard specific
+  actions: HazardAction[]  // Reactive actions
+  routine?: string  // Narrative routine description
+  routineActions?: RoutineAction[]  // Structured routine actions
+  actionsPerRound?: number
+
+  // Legacy fields for compatibility
+  stealth?: string
+  disable?: string
 }
 
 export interface EncounterHazard {

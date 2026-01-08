@@ -11,6 +11,7 @@ import AnimatedBackground from './components/AnimatedBackground.vue'
 import GlitchOverlay from './components/GlitchOverlay.vue'
 import HackingPanel from './components/hacking/HackingPanel.vue'
 import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
+import CustomPanel from './components/custom/CustomPanel.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
@@ -47,7 +48,7 @@ onUnmounted(() => {
 
 const showSettingsModal = ref(false)
 
-type Tab = 'builder' | 'combat' | 'hacking'
+type Tab = 'builder' | 'combat' | 'hacking' | 'starship' | 'custom'
 const activeTab = ref<Tab>('builder')
 
 const showImportModal = ref(false)
@@ -130,6 +131,20 @@ function handleRunEncounter() {
             @click="activeTab = 'hacking'"
           >
             <span class="text-accent mr-1">&gt;</span> HACKING
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ 'nav-tab-active': activeTab === 'starship' }"
+            @click="activeTab = 'starship'"
+          >
+            <span class="text-accent mr-1">&gt;</span> STARSHIP
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ 'nav-tab-active': activeTab === 'custom' }"
+            @click="activeTab = 'custom'"
+          >
+            <span class="text-accent mr-1">&gt;</span> CUSTOM
           </button>
         </nav>
       </div>
@@ -236,6 +251,22 @@ function handleRunEncounter() {
       <!-- Hacking Encounter Tab -->
       <template v-else-if="activeTab === 'hacking'">
         <HackingPanel />
+      </template>
+
+      <!-- Starship Encounter Tab -->
+      <template v-else-if="activeTab === 'starship'">
+        <div class="flex-1 flex items-center justify-center">
+          <div class="text-center">
+            <div class="text-6xl mb-4 text-accent font-mono">[*]</div>
+            <h2 class="text-2xl font-bold text-accent mb-2">CINEMATIC STARSHIP SCENES</h2>
+            <p class="text-dim text-lg">Coming Soon</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Custom Creature/Hazard Builder Tab -->
+      <template v-else-if="activeTab === 'custom'">
+        <CustomPanel />
       </template>
 
       <!-- Roll History Panel (for builder only) -->

@@ -36,6 +36,17 @@ export interface SpellEntry {
   attack?: number
 }
 
+export interface SpellcastingConfig {
+  enabled: boolean
+  tradition: 'arcane' | 'divine' | 'occult' | 'primal' | ''
+  type: 'prepared' | 'spontaneous' | 'innate' | ''
+  dc: number
+  attackMod: number
+  focusPoints: number
+  slots: Record<number, number> // rank -> count
+  notes: string // For describing spells without specific selection
+}
+
 export interface SpecialAbility {
   name: string
   actions?: 0 | 1 | 2 | 3 | 'reaction' | 'free'
@@ -65,6 +76,7 @@ export interface Creature {
   speed: string
   attacks: Attack[]
   spells?: SpellEntry[]
+  spellcasting?: SpellcastingConfig
   specialAbilities: SpecialAbility[]
   description?: string
   rawText?: string

@@ -6,7 +6,7 @@ import { useHackingStore } from '../stores/hackingStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
-  mode: 'builder' | 'combat' | 'hacking'
+  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom'
 }>()
 
 const combatStore = useCombatStore()
