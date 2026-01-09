@@ -1,4 +1,4 @@
-import type { Computer, AccessPoint, ComputerType, AccessPointType } from '../types/hacking'
+import type { Computer, AccessPoint, ComputerType, AccessPointType, SkillCheck, Vulnerability, Countermeasure } from '../types/hacking'
 
 // Starfinder-themed word lists
 
@@ -380,6 +380,142 @@ function getDCForLevel(level: number): number {
   return DC_BY_LEVEL[clampedLevel] ?? 15
 }
 
+// Generate hack skills for a node
+function generateHackSkills(nodeType: AccessPointType, computerType: ComputerType, baseDC: number): SkillCheck[] {
+  const skills: SkillCheck[] = []
+
+  // Primary skill is always Computers for tech, varies for magic
+  if (computerType === 'magic') {
+    skills.push({ skill: pick(['Arcana', 'Occultism']), dc: baseDC, proficiency: 'trained' })
+  } else if (computerType === 'hybrid') {
+    skills.push({ skill: 'Computers', dc: baseDC, proficiency: 'trained' })
+    if (Math.random() < 0.5) {
+      skills.push({ skill: pick(['Arcana', 'Occultism']), dc: baseDC + 2, proficiency: 'trained' })
+    }
+  } else {
+    skills.push({ skill: 'Computers', dc: baseDC, proficiency: 'trained' })
+  }
+
+  // Sometimes add alternative skill based on node type
+  if (Math.random() < 0.3) {
+    const altSkill = nodeType === 'magical' ? pick(['Arcana', 'Occultism', 'Religion']) :
+                     nodeType === 'physical' ? pick(['Crafting', 'Engineering']) :
+                     pick(['Society', 'Deception'])
+    if (!skills.some(s => s.skill === altSkill)) {
+      skills.push({ skill: altSkill, dc: baseDC + 2 })
+    }
+  }
+
+  return skills
+}
+
+// Generate vulnerabilities for a node
+function generateVulnerabilities(baseDC: number, count: number): Vulnerability[] {
+  if (count === 0) return []
+
+  const vulnerabilities: Vulnerability[] = []
+  const usedTemplates = new Set<number>()
+
+  for (let i = 0; i < count; i++) {
+    let templateIndex: number
+    let attempts = 0
+    do {
+      templateIndex = randomInt(0, VULNERABILITY_TEMPLATES.length - 1)
+      attempts++
+    } while (usedTemplates.has(templateIndex) && attempts < 10)
+
+    usedTemplates.add(templateIndex)
+    const template = VULNERABILITY_TEMPLATES[templateIndex]!
+
+    // DC reduction increases with each vulnerability (1, 2, 3)
+    const dcReduction = i + 1
+    // Vulnerability DC is lower than base (easier to find/exploit)
+    const vulnDC = baseDC - 2 - i * 2
+
+    vulnerabilities.push({
+      id: `v-${Date.now()}-${i}`,
+      name: template.name,
+      skills: template.skills.slice(0, 2).map(skill => ({ skill, dc: vulnDC })),
+      dcReduction
+    })
+  }
+
+  return vulnerabilities
+}
+
+// Generate countermeasures for a node
+function generateCountermeasures(baseDC: number, count: number): Countermeasure[] {
+  if (count === 0) return []
+
+  const countermeasures: Countermeasure[] = []
+  const usedTemplates = new Set<number>()
+
+  for (let i = 0; i < count; i++) {
+    let templateIndex: number
+    let attempts = 0
+    do {
+      templateIndex = randomInt(0, COUNTERMEASURE_TEMPLATES.length - 1)
+      attempts++
+    } while (usedTemplates.has(templateIndex) && attempts < 10)
+
+    usedTemplates.add(templateIndex)
+    const template = COUNTERMEASURE_TEMPLATES[templateIndex]!
+
+    // Failure threshold: 2-3 failures to trigger
+    const failureThreshold = randomInt(2, 3)
+    // Notice DC is lower than base
+    const noticeDC = baseDC - 4
+    // Disable DC is higher than base
+    const disableDC = baseDC + 2
+
+    countermeasures.push({
+      id: `c-${Date.now()}-${i}`,
+      name: template.name,
+      failureThreshold,
+      noticeDC,
+      noticeSkills: template.noticeSkills,
+      disableSkills: template.disableSkills.map(skill => ({ skill, dc: disableDC })),
+      description: `${template.name}. The hacker must overcome this to continue.`,
+      isPersistent: template.isPersistent
+    })
+  }
+
+  return countermeasures
+}
+
+// Generate outcome descriptions based on computer purpose
+function generateOutcomeDescriptions(): { success: string; critSuccess: string; failure: string } {
+  const successTemplates = [
+    'You gain access to the restricted data and can extract the information you need.',
+    'The system grants you user-level access, revealing its contents.',
+    'You successfully breach the security and can now manipulate the system.',
+    'Access granted. You can download files and review logs.',
+    'The firewall falls and the system\'s secrets are laid bare.'
+  ]
+
+  const critSuccessTemplates = [
+    'You gain administrator access with full system control. +2 circumstance bonus to related skill checks for 1 week.',
+    'Complete system breach. You can plant backdoors for future access and cover your tracks entirely.',
+    'Root access achieved. You discover additional hidden data and gain a +2 bonus to Gather Information about this organization.',
+    'Total system compromise. You can modify logs, plant false evidence, or lock out other users.',
+    'Masterful hack. The system thinks you\'re a trusted admin, granting ongoing access without further checks.'
+  ]
+
+  const failureTemplates = [
+    'The system locks you out and may alert security.',
+    'Access denied. Your intrusion attempt has been logged.',
+    'The hack fails and countermeasures activate.',
+    'You\'re detected and ejected from the system.',
+    'Critical failure. The system traces your location and alerts authorities.'
+  ]
+
+  return {
+    success: pick(successTemplates),
+    critSuccess: pick(critSuccessTemplates),
+    failure: pick(failureTemplates)
+  }
+}
+
 // Main generator function
 export interface GeneratorOptions {
   nodeCount?: number
@@ -432,6 +568,20 @@ export function generateRandomComputer(options: GeneratorOptions = {}): Computer
     const dcVariation = randomInt(-2, 2)
     const nodeDC = baseDC + dcVariation
 
+    // Generate advanced node properties
+    const hackSkills = generateHackSkills(nodeType, type, nodeDC)
+
+    // Successes required: usually 1, sometimes 2 for important nodes
+    const successesRequired = (i === 0 || Math.random() < 0.3) ? randomInt(1, 2) : 1
+
+    // Vulnerabilities: 0-2 per node, more likely on later nodes
+    const vulnCount = Math.random() < 0.4 ? 0 : randomInt(1, 2)
+    const vulnerabilities = generateVulnerabilities(nodeDC, vulnCount)
+
+    // Countermeasures: 0-1 per node, more likely on important nodes
+    const cmCount = (i === 0 || Math.random() < 0.4) ? randomInt(0, 1) : 0
+    const countermeasures = generateCountermeasures(nodeDC, cmCount)
+
     accessPoints.push({
       id: nodeId,
       name: nodeName,
@@ -439,7 +589,11 @@ export function generateRandomComputer(options: GeneratorOptions = {}): Computer
       state: 'locked',
       position: positions[i]!,
       connectedTo: [],
-      dc: nodeDC
+      dc: nodeDC,
+      successesRequired,
+      hackSkills,
+      vulnerabilities: vulnerabilities.length > 0 ? vulnerabilities : undefined,
+      countermeasures: countermeasures.length > 0 ? countermeasures : undefined
     })
   }
 
@@ -450,12 +604,20 @@ export function generateRandomComputer(options: GeneratorOptions = {}): Computer
       .filter((id): id is string => id !== undefined)
   }
 
+  // Generate computer-level descriptions
+  const description = pick(COMPUTER_DESCRIPTIONS)
+  const outcomes = generateOutcomeDescriptions()
+
   return {
     id: crypto.randomUUID(),
     name,
     level,
     type,
-    accessPoints
+    description,
+    accessPoints,
+    successDescription: outcomes.success,
+    criticalSuccessDescription: outcomes.critSuccess,
+    failureDescription: outcomes.failure
   }
 }
 
