@@ -20,6 +20,16 @@ const connectingFromId = ref<string | null>(null)
 const computerName = ref('')
 const computerLevel = ref(1)
 const computerType = ref<ComputerType>('tech')
+const computerDescription = ref('')
+const successDescription = ref('')
+const criticalSuccessDescription = ref('')
+const failureDescription = ref('')
+const showOutcomeDescriptions = ref(false)
+
+// Node advanced options collapse state
+const showHackSkills = ref(false)
+const showVulnerabilities = ref(false)
+const showCountermeasures = ref(false)
 
 // New node form
 const newNodeName = ref('')
@@ -63,6 +73,10 @@ onMounted(() => {
     computerName.value = store.state.computer.name
     computerLevel.value = store.state.computer.level
     computerType.value = store.state.computer.type
+    computerDescription.value = store.state.computer.description || ''
+    successDescription.value = store.state.computer.successDescription || ''
+    criticalSuccessDescription.value = store.state.computer.criticalSuccessDescription || ''
+    failureDescription.value = store.state.computer.failureDescription || ''
   }
 
   if (canvasRef.value) {
@@ -277,6 +291,98 @@ function updateComputer() {
   store.state.computer.name = computerName.value
   store.state.computer.level = computerLevel.value
   store.state.computer.type = computerType.value
+  store.state.computer.description = computerDescription.value || undefined
+  store.state.computer.successDescription = successDescription.value || undefined
+  store.state.computer.criticalSuccessDescription = criticalSuccessDescription.value || undefined
+  store.state.computer.failureDescription = failureDescription.value || undefined
+}
+
+// Hack Skills helpers
+function addHackSkill(node: AccessPoint) {
+  if (!node.hackSkills) node.hackSkills = []
+  node.hackSkills.push({ skill: 'Computers', dc: node.dc || 20 })
+}
+
+function removeHackSkill(node: AccessPoint, index: number) {
+  if (node.hackSkills) {
+    node.hackSkills.splice(index, 1)
+    if (node.hackSkills.length === 0) node.hackSkills = undefined
+  }
+}
+
+// Vulnerability helpers
+function addVulnerability(node: AccessPoint) {
+  if (!node.vulnerabilities) node.vulnerabilities = []
+  node.vulnerabilities.push({
+    id: `v-${Date.now()}`,
+    name: 'New Vulnerability',
+    skills: [{ skill: 'Society', dc: (node.dc || 20) - 2 }],
+    dcReduction: 1
+  })
+}
+
+function removeVulnerability(node: AccessPoint, index: number) {
+  if (node.vulnerabilities) {
+    node.vulnerabilities.splice(index, 1)
+    if (node.vulnerabilities.length === 0) node.vulnerabilities = undefined
+  }
+}
+
+function addVulnerabilitySkill(node: AccessPoint, vulnIndex: number) {
+  if (node.vulnerabilities?.[vulnIndex]) {
+    node.vulnerabilities[vulnIndex].skills.push({ skill: 'Diplomacy', dc: (node.dc || 20) - 2 })
+  }
+}
+
+function removeVulnerabilitySkill(node: AccessPoint, vulnIndex: number, skillIndex: number) {
+  if (node.vulnerabilities?.[vulnIndex]?.skills) {
+    node.vulnerabilities[vulnIndex].skills.splice(skillIndex, 1)
+  }
+}
+
+// Countermeasure helpers
+function addCountermeasure(node: AccessPoint) {
+  if (!node.countermeasures) node.countermeasures = []
+  node.countermeasures.push({
+    id: `c-${Date.now()}`,
+    name: 'New Countermeasure',
+    failureThreshold: 2,
+    noticeDC: (node.dc || 20) - 4,
+    noticeSkills: ['Computers', 'Perception'],
+    disableSkills: [{ skill: 'Computers', dc: (node.dc || 20) + 2 }],
+    description: 'Describe what happens when triggered...'
+  })
+}
+
+function removeCountermeasure(node: AccessPoint, index: number) {
+  if (node.countermeasures) {
+    node.countermeasures.splice(index, 1)
+    if (node.countermeasures.length === 0) node.countermeasures = undefined
+  }
+}
+
+function addDisableSkill(node: AccessPoint, cmIndex: number) {
+  if (node.countermeasures?.[cmIndex]) {
+    node.countermeasures[cmIndex].disableSkills.push({ skill: 'Computers', dc: (node.dc || 20) + 2 })
+  }
+}
+
+function removeDisableSkill(node: AccessPoint, cmIndex: number, skillIndex: number) {
+  if (node.countermeasures?.[cmIndex]?.disableSkills) {
+    node.countermeasures[cmIndex].disableSkills.splice(skillIndex, 1)
+  }
+}
+
+function toggleNoticeSkill(node: AccessPoint, cmIndex: number, skill: string) {
+  if (!node.countermeasures?.[cmIndex]) return
+  const cm = node.countermeasures[cmIndex]
+  if (!cm.noticeSkills) cm.noticeSkills = []
+  const idx = cm.noticeSkills.indexOf(skill)
+  if (idx >= 0) {
+    cm.noticeSkills.splice(idx, 1)
+  } else {
+    cm.noticeSkills.push(skill)
+  }
 }
 
 // Create new computer
@@ -458,6 +564,10 @@ watch(() => store.state.computer, (newComputer) => {
     computerName.value = newComputer.name
     computerLevel.value = newComputer.level
     computerType.value = newComputer.type
+    computerDescription.value = newComputer.description || ''
+    successDescription.value = newComputer.successDescription || ''
+    criticalSuccessDescription.value = newComputer.criticalSuccessDescription || ''
+    failureDescription.value = newComputer.failureDescription || ''
   }
 }, { immediate: true })
 </script>
@@ -497,6 +607,58 @@ watch(() => store.state.computer, (newComputer) => {
             </select>
           </div>
         </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            v-model="computerDescription"
+            class="input description-textarea"
+            placeholder="What is this computer and what does it control?"
+            rows="2"
+            @change="updateComputer"
+          ></textarea>
+        </div>
+
+        <button
+          class="collapsible-header"
+          @click="showOutcomeDescriptions = !showOutcomeDescriptions"
+        >
+          <span>Outcome Descriptions</span>
+          <span class="collapse-icon">{{ showOutcomeDescriptions ? '▼' : '▶' }}</span>
+        </button>
+        <div v-if="showOutcomeDescriptions" class="collapsible-content">
+          <div class="form-group">
+            <label>Critical Success</label>
+            <textarea
+              v-model="criticalSuccessDescription"
+              class="input description-textarea"
+              placeholder="Bonus rewards for critical success..."
+              rows="2"
+              @change="updateComputer"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Success</label>
+            <textarea
+              v-model="successDescription"
+              class="input description-textarea"
+              placeholder="What players get on success..."
+              rows="2"
+              @change="updateComputer"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Failure</label>
+            <textarea
+              v-model="failureDescription"
+              class="input description-textarea"
+              placeholder="What happens on failure..."
+              rows="2"
+              @change="updateComputer"
+            ></textarea>
+          </div>
+        </div>
+
         <button class="btn btn-secondary btn-sm w-full" @click="createNewComputer">
           New Computer
         </button>
@@ -606,16 +768,280 @@ watch(() => store.state.computer, (newComputer) => {
           </div>
         </div>
 
-        <div class="form-group">
-          <label>DC</label>
-          <input
-            v-model.number="selectedNode.dc"
-            type="number"
-            min="0"
-            max="50"
-            class="input"
-            placeholder="Auto"
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label>DC</label>
+            <input
+              v-model.number="selectedNode.dc"
+              type="number"
+              min="0"
+              max="50"
+              class="input"
+              placeholder="Auto"
+            />
+          </div>
+          <div class="form-group">
+            <label>Successes</label>
+            <input
+              v-model.number="selectedNode.successesRequired"
+              type="number"
+              min="1"
+              max="10"
+              class="input"
+              placeholder="1"
+            />
+          </div>
+        </div>
+
+        <!-- Hack Skills -->
+        <button
+          class="collapsible-header"
+          @click="showHackSkills = !showHackSkills"
+        >
+          <span>Hack Skills ({{ selectedNode.hackSkills?.length || 0 }})</span>
+          <span class="collapse-icon">{{ showHackSkills ? '▼' : '▶' }}</span>
+        </button>
+        <div v-if="showHackSkills" class="collapsible-content">
+          <div
+            v-for="(skill, index) in selectedNode.hackSkills || []"
+            :key="index"
+            class="skill-row"
+          >
+            <input
+              v-model="skill.skill"
+              class="input skill-input"
+              placeholder="Skill"
+            />
+            <input
+              v-model.number="skill.dc"
+              type="number"
+              class="input dc-input"
+              placeholder="DC"
+            />
+            <button
+              class="btn btn-xs btn-danger"
+              @click="removeHackSkill(selectedNode, index)"
+            >
+              ✕
+            </button>
+          </div>
+          <button
+            class="btn btn-xs btn-secondary w-full"
+            @click="addHackSkill(selectedNode)"
+          >
+            + Add Skill
+          </button>
+        </div>
+
+        <!-- Vulnerabilities -->
+        <button
+          class="collapsible-header"
+          @click="showVulnerabilities = !showVulnerabilities"
+        >
+          <span>Vulnerabilities ({{ selectedNode.vulnerabilities?.length || 0 }})</span>
+          <span class="collapse-icon">{{ showVulnerabilities ? '▼' : '▶' }}</span>
+        </button>
+        <div v-if="showVulnerabilities" class="collapsible-content">
+          <div
+            v-for="(vuln, vIndex) in selectedNode.vulnerabilities || []"
+            :key="vuln.id"
+            class="vulnerability-item"
+          >
+            <div class="vuln-header">
+              <input
+                v-model="vuln.name"
+                class="input"
+                placeholder="Vulnerability name"
+              />
+              <button
+                class="btn btn-xs btn-danger"
+                @click="removeVulnerability(selectedNode, vIndex)"
+              >
+                ✕
+              </button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>DC Reduction</label>
+                <input
+                  v-model.number="vuln.dcReduction"
+                  type="number"
+                  min="1"
+                  max="5"
+                  class="input"
+                />
+              </div>
+            </div>
+            <label class="sub-label">Skills to exploit:</label>
+            <div
+              v-for="(skill, sIndex) in vuln.skills"
+              :key="sIndex"
+              class="skill-row"
+            >
+              <input
+                v-model="skill.skill"
+                class="input skill-input"
+                placeholder="Skill"
+              />
+              <input
+                v-model.number="skill.dc"
+                type="number"
+                class="input dc-input"
+                placeholder="DC"
+              />
+              <button
+                class="btn btn-xs btn-danger"
+                @click="removeVulnerabilitySkill(selectedNode, vIndex, sIndex)"
+              >
+                ✕
+              </button>
+            </div>
+            <button
+              class="btn btn-xs btn-secondary w-full"
+              @click="addVulnerabilitySkill(selectedNode, vIndex)"
+            >
+              + Add Skill
+            </button>
+          </div>
+          <button
+            class="btn btn-xs btn-secondary w-full"
+            @click="addVulnerability(selectedNode)"
+          >
+            + Add Vulnerability
+          </button>
+        </div>
+
+        <!-- Countermeasures -->
+        <button
+          class="collapsible-header"
+          @click="showCountermeasures = !showCountermeasures"
+        >
+          <span>Countermeasures ({{ selectedNode.countermeasures?.length || 0 }})</span>
+          <span class="collapse-icon">{{ showCountermeasures ? '▼' : '▶' }}</span>
+        </button>
+        <div v-if="showCountermeasures" class="collapsible-content">
+          <div
+            v-for="(cm, cIndex) in selectedNode.countermeasures || []"
+            :key="cm.id"
+            class="countermeasure-item"
+          >
+            <div class="cm-header">
+              <input
+                v-model="cm.name"
+                class="input"
+                placeholder="Countermeasure name"
+              />
+              <button
+                class="btn btn-xs btn-danger"
+                @click="removeCountermeasure(selectedNode, cIndex)"
+              >
+                ✕
+              </button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Failures</label>
+                <input
+                  v-model.number="cm.failureThreshold"
+                  type="number"
+                  min="1"
+                  max="10"
+                  class="input"
+                  title="Triggers after this many failures"
+                />
+              </div>
+              <div class="form-group">
+                <label>Notice DC</label>
+                <input
+                  v-model.number="cm.noticeDC"
+                  type="number"
+                  class="input"
+                  placeholder="—"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Notice Skills</label>
+              <div class="notice-skills-row">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="cm.noticeSkills?.includes('Computers')"
+                    @change="toggleNoticeSkill(selectedNode, cIndex, 'Computers')"
+                  />
+                  Computers
+                </label>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="cm.noticeSkills?.includes('Perception')"
+                    @change="toggleNoticeSkill(selectedNode, cIndex, 'Perception')"
+                  />
+                  Perception
+                </label>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="cm.noticeSkills?.includes('Crafting')"
+                    @change="toggleNoticeSkill(selectedNode, cIndex, 'Crafting')"
+                  />
+                  Crafting
+                </label>
+              </div>
+            </div>
+            <label class="sub-label">Disable Skills:</label>
+            <div
+              v-for="(skill, sIndex) in cm.disableSkills"
+              :key="sIndex"
+              class="skill-row"
+            >
+              <input
+                v-model="skill.skill"
+                class="input skill-input"
+                placeholder="Skill"
+              />
+              <input
+                v-model.number="skill.dc"
+                type="number"
+                class="input dc-input"
+                placeholder="DC"
+              />
+              <button
+                class="btn btn-xs btn-danger"
+                @click="removeDisableSkill(selectedNode, cIndex, sIndex)"
+              >
+                ✕
+              </button>
+            </div>
+            <button
+              class="btn btn-xs btn-secondary w-full"
+              @click="addDisableSkill(selectedNode, cIndex)"
+            >
+              + Add Disable Skill
+            </button>
+            <div class="form-group">
+              <label>Effect Description</label>
+              <textarea
+                v-model="cm.description"
+                class="input description-textarea"
+                placeholder="What happens when triggered..."
+                rows="2"
+              ></textarea>
+            </div>
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                v-model="cm.isPersistent"
+              />
+              Persistent (triggers each round)
+            </label>
+          </div>
+          <button
+            class="btn btn-xs btn-secondary w-full"
+            @click="addCountermeasure(selectedNode)"
+          >
+            + Add Countermeasure
+          </button>
         </div>
 
         <div class="form-group">
@@ -732,11 +1158,129 @@ watch(() => store.state.computer, (newComputer) => {
   flex: 1;
 }
 
-.notes-textarea {
+.notes-textarea,
+.description-textarea {
   resize: vertical;
   min-height: 3rem;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.collapsible-header:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.collapse-icon {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+}
+
+.collapsible-content {
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.skill-row {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 0.375rem;
+  align-items: center;
+}
+
+.skill-input {
+  flex: 1;
+}
+
+.dc-input {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.vulnerability-item,
+.countermeasure-item {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.vuln-header,
+.cm-header {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.vuln-header .input,
+.cm-header .input {
+  flex: 1;
+}
+
+.sub-label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.notice-skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-accent);
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .divider {

@@ -70,6 +70,7 @@ export interface Computer {
   // SF2e outcome descriptions
   successDescription?: string       // What players get on success
   criticalSuccessDescription?: string  // Bonus for crit success
+  failureDescription?: string       // What happens on failure
 }
 
 // Effect Types
