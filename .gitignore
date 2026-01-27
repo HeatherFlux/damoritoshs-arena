@@ -50,5 +50,3 @@ coverage/
 
 # Optional eslint cache
 .eslintcache
-# Reference data from APIs - not committed to git
-data/
