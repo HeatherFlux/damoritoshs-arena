@@ -11,6 +11,8 @@ import AnimatedBackground from './components/AnimatedBackground.vue'
 import GlitchOverlay from './components/GlitchOverlay.vue'
 import HackingPanel from './components/hacking/HackingPanel.vue'
 import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
+import StarshipPanel from './components/starship/StarshipPanel.vue'
+import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
 import CollapsibleSidebar from './components/CollapsibleSidebar.vue'
 import { useEncounterStore } from './stores/encounterStore'
@@ -27,12 +29,14 @@ const { settings } = useSettingsStore()
 // Get current theme's accent color for the background animation
 const currentAccentColor = computed(() => themes[settings.theme].accent)
 
-// Check if we're on the hacking player view route
+// Check if we're on a player view route
 const isHackingPlayerView = ref(false)
+const isStarshipPlayerView = ref(false)
 
 function checkRoute() {
   const hash = window.location.hash
   isHackingPlayerView.value = hash.includes('/hacking/view')
+  isStarshipPlayerView.value = hash.includes('/starship/view')
 }
 
 // Initialize Discord webhook integration
@@ -91,8 +95,9 @@ function handleRunEncounter() {
 </script>
 
 <template>
-  <!-- Hacking Player View (fullscreen, no chrome) -->
+  <!-- Player Views (fullscreen, no chrome) -->
   <HackingPlayerView v-if="isHackingPlayerView" />
+  <StarshipPlayerView v-else-if="isStarshipPlayerView" />
 
   <!-- Main App -->
   <div v-else class="flex flex-col h-screen overflow-hidden max-w-[100vw]">
@@ -321,13 +326,7 @@ function handleRunEncounter() {
 
       <!-- Starship Encounter Tab -->
       <template v-else-if="activeTab === 'starship'">
-        <div class="flex-1 flex items-center justify-center">
-          <div class="text-center">
-            <div class="text-6xl mb-4 text-accent font-mono">[*]</div>
-            <h2 class="text-2xl font-bold text-accent mb-2">CINEMATIC STARSHIP SCENES</h2>
-            <p class="text-dim text-lg">Coming Soon</p>
-          </div>
-        </div>
+        <StarshipPanel />
       </template>
 
       <!-- Custom Creature/Hazard Builder Tab -->
