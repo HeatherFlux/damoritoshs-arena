@@ -84,33 +84,33 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
 <template>
   <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Hazards</h2>
+    <div class="flex justify-between items-center mb-3 lg:mb-4">
+      <h2 class="text-base lg:text-lg font-semibold">Hazards</h2>
       <span class="text-xs text-dim">{{ filteredHazards.length }} / {{ store.state.hazards.length }}</span>
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col gap-2 mb-4">
+    <div class="flex flex-col gap-2 mb-3 lg:mb-4">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Search hazards..."
-        class="input"
+        class="input input-sm lg:input"
       />
 
-      <div class="flex gap-2 flex-wrap">
-        <select v-model.number="levelFilter" class="input select flex-1 min-w-[100px]">
+      <div class="grid grid-cols-2 lg:flex gap-2">
+        <select v-model.number="levelFilter" class="input input-sm lg:input select flex-1">
           <option :value="null">Any Level</option>
           <option v-for="n in 11" :key="n - 1" :value="n - 1">Level {{ n - 1 }}</option>
         </select>
 
-        <select v-model="complexityFilter" class="input select flex-1 min-w-[100px]">
+        <select v-model="complexityFilter" class="input input-sm lg:input select flex-1">
           <option value="">Any Complexity</option>
           <option value="simple">Simple</option>
           <option value="complex">Complex</option>
         </select>
 
-        <select v-model="typeFilter" class="input select flex-1 min-w-[100px]">
+        <select v-model="typeFilter" class="input input-sm lg:input select flex-1">
           <option value="">Any Type</option>
           <option value="trap">Trap</option>
           <option value="environmental">Environmental</option>
@@ -119,7 +119,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
 
         <button
           v-if="searchQuery || levelFilter !== null || complexityFilter || typeFilter"
-          class="btn-secondary btn-sm"
+          class="btn-secondary btn-xs lg:btn-sm col-span-2 lg:col-span-1"
           @click="clearFilters"
         >
           Clear
@@ -128,7 +128,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
     </div>
 
     <!-- Hazard List -->
-    <div class="flex-1 overflow-y-auto flex flex-col gap-2">
+    <div class="flex-1 overflow-y-auto flex flex-col gap-1.5 lg:gap-2">
       <div
         v-for="hazard in filteredHazards"
         :key="hazard.id"
@@ -137,14 +137,14 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
       >
         <!-- Hazard Header -->
         <div
-          class="flex justify-between items-center p-3 cursor-pointer"
+          class="flex justify-between items-center p-2 lg:p-3 cursor-pointer"
           @click="toggleExpanded(hazard.id)"
         >
           <div class="flex-1 min-w-0">
-            <span class="block font-semibold mb-1.5">{{ hazard.name }}</span>
-            <div class="flex gap-1.5 flex-wrap">
+            <span class="block font-semibold text-sm lg:text-base mb-1 lg:mb-1.5 truncate">{{ hazard.name }}</span>
+            <div class="flex gap-1 lg:gap-1.5 flex-wrap">
               <span
-                class="badge-level text-[0.6875rem]"
+                class="badge-level text-[0.5625rem] lg:text-[0.6875rem]"
                 :class="{
                   'badge-level-success': hazard.level < store.state.partyLevel,
                   'badge-level-warning': hazard.level === store.state.partyLevel,
@@ -154,7 +154,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
                 Lvl {{ hazard.level }}
               </span>
               <span
-                class="text-[0.6875rem] px-1.5 py-0.5 rounded bg-elevated"
+                class="text-[0.5625rem] lg:text-[0.6875rem] px-1 lg:px-1.5 py-0.5 rounded bg-elevated"
                 :class="{
                   'text-dim': hazard.complexity === 'simple',
                   'text-warning': hazard.complexity === 'complex'
@@ -163,7 +163,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
                 {{ formatComplexity(hazard.complexity) }}
               </span>
               <span
-                class="text-[0.6875rem] px-1.5 py-0.5 rounded bg-elevated"
+                class="text-[0.5625rem] lg:text-[0.6875rem] px-1 lg:px-1.5 py-0.5 rounded bg-elevated"
                 :class="{
                   'text-danger': hazard.type === 'trap',
                   'text-success': hazard.type === 'environmental',
@@ -172,12 +172,12 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
               >
                 {{ formatHazardType(hazard.type) }}
               </span>
-              <span class="badge-xp">{{ getXP(hazard) }} XP</span>
+              <span class="badge-xp text-[0.5625rem] lg:text-[0.6875rem]">{{ getXP(hazard) }} XP</span>
             </div>
           </div>
           <div class="ml-2">
             <button
-              class="w-7 h-7 rounded bg-[var(--color-accent)] text-white text-xl font-semibold flex items-center justify-center transition-all duration-150 hover:scale-105"
+              class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-white text-lg lg:text-xl font-semibold flex items-center justify-center transition-all duration-150 hover:scale-105"
               @click.stop="addToEncounter(hazard)"
               title="Add to encounter"
             >
@@ -187,49 +187,49 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
         </div>
 
         <!-- Hazard Details (Expanded) -->
-        <div v-if="expandedHazard === hazard.id" class="px-3 pb-3 pt-3 border-t border-[var(--color-border)]">
-          <p class="text-sm text-dim mb-3">{{ hazard.description }}</p>
+        <div v-if="expandedHazard === hazard.id" class="px-2 lg:px-3 pb-2 lg:pb-3 pt-2 lg:pt-3 border-t border-[var(--color-border)]">
+          <p class="text-xs lg:text-sm text-dim mb-2 lg:mb-3">{{ hazard.description }}</p>
 
           <!-- Stats Grid -->
-          <div class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 mb-3">
-            <div v-if="hazard.stealth" class="flex gap-2 text-[0.8125rem]">
+          <div class="grid grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-1.5 lg:gap-2 mb-2 lg:mb-3">
+            <div v-if="hazard.stealth" class="flex gap-1.5 lg:gap-2 text-[0.6875rem] lg:text-[0.8125rem]">
               <span class="font-semibold text-accent">Stealth</span>
               <span>{{ hazard.stealth }}</span>
             </div>
-            <div v-if="hazard.disable" class="flex gap-2 text-[0.8125rem]">
+            <div v-if="hazard.disable" class="flex gap-1.5 lg:gap-2 text-[0.6875rem] lg:text-[0.8125rem]">
               <span class="font-semibold text-accent">Disable</span>
               <span>{{ hazard.disable }}</span>
             </div>
-            <div v-if="hazard.ac" class="flex gap-2 text-[0.8125rem]">
+            <div v-if="hazard.ac" class="flex gap-1.5 lg:gap-2 text-[0.6875rem] lg:text-[0.8125rem]">
               <span class="font-semibold text-accent">AC</span>
               <span>{{ hazard.ac }}</span>
             </div>
-            <div v-if="hazard.hp" class="flex gap-2 text-[0.8125rem]">
+            <div v-if="hazard.hp" class="flex gap-1.5 lg:gap-2 text-[0.6875rem] lg:text-[0.8125rem]">
               <span class="font-semibold text-accent">HP</span>
               <span>{{ hazard.hp }}{{ hazard.bt ? ` (BT ${hazard.bt})` : '' }}</span>
             </div>
-            <div v-if="hazard.hardness" class="flex gap-2 text-[0.8125rem]">
+            <div v-if="hazard.hardness" class="flex gap-1.5 lg:gap-2 text-[0.6875rem] lg:text-[0.8125rem]">
               <span class="font-semibold text-accent">Hardness</span>
               <span>{{ hazard.hardness }}</span>
             </div>
           </div>
 
           <!-- Actions -->
-          <div v-if="hazard.actions.length" class="flex flex-col gap-2 mb-3">
+          <div v-if="hazard.actions.length" class="flex flex-col gap-1.5 lg:gap-2 mb-2 lg:mb-3">
             <div
               v-for="(action, idx) in hazard.actions"
               :key="idx"
-              class="bg-elevated p-2 rounded text-[0.8125rem]"
+              class="bg-elevated p-1.5 lg:p-2 rounded text-[0.6875rem] lg:text-[0.8125rem]"
             >
-              <div class="flex items-center gap-1.5 mb-1">
+              <div class="flex items-center gap-1 lg:gap-1.5 mb-1">
                 <span class="font-semibold text-accent">{{ action.name }}</span>
-                <span v-if="action.actionType === 'reaction'" class="text-base">⟲</span>
+                <span v-if="action.actionType === 'reaction'" class="text-sm lg:text-base">⟲</span>
               </div>
               <p v-if="action.trigger" class="my-1 text-dim">
                 <strong>Trigger</strong> {{ action.trigger }}
               </p>
               <p class="my-1 text-dim">{{ action.effect }}</p>
-              <p v-if="action.damage" class="my-1 text-dim flex items-center gap-2 flex-wrap">
+              <p v-if="action.damage" class="my-1 text-dim flex items-center gap-1.5 lg:gap-2 flex-wrap">
                 <span
                   class="rollable inline-flex items-center gap-1"
                   @click="rollHazardDamage(hazard.name, action.name, action.damage)"
@@ -239,7 +239,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
                   <span class="roll-value">{{ action.damage }}</span>
                 </span>
                 <span
-                  class="rollable text-danger text-xs"
+                  class="rollable text-danger text-[0.625rem] lg:text-xs"
                   @click="rollHazardCritDamage(hazard.name, action.name, action.damage)"
                   title="Roll critical damage (doubled)"
                 >
@@ -250,24 +250,24 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
             </div>
           </div>
 
-          <p v-if="hazard.routine" class="text-[0.8125rem] mb-2 text-dim">
+          <p v-if="hazard.routine" class="text-[0.6875rem] lg:text-[0.8125rem] mb-2 text-dim">
             <strong>Routine</strong> {{ hazard.routine }}
           </p>
 
-          <p v-if="hazard.reset" class="text-[0.8125rem] mb-2 text-dim">
+          <p v-if="hazard.reset" class="text-[0.6875rem] lg:text-[0.8125rem] mb-2 text-dim">
             <strong>Reset</strong> {{ hazard.reset }}
           </p>
 
           <!-- Footer -->
-          <div class="flex justify-between text-[0.6875rem] text-muted pt-2 border-t border-[var(--color-border)]">
+          <div class="flex justify-between text-[0.5625rem] lg:text-[0.6875rem] text-muted pt-2 border-t border-[var(--color-border)]">
             <span>{{ hazard.source }}</span>
-            <span class="italic">{{ hazard.traits.join(', ') }}</span>
+            <span class="italic truncate ml-2">{{ hazard.traits.join(', ') }}</span>
           </div>
         </div>
       </div>
 
       <!-- No Results -->
-      <div v-if="filteredHazards.length === 0" class="text-center py-8 text-dim">
+      <div v-if="filteredHazards.length === 0" class="text-center py-6 lg:py-8 text-dim text-sm">
         No hazards found matching your filters.
       </div>
     </div>

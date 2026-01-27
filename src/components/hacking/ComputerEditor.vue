@@ -1098,23 +1098,47 @@ watch(() => store.state.computer, (newComputer) => {
 <style scoped>
 .computer-editor {
   display: flex;
+  flex-direction: column;
   height: 100%;
-  gap: 1rem;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .computer-editor {
+    flex-direction: row;
+    gap: 1rem;
+  }
 }
 
 .editor-sidebar {
-  width: 280px;
+  width: 100%;
+  max-height: 40vh;
   flex-shrink: 0;
-  padding: 1rem;
+  padding: 0.75rem;
   overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .editor-sidebar {
+    width: 280px;
+    max-height: none;
+    padding: 1rem;
+  }
 }
 
 .editor-canvas {
   flex: 1;
+  min-height: 200px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .editor-canvas {
+    min-height: 0;
+  }
 }
 
 .editor-canvas canvas {
@@ -1124,34 +1148,66 @@ watch(() => store.state.computer, (newComputer) => {
 }
 
 .sidebar-section {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-section {
+    margin-bottom: 1rem;
+  }
 }
 
 .section-title {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--color-accent);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .section-title {
+    font-size: var(--text-sm);
+    margin-bottom: 0.75rem;
+  }
 }
 
 .form-group {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
 }
 
 .form-group label {
   display: block;
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   color: var(--color-text-dim);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
+@media (min-width: 1024px) {
+  .form-group label {
+    font-size: var(--text-xs);
+    margin-bottom: 0.25rem;
+  }
+}
+
 .form-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
+}
+
+@media (min-width: 1024px) {
+  .form-row {
+    gap: 0.5rem;
+  }
 }
 
 .form-row .form-group {
@@ -1161,9 +1217,17 @@ watch(() => store.state.computer, (newComputer) => {
 .notes-textarea,
 .description-textarea {
   resize: vertical;
-  min-height: 3rem;
+  min-height: 2.5rem;
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
+}
+
+@media (min-width: 1024px) {
+  .notes-textarea,
+  .description-textarea {
+    min-height: 3rem;
+    font-size: var(--text-sm);
+  }
 }
 
 .collapsible-header {
@@ -1171,18 +1235,26 @@ watch(() => store.state.computer, (newComputer) => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  margin-bottom: 0.375rem;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-dim);
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+@media (min-width: 1024px) {
+  .collapsible-header {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: var(--text-xs);
+  }
 }
 
 .collapsible-header:hover {
@@ -1197,27 +1269,48 @@ watch(() => store.state.computer, (newComputer) => {
 }
 
 .collapsible-content {
-  padding: 0.5rem;
-  margin-bottom: 0.75rem;
+  padding: 0.375rem;
+  margin-bottom: 0.5rem;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }
 
+@media (min-width: 1024px) {
+  .collapsible-content {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
 .skill-row {
   display: flex;
-  gap: 0.375rem;
-  margin-bottom: 0.375rem;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
   align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .skill-row {
+    gap: 0.375rem;
+    margin-bottom: 0.375rem;
+  }
 }
 
 .skill-input {
   flex: 1;
+  min-width: 0;
 }
 
 .dc-input {
-  width: 60px;
+  width: 50px;
   flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .dc-input {
+    width: 60px;
+  }
 }
 
 .vulnerability-item,
@@ -1286,30 +1379,50 @@ input[type="number"] {
 .divider {
   border: none;
   border-top: 1px solid var(--color-border);
-  margin: 1rem 0;
+  margin: 0.75rem 0;
+}
+
+@media (min-width: 1024px) {
+  .divider {
+    margin: 1rem 0;
+  }
 }
 
 .mode-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.375rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .mode-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.375rem;
+  }
 }
 
 .mode-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.25rem;
+  padding: 0.375rem 0.125rem;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-dim);
-  font-size: var(--text-xs);
+  font-size: 0.5rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+@media (min-width: 1024px) {
+  .mode-btn {
+    padding: 0.5rem 0.25rem;
+    font-size: var(--text-xs);
+  }
 }
 
 .mode-btn:hover {

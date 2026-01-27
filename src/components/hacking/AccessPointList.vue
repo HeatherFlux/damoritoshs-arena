@@ -141,25 +141,45 @@ function getNodeDC(node: AccessPoint): number | undefined {
 .node-list {
   flex: 1;
   width: 100%;
-  min-height: 300px;
-  padding: 1.5rem;
+  min-height: 0;
+  padding: 0.75rem;
   overflow-y: auto;
   border-radius: var(--radius-md);
 }
 
+@media (min-width: 1024px) {
+  .node-list {
+    min-height: 300px;
+    padding: 1.5rem;
+  }
+}
+
 .card-title {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .card-title {
+    font-size: var(--text-base);
+    margin-bottom: 1rem;
+  }
 }
 
 .nodes {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
+}
+
+@media (min-width: 1024px) {
+  .nodes {
+    gap: 0.5rem;
+  }
 }
 
 .node-item {
@@ -176,23 +196,38 @@ function getNodeDC(node: AccessPoint): number | undefined {
 }
 
 .node-item.state-breached {
-  border-left: 4px solid var(--color-success);
+  border-left: 3px solid var(--color-success);
 }
 
 .node-item.state-alarmed {
-  border-left: 4px solid var(--color-danger);
+  border-left: 3px solid var(--color-danger);
 }
 
 .node-item.state-active {
-  border-left: 4px solid var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+}
+
+@media (min-width: 1024px) {
+  .node-item.state-breached,
+  .node-item.state-alarmed,
+  .node-item.state-active {
+    border-left-width: 4px;
+  }
 }
 
 .node-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem;
+  padding: 0.5rem;
   cursor: pointer;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .node-header {
+    padding: 0.75rem;
+  }
 }
 
 .node-header:hover {
@@ -202,7 +237,13 @@ function getNodeDC(node: AccessPoint): number | undefined {
 .node-name-row {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .node-name-row {
+    gap: 0.375rem;
+  }
 }
 
 .expand-btn {
@@ -210,34 +251,62 @@ function getNodeDC(node: AccessPoint): number | undefined {
   background: none;
   border: none;
   color: var(--color-text-dim);
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
-  width: 18px;
+  width: 16px;
+}
+
+@media (min-width: 1024px) {
+  .expand-btn {
+    font-size: 11px;
+    width: 18px;
+  }
 }
 
 .node-name {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text);
 }
 
+@media (min-width: 1024px) {
+  .node-name {
+    font-size: var(--text-base);
+  }
+}
+
 .node-dc {
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--color-accent);
   background: var(--color-bg);
-  padding: 0.125rem 0.375rem;
+  padding: 0.125rem 0.25rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-accent);
+}
+
+@media (min-width: 1024px) {
+  .node-dc {
+    font-size: var(--text-xs);
+    padding: 0.125rem 0.375rem;
+  }
 }
 
 .node-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: var(--text-xs);
+  gap: 0.375rem;
+  font-size: 0.625rem;
   color: var(--color-text-muted);
-  margin-top: 0.25rem;
+  margin-top: 0.125rem;
+}
+
+@media (min-width: 1024px) {
+  .node-meta {
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    margin-top: 0.25rem;
+  }
 }
 
 .node-type {
@@ -249,8 +318,8 @@ function getNodeDC(node: AccessPoint): number | undefined {
 }
 
 .state-select {
-  padding: 0.25rem 0.5rem;
-  font-size: var(--text-xs);
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   border-radius: var(--radius-sm);
@@ -258,11 +327,19 @@ function getNodeDC(node: AccessPoint): number | undefined {
   background: var(--color-bg);
   color: var(--color-text);
   cursor: pointer;
+  flex-shrink: 0;
   /* Remove native select arrows */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   background-image: none;
+}
+
+@media (min-width: 1024px) {
+  .state-select {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--text-xs);
+  }
 }
 
 /* Remove arrows in IE/Edge */
@@ -287,15 +364,28 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
 /* Hack DC row */
 .hack-dc {
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   background: var(--color-bg);
   border-top: 1px solid var(--color-border);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
+}
+
+@media (min-width: 1024px) {
+  .hack-dc {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+  }
 }
 
 .dc-label {
   color: var(--color-text-muted);
-  margin-right: 0.5rem;
+  margin-right: 0.375rem;
+}
+
+@media (min-width: 1024px) {
+  .dc-label {
+    margin-right: 0.5rem;
+  }
 }
 
 .dc-value {
@@ -305,15 +395,28 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
 /* GM Notes (read-only display) */
 .node-notes-display {
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   background: var(--color-bg);
   border-top: 1px solid var(--color-border);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
+}
+
+@media (min-width: 1024px) {
+  .node-notes-display {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+  }
 }
 
 .notes-label {
   color: var(--color-text-muted);
-  margin-right: 0.5rem;
+  margin-right: 0.375rem;
+}
+
+@media (min-width: 1024px) {
+  .notes-label {
+    margin-right: 0.5rem;
+  }
 }
 
 .notes-text {
@@ -323,13 +426,25 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
 /* Expanded details */
 .node-details {
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: var(--color-bg);
   border-top: 1px solid var(--color-border);
 }
 
+@media (min-width: 1024px) {
+  .node-details {
+    padding: 0.75rem;
+  }
+}
+
 .detail-section {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .detail-section {
+    margin-bottom: 0.75rem;
+  }
 }
 
 .detail-section:last-child {
@@ -337,11 +452,18 @@ function getNodeDC(node: AccessPoint): number | undefined {
 }
 
 .section-label {
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .section-label {
+    font-size: var(--text-xs);
+    margin-bottom: 0.375rem;
+  }
 }
 
 .vuln-label {
@@ -353,10 +475,19 @@ function getNodeDC(node: AccessPoint): number | undefined {
 }
 
 .detail-item {
-  font-size: var(--text-sm);
-  padding: 0.375rem 0;
-  padding-left: 0.625rem;
-  border-left: 3px solid;
+  font-size: var(--text-xs);
+  padding: 0.25rem 0;
+  padding-left: 0.5rem;
+  border-left: 2px solid;
+}
+
+@media (min-width: 1024px) {
+  .detail-item {
+    font-size: var(--text-sm);
+    padding: 0.375rem 0;
+    padding-left: 0.625rem;
+    border-left-width: 3px;
+  }
 }
 
 .detail-item.vuln {
@@ -393,28 +524,54 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
 .cm-info {
   color: var(--color-text-dim);
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   margin-top: 0.125rem;
+}
+
+@media (min-width: 1024px) {
+  .cm-info {
+    font-size: var(--text-xs);
+  }
 }
 
 /* Outcome section */
 .outcome-section {
-  margin-top: 1rem;
-  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--color-border);
 }
 
+@media (min-width: 1024px) {
+  .outcome-section {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+  }
+}
+
 .outcome-label {
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--color-success);
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .outcome-label {
+    font-size: var(--text-xs);
+    margin-bottom: 0.375rem;
+  }
 }
 
 .outcome-text {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--color-text-dim);
   line-height: 1.5;
+}
+
+@media (min-width: 1024px) {
+  .outcome-text {
+    font-size: var(--text-sm);
+  }
 }
 </style>

@@ -306,9 +306,17 @@ function adaptAoNCreature(hit) {
 const raw = JSON.parse(readFileSync('/tmp/aon_creatures_raw.json', 'utf-8'));
 const hits = raw.hits?.hits || [];
 
+// Deduplicate by name (keep first occurrence)
+const seen = new Set();
 const creatures = hits
   .map(hit => adaptAoNCreature(hit))
-  .filter(c => c !== null)
+  .filter(c => {
+    if (c === null) return false;
+    const key = c.name.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  })
   .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 
 writeFileSync('./src/data/creatures.json', JSON.stringify(creatures, null, 2));

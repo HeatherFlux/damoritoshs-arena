@@ -181,24 +181,27 @@ function savePlayerEdit() {
 <template>
   <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Party</h2>
-      <div class="flex gap-1.5">
-        <button class="btn-primary btn-sm" @click="openAddPlayerModal">
-          + Add Player
+    <div class="flex justify-between items-center mb-3 lg:mb-4">
+      <h2 class="text-base lg:text-lg font-semibold">Party</h2>
+      <div class="flex gap-1 lg:gap-1.5">
+        <button class="btn-primary btn-xs lg:btn-sm" @click="openAddPlayerModal">
+          + Add
         </button>
-        <button class="btn-secondary btn-sm" @click="createPartyIfNeeded" title="Manage Parties">
-          ⚙️
+        <button class="btn-secondary btn-xs lg:btn-sm" @click="createPartyIfNeeded" title="Manage Parties">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+          </svg>
         </button>
       </div>
     </div>
 
     <!-- Party Selection (if multiple) -->
-    <div v-if="partyStore.state.parties.length > 1" class="mb-3">
+    <div v-if="partyStore.state.parties.length > 1" class="mb-2 lg:mb-3">
       <select
         :value="partyStore.state.activePartyId"
         @change="partyStore.setActiveParty(($event.target as HTMLSelectElement).value)"
-        class="input select w-full"
+        class="input input-sm lg:input select w-full"
       >
         <option v-for="party in partyStore.state.parties" :key="party.id" :value="party.id">
           {{ party.name }} ({{ party.players.length }})
@@ -207,17 +210,17 @@ function savePlayerEdit() {
     </div>
 
     <!-- No Party State -->
-    <div v-if="partyStore.state.parties.length === 0" class="text-center py-8 px-4 text-dim">
-      <p>No party created yet</p>
+    <div v-if="partyStore.state.parties.length === 0" class="text-center py-6 lg:py-8 px-4 text-dim">
+      <p class="text-sm lg:text-base">No party created yet</p>
       <p class="text-xs mt-1">Create a party to save your players for reuse across sessions</p>
-      <button class="btn-primary mt-4" @click="createPartyIfNeeded">Create Party</button>
+      <button class="btn-primary btn-sm lg:btn mt-4" @click="createPartyIfNeeded">Create Party</button>
     </div>
 
     <!-- Players List -->
     <template v-else-if="partyStore.activeParty.value">
-      <div class="mb-3">
+      <div class="mb-2 lg:mb-3">
         <button
-          class="btn-primary btn-sm"
+          class="btn-primary btn-xs lg:btn-sm"
           @click="addAllPlayersToEncounter"
           :disabled="partyStore.activeParty.value.players.length === 0"
           title="Add all players to combat"
@@ -226,40 +229,40 @@ function savePlayerEdit() {
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto flex flex-col gap-2">
+      <div class="flex-1 overflow-y-auto flex flex-col gap-1.5 lg:gap-2">
         <div
           v-for="player in partyStore.activeParty.value.players"
           :key="player.id"
-          class="card card-interactive p-2.5"
+          class="card card-interactive p-2 lg:p-2.5"
         >
           <!-- Edit Mode -->
           <template v-if="editingPlayer === player.id">
             <div class="flex flex-col gap-2">
-              <input v-model="editName" placeholder="Name" class="input" />
-              <div class="flex gap-2">
-                <label class="flex-1 text-[0.6875rem] text-dim">
+              <input v-model="editName" placeholder="Name" class="input input-sm lg:input" />
+              <div class="flex gap-1.5 lg:gap-2">
+                <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
                   HP <input v-model.number="editHP" type="number" min="1" class="input input-sm mt-0.5" />
                 </label>
-                <label class="flex-1 text-[0.6875rem] text-dim">
+                <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
                   AC <input v-model.number="editAC" type="number" min="1" class="input input-sm mt-0.5" />
                 </label>
-                <label class="flex-1 text-[0.6875rem] text-dim">
+                <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
                   Lvl <input v-model.number="editLevel" type="number" min="1" max="20" class="input input-sm mt-0.5" />
                 </label>
               </div>
-              <div class="flex justify-end gap-1.5">
-                <button class="btn-secondary btn-sm" @click="editingPlayer = null">Cancel</button>
-                <button class="btn-primary btn-sm" @click="savePlayerEdit">Save</button>
+              <div class="flex justify-end gap-1 lg:gap-1.5">
+                <button class="btn-secondary btn-xs lg:btn-sm" @click="editingPlayer = null">Cancel</button>
+                <button class="btn-primary btn-xs lg:btn-sm" @click="savePlayerEdit">Save</button>
               </div>
             </div>
           </template>
 
           <!-- View Mode -->
           <template v-else>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 lg:gap-2">
               <div class="flex-1 min-w-0">
-                <span class="block font-semibold truncate text-text">{{ player.name }}</span>
-                <span class="text-[0.6875rem] text-dim">
+                <span class="block font-semibold truncate text-text text-sm lg:text-base">{{ player.name }}</span>
+                <span class="text-[0.5625rem] lg:text-[0.6875rem] text-dim">
                   <template v-if="player.class">
                     Lvl {{ player.level }} {{ player.class }}
                   </template>
@@ -268,27 +271,29 @@ function savePlayerEdit() {
                   </template>
                 </span>
               </div>
-              <div class="flex gap-1.5">
-                <span class="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded bg-elevated text-success">{{ player.maxHP }} HP</span>
-                <span class="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded bg-elevated text-accent">AC {{ player.ac }}</span>
+              <div class="flex gap-1 lg:gap-1.5 shrink-0">
+                <span class="text-[0.5625rem] lg:text-[0.6875rem] font-semibold px-1 lg:px-1.5 py-0.5 rounded bg-elevated text-success">{{ player.maxHP }} HP</span>
+                <span class="text-[0.5625rem] lg:text-[0.6875rem] font-semibold px-1 lg:px-1.5 py-0.5 rounded bg-elevated text-accent">AC {{ player.ac }}</span>
               </div>
-              <div class="flex gap-1">
+              <div class="flex gap-0.5 lg:gap-1 shrink-0">
                 <button
-                  class="w-7 h-7 rounded bg-[var(--color-accent)] text-white text-xl font-semibold flex items-center justify-center hover:scale-105 transition-transform"
+                  class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-white text-lg lg:text-xl font-semibold flex items-center justify-center hover:scale-105 transition-transform"
                   @click="addPlayerToEncounter(player)"
                   title="Add to combat"
                 >
                   +
                 </button>
-                <button class="btn-icon btn-sm" @click="startEditPlayer(player)" title="Edit">
-                  ✏️
+                <button class="btn-icon btn-xs lg:btn-sm" @click="startEditPlayer(player)" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                  </svg>
                 </button>
-                <button class="btn-icon btn-sm btn-danger" @click="partyStore.removePlayer(player.id)" title="Remove">
+                <button class="btn-icon btn-xs lg:btn-sm btn-danger" @click="partyStore.removePlayer(player.id)" title="Remove">
                   ×
                 </button>
               </div>
             </div>
-            <div v-if="player.fortitude || player.reflex || player.will" class="flex gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-border)] text-[0.625rem] text-dim">
+            <div v-if="player.fortitude || player.reflex || player.will" class="flex gap-1.5 lg:gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-border)] text-[0.5rem] lg:text-[0.625rem] text-dim flex-wrap">
               <span v-if="player.perception">Perc +{{ player.perception }}</span>
               <span v-if="player.fortitude">Fort +{{ player.fortitude }}</span>
               <span v-if="player.reflex">Ref +{{ player.reflex }}</span>
@@ -298,8 +303,8 @@ function savePlayerEdit() {
         </div>
 
         <!-- Empty Players -->
-        <div v-if="partyStore.activeParty.value.players.length === 0" class="text-center py-8 text-dim">
-          <p>No players in party</p>
+        <div v-if="partyStore.activeParty.value.players.length === 0" class="text-center py-6 lg:py-8 text-dim">
+          <p class="text-sm">No players in party</p>
           <p class="text-xs mt-1">Add players manually or import from Pathbuilder</p>
         </div>
       </div>
@@ -307,76 +312,76 @@ function savePlayerEdit() {
 
     <!-- Add Player Modal -->
     <div v-if="showAddPlayerModal" class="modal-overlay" @click.self="showAddPlayerModal = false">
-      <div class="modal max-w-[480px]">
-        <h3 class="text-lg font-semibold mb-4">Add Player</h3>
+      <div class="modal max-w-[480px] mx-4">
+        <h3 class="text-base lg:text-lg font-semibold mb-3 lg:mb-4">Add Player</h3>
 
         <!-- Method Tabs -->
-        <div class="tabs mb-4">
-          <button class="tab" :class="{ 'tab-active': addMethod === 'link' }" @click="addMethod = 'link'">
-            Pathbuilder Link
+        <div class="tabs mb-3 lg:mb-4">
+          <button class="tab text-xs lg:text-sm" :class="{ 'tab-active': addMethod === 'link' }" @click="addMethod = 'link'">
+            Link
           </button>
-          <button class="tab" :class="{ 'tab-active': addMethod === 'json' }" @click="addMethod = 'json'">
-            Paste JSON
+          <button class="tab text-xs lg:text-sm" :class="{ 'tab-active': addMethod === 'json' }" @click="addMethod = 'json'">
+            JSON
           </button>
-          <button class="tab" :class="{ 'tab-active': addMethod === 'manual' }" @click="addMethod = 'manual'">
+          <button class="tab text-xs lg:text-sm" :class="{ 'tab-active': addMethod === 'manual' }" @click="addMethod = 'manual'">
             Manual
           </button>
         </div>
 
         <!-- Pathbuilder Link -->
-        <div v-if="addMethod === 'link'" class="min-h-[120px]">
-          <p class="text-[0.8125rem] text-dim mb-3">Paste your Pathbuilder share link or character ID</p>
+        <div v-if="addMethod === 'link'" class="min-h-[100px] lg:min-h-[120px]">
+          <p class="text-[0.6875rem] lg:text-[0.8125rem] text-dim mb-2 lg:mb-3">Paste your Pathbuilder share link or character ID</p>
           <input
             v-model="pathbuilderLink"
-            placeholder="https://pathbuilder2e.com/launch.html?build=123456 or just 123456"
-            class="input w-full"
+            placeholder="Pathbuilder link or ID"
+            class="input input-sm lg:input w-full"
             @keyup.enter="importFromLink"
           />
-          <p class="text-[0.6875rem] text-dim mt-2 italic">Character must be set to "Public" in Pathbuilder sharing settings</p>
+          <p class="text-[0.5625rem] lg:text-[0.6875rem] text-dim mt-2 italic">Character must be "Public" in Pathbuilder</p>
         </div>
 
         <!-- Paste JSON -->
-        <div v-if="addMethod === 'json'" class="min-h-[120px]">
-          <p class="text-[0.8125rem] text-dim mb-3">Export JSON from Pathbuilder: Menu → Export → Export to JSON</p>
+        <div v-if="addMethod === 'json'" class="min-h-[100px] lg:min-h-[120px]">
+          <p class="text-[0.6875rem] lg:text-[0.8125rem] text-dim mb-2 lg:mb-3">Export JSON from Pathbuilder: Menu → Export → Export to JSON</p>
           <textarea
             v-model="importJson"
             placeholder='{"success": true, "build": {...}}'
-            rows="5"
-            class="input w-full font-mono text-xs resize-y"
+            rows="4"
+            class="input input-sm lg:input w-full font-mono text-xs resize-y"
           ></textarea>
         </div>
 
         <!-- Manual Entry -->
-        <div v-if="addMethod === 'manual'" class="min-h-[120px]">
+        <div v-if="addMethod === 'manual'" class="min-h-[100px] lg:min-h-[120px]">
           <input
             v-model="newPlayerName"
             placeholder="Character name"
-            class="input w-full mb-2"
+            class="input input-sm lg:input w-full mb-2"
             @keyup.enter="addPlayerManually"
           />
-          <div class="flex gap-2">
-            <label class="flex-1 text-[0.6875rem] text-dim">
+          <div class="flex gap-1.5 lg:gap-2">
+            <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
               Max HP <input v-model.number="newPlayerHP" type="number" min="1" class="input input-sm w-full mt-0.5" />
             </label>
-            <label class="flex-1 text-[0.6875rem] text-dim">
+            <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
               AC <input v-model.number="newPlayerAC" type="number" min="1" class="input input-sm w-full mt-0.5" />
             </label>
-            <label class="flex-1 text-[0.6875rem] text-dim">
+            <label class="flex-1 text-[0.5625rem] lg:text-[0.6875rem] text-dim">
               Level <input v-model.number="newPlayerLevel" type="number" min="1" max="20" class="input input-sm w-full mt-0.5" />
             </label>
           </div>
         </div>
 
         <!-- Status Messages -->
-        <p v-if="importError" class="text-danger text-sm mt-2">{{ importError }}</p>
-        <p v-if="importSuccess" class="text-success text-sm mt-2">{{ importSuccess }}</p>
+        <p v-if="importError" class="text-danger text-xs lg:text-sm mt-2">{{ importError }}</p>
+        <p v-if="importSuccess" class="text-success text-xs lg:text-sm mt-2">{{ importSuccess }}</p>
 
         <!-- Actions -->
-        <div class="flex justify-end gap-2 mt-4">
-          <button class="btn-secondary" @click="showAddPlayerModal = false">Done</button>
+        <div class="flex justify-end gap-1.5 lg:gap-2 mt-3 lg:mt-4">
+          <button class="btn-secondary btn-sm lg:btn" @click="showAddPlayerModal = false">Done</button>
           <button
             v-if="addMethod === 'link'"
-            class="btn-primary"
+            class="btn-primary btn-sm lg:btn"
             @click="importFromLink"
             :disabled="!pathbuilderLink.trim() || isLoading"
           >
@@ -384,7 +389,7 @@ function savePlayerEdit() {
           </button>
           <button
             v-else-if="addMethod === 'json'"
-            class="btn-primary"
+            class="btn-primary btn-sm lg:btn"
             @click="importFromJson"
             :disabled="!importJson.trim()"
           >
@@ -392,11 +397,11 @@ function savePlayerEdit() {
           </button>
           <button
             v-else
-            class="btn-primary"
+            class="btn-primary btn-sm lg:btn"
             @click="addPlayerManually"
             :disabled="!newPlayerName.trim()"
           >
-            Add Player
+            Add
           </button>
         </div>
       </div>
@@ -404,31 +409,31 @@ function savePlayerEdit() {
 
     <!-- Manage Party Modal -->
     <div v-if="showManageModal" class="modal-overlay" @click.self="showManageModal = false">
-      <div class="modal max-w-[500px]">
-        <h3 class="text-lg font-semibold mb-4">Manage Parties</h3>
+      <div class="modal max-w-[500px] mx-4">
+        <h3 class="text-base lg:text-lg font-semibold mb-3 lg:mb-4">Manage Parties</h3>
 
-        <div class="flex flex-col gap-2 mb-4 max-h-[300px] overflow-y-auto">
+        <div class="flex flex-col gap-1.5 lg:gap-2 mb-3 lg:mb-4 max-h-[250px] lg:max-h-[300px] overflow-y-auto">
           <div
             v-for="party in partyStore.state.parties"
             :key="party.id"
-            class="flex items-center gap-2 p-2 bg-elevated rounded"
+            class="flex items-center gap-1.5 lg:gap-2 p-2 bg-elevated rounded"
             :class="{ 'border border-[var(--color-accent)]': party.id === partyStore.state.activePartyId }"
           >
             <input
               :value="party.name"
               @input="partyStore.updatePartyName(party.id, ($event.target as HTMLInputElement).value)"
-              class="flex-1 bg-transparent border-none border-b border-transparent p-1 text-[var(--color-text)] focus:border-b-[var(--color-accent)] focus:outline-none"
+              class="flex-1 bg-transparent border-none border-b border-transparent p-1 text-sm lg:text-base text-[var(--color-text)] focus:border-b-[var(--color-accent)] focus:outline-none min-w-0"
             />
-            <span class="text-[0.6875rem] text-dim">{{ party.players.length }} players</span>
+            <span class="text-[0.5625rem] lg:text-[0.6875rem] text-dim shrink-0">{{ party.players.length }} players</span>
             <button
-              class="btn-sm"
+              class="btn-xs lg:btn-sm shrink-0"
               :class="party.id === partyStore.state.activePartyId ? 'btn-primary' : 'btn-secondary'"
               @click="partyStore.setActiveParty(party.id)"
             >
               {{ party.id === partyStore.state.activePartyId ? 'Active' : 'Select' }}
             </button>
             <button
-              class="btn-icon btn-sm btn-danger"
+              class="btn-icon btn-xs lg:btn-sm btn-danger shrink-0"
               @click="partyStore.deleteParty(party.id)"
               title="Delete"
             >
@@ -437,10 +442,10 @@ function savePlayerEdit() {
           </div>
         </div>
 
-        <button class="btn-secondary w-full mb-4" @click="partyStore.createParty()">+ New Party</button>
+        <button class="btn-secondary btn-sm lg:btn w-full mb-3 lg:mb-4" @click="partyStore.createParty()">+ New Party</button>
 
         <div class="flex justify-end">
-          <button class="btn-primary" @click="showManageModal = false">Done</button>
+          <button class="btn-primary btn-sm lg:btn" @click="showManageModal = false">Done</button>
         </div>
       </div>
     </div>

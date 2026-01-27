@@ -3,6 +3,11 @@ import { useEncounterStore } from '../stores/encounterStore'
 
 const store = useEncounterStore()
 
+const emit = defineEmits<{
+  import: []
+  export: []
+}>()
+
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -43,11 +48,19 @@ function clearAll() {
 <template>
   <div class="flex flex-col h-full p-4">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-base font-semibold">Encounters</h2>
-      <button class="btn-primary btn-sm" @click="store.createEncounter()">
-        + New
-      </button>
+    <div class="mb-4">
+      <h2 class="text-base font-semibold mb-2">Encounters</h2>
+      <div class="flex gap-1">
+        <button class="btn-secondary btn-xs" @click="emit('import')">
+          Import
+        </button>
+        <button class="btn-secondary btn-xs" @click="emit('export')">
+          Export
+        </button>
+        <button class="btn-primary btn-xs" @click="store.createEncounter()">
+          New
+        </button>
+      </div>
     </div>
 
     <!-- Encounter List -->

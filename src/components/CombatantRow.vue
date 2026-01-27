@@ -98,9 +98,87 @@ const hasExpandableDetails = computed(() => {
 </script>
 
 <template>
-  <div class="mb-0.5">
+  <div class="mb-1 lg:mb-0.5">
+    <!-- Mobile Layout -->
     <div
-      class="grid gap-2 p-2 items-center rounded-md transition-all duration-150 bg-surface hover:bg-elevated"
+      class="lg:hidden flex flex-col gap-2 p-3 rounded-md transition-all duration-150 bg-surface"
+      :class="{
+        'bg-accent/15 border-l-3 border-l-accent': isCurrent,
+        'opacity-50 bg-danger/10': combatant.isDead,
+        'border-l-3 border-l-success': combatant.isPlayer && !isCurrent,
+        'border-l-3 border-l-hazard': combatant.isHazard && !isCurrent,
+        'rounded-b-none bg-elevated': showStatblock,
+      }"
+    >
+      <!-- Row 1: Init + Name + Actions -->
+      <div class="flex items-center gap-2">
+        <input
+          :value="combatant.initiative"
+          type="number"
+          class="init-input"
+          @change="combatStore.setInitiative(combatant.id, Number(($event.target as HTMLInputElement).value))"
+        />
+        <div class="flex-1 min-w-0" @click="toggleStatblock">
+          <span class="font-medium flex items-center gap-1 text-text text-sm">
+            <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-white">E</span>
+            <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">W</span>
+            <span v-if="combatant.isHazard" class="text-xs text-hazard">⚠</span>
+            <span class="truncate">{{ combatant.name }}</span>
+            <span v-if="hasExpandableDetails" class="text-[0.625rem] text-muted">{{ showStatblock ? '▼' : '▶' }}</span>
+          </span>
+          <span v-if="combatant.creature" class="text-[0.625rem] text-dim block">
+            Lvl {{ combatant.creature.level + (combatant.adjustment === 'elite' ? 1 : combatant.adjustment === 'weak' ? -1 : 0) }}
+          </span>
+        </div>
+        <div class="font-bold text-accent text-lg" :class="{ 'text-danger': conditionEffects.ac < 0 }">
+          {{ effectiveAC }}
+        </div>
+        <div class="flex gap-1">
+          <button
+            class="btn-icon btn-sm"
+            :class="combatant.isDead ? 'bg-success text-white' : 'btn-secondary'"
+            @click="combatStore.toggleDead(combatant.id)"
+          >
+            {{ combatant.isDead ? '❤️' : '💀' }}
+          </button>
+          <button class="btn-icon btn-sm btn-danger" @click="combatStore.removeCombatant(combatant.id)">×</button>
+        </div>
+      </div>
+
+      <!-- Row 2: HP Bar + Controls -->
+      <div class="flex items-center gap-2">
+        <div class="hp-bar flex-1">
+          <div class="hp-bar-fill" :style="{ width: hpPercentage + '%', background: hpColor }"></div>
+          <div class="hp-bar-text text-sm">
+            {{ combatant.currentHP }}<span class="opacity-50">/</span>{{ combatant.maxHP }}
+            <span v-if="combatant.tempHP > 0" class="text-accent">+{{ combatant.tempHP }}</span>
+          </div>
+        </div>
+        <div class="hp-controls shrink-0">
+          <button class="hp-btn hp-btn-damage" @click="applyQuickDamage">−</button>
+          <input v-model.number="damageAmount" type="number" class="hp-input" placeholder="0" @keydown.enter="applyQuickDamage" />
+          <button class="hp-btn hp-btn-heal" @click="applyQuickHeal">+</button>
+        </div>
+      </div>
+
+      <!-- Row 3: Conditions -->
+      <div class="flex flex-wrap gap-1 items-center">
+        <span
+          v-for="cond in combatant.conditions"
+          :key="cond.name"
+          class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize"
+          :class="{ 'bg-danger text-white': cond.value }"
+          @click="decrementCondition(cond.name)"
+        >
+          {{ cond.name }}{{ cond.value ? ` ${cond.value}` : '' }}
+        </span>
+        <button class="w-5 h-5 p-0 text-xs bg-elevated border border-dashed border-border rounded text-text" @click="emit('showConditions')">+</button>
+      </div>
+    </div>
+
+    <!-- Desktop Layout -->
+    <div
+      class="hidden lg:grid gap-2 p-2 items-center rounded-md transition-all duration-150 bg-surface hover:bg-elevated"
       :class="{
         'bg-accent/15 border-l-3 border-l-accent': isCurrent,
         'opacity-50 bg-danger/10': combatant.isDead,
@@ -109,7 +187,7 @@ const hasExpandableDetails = computed(() => {
         'cursor-pointer': hasExpandableDetails,
         'rounded-b-none bg-elevated': showStatblock,
       }"
-      style="grid-template-columns: 60px 1fr 220px 50px 1fr 100px;"
+      style="grid-template-columns: 60px 1fr 180px 50px 1fr 80px;"
     >
       <!-- Initiative -->
       <div class="flex items-center gap-1">
@@ -150,7 +228,7 @@ const hasExpandableDetails = computed(() => {
 
       <!-- HP -->
       <div class="flex items-center gap-2">
-        <div class="hp-bar" style="min-width: 100px; flex: 1;">
+        <div class="hp-bar flex-1" style="min-width: 80px;">
           <div
             class="hp-bar-fill"
             :style="{ width: hpPercentage + '%', background: hpColor }"
@@ -162,26 +240,10 @@ const hasExpandableDetails = computed(() => {
             <span v-if="combatant.tempHP > 0" class="text-accent ml-1">+{{ combatant.tempHP }}</span>
           </div>
         </div>
-        <!-- HP Controls: always visible -->
         <div class="hp-controls shrink-0">
-          <button
-            class="hp-btn hp-btn-damage"
-            @click="applyQuickDamage"
-            title="Apply damage (Enter)"
-          >−</button>
-          <input
-            v-model.number="damageAmount"
-            type="number"
-            class="hp-input"
-            placeholder="0"
-            @keydown.enter.exact="applyQuickDamage"
-            @keydown.enter.shift="applyQuickHeal"
-          />
-          <button
-            class="hp-btn hp-btn-heal"
-            @click="applyQuickHeal"
-            title="Apply healing (Shift+Enter)"
-          >+</button>
+          <button class="hp-btn hp-btn-damage" @click="applyQuickDamage" title="Apply damage">−</button>
+          <input v-model.number="damageAmount" type="number" class="hp-input" placeholder="0" @keydown.enter.exact="applyQuickDamage" @keydown.enter.shift="applyQuickHeal" />
+          <button class="hp-btn hp-btn-heal" @click="applyQuickHeal" title="Apply healing">+</button>
         </div>
       </div>
 
@@ -213,17 +275,10 @@ const hasExpandableDetails = computed(() => {
             +
           </button>
         </div>
-        <!-- Show condition effects summary -->
         <div v-if="combatant.conditions.length > 0 && (conditionEffects.ac < 0 || conditionEffects.attackRolls < 0)" class="flex gap-1 mt-1">
-          <span v-if="conditionEffects.attackRolls < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">
-            Atk {{ conditionEffects.attackRolls }}
-          </span>
-          <span v-if="conditionEffects.damage < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">
-            Dmg {{ conditionEffects.damage }}
-          </span>
-          <span v-if="conditionEffects.perception < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">
-            Perc {{ conditionEffects.perception }}
-          </span>
+          <span v-if="conditionEffects.attackRolls < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">Atk {{ conditionEffects.attackRolls }}</span>
+          <span v-if="conditionEffects.damage < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">Dmg {{ conditionEffects.damage }}</span>
+          <span v-if="conditionEffects.perception < 0" class="text-[0.5625rem] px-1 py-0.5 rounded bg-surface text-danger font-semibold">Perc {{ conditionEffects.perception }}</span>
         </div>
       </div>
 

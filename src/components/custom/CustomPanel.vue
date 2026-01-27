@@ -15,6 +15,10 @@ const customPanelStore = useCustomPanelStore()
 type BuildMode = 'creature' | 'hazard'
 const buildMode = ref<BuildMode>('creature')
 
+// Mobile collapsible sections
+const mobileBuilderOpen = ref(true)
+const mobilePreviewOpen = ref(false)
+
 // Sync build mode to store
 watch(buildMode, (mode) => {
   customPanelStore.setMode(mode)
@@ -239,11 +243,101 @@ function discardForm() {
 </script>
 
 <template>
-  <div class="flex flex-1 overflow-hidden relative">
+  <div class="custom-layout">
     <!-- ASCII Background Animation -->
     <AsciiBackground />
-    <!-- Left Panel: Form -->
-    <aside class="w-80 bg-surface border-r border-border overflow-y-auto flex flex-col">
+
+    <!-- Mobile: Collapsible Builder -->
+    <div class="mobile-section">
+      <button class="mobile-section-header" @click="mobileBuilderOpen = !mobileBuilderOpen">
+        <span>Builder</span>
+        <span class="mobile-chevron">{{ mobileBuilderOpen ? '▼' : '▶' }}</span>
+      </button>
+      <div class="mobile-section-content" v-show="mobileBuilderOpen">
+        <!-- Mode Switcher -->
+        <div class="p-3 border-b border-border">
+          <div class="mode-switcher">
+            <button
+              class="mode-btn"
+              :class="{ 'mode-btn-active': buildMode === 'creature' }"
+              @click="buildMode = 'creature'"
+            >
+              <span class="mode-icon">◆</span>
+              CREATURE
+            </button>
+            <button
+              class="mode-btn"
+              :class="{ 'mode-btn-active': buildMode === 'hazard' }"
+              @click="buildMode = 'hazard'"
+            >
+              <span class="mode-icon">⚠</span>
+              HAZARD
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <div class="p-3">
+          <CreatureForm
+            v-if="buildMode === 'creature'"
+            v-model="creatureData"
+          />
+          <HazardForm
+            v-else
+            v-model="hazardData"
+          />
+        </div>
+
+        <!-- Action Bar -->
+        <div class="p-3 border-t border-border bg-elevated flex flex-col gap-2">
+          <div
+            v-if="showSuccess"
+            class="success-message"
+          >
+            ✓ {{ successMessage }}
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary btn-sm" @click="discardForm" title="Discard">
+              ✕
+            </button>
+            <button class="btn btn-secondary flex-1" @click="showExportModal = true">
+              Export
+            </button>
+            <button
+              class="btn btn-primary flex-1"
+              :disabled="!canAdd"
+              @click="addToList"
+            >
+              <span class="text-lg mr-1">+</span>
+              {{ buildMode === 'creature' ? 'Add' : 'Add' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile: Collapsible Preview -->
+    <div class="mobile-section mobile-section-preview">
+      <button class="mobile-section-header" @click="mobilePreviewOpen = !mobilePreviewOpen">
+        <span>Preview</span>
+        <span class="mobile-chevron">{{ mobilePreviewOpen ? '▼' : '▶' }}</span>
+      </button>
+      <div class="mobile-section-content mobile-preview-content" v-show="mobilePreviewOpen">
+        <div class="p-3">
+          <StatBlockPreview
+            v-if="buildMode === 'creature'"
+            :creature="creatureData"
+          />
+          <StatBlockPreview
+            v-else
+            :hazard="hazardData"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop: Left Panel Form -->
+    <aside class="desktop-sidebar">
       <!-- Mode Switcher -->
       <div class="p-4 border-b border-border">
         <div class="mode-switcher">
@@ -307,8 +401,8 @@ function discardForm() {
       </div>
     </aside>
 
-    <!-- Right Panel: Preview -->
-    <section class="flex-1 overflow-y-auto p-6 bg-bg">
+    <!-- Desktop: Right Panel Preview -->
+    <section class="desktop-preview">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-xs uppercase tracking-widest text-dim mb-4 font-mono">
           <span class="text-accent">//</span> Live Preview
@@ -348,6 +442,113 @@ function discardForm() {
 </template>
 
 <style scoped>
+/* Layout */
+.custom-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .custom-layout {
+    flex-direction: row;
+    overflow-y: hidden;
+  }
+}
+
+/* Mobile sections */
+.mobile-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-surface);
+}
+
+@media (min-width: 1024px) {
+  .mobile-section {
+    display: none;
+  }
+}
+
+.mobile-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: var(--color-bg-elevated);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobile-section-header:hover {
+  background: var(--color-bg-hover);
+}
+
+.mobile-chevron {
+  font-size: 10px;
+  color: var(--color-text-dim);
+}
+
+.mobile-section-content {
+  background: var(--color-bg-surface);
+}
+
+.mobile-section-preview {
+  flex: 1;
+  min-height: 0;
+}
+
+.mobile-preview-content {
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .mobile-section-preview {
+    display: none;
+  }
+}
+
+/* Desktop sidebar */
+.desktop-sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 20rem;
+    background: var(--color-bg-surface);
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+  }
+}
+
+/* Desktop preview */
+.desktop-preview {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktop-preview {
+    display: block;
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: var(--color-bg);
+  }
+}
+
 .mode-switcher {
   display: flex;
   gap: 0.25rem;

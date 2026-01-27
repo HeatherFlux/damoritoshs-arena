@@ -76,27 +76,27 @@ function clearFilters() {
 <template>
   <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Creatures</h2>
+    <div class="flex justify-between items-center mb-3 lg:mb-4">
+      <h2 class="text-base lg:text-lg font-semibold">Creatures</h2>
       <span class="text-xs text-dim">{{ filteredCreatures.length }} / {{ store.state.creatures.length }}</span>
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col gap-2 mb-4">
+    <div class="flex flex-col gap-2 mb-3 lg:mb-4">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Search creatures..."
-        class="input"
+        class="input input-sm lg:input"
       />
 
-      <div class="flex gap-2">
-        <select v-model.number="levelFilter" class="input select flex-1">
+      <div class="grid grid-cols-2 lg:flex gap-2">
+        <select v-model.number="levelFilter" class="input input-sm lg:input select flex-1">
           <option :value="null">Any Level</option>
           <option v-for="n in 25" :key="n - 1" :value="n - 1">Level {{ n - 1 }}</option>
         </select>
 
-        <select v-model="traitFilter" class="input select flex-1">
+        <select v-model="traitFilter" class="input input-sm lg:input select flex-1">
           <option value="">Any Trait</option>
           <option v-for="trait in availableTraits" :key="trait" :value="trait">
             {{ trait }}
@@ -105,7 +105,7 @@ function clearFilters() {
 
         <button
           v-if="searchQuery || levelFilter !== null || traitFilter"
-          class="btn-secondary btn-sm"
+          class="btn-secondary btn-xs lg:btn-sm col-span-2 lg:col-span-1"
           @click="clearFilters"
         >
           Clear
@@ -114,40 +114,40 @@ function clearFilters() {
     </div>
 
     <!-- Creature List -->
-    <div class="flex-1 overflow-y-auto flex flex-col gap-2">
+    <div class="flex-1 overflow-y-auto flex flex-col gap-1.5 lg:gap-2">
       <div
         v-for="creature in filteredCreatures"
         :key="creature.id"
-        class="card p-3"
+        class="card p-2 lg:p-3"
       >
         <!-- Creature Header -->
         <div
-          class="flex justify-between items-center cursor-pointer"
+          class="flex justify-between items-center gap-2 cursor-pointer"
           @click="toggleStatblock(creature.id)"
         >
-          <div class="flex items-center gap-3">
-            <span class="inline-flex items-center justify-center w-7 h-7 bg-[var(--color-accent)] text-white text-xs font-bold rounded">
+          <div class="flex items-center gap-2 lg:gap-3 min-w-0">
+            <span class="inline-flex items-center justify-center w-6 h-6 lg:w-7 lg:h-7 bg-[var(--color-accent)] text-white text-xs font-bold rounded shrink-0">
               {{ creature.level }}
             </span>
-            <span class="font-medium">{{ creature.name }}</span>
+            <span class="font-medium text-sm lg:text-base truncate">{{ creature.name }}</span>
           </div>
-          <div class="flex gap-1">
+          <div class="flex gap-1 shrink-0">
             <button
-              class="btn-secondary btn-compact"
+              class="btn-secondary btn-compact text-xs"
               title="Add Weak"
               @click.stop="addToEncounter(creature, 'weak')"
             >
               W
             </button>
             <button
-              class="btn-primary btn-compact"
+              class="btn-primary btn-compact text-xs"
               title="Add Normal"
               @click.stop="addToEncounter(creature, 'normal')"
             >
               +
             </button>
             <button
-              class="btn-secondary btn-compact"
+              class="btn-secondary btn-compact text-xs"
               title="Add Elite"
               @click.stop="addToEncounter(creature, 'elite')"
             >
@@ -157,11 +157,11 @@ function clearFilters() {
         </div>
 
         <!-- Traits -->
-        <div class="flex flex-wrap gap-1 mt-2">
+        <div class="flex flex-wrap gap-1 mt-1.5 lg:mt-2">
           <span
             v-for="trait in creature.traits"
             :key="trait"
-            class="trait"
+            class="trait text-[0.5625rem] lg:text-[0.625rem]"
             :class="{
               'trait-size': ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan'].includes(trait),
               'trait-rarity-uncommon': trait === 'Uncommon',

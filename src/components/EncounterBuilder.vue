@@ -74,14 +74,14 @@ function getDifficultyBudgets() {
 <template>
   <div class="flex flex-col h-full">
     <template v-if="store.activeEncounter.value">
-      <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-2 lg:gap-3 mb-3 lg:mb-4">
         <input
           :value="store.activeEncounter.value.name"
           @input="store.updateEncounterName(store.activeEncounter.value!.id, ($event.target as HTMLInputElement).value)"
-          class="flex-1 text-xl font-semibold bg-transparent border-none border-b-2 border-b-transparent py-1 text-text focus:outline-none focus:border-b-accent"
+          class="flex-1 text-base lg:text-xl font-semibold bg-transparent border-none border-b-2 border-b-transparent py-1 text-text focus:outline-none focus:border-b-accent min-w-0"
         />
         <button
-          class="px-4 py-2 bg-success text-white border-none rounded-md font-semibold text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:bg-[#16a34a] hover:-translate-y-px disabled:bg-dim disabled:cursor-not-allowed disabled:opacity-50"
+          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-success text-white border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:bg-[#16a34a] hover:-translate-y-px disabled:bg-dim disabled:cursor-not-allowed disabled:opacity-50"
           @click="runEncounter"
           :disabled="store.activeEncounter.value.creatures.length === 0 && !store.activeEncounter.value.hazards?.length"
           title="Start combat with this encounter"
@@ -91,16 +91,16 @@ function getDifficultyBudgets() {
       </div>
 
       <!-- Party Quick Settings -->
-      <div class="flex items-center gap-3 mb-3 p-3 bg-surface border border-border rounded-lg">
+      <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-3 p-2 lg:p-3 bg-surface border border-border rounded-lg">
         <!-- Using Party Mode -->
         <template v-if="partyStore.activeParty.value?.players?.length && !store.state.useManualOverride">
-          <span class="text-xs text-dim uppercase tracking-wide">Party:</span>
-          <span class="font-medium text-accent">{{ partyStore.activeParty.value.name }}</span>
-          <span class="text-xs text-dim">
+          <span class="text-[0.625rem] lg:text-xs text-dim uppercase tracking-wide">Party:</span>
+          <span class="font-medium text-accent text-sm lg:text-base">{{ partyStore.activeParty.value.name }}</span>
+          <span class="text-[0.625rem] lg:text-xs text-dim">
             ({{ partyStore.partySize.value }} players, Lvl {{ partyStore.partyLevel.value }})
           </span>
           <button
-            class="ml-auto text-xs text-dim hover:text-text transition-colors"
+            class="ml-auto text-[0.625rem] lg:text-xs text-dim hover:text-text transition-colors"
             @click="store.setManualOverride(true)"
             title="Use manual level/size instead"
           >
@@ -110,7 +110,7 @@ function getDifficultyBudgets() {
 
         <!-- Manual Mode -->
         <template v-else>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 lg:gap-4">
             <SciFiDial
               :model-value="store.state.partySize"
               @update:model-value="store.setPartySize($event)"
@@ -128,26 +128,26 @@ function getDifficultyBudgets() {
           </div>
           <button
             v-if="partyStore.activeParty.value?.players?.length"
-            class="ml-auto text-xs text-accent hover:text-text transition-colors"
+            class="ml-auto text-[0.625rem] lg:text-xs text-accent hover:text-text transition-colors"
             @click="store.setManualOverride(false)"
             title="Use party data"
           >
             ← Use Party
           </button>
-          <span v-else class="ml-auto text-xs text-dim italic">
+          <span v-else class="ml-auto text-[0.625rem] lg:text-xs text-dim italic">
             No party selected
           </span>
         </template>
       </div>
 
       <!-- XP Summary -->
-      <div v-if="store.encounterXP.value" class="bg-surface border border-border rounded-xl p-4 mb-4">
+      <div v-if="store.encounterXP.value" class="bg-surface border border-border rounded-xl p-3 lg:p-4 mb-3 lg:mb-4">
         <div class="flex items-baseline justify-between mb-2">
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-bold text-accent">{{ store.encounterXP.value.totalXP }}</span>
-            <span class="text-base text-dim">XP</span>
+          <div class="flex items-baseline gap-1.5 lg:gap-2">
+            <span class="text-2xl lg:text-3xl font-bold text-accent">{{ store.encounterXP.value.totalXP }}</span>
+            <span class="text-sm lg:text-base text-dim">XP</span>
           </div>
-          <div v-if="store.encounterXP.value.creatureBreakdown.length > 0 || store.encounterXP.value.hazardBreakdown.length > 0" class="flex items-center gap-1.5 text-xs text-dim">
+          <div v-if="store.encounterXP.value.creatureBreakdown.length > 0 || store.encounterXP.value.hazardBreakdown.length > 0" class="flex items-center gap-1.5 text-[0.625rem] lg:text-xs text-dim">
             <span v-if="store.encounterXP.value.creatureBreakdown.length > 0">
               {{ store.encounterXP.value.creatureBreakdown.reduce((sum, c) => sum + c.count, 0) }} creatures
             </span>
@@ -165,11 +165,11 @@ function getDifficultyBudgets() {
           {{ store.encounterXP.value.difficulty }}
         </div>
 
-        <div class="mt-4">
-          <div class="flex justify-between text-[0.625rem] text-dim uppercase">
+        <div class="mt-3 lg:mt-4">
+          <div class="flex justify-between text-[0.5rem] lg:text-[0.625rem] text-dim uppercase">
             <span>Trivial</span>
             <span>Low</span>
-            <span>Moderate</span>
+            <span>Mod</span>
             <span>Severe</span>
             <span>Extreme</span>
           </div>
@@ -189,7 +189,7 @@ function getDifficultyBudgets() {
               :title="`${difficulty}: ${budget} XP`"
             ></div>
           </div>
-          <div class="flex justify-between text-[0.625rem] text-dim mt-1">
+          <div class="flex justify-between text-[0.5rem] lg:text-[0.625rem] text-dim mt-1">
             <span>{{ getDifficultyBudgets().trivial }}</span>
             <span>{{ getDifficultyBudgets().low }}</span>
             <span>{{ getDifficultyBudgets().moderate }}</span>
@@ -202,66 +202,66 @@ function getDifficultyBudgets() {
       <!-- Encounter Contents (Players, Creatures, Hazards) -->
       <div class="flex-1 overflow-y-auto min-h-0">
         <!-- Players Section -->
-        <div v-if="partyStore.activeParty.value?.players?.length" class="flex flex-col gap-2 mb-4">
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide">Players</h3>
+        <div v-if="partyStore.activeParty.value?.players?.length" class="flex flex-col gap-1.5 lg:gap-2 mb-3 lg:mb-4">
+          <h3 class="text-xs lg:text-sm font-semibold text-dim uppercase tracking-wide">Players</h3>
           <div
             v-for="player in partyStore.activeParty.value.players"
             :key="player.id"
-            class="bg-surface border border-border rounded-lg p-3 border-l-3 border-l-success"
+            class="bg-surface border border-border rounded-lg p-2 lg:p-3 border-l-3 border-l-success"
           >
-            <div class="flex items-center gap-3">
-              <span class="text-lg">👤</span>
-              <div class="flex-1 flex flex-col">
-                <span class="font-medium text-text">{{ player.name }}</span>
-                <span class="text-xs text-dim">
+            <div class="flex items-center gap-2 lg:gap-3">
+              <span class="text-base lg:text-lg">👤</span>
+              <div class="flex-1 flex flex-col min-w-0">
+                <span class="font-medium text-text text-sm lg:text-base truncate">{{ player.name }}</span>
+                <span class="text-[0.625rem] lg:text-xs text-dim">
                   Level {{ player.level || '?' }}
                   <template v-if="player.class"> · {{ player.class }}</template>
                 </span>
               </div>
-              <div class="flex gap-1.5">
-                <span class="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded bg-elevated text-success">{{ player.maxHP }} HP</span>
-                <span class="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded bg-elevated text-accent">AC {{ player.ac }}</span>
+              <div class="flex gap-1 lg:gap-1.5 shrink-0">
+                <span class="text-[0.5625rem] lg:text-[0.6875rem] font-semibold px-1 lg:px-1.5 py-0.5 rounded bg-elevated text-success">{{ player.maxHP }} HP</span>
+                <span class="text-[0.5625rem] lg:text-[0.6875rem] font-semibold px-1 lg:px-1.5 py-0.5 rounded bg-elevated text-accent">AC {{ player.ac }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-if="!store.activeEncounter.value.creatures.length && !store.activeEncounter.value.hazards?.length && !partyStore.activeParty.value?.players?.length" class="text-center py-8 text-dim">
-          <p>No threats in this encounter</p>
-          <p class="text-sm mt-2">Search and add creatures or hazards from the panel on the left</p>
+        <div v-if="!store.activeEncounter.value.creatures.length && !store.activeEncounter.value.hazards?.length && !partyStore.activeParty.value?.players?.length" class="text-center py-6 lg:py-8 text-dim">
+          <p class="text-sm lg:text-base">No threats in this encounter</p>
+          <p class="text-xs lg:text-sm mt-2">Search and add creatures or hazards from the panel above</p>
         </div>
 
         <!-- Creature List -->
-        <div v-if="store.encounterXP.value?.creatureBreakdown?.length" class="flex flex-col gap-2 mb-4">
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide">Creatures</h3>
+        <div v-if="store.encounterXP.value?.creatureBreakdown?.length" class="flex flex-col gap-1.5 lg:gap-2 mb-3 lg:mb-4">
+          <h3 class="text-xs lg:text-sm font-semibold text-dim uppercase tracking-wide">Creatures</h3>
           <div
             v-for="entry in store.encounterXP.value.creatureBreakdown"
             :key="`${entry.creature.id}-${entry.adjustment}`"
-            class="bg-surface border border-border rounded-lg p-3"
+            class="bg-surface border border-border rounded-lg p-2 lg:p-3"
           >
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1">
+            <div class="flex items-center gap-2 lg:gap-3">
+              <div class="flex items-center gap-0.5 lg:gap-1">
                 <button
-                  class="w-6 h-6 p-0 flex items-center justify-center bg-elevated border border-border text-base"
+                  class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base"
                   @click="store.updateCreatureCount(entry.creature.id, entry.adjustment, entry.count - 1)"
                 >
                   -
                 </button>
-                <span class="w-6 text-center font-semibold">{{ entry.count }}</span>
+                <span class="w-5 lg:w-6 text-center font-semibold text-sm lg:text-base">{{ entry.count }}</span>
                 <button
-                  class="w-6 h-6 p-0 flex items-center justify-center bg-elevated border border-border text-base"
+                  class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base"
                   @click="store.updateCreatureCount(entry.creature.id, entry.adjustment, entry.count + 1)"
                 >
                   +
                 </button>
               </div>
 
-              <div class="flex-1 flex flex-col">
-                <span class="font-medium">
+              <div class="flex-1 flex flex-col min-w-0">
+                <span class="font-medium text-sm lg:text-base truncate">
                   <template v-if="entry.adjustment !== 'normal'">
                     <span
-                      class="text-[0.625rem] uppercase px-1 py-0.5 rounded mr-1"
+                      class="text-[0.5rem] lg:text-[0.625rem] uppercase px-1 py-0.5 rounded mr-1"
                       :class="{
                         'bg-danger text-white': entry.adjustment === 'elite',
                         'bg-dim text-white': entry.adjustment === 'weak'
@@ -270,7 +270,7 @@ function getDifficultyBudgets() {
                   </template>
                   {{ entry.creature.name }}
                 </span>
-                <span class="text-xs text-dim">
+                <span class="text-[0.625rem] lg:text-xs text-dim">
                   Level {{ entry.effectiveLevel }}
                   <span class="font-medium" :style="{ color: getXPColor(entry.levelDiff) }">
                     ({{ formatLevelDiff(entry.levelDiff) }})
@@ -278,13 +278,13 @@ function getDifficultyBudgets() {
                 </span>
               </div>
 
-              <div class="flex flex-col items-end text-xs">
-                <span class="text-dim">{{ entry.xpEach }} XP ea.</span>
+              <div class="flex flex-col items-end text-[0.625rem] lg:text-xs shrink-0">
+                <span class="text-dim hidden lg:block">{{ entry.xpEach }} XP ea.</span>
                 <span class="font-semibold text-accent">{{ entry.xpTotal }} XP</span>
               </div>
 
               <button
-                class="btn-icon btn-danger btn-sm"
+                class="btn-icon btn-danger btn-xs lg:btn-sm"
                 @click="store.removeCreatureFromEncounter(entry.creature.id, entry.adjustment)"
                 title="Remove all"
               >
@@ -292,7 +292,7 @@ function getDifficultyBudgets() {
               </button>
             </div>
 
-            <div class="flex gap-4 mt-2 pt-2 border-t border-border text-xs">
+            <div class="flex gap-3 lg:gap-4 mt-2 pt-2 border-t border-border text-[0.625rem] lg:text-xs">
               <label class="flex items-center gap-1 cursor-pointer text-dim">
                 <input
                   type="radio"
@@ -325,43 +325,43 @@ function getDifficultyBudgets() {
         </div>
 
         <!-- Hazard List -->
-        <div v-if="store.encounterXP.value?.hazardBreakdown?.length" class="flex flex-col gap-2">
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide">Hazards</h3>
+        <div v-if="store.encounterXP.value?.hazardBreakdown?.length" class="flex flex-col gap-1.5 lg:gap-2">
+          <h3 class="text-xs lg:text-sm font-semibold text-dim uppercase tracking-wide">Hazards</h3>
           <div
             v-for="entry in store.encounterXP.value.hazardBreakdown"
             :key="entry.hazard.id"
-            class="bg-surface border border-border rounded-lg p-3 border-l-3 border-l-hazard"
+            class="bg-surface border border-border rounded-lg p-2 lg:p-3 border-l-3 border-l-hazard"
           >
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1">
+            <div class="flex items-center gap-2 lg:gap-3">
+              <div class="flex items-center gap-0.5 lg:gap-1">
                 <button
-                  class="w-6 h-6 p-0 flex items-center justify-center bg-elevated border border-border text-base"
+                  class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base"
                   @click="store.updateHazardCount(entry.hazard.id, entry.count - 1)"
                 >
                   -
                 </button>
-                <span class="w-6 text-center font-semibold">{{ entry.count }}</span>
+                <span class="w-5 lg:w-6 text-center font-semibold text-sm lg:text-base">{{ entry.count }}</span>
                 <button
-                  class="w-6 h-6 p-0 flex items-center justify-center bg-elevated border border-border text-base"
+                  class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base"
                   @click="store.updateHazardCount(entry.hazard.id, entry.count + 1)"
                 >
                   +
                 </button>
               </div>
 
-              <div class="flex-1 flex flex-col">
-                <span class="font-medium">
+              <div class="flex-1 flex flex-col min-w-0">
+                <span class="font-medium text-sm lg:text-base truncate">
                   {{ entry.hazard.name }}
                 </span>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-xs text-dim">
+                <div class="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+                  <span class="text-[0.625rem] lg:text-xs text-dim">
                     Level {{ entry.hazard.level }}
                     <span class="font-medium" :style="{ color: getXPColor(entry.levelDiff) }">
                       ({{ formatLevelDiff(entry.levelDiff) }})
                     </span>
                   </span>
                   <span
-                    class="text-[0.625rem] px-1.5 py-0.5 rounded font-medium uppercase bg-elevated"
+                    class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated"
                     :class="{
                       'text-dim': entry.hazard.complexity === 'simple',
                       'text-warning': entry.hazard.complexity === 'complex'
@@ -370,7 +370,7 @@ function getDifficultyBudgets() {
                     {{ formatComplexity(entry.hazard.complexity) }}
                   </span>
                   <span
-                    class="text-[0.625rem] px-1.5 py-0.5 rounded font-medium uppercase bg-elevated"
+                    class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated"
                     :class="{
                       'text-danger': entry.hazard.type === 'trap',
                       'text-success': entry.hazard.type === 'environmental',
@@ -382,13 +382,13 @@ function getDifficultyBudgets() {
                 </div>
               </div>
 
-              <div class="flex flex-col items-end text-xs">
-                <span class="text-dim">{{ entry.xpEach }} XP ea.</span>
+              <div class="flex flex-col items-end text-[0.625rem] lg:text-xs shrink-0">
+                <span class="text-dim hidden lg:block">{{ entry.xpEach }} XP ea.</span>
                 <span class="font-semibold text-hazard">{{ entry.xpTotal }} XP</span>
               </div>
 
               <button
-                class="btn-icon btn-danger btn-sm"
+                class="btn-icon btn-danger btn-xs lg:btn-sm"
                 @click="store.removeHazardFromEncounter(entry.hazard.id)"
                 title="Remove all"
               >

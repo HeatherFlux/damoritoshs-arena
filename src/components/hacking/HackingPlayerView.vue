@@ -137,14 +137,36 @@ onUnmounted(() => {
 }
 
 /* ========================================
-   DICE ROLLER CONTAINER (Desktop floating)
+   DICE ROLLER CONTAINER (Compact floating button)
    ======================================== */
 .dice-roller-container {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
   z-index: 105;
-  width: 200px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .dice-roller-container {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .computer-name-header {
+    top: 0.5rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .header-name {
+    font-size: 0.875rem;
+  }
+
+  .sync-badge {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 /* Sync Badge (bottom-right) */

@@ -428,6 +428,17 @@ onUnmounted(() => {
 
     <!-- COMBAT MODE -->
     <template v-else>
+      <!-- Latest Roll Display (in combat, shown first after terminal) -->
+      <div v-if="latestRoll" class="roll-display" :class="{
+        'roll-nat20': rollSpecial?.isNat20,
+        'roll-nat1': rollSpecial?.isNat1,
+        'roll-crit': rollSpecial?.isCrit && !rollSpecial?.isNat20 && !rollSpecial?.isNat1
+      }">
+        <span class="roll-prefix">&gt;</span>
+        <span class="roll-text">{{ rollDisplayText }}</span>
+        <span class="roll-cursor" :class="{ 'cursor-visible': rollCursorVisible }">_</span>
+      </div>
+
       <!-- Combat Status -->
       <div v-if="combat" class="status-section">
         <span class="status-label">COMBAT</span>
@@ -466,8 +477,8 @@ onUnmounted(() => {
       </div>
     </template>
 
-    <!-- Latest Roll Display (Typewriter Style) - positioned left of spacer -->
-    <div v-if="latestRoll" class="roll-display" :class="{
+    <!-- Latest Roll Display (non-combat modes) -->
+    <div v-if="latestRoll && mode !== 'combat'" class="roll-display" :class="{
       'roll-nat20': rollSpecial?.isNat20,
       'roll-nat1': rollSpecial?.isNat1,
       'roll-crit': rollSpecial?.isCrit && !rollSpecial?.isNat20 && !rollSpecial?.isNat1
@@ -819,5 +830,74 @@ onUnmounted(() => {
 
 .roll-cursor.cursor-visible {
   opacity: 1;
+}
+
+/* Mobile responsiveness - prioritize roll display */
+@media (max-width: 768px) {
+  .status-bar {
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Hide terminal animation on mobile to save space */
+  .terminal-display {
+    display: none;
+  }
+
+  /* Roll display takes available space */
+  .roll-display {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .roll-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Shrink HP bar on tablet */
+  .hp-mini-bar {
+    width: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .status-bar {
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.625rem;
+  }
+
+  /* Hide most status sections, keep essentials */
+  .status-section {
+    display: none;
+  }
+
+  /* Keep mode indicator visible (last section) */
+  .status-bar > .status-section:last-of-type {
+    display: flex;
+  }
+
+  .roll-display {
+    flex: 1;
+  }
+
+  /* Hide difficulty badge on small screens */
+  .difficulty-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Ultra compact - just roll + mode */
+  .status-bar {
+    gap: 0.375rem;
+    min-height: 2rem;
+  }
+
+  .roll-display {
+    font-size: 0.5625rem;
+  }
 }
 </style>

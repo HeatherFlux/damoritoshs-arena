@@ -135,10 +135,10 @@ function importAnother() {
 
     <!-- Active Combat -->
     <template v-else>
-      <div class="flex justify-between items-start mb-4 pb-4 border-b border-border">
+      <div class="flex flex-col lg:flex-row justify-between items-start gap-3 mb-4 pb-4 border-b border-border">
         <div>
-          <h2 class="text-xl mb-1">{{ combatStore.state.combat?.name }}</h2>
-          <div class="flex gap-4 text-sm text-dim">
+          <h2 class="text-lg lg:text-xl mb-1">{{ combatStore.state.combat?.name }}</h2>
+          <div class="flex flex-wrap gap-2 lg:gap-4 text-sm text-dim">
             <span class="bg-accent text-white px-2 py-0.5 rounded font-semibold">Round {{ combatStore.state.combat?.round }}</span>
             <span v-if="combatStore.currentCombatant.value">
               Current: <strong class="text-text">{{ combatStore.currentCombatant.value.name }}</strong>
@@ -146,17 +146,17 @@ function importAnother() {
           </div>
         </div>
 
-        <div class="flex gap-2">
-          <button class="btn-secondary btn-sm" @click="combatStore.previousTurn()">
+        <div class="flex flex-wrap gap-2">
+          <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.previousTurn()">
             ← Prev
           </button>
-          <button class="btn-primary" @click="combatStore.nextTurn()">
+          <button class="btn-primary btn-sm" @click="combatStore.nextTurn()">
             Next Turn →
           </button>
-          <button class="btn-secondary btn-sm" @click="combatStore.rollAllInitiative()">
+          <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.rollAllInitiative()">
             Roll All Init
           </button>
-          <button class="btn-danger btn-sm" @click="combatStore.endCombat()">
+          <button class="btn-danger btn-xs lg:btn-sm" @click="combatStore.endCombat()">
             End Combat
           </button>
         </div>
@@ -164,7 +164,8 @@ function importAnother() {
 
       <!-- Combatant List -->
       <div class="flex-1 overflow-y-auto">
-        <div class="grid gap-2 p-2 text-xs font-semibold uppercase text-dim border-b border-border" style="grid-template-columns: 60px 1fr 120px 50px 1fr 100px;">
+        <!-- Desktop header - hidden on mobile -->
+        <div class="hidden lg:grid gap-2 p-2 text-xs font-semibold uppercase text-dim border-b border-border" style="grid-template-columns: 60px 1fr 180px 50px 1fr 80px;">
           <span>Init</span>
           <span>Name</span>
           <span>HP</span>

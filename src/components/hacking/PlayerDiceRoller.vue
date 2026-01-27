@@ -46,77 +46,59 @@ function roll() {
 </script>
 
 <template>
-  <div class="dice-roller">
-    <!-- Modifier Controls -->
-    <div class="modifier-row">
+  <div class="dice-roller-wrapper">
+    <!-- Compact Roll Button with Modifier -->
+    <div class="roll-controls">
       <button class="mod-btn" @click="adjustModifier(-1)" aria-label="Decrease modifier">−</button>
-      <div class="modifier-display">
-        <span class="mod-label">MOD</span>
-        <span class="mod-value">{{ modifierDisplay || '±0' }}</span>
-      </div>
+      <button
+        class="roll-button"
+        :class="{ rolling: isRolling }"
+        @click="roll"
+        :disabled="isRolling"
+      >
+        <span class="roll-label">D20</span>
+        <span class="roll-mod">{{ modifierDisplay || '±0' }}</span>
+      </button>
       <button class="mod-btn" @click="adjustModifier(1)" aria-label="Increase modifier">+</button>
     </div>
 
-    <!-- Roll Button -->
-    <button
-      class="roll-button"
-      :class="{ rolling: isRolling }"
-      @click="roll"
-      :disabled="isRolling"
-    >
-      <span class="roll-text">{{ isRolling ? 'ROLLING...' : 'ROLL D20' }}</span>
-    </button>
-
-    <!-- Result Display -->
-    <Transition name="result-fade">
-      <div v-if="showResult && lastRoll" class="result-container">
-        <div class="result-number" :class="resultClass">
-          {{ lastRoll.total }}
+    <!-- Fullscreen Result Toast Overlay -->
+    <Teleport to="body">
+      <Transition name="toast">
+        <div v-if="showResult && lastRoll" class="result-toast" :class="resultClass">
+          <div class="toast-number">{{ lastRoll.total }}</div>
+          <div class="toast-breakdown">{{ lastRoll.breakdown }}</div>
+          <div v-if="lastRoll.isNat20" class="toast-crit nat20">NATURAL 20</div>
+          <div v-if="lastRoll.isNat1" class="toast-crit nat1">NATURAL 1</div>
         </div>
-        <div class="result-breakdown">
-          {{ lastRoll.breakdown }}
-        </div>
-        <div v-if="lastRoll.isNat20" class="result-crit nat20">NATURAL 20!</div>
-        <div v-if="lastRoll.isNat1" class="result-crit nat1">NATURAL 1!</div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-.dice-roller {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: rgba(5, 6, 8, 0.95);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  box-shadow:
-    0 0 20px var(--color-accent-glow, rgba(30, 203, 225, 0.3)),
-    inset 0 0 30px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
+.dice-roller-wrapper {
+  display: contents;
 }
 
-/* Modifier Row */
-.modifier-row {
+/* Roll Controls - compact inline */
+.roll-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.25rem;
 }
 
 .mod-btn {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: rgba(5, 6, 8, 0.9);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  color: var(--color-text);
-  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 1rem;
   font-family: 'JetBrains Mono', monospace;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -125,88 +107,59 @@ function roll() {
 .mod-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-  box-shadow: 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.3));
+  box-shadow: 0 0 8px var(--color-accent-glow, rgba(30, 203, 225, 0.3));
 }
 
 .mod-btn:active {
   transform: scale(0.95);
 }
 
-.modifier-display {
+/* Roll Button */
+.roll-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 4rem;
-}
-
-.mod-label {
-  font-size: 0.625rem;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--color-text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-}
-
-.mod-value {
-  font-size: 1.5rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  color: var(--color-accent);
-  text-shadow: 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.3));
-}
-
-/* Roll Button */
-.roll-button {
-  width: 100%;
-  padding: 1rem 2rem;
-  background: transparent;
-  border: 2px solid var(--color-accent);
+  gap: 0;
+  padding: 0.375rem 0.75rem;
+  background: rgba(5, 6, 8, 0.9);
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-sm);
   color: var(--color-accent);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
   cursor: pointer;
-  box-shadow:
-    0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.3)),
-    inset 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.2));
-  text-shadow: 0 0 10px var(--color-accent);
+  box-shadow: 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.2));
   transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
 }
 
-.roll-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-accent-glow, rgba(30, 203, 225, 0.2)),
-    transparent
-  );
-  transition: left 0.5s ease;
+.roll-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px var(--color-accent);
+}
+
+.roll-mod {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  line-height: 1;
 }
 
 .roll-button:hover:not(:disabled) {
   background: var(--color-accent);
   color: var(--color-bg);
-  box-shadow: 0 0 30px var(--color-accent-glow, rgba(30, 203, 225, 0.5));
+  box-shadow: 0 0 20px var(--color-accent-glow, rgba(30, 203, 225, 0.4));
+}
+
+.roll-button:hover:not(:disabled) .roll-label {
   text-shadow: none;
 }
 
-.roll-button:hover:not(:disabled)::before {
-  left: 100%;
+.roll-button:hover:not(:disabled) .roll-mod {
+  color: var(--color-bg);
 }
 
 .roll-button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.95);
 }
 
 .roll-button:disabled {
@@ -215,118 +168,164 @@ function roll() {
 }
 
 .roll-button.rolling {
-  animation: pulse-glow 0.3s ease-in-out infinite alternate;
+  animation: pulse-glow 0.2s ease-in-out infinite alternate;
 }
 
 @keyframes pulse-glow {
-  from {
-    box-shadow:
-      0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.3)),
-      inset 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.2));
-  }
-  to {
-    box-shadow:
-      0 0 25px var(--color-accent-glow, rgba(30, 203, 225, 0.5)),
-      inset 0 0 20px var(--color-accent-glow, rgba(30, 203, 225, 0.3));
-  }
+  from { box-shadow: 0 0 10px var(--color-accent-glow, rgba(30, 203, 225, 0.2)); }
+  to { box-shadow: 0 0 25px var(--color-accent-glow, rgba(30, 203, 225, 0.5)); }
 }
 
-/* Result Display */
-.result-container {
+/* ========================================
+   RESULT TOAST - Fullscreen overlay
+   ======================================== */
+.result-toast {
+  position: fixed;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  padding-top: 0.5rem;
+  z-index: 9999;
+  pointer-events: none;
 }
 
-.result-number {
-  font-size: 4rem;
+.toast-number {
+  font-size: 6rem;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-tertiary);
   text-shadow:
-    0 0 10px var(--color-accent),
-    0 0 30px var(--color-accent-glow, rgba(30, 203, 225, 0.5));
+    0 0 20px var(--color-tertiary),
+    0 0 40px var(--color-tertiary),
+    0 0 80px var(--color-accent-glow, rgba(30, 203, 225, 0.5));
   line-height: 1;
 }
 
-.result-number.nat20 {
+.result-toast.nat20 .toast-number {
+  color: var(--color-warning);
+  text-shadow:
+    0 0 20px var(--color-warning),
+    0 0 40px var(--color-warning),
+    0 0 80px var(--color-warning),
+    0 0 120px var(--color-warning);
+  animation: crit-glow 0.5s ease-out;
+}
+
+.result-toast.nat1 .toast-number {
+  color: var(--color-danger);
+  text-shadow:
+    0 0 20px var(--color-danger),
+    0 0 40px var(--color-danger),
+    0 0 80px var(--color-danger);
+}
+
+.toast-breakdown {
+  font-size: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--color-text-muted);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.05em;
+}
+
+.toast-crit {
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.toast-crit.nat20 {
   color: var(--color-warning);
   text-shadow:
     0 0 10px var(--color-warning),
-    0 0 30px var(--color-warning),
-    0 0 50px var(--color-warning);
-  animation: crit-pulse 0.5s ease-out;
+    0 0 30px var(--color-warning);
+  animation: crit-text-pulse 0.3s ease-in-out 3;
 }
 
-.result-number.nat1 {
+.toast-crit.nat1 {
   color: var(--color-danger);
   text-shadow:
     0 0 10px var(--color-danger),
     0 0 30px var(--color-danger);
-  animation: crit-pulse 0.5s ease-out;
 }
 
-@keyframes crit-pulse {
+@keyframes crit-glow {
+  0% { transform: scale(1.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes crit-text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Toast Transitions */
+.toast-enter-active {
+  animation: toast-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-leave-active {
+  animation: toast-out 0.3s ease-in;
+}
+
+@keyframes toast-in {
   0% {
-    transform: scale(1.5);
     opacity: 0;
-  }
-  50% {
-    transform: scale(1.1);
+    transform: translateX(-50%) translateY(30px) scale(0.8);
   }
   100% {
-    transform: scale(1);
     opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 
-.result-breakdown {
-  font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--color-text-dim);
-  letter-spacing: 0.05em;
-}
-
-.result-crit {
-  margin-top: 0.25rem;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: var(--radius-sm);
-}
-
-.result-crit.nat20 {
-  background: var(--color-warning);
-  color: var(--color-bg);
-}
-
-.result-crit.nat1 {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* Transitions */
-.result-fade-enter-active {
-  animation: result-appear 0.3s ease-out;
-}
-
-.result-fade-leave-active {
-  animation: result-appear 0.2s ease-in reverse;
-}
-
-@keyframes result-appear {
-  from {
+@keyframes toast-out {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
     opacity: 0;
-    transform: translateY(-10px) scale(0.9);
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .mod-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.25rem;
+  }
+
+  .roll-button {
+    padding: 0.5rem 1rem;
+  }
+
+  .roll-label {
+    font-size: 0.875rem;
+  }
+
+  .roll-mod {
+    font-size: 0.75rem;
+  }
+
+  .toast-number {
+    font-size: 5rem;
+  }
+
+  .toast-breakdown {
+    font-size: 0.875rem;
+  }
+
+  .toast-crit {
+    font-size: 1rem;
   }
 }
 </style>
