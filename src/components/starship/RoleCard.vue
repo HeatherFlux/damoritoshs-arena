@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { StarshipRole } from '../../types/starship'
+import type { StarshipRole, StarshipAction } from '../../types/starship'
 
 const props = defineProps<{
   role: StarshipRole
@@ -29,6 +29,18 @@ function isActionExpanded(actionId: string): boolean {
   return expandedActions.value.has(actionId)
 }
 
+// Get display text for action check type (skill or attack roll)
+function getActionCheckDisplay(action: StarshipAction): string {
+  if (action.isAttack) {
+    const prof = action.proficiency === 'martial' ? 'Martial' : 'Simple'
+    return `Attack Roll (${prof})`
+  }
+  if (action.skills.length === 0) {
+    return 'Special'
+  }
+  return action.skills.join(' or ')
+}
+
 const roleTypeColor = computed(() => {
   switch (props.role.type) {
     case 'captain': return 'var(--color-warning)'
@@ -51,7 +63,7 @@ const roleTypeColor = computed(() => {
       <div class="role-info">
         <h4 class="role-name">{{ role.name }}</h4>
         <div class="role-skills">
-          {{ role.primarySkills.join(', ') }}
+          {{ role.primarySkills.length > 0 ? role.primarySkills.join(', ') : 'Attack Rolls' }}
         </div>
       </div>
       <div class="role-meta">
@@ -100,7 +112,7 @@ const roleTypeColor = computed(() => {
             </div>
             <div class="action-info">
               <span class="action-name">{{ action.name }}</span>
-              <span class="action-skills">{{ action.skills.join(' or ') }}</span>
+              <span class="action-skills" :class="{ 'attack-roll': action.isAttack }">{{ getActionCheckDisplay(action) }}</span>
             </div>
             <span class="action-expand">{{ isActionExpanded(action.id) ? '&#x25BC;' : '&#x25B6;' }}</span>
           </div>
@@ -320,6 +332,11 @@ const roleTypeColor = computed(() => {
   font-size: 0.625rem;
   color: var(--color-text-dim);
   text-transform: uppercase;
+}
+
+.action-skills.attack-roll {
+  color: var(--color-danger);
+  font-weight: 600;
 }
 
 .action-expand {

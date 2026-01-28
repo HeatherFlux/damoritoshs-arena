@@ -21,6 +21,9 @@ export interface ActionOutcomes {
   criticalFailure?: string
 }
 
+// Weapon proficiency for attack actions
+export type WeaponProficiency = 'simple' | 'martial'
+
 // 2-action activity for a role
 export interface StarshipAction {
   id: string
@@ -30,6 +33,11 @@ export interface StarshipAction {
   dc?: number // Optional fixed DC
   description: string
   outcomes: ActionOutcomes
+  // For attack actions (gunner Strikes)
+  isAttack?: boolean // True if this is an attack roll vs AC
+  proficiency?: WeaponProficiency // Required weapon proficiency (simple/martial)
+  damage?: string // Damage dice expression (e.g., '2d10+8 fire')
+  traits?: string[] // Weapon traits (e.g., ['deadly d8', 'range 120 ft'])
 }
 
 // Starship role definition

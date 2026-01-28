@@ -1,6 +1,14 @@
 /**
  * Starfinder 2E Cinematic Starship Roles
- * Pre-built roles based on SF2e rules
+ * Pre-built roles based on SF2e GM Core rules
+ *
+ * Skills per GM Core:
+ * - Pilot: Piloting (primary), Acrobatics, Perception
+ * - Engineer: Crafting (primary), Athletics, Technology Lore
+ * - Gunner: Attack rolls using weapon proficiency (simple/martial)
+ * - Science Officer: Computers (primary), Perception, Lore skills
+ * - Captain: Diplomacy, Intimidation, Performance
+ * - Magic Officer: Arcana, Occultism, Religion, Nature
  */
 
 import type { StarshipRole } from '../types/starship'
@@ -33,7 +41,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         skills: ['Intimidation', 'Deception'],
         description: 'You broadcast a taunt to the enemy ship, attempting to goad them into making a mistake or revealing their intentions.',
         outcomes: {
-          criticalSuccess: 'The enemy captain is rattled. The enemy ship takes a -2 circumstance penalty to their next attack roll or piloting check. Additionally, the GM reveals one of the enemy\'s planned actions.',
+          criticalSuccess: 'The enemy captain is rattled. The enemy ship takes a -2 circumstance penalty to their next attack roll or Piloting check. Additionally, the GM reveals one of the enemy\'s planned actions.',
           success: 'The enemy is distracted. The enemy ship takes a -1 circumstance penalty to their next attack roll.',
           failure: 'Your taunt has no effect.',
           criticalFailure: 'The enemy turns your taunt against you. Your gunner takes a -1 circumstance penalty to their next attack roll.'
@@ -72,13 +80,13 @@ export const STARSHIP_ROLES: StarshipRole[] = [
     type: 'engineer',
     name: 'Engineer',
     description: 'The engineer keeps the ship running, repairs damage, and can push systems beyond their normal limits in emergencies.',
-    primarySkills: ['Crafting', 'Engineering Lore'],
+    primarySkills: ['Crafting', 'Athletics', 'Technology Lore'],
     actions: [
       {
         id: 'divert-power',
         name: 'Divert Power',
         actionCost: 2,
-        skills: ['Crafting', 'Engineering Lore'],
+        skills: ['Crafting', 'Technology Lore'],
         description: 'You reroute power from non-essential systems to boost a critical function.',
         outcomes: {
           criticalSuccess: 'Choose weapons, shields, or engines. That system gains a +2 circumstance bonus to related checks or effects for 1 round. Another system of your choice takes no penalty.',
@@ -91,7 +99,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'emergency-repair',
         name: 'Emergency Repair',
         actionCost: 2,
-        skills: ['Crafting', 'Engineering Lore'],
+        skills: ['Crafting', 'Athletics'],
         description: 'You perform hasty repairs on damaged systems or hull breaches.',
         outcomes: {
           criticalSuccess: 'Restore 2d6 + your level HP to the ship, or fully restore one disabled system.',
@@ -104,7 +112,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'boost-shields',
         name: 'Boost Shields',
         actionCost: 2,
-        skills: ['Crafting', 'Engineering Lore'],
+        skills: ['Crafting', 'Technology Lore'],
         description: 'You overcharge the shield generators to provide extra protection.',
         outcomes: {
           criticalSuccess: 'The shields surge with power. Restore shields to maximum and gain temporary shields equal to half maximum that last for 1 round.',
@@ -117,7 +125,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'overclock-weapons',
         name: 'Overclock Weapons',
         actionCost: 2,
-        skills: ['Crafting', 'Engineering Lore'],
+        skills: ['Crafting', 'Technology Lore'],
         description: 'You push the weapon systems beyond their normal parameters.',
         outcomes: {
           criticalSuccess: 'Weapons deal an additional 2d6 damage on the next hit this round, and the gunner gains a +1 bonus to their attack roll.',
@@ -132,17 +140,19 @@ export const STARSHIP_ROLES: StarshipRole[] = [
     id: 'gunner',
     type: 'gunner',
     name: 'Gunner',
-    description: 'The gunner operates the ship\'s weapons systems, targeting enemies and defending against incoming attacks.',
-    primarySkills: ['Piloting Lore', 'Athletics'],
+    description: 'The gunner operates the ship\'s weapons systems, targeting enemies and defending against incoming attacks. Gunner actions are attack rolls using weapon proficiency, not skill checks.',
+    primarySkills: [], // Gunners use attack rolls, not skills
     actions: [
       {
-        id: 'fire-at-will',
-        name: 'Fire at Will',
+        id: 'fire-weapons',
+        name: 'Fire Weapons',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Athletics'],
-        description: 'You unleash a barrage of weapons fire at an enemy target.',
+        skills: [], // Attack roll, not skill check
+        isAttack: true,
+        proficiency: 'martial',
+        description: 'You fire the ship\'s weapons at an enemy target. This is an attack roll using your proficiency with martial weapons, targeting the enemy\'s AC.',
         outcomes: {
-          criticalSuccess: 'Direct hit to a vital system! Deal normal damage plus an additional 2d6, and choose one: disable a system for 1 round, or the target is off-guard until the start of your next turn.',
+          criticalSuccess: 'Direct hit to a vital system! Deal normal weapon damage plus an additional die of damage, and choose one: disable a system for 1 round, or the target is off-guard until the start of your next turn.',
           success: 'Solid hit. Deal normal weapon damage to the target.',
           failure: 'Your shots go wide. No damage dealt.',
           criticalFailure: 'Catastrophic miss. Your weapons overheat and can\'t be used until the engineer repairs them or until the end of next round.'
@@ -152,8 +162,10 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'precise-shot',
         name: 'Precise Shot',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Perception'],
-        description: 'You take careful aim at a specific system on the enemy ship.',
+        skills: [], // Attack roll, not skill check
+        isAttack: true,
+        proficiency: 'martial',
+        description: 'You take careful aim at a specific system on the enemy ship. This attack takes a -2 penalty but can disable systems.',
         outcomes: {
           criticalSuccess: 'Perfect shot! Deal normal damage and disable the targeted system (weapons, engines, or shields) for 2 rounds.',
           success: 'You hit the system. Deal half normal damage and disable the targeted system for 1 round.',
@@ -165,11 +177,13 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'suppressive-fire',
         name: 'Suppressive Fire',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Intimidation'],
-        description: 'You lay down a field of fire to restrict enemy movement and actions.',
+        skills: [], // Attack roll with Intimidation benefit
+        isAttack: true,
+        proficiency: 'simple',
+        description: 'You lay down a field of fire to restrict enemy movement and actions. Uses simple weapon proficiency.',
         outcomes: {
-          criticalSuccess: 'The enemy is pinned down. They take a -2 circumstance penalty to all piloting checks and attack rolls until the start of your next turn, and take 1d6 damage if they attempt to move.',
-          success: 'The enemy is suppressed. They take a -1 circumstance penalty to piloting checks until the start of your next turn.',
+          criticalSuccess: 'The enemy is pinned down. They take a -2 circumstance penalty to all Piloting checks and attack rolls until the start of your next turn, and take 1d6 damage if they attempt to move.',
+          success: 'The enemy is suppressed. They take a -1 circumstance penalty to Piloting checks until the start of your next turn.',
           failure: 'Your suppressive fire is ineffective.',
           criticalFailure: 'You waste ammunition and reveal your firing patterns. The enemy gains a +1 bonus to evade your next attack.'
         }
@@ -178,8 +192,9 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'point-defense',
         name: 'Point Defense',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Perception'],
-        description: 'You ready the ship\'s point defense systems to intercept incoming attacks.',
+        skills: ['Perception'], // This one uses Perception to ready defenses
+        isAttack: false,
+        description: 'You ready the ship\'s point defense systems to intercept incoming attacks. Roll a Perception check.',
         outcomes: {
           criticalSuccess: 'Exceptional defensive coverage. Reduce the damage from the next attack against your ship by half, and if it\'s a missile or torpedo attack, negate it entirely.',
           success: 'Good coverage. Reduce the damage from the next attack against your ship by 1d6 + your level.',
@@ -255,13 +270,13 @@ export const STARSHIP_ROLES: StarshipRole[] = [
     type: 'pilot',
     name: 'Pilot',
     description: 'The pilot controls the ship\'s movement, executing maneuvers to gain tactical advantage, avoid attacks, and position for the crew.',
-    primarySkills: ['Piloting Lore', 'Acrobatics'],
+    primarySkills: ['Piloting', 'Acrobatics', 'Perception'],
     actions: [
       {
         id: 'evasive-maneuvers',
         name: 'Evasive Maneuvers',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Acrobatics'],
+        skills: ['Piloting', 'Acrobatics'],
         description: 'You throw the ship into a series of unpredictable movements to avoid incoming fire.',
         outcomes: {
           criticalSuccess: 'Masterful evasion! The ship gains a +2 circumstance bonus to AC and Reflex saves until the start of your next turn. The first attack that misses you this round provokes a free counterattack from your gunner at -2.',
@@ -274,7 +289,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'full-speed',
         name: 'Full Speed',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Athletics'],
+        skills: ['Piloting', 'Athletics'],
         description: 'You push the engines to maximum, closing distance with enemies or creating separation.',
         outcomes: {
           criticalSuccess: 'The ship surges forward with incredible speed. Gain a significant positional advantage (close to optimal firing range, escape a pursuer, or catch a fleeing enemy). Your gunner gains a +1 bonus to their next attack from the momentum.',
@@ -287,7 +302,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'barrel-roll',
         name: 'Barrel Roll',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Acrobatics'],
+        skills: ['Piloting', 'Acrobatics'],
         description: 'You execute a dramatic spinning maneuver to throw off targeting solutions and reposition.',
         outcomes: {
           criticalSuccess: 'A perfect roll that reorients the ship advantageously. Negate one attack that would have hit this round, and position yourself for a better firing angle (+1 to your gunner\'s next attack).',
@@ -300,13 +315,26 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'pursuit',
         name: 'Pursuit',
         actionCost: 2,
-        skills: ['Piloting Lore', 'Survival'],
+        skills: ['Piloting', 'Survival'],
         description: 'You doggedly pursue a fleeing enemy or maintain optimal attack position.',
         outcomes: {
           criticalSuccess: 'You\'re right on their tail. The enemy can\'t escape this round, your gunner gains a +2 bonus to attack them, and if they try to flee, you get a free attack.',
           success: 'You maintain pursuit. The enemy can\'t easily escape, and your gunner gains a +1 bonus to attack them.',
           failure: 'The enemy slips away from optimal range.',
           criticalFailure: 'You overcommit to the chase. Another enemy (or hazard) gets a free action against your exposed ship.'
+        }
+      },
+      {
+        id: 'avoid-hazard',
+        name: 'Avoid Hazard',
+        actionCost: 2,
+        skills: ['Piloting', 'Perception'],
+        description: 'You navigate around environmental dangers like asteroids, debris fields, or energy storms.',
+        outcomes: {
+          criticalSuccess: 'Perfect navigation. The ship is unaffected by the hazard\'s next routine, and you spot a tactical advantage (+1 to your next check).',
+          success: 'You avoid the worst of it. The ship is unaffected by the hazard\'s next routine.',
+          failure: 'You can\'t avoid it entirely. The hazard affects your ship normally.',
+          criticalFailure: 'You fly directly into danger. The ship takes damage as though affected by the hazard\'s routine, plus an additional 1d6 damage.'
         }
       }
     ]
@@ -316,7 +344,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
     type: 'science_officer',
     name: 'Science Officer',
     description: 'The science officer gathers intelligence, analyzes enemy weaknesses, and manipulates sensors and communications.',
-    primarySkills: ['Computers', 'Society'],
+    primarySkills: ['Computers', 'Perception', 'Technology Lore'],
     actions: [
       {
         id: 'scan-target',
@@ -348,7 +376,7 @@ export const STARSHIP_ROLES: StarshipRole[] = [
         id: 'analyze-weakness',
         name: 'Analyze Weakness',
         actionCost: 2,
-        skills: ['Computers', 'Engineering Lore'],
+        skills: ['Computers', 'Technology Lore'],
         description: 'You study the enemy\'s flight patterns and system signatures to identify exploitable weaknesses.',
         outcomes: {
           criticalSuccess: 'Critical weakness identified! The next attack against the target that hits deals an additional 2d6 damage and bypasses any resistance or shield.',
@@ -384,7 +412,7 @@ export function getRoleByType(type: string): StarshipRole | undefined {
   return STARSHIP_ROLES.find(r => r.type === type)
 }
 
-// Get all available skills across all roles
+// Get all available skills across all roles (excludes attack-based actions)
 export function getAllRoleSkills(): string[] {
   const skills = new Set<string>()
   for (const role of STARSHIP_ROLES) {
