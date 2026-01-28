@@ -1,29 +1,34 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 /**
  * ActionIcon - Displays Paizo action icons using the Pathfinder-Icons font
  * Uses ligatures to render: [one-action], [two-actions], [three-actions], [reaction], [free-action]
  */
 
-type ActionType = 0 | 1 | 2 | 3 | 'reaction' | 'free'
+// Accept number (for action costs) or string (for special types)
+type ActionType = number | 'reaction' | 'free'
 
-defineProps<{
+const props = defineProps<{
   action: ActionType
 }>()
 
 // Map action types to ligature strings
-const actionLigatures: Record<ActionType, string> = {
-  0: '', // No action cost
-  1: '[one-action]',
-  2: '[two-actions]',
-  3: '[three-actions]',
-  'reaction': '[reaction]',
-  'free': '[free-action]'
-}
+const ligature = computed(() => {
+  if (props.action === 0) return ''
+  if (props.action === 1) return '[one-action]'
+  if (props.action === 2) return '[two-actions]'
+  if (props.action === 3) return '[three-actions]'
+  if (props.action === 'reaction') return '[reaction]'
+  if (props.action === 'free') return '[free-action]'
+  // Fallback for any other number - show as text
+  return `[${props.action}]`
+})
 </script>
 
 <template>
   <span v-if="action !== 0" class="action-icon" :title="String(action)">
-    {{ actionLigatures[action] }}
+    {{ ligature }}
   </span>
 </template>
 

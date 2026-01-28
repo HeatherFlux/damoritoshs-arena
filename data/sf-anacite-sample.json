@@ -1,0 +1,201 @@
+{
+    "took": 1,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 2,
+            "relation": "eq"
+        },
+        "max_score": 20.904753,
+        "hits": [
+            {
+                "_index": "aonsf8",
+                "_id": "creatures--2-anacite-wingbot",
+                "_score": 20.904753,
+                "_source": {
+                    "ac": 13,
+                    "ac_scale": "Moderate",
+                    "ac_scale_number": 3,
+                    "attack_bonus": [
+                        5,
+                        5
+                    ],
+                    "attack_bonus_scale": [
+                        "Low"
+                    ],
+                    "attack_bonus_scale_number": [
+                        2
+                    ],
+                    "category": "creature",
+                    "charisma": -2,
+                    "charisma_scale": "Low",
+                    "charisma_scale_number": 2,
+                    "constitution": 2,
+                    "constitution_scale": "Moderate",
+                    "constitution_scale_number": 3,
+                    "creature_ability": [
+                        "Always Watching",
+                        "Shortwave",
+                        "Sunlight Dependency",
+                        "sting +5",
+                        "laser ray +5"
+                    ],
+                    "creature_family": "Anacite",
+                    "creature_family_markdown": "[Anacite](/creatures/families/1-anacite)",
+                    "dexterity": 2,
+                    "dexterity_scale": "Moderate",
+                    "dexterity_scale_number": 3,
+                    "exclude_from_search": false,
+                    "fortitude_save": 5,
+                    "fortitude_save_scale": "Moderate",
+                    "fortitude_save_scale_number": 3,
+                    "hp": 8,
+                    "hp_raw": "8",
+                    "hp_scale": "Moderate",
+                    "hp_scale_number": 3,
+                    "id": "creatures--2-anacite-wingbot",
+                    "immunity": [
+                        "bleed",
+                        "death effects",
+                        "disease",
+                        "doomed",
+                        "drained",
+                        "fatigued",
+                        "healing",
+                        "mental",
+                        "nonlethal attacks",
+                        "paralyzed",
+                        "poison",
+                        "sickened",
+                        "spirit",
+                        "unconscious",
+                        "vitality",
+                        "void"
+                    ],
+                    "immunity_markdown": "bleed, death effects, disease, doomed, drained, fatigued, healing, mental, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void",
+                    "intelligence": -4,
+                    "intelligence_scale": "Low",
+                    "intelligence_scale_number": 2,
+                    "language": [
+                        "Aballonian",
+                        "Common",
+                        "Trinary",
+                        "can't speak, shortwave 100 feet"
+                    ],
+                    "language_markdown": "[Aballonian](/languages/22-aballonian), [Common](/languages/1-common), [Trinary](/languages/18-trinary); can't speak, shortwave 100 feet",
+                    "level": -1,
+                    "markdown": "<title level=\"1\" pfs=\"\">[Anacite Wingbot](/creatures/2-anacite-wingbot)</title>\r\n\r\n<row gap=\"medium\">\r\n\r\n<column gap=\"medium\" flex=\"1 1 400px\">\r\n\r\nAnacite wingbots are common. Little more than drones, wingbots are piloted by virtual intelligences (VI) programmed to serve Insight Array and their representatives. Transmitters spaced regularly across most of Aballon's megaplexes allow wingbots to record their constantly running video feeds to their VI \u201chandlers\u201d at all times. The solar panels that line a wingbot's wings allow it to recharge while on the move.\n\n</column>\r\n\r\n<column gap=\"medium\">\r\n\r\n</column>\r\n\r\n</row>\r\n\r\n<title level=\"2\" right=\"Creature -1\">[Anacite Wingbot](/creatures/2-anacite-wingbot)</title>\r\n\r\n<traits>\r\n<trait label=\"Small\" />\r\n<trait label=\"Construct\" url=\"/traits/49-construct\" />\r\n<trait label=\"Tech\" url=\"/traits/179-tech\" />\r\n</traits>\r\n\r\n<column gap=\"tiny\">\r\n\r\n**Source** [Starfinder Murder in Metal City Deluxe Adventure](/sources/7-starfinder-murder-in-metal-city-deluxe-adventure) pg. 48\n\n**Perception** +5; [darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)\r\n\r\n**Languages**\r\n[Aballonian](/languages/22-aballonian), [Common](/languages/1-common), [Trinary](/languages/18-trinary); can't speak, shortwave 100 feet\r\n\r\n**Skills**\n\n<row gap=\"medium\">\r\n**Str** +1\r\n\r\n**Dex** +2\r\n\r\n**Con** +2\r\n\r\n**Int** -4\r\n\r\n**Wis** +1\r\n\r\n**Cha** -2\r\n</row>\r\n\r\n**Always Watching** Anacite wingbots are always recording and uploading their feed through shortwave as long as they're within range of a transmitter. An anacite wingbot can project a hologram of the live footage they're recording or play back a video of anything they've recorded, which appears in the air nearby as the spell illusory scene.<br />**Shortwave** The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits.<br />**Sunlight Dependency** Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely.\n\n</column>\r\n\r\n---\r\n\r\n<column gap=\"tiny\">\r\n\r\n<row gap=\"medium\">\r\n**AC** 13 \r\n\r\n**Fort** +5 \r\n\r\n**Ref** +5 \r\n\r\n**Will** +3 \n\n</row>\r\n\r\n<row gap=\"medium\">\r\n**HP** 8\n\n</row>\r\n\r\n**Immunities**\r\nbleed, death effects, disease, doomed, drained, fatigued, healing, mental, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void\n\n</column>\r\n\r\n---\r\n\r\n<column gap=\"tiny\">\r\n\r\n**Speed** 20 feet, fly 40 feet\r\n\r\n**Melee**\r\n<actions string=\"Single Action\" />\r\nsting 5,\r\n1d41 piercing plus nanites\r\n\r\n**Ranged**\r\n<actions string=\"Single Action\" />\r\nlaser ray 5,\r\n1d4 fire\n\n**Melee**\r\n<actions string=\"Single Action\" />\r\nsting 5,\r\n1d41 piercing plus nanites\r\n\r\n**Ranged**\r\n<actions string=\"Single Action\" />\r\nlaser ray 5,\r\n1d4 fire\r\n\r\n</column>\n\n<document level=\"2\" id=\"creatures--families--1-anacite\" />",
+                    "name": "Anacite Wingbot",
+                    "npc": false,
+                    "perception": 5,
+                    "perception_scale": "Moderate",
+                    "perception_scale_number": 3,
+                    "primary_source": "Starfinder Murder in Metal City Deluxe Adventure",
+                    "primary_source_raw": "Starfinder Murder in Metal City Deluxe Adventure pg. 48",
+                    "primary_source_category": "Adventures",
+                    "primary_source_group": "Murder in Metal City",
+                    "rarity": "common",
+                    "rarity_id": 1,
+                    "reflex_save": 5,
+                    "reflex_save_scale": "Moderate",
+                    "reflex_save_scale_number": 3,
+                    "release_date": "2025-07-31",
+                    "resistance": {},
+                    "search_markdown": "<traits>\r\n<trait label=\"Small\" />\r\n<trait label=\"Construct\" url=\"/traits/49-construct\" />\r\n<trait label=\"Tech\" url=\"/traits/179-tech\" />\r\n</traits>\r\n\r\n<additional-info>\r\n**Source** [Starfinder Murder in Metal City Deluxe Adventure](/sources/7-starfinder-murder-in-metal-city-deluxe-adventure) pg. 48\r\n\r\n**Creature Family** [Anacite](/creatures/families/1-anacite)\r\n\r\n<row gap=\"medium\">\r\n**HP** 8\r\n\r\n**AC** 13\r\n\r\n**Fort** +5\r\n\r\n**Ref** +5\r\n\r\n**Will** +3\r\n\r\n**Perception** +5\r\n</row>\r\n</additional-info>\r\n\r\n---\r\n\r\n<summary>\r\nAnacite wingbots are common. Little more than drones, wingbots are piloted by virtual intelligences (VI) programmed to serve Insight Array and their \u2026\r\n</summary>",
+                    "sense": "darkvision, low-light vision",
+                    "sense_markdown": "[darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)",
+                    "size": [
+                        "Small"
+                    ],
+                    "size_id": [
+                        2
+                    ],
+                    "skill_markdown": "",
+                    "skill_mod": {},
+                    "source": [
+                        "Starfinder Murder in Metal City Deluxe Adventure"
+                    ],
+                    "source_raw": [
+                        "Starfinder Murder in Metal City Deluxe Adventure pg. 48"
+                    ],
+                    "source_category": [
+                        "Adventures"
+                    ],
+                    "source_group": [
+                        "Murder in Metal City"
+                    ],
+                    "source_markdown": "[Starfinder Murder in Metal City Deluxe Adventure](/sources/7-starfinder-murder-in-metal-city-deluxe-adventure) pg. 48",
+                    "speed": {
+                        "fly": 40,
+                        "land": 20,
+                        "max": 40
+                    },
+                    "speed_markdown": "20 feet, fly 40 feet",
+                    "speed_raw": "20 feet, fly 40 feet",
+                    "spell_markdown": "",
+                    "strike_damage_average": [
+                        2,
+                        3
+                    ],
+                    "strike_damage_scale": [
+                        "Low",
+                        "High"
+                    ],
+                    "strike_damage_scale_number": [
+                        2,
+                        4
+                    ],
+                    "strength": 1,
+                    "strength_scale": "Low",
+                    "strength_scale_number": 2,
+                    "strongest_save": [
+                        "fort",
+                        "fortitude",
+                        "ref",
+                        "reflex"
+                    ],
+                    "summary": "Anacite wingbots are common. Little more than drones, wingbots are piloted by virtual intelligences (VI) programmed to serve Insight Array and their \u2026",
+                    "summary_markdown": "Anacite wingbots are common. Little more than drones, wingbots are piloted by virtual intelligences (VI) programmed to serve Insight Array and their \u2026",
+                    "text": " Anacite Wingbot Anacite wingbots are common. Little more than drones, wingbots are piloted by virtual intelligences (VI) programmed to serve Insight Array and their representatives. Transmitters spaced regularly across most of Aballon's megaplexes allow wingbots to record their constantly running video feeds to their VI \u201chandlers\u201d at all times. The solar panels that line a wingbot's wings allow it to recharge while on the move. Anacite Wingbot Source Starfinder Murder in Metal City Deluxe Adventure pg. 48 Perception +5; darkvision, low-light vision Languages Aballonian, Common, Trinary; can't speak, shortwave 100 feet Skills Str +1 Dex +2 Con +2 Int -4 Wis +1 Cha -2 Always Watching Anacite wingbots are always recording and uploading their feed through shortwave as long as they're within range of a transmitter. An anacite wingbot can project a hologram of the live footage they're recording or play back a video of anything they've recorded, which appears in the air nearby as the spell illusory scene. Shortwave The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits. Sunlight Dependency Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely. --- AC 13 Fort +5 Ref +5 Will +3 HP 8 Immunities bleed, death effects, disease, doomed, drained, fatigued, healing, mental, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void --- Speed 20 feet, fly 40 feet Melee Single Action sting 5, 1d41 piercing plus nanites Ranged Single Action laser ray 5, 1d4 fire Melee Single Action sting 5, 1d41 piercing plus nanites Ranged Single Action laser ray 5, 1d4 fire ",
+                    "tradition_markdown": "",
+                    "trait": [
+                        "Construct",
+                        "Tech",
+                        "Small"
+                    ],
+                    "trait_group": [
+                        "Creature",
+                        "Weapon",
+                        "Armor",
+                        "Shield",
+                        "Hazard"
+                    ],
+                    "trait_markdown": "[Construct](/traits/49-construct), [Tech](/traits/179-tech)",
+                    "trait_raw": [
+                        "Construct",
+                        "Tech"
+                    ],
+                    "type": "Creature",
+                    "url": "/creatures/2-anacite-wingbot",
+                    "vision": "Darkvision",
+                    "weakest_save": [
+                        "will"
+                    ],
+                    "weakness": {},
+                    "will_save": 3,
+                    "will_save_scale": "Low",
+                    "will_save_scale_number": 2,
+                    "wisdom": 1,
+                    "wisdom_scale": "Low",
+                    "wisdom_scale_number": 2
+                }
+            }
+        ]
+    }
+}

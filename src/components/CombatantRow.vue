@@ -4,6 +4,7 @@ import { useCombatStore } from '../stores/combatStore'
 import { VALUED_CONDITIONS } from '../types/combat'
 import type { Combatant } from '../types/combat'
 import CreatureCard from './CreatureCard.vue'
+import ActionIcon from './ActionIcon.vue'
 import { calculateConditionEffects, getCondition } from '../data/conditions'
 import { formatComplexity, formatHazardType } from '../types/hazard'
 import { rollDamage } from '../utils/dice'
@@ -374,7 +375,7 @@ const hasExpandableDetails = computed(() => {
           <div v-for="(action, idx) in combatant.hazard.actions" :key="idx" class="bg-elevated p-2.5 rounded-md">
             <div class="flex items-center gap-2 mb-1">
               <span class="font-semibold text-hazard">{{ action.name }}</span>
-              <span v-if="action.actionType === 'reaction'" class="text-[0.6875rem] text-dim">⟲ Reaction</span>
+              <ActionIcon v-if="action.actionType" :action="action.actionType" class="text-hazard" />
             </div>
             <p v-if="action.trigger" class="text-[0.8125rem] my-1 text-dim">
               <strong>Trigger</strong> {{ action.trigger }}

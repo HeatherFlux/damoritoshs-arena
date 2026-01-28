@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import type { StarshipRole, StarshipAction } from '../../types/starship'
 import { getAllRoleSkills } from '../../data/starshipRoles'
+import ActionIcon from '../ActionIcon.vue'
 
 const props = defineProps<{
   editingRole?: StarshipRole | null
@@ -296,10 +297,7 @@ function saveRole() {
             :class="{ editing: editingActionIndex === index }"
           >
             <div class="action-preview-header">
-              <div class="action-cost">
-                <span class="cost-diamond"></span>
-                <span class="cost-diamond"></span>
-              </div>
+              <ActionIcon :action="action.actionCost" class="action-cost-icon" />
               <div class="action-preview-info">
                 <span class="action-preview-name">{{ action.name }}</span>
                 <span class="action-preview-skills">{{ action.skills.join(', ') }}</span>
@@ -619,16 +617,10 @@ function saveRole() {
   gap: 0.5rem;
 }
 
-.action-cost {
-  display: flex;
-  gap: 0.125rem;
-}
-
-.cost-diamond {
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--color-accent);
-  transform: rotate(45deg);
+.action-cost-icon {
+  font-size: 1.25rem;
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .action-preview-info {

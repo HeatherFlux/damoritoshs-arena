@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Creature } from '../../types/creature'
 import type { Hazard } from '../../types/hazard'
+import ActionIcon from '../ActionIcon.vue'
 
 const props = defineProps<{
   creature?: Partial<Creature>
@@ -307,9 +308,7 @@ const sizeDisplay = computed(() => {
           <div v-for="action in hazard.actions" :key="action.name" class="stat-action">
             <div class="action-header">
               <span class="action-name">{{ action.name }}</span>
-              <span v-if="action.actionType" class="action-type">
-                {{ action.actionType === 'reaction' ? '[R]' : action.actionType === 'free' ? '[F]' : `[${action.actionType}]` }}
-              </span>
+              <ActionIcon v-if="action.actionType" :action="action.actionType" class="action-type-icon" />
               <span v-if="action.traits?.length" class="action-traits">({{ action.traits.join(', ') }})</span>
             </div>
             <div v-if="action.trigger" class="action-line">
@@ -573,9 +572,9 @@ const sizeDisplay = computed(() => {
   color: var(--color-text);
 }
 
-.action-type {
+.action-type-icon {
   color: var(--color-secondary);
-  font-weight: 600;
+  font-size: 1.1em;
   margin-left: 0.25rem;
 }
 

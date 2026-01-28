@@ -4,6 +4,7 @@ import { useEncounterStore } from '../stores/encounterStore'
 import type { Hazard } from '../types/hazard'
 import { formatComplexity, formatHazardType, calculateHazardXP } from '../types/hazard'
 import { rollDamage } from '../utils/dice'
+import ActionIcon from './ActionIcon.vue'
 
 const store = useEncounterStore()
 
@@ -223,7 +224,7 @@ function rollHazardCritDamage(hazardName: string, actionName: string, damage: st
             >
               <div class="flex items-center gap-1 lg:gap-1.5 mb-1">
                 <span class="font-semibold text-accent">{{ action.name }}</span>
-                <span v-if="action.actionType === 'reaction'" class="text-sm lg:text-base">⟲</span>
+                <ActionIcon v-if="action.actionType" :action="action.actionType" class="text-accent" />
               </div>
               <p v-if="action.trigger" class="my-1 text-dim">
                 <strong>Trigger</strong> {{ action.trigger }}
