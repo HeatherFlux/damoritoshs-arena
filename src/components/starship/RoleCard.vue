@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { StarshipRole, StarshipAction } from '../../types/starship'
+import ActionIcon from '../ActionIcon.vue'
 
 const props = defineProps<{
   role: StarshipRole
   playerName?: string
   compact?: boolean
   showActions?: boolean
+  editable?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'assign', roleId: string): void
   (e: 'unassign', roleId: string): void
+  (e: 'edit', role: StarshipRole): void
 }>()
 
 const expanded = ref(props.showActions || !props.compact)
@@ -69,6 +72,14 @@ const roleTypeColor = computed(() => {
       <div class="role-meta">
         <span v-if="playerName" class="assigned-badge">{{ playerName }}</span>
         <span v-if="role.isCustom" class="custom-badge">Custom</span>
+        <button
+          v-if="editable"
+          class="edit-btn"
+          @click.stop="emit('edit', role)"
+          title="Edit role"
+        >
+          &#9998;
+        </button>
         <span class="expand-icon">{{ expanded ? '&#x25BC;' : '&#x25B6;' }}</span>
       </div>
     </div>
@@ -106,10 +117,7 @@ const roleTypeColor = computed(() => {
           :class="{ 'action-expanded': isActionExpanded(action.id) }"
         >
           <div class="action-header" @click.stop="toggleAction(action.id)">
-            <div class="action-cost">
-              <span class="cost-diamond"></span>
-              <span class="cost-diamond"></span>
-            </div>
+            <ActionIcon :action="action.actionCost" class="action-cost-icon" />
             <div class="action-info">
               <span class="action-name">{{ action.name }}</span>
               <span class="action-skills" :class="{ 'attack-roll': action.isAttack }">{{ getActionCheckDisplay(action) }}</span>
@@ -227,6 +235,23 @@ const roleTypeColor = computed(() => {
   border-radius: var(--radius-sm);
 }
 
+.edit-btn {
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.edit-btn:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
 .expand-icon {
   font-size: 0.75rem;
   color: var(--color-text-dim);
@@ -303,16 +328,10 @@ const roleTypeColor = computed(() => {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.action-cost {
-  display: flex;
-  gap: 0.125rem;
-}
-
-.cost-diamond {
-  width: 0.625rem;
-  height: 0.625rem;
-  background: var(--color-accent);
-  transform: rotate(45deg);
+.action-cost-icon {
+  font-size: 1.25rem;
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .action-info {

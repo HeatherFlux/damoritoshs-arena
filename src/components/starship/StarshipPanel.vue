@@ -103,7 +103,53 @@ function openCustomRoleBuilder(role?: StarshipRole) {
 function closeCustomRoleBuilder() {
   showCustomRoleBuilder.value = false
   editingCustomRole.value = null
+  editingInstanceId.value = null
 }
+
+// Track which role instance is being edited (to update the deck after save)
+const editingInstanceId = ref<string | null>(null)
+
+function handleEditRole(role: StarshipRole, instanceId: string) {
+  editingInstanceId.value = instanceId
+
+  if (role.isCustom) {
+    // Edit custom role directly
+    openCustomRoleBuilder(role)
+  } else {
+    // Create a modified copy of a built-in role
+    const roleCopy: StarshipRole = {
+      ...role,
+      id: crypto.randomUUID(),
+      name: `${role.name} (Modified)`,
+      isCustom: true,
+      actions: role.actions.map(a => ({
+        ...a,
+        id: crypto.randomUUID(),
+        outcomes: { ...a.outcomes }
+      })),
+      primarySkills: [...role.primarySkills]
+    }
+    openCustomRoleBuilder(roleCopy)
+  }
+}
+
+// Update the deck when a role is saved from the builder
+watch(() => showCustomRoleBuilder.value, (isOpen, wasOpen) => {
+  if (wasOpen && !isOpen && editingInstanceId.value) {
+    // Builder just closed - update the role in the deck if it was a new custom version
+    const instance = selectedRoleCards.value.find(r => r.instanceId === editingInstanceId.value)
+    if (instance && editingCustomRole.value) {
+      // Find the newly created/updated custom role
+      const updatedRole = store.state.customRoles.find(r => r.id === editingCustomRole.value?.id)
+        || store.state.customRoles[store.state.customRoles.length - 1]
+      if (updatedRole) {
+        instance.role = updatedRole
+        saveRoleDeck()
+      }
+    }
+    editingInstanceId.value = null
+  }
+})
 
 function deleteCustomRole(roleId: string) {
   // Remove from deck if present
@@ -474,6 +520,8 @@ async function copyShareLink() {
           <RoleCard
             :role="instance.role"
             :show-actions="true"
+            :editable="true"
+            @edit="handleEditRole($event, instance.instanceId)"
           />
         </div>
       </div>
