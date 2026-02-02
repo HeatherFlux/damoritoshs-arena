@@ -5,11 +5,12 @@ import type {
   SavedScene,
   Starship,
   StarshipThreat,
-  StarshipRole,
   RoleAssignment,
   ActionLogEntry,
   StarshipSyncMessage,
-  StarshipSyncMessageType
+  StarshipSyncMessageType,
+  InitiativeEntry,
+  ThreatRoutineAction
 } from '../types/starship'
 import {
   createDefaultThreat,
@@ -19,7 +20,6 @@ import {
 
 // Storage keys
 const STORAGE_KEY = 'sf2e-starship'
-const CUSTOM_ROLES_KEY = 'sf2e-custom-roles'
 
 // Generate or retrieve session ID for channel isolation
 function getSessionId(): string {
@@ -43,7 +43,6 @@ function getSessionId(): string {
 const state = reactive<StarshipState>({
   savedScenes: [],
   activeScene: null,
-  customRoles: [],
   editingStarship: null,
   sessionId: '',
   isGMView: true,
@@ -130,6 +129,19 @@ function handleSyncMessage(message: StarshipSyncMessage) {
     case 'role-assignment':
       if (state.activeScene) {
         state.activeScene.roles = message.payload as RoleAssignment[]
+      }
+      break
+    case 'initiative-update':
+      if (state.activeScene) {
+        state.activeScene.initiativeOrder = message.payload as InitiativeEntry[]
+        state.activeScene.initiativeRolled = true
+      }
+      break
+    case 'turn-change':
+      if (state.activeScene) {
+        const payload = message.payload as { currentTurnIndex: number; initiativeOrder: InitiativeEntry[] }
+        state.activeScene.currentTurnIndex = payload.currentTurnIndex
+        state.activeScene.initiativeOrder = payload.initiativeOrder
       }
       break
   }
@@ -236,6 +248,16 @@ function regenerateShields() {
   const ship = state.activeScene.starship
   ship.currentShields = Math.min(ship.maxShields, ship.currentShields + ship.shieldRegen)
   broadcast('starship-update', ship)
+
+  // Also regenerate threat shields
+  for (const threat of state.activeScene.threats) {
+    if (threat.isDefeated) continue
+    if (threat.shieldRegen && threat.shieldRegen > 0 && threat.maxShields && threat.currentShields !== undefined) {
+      threat.currentShields = Math.min(threat.maxShields, threat.currentShields + threat.shieldRegen)
+      broadcast('threat-update', threat)
+    }
+  }
+
   saveToLocalStorage()
 }
 
@@ -338,6 +360,209 @@ function setVP(amount: number) {
   saveToLocalStorage()
 }
 
+// ============ Initiative Management ============
+
+interface PCInitiativeInput {
+  playerId?: string
+  playerName: string
+  roleId: string
+  roleSkill?: string
+  roll: number
+}
+
+function rollInitiative(pcInitiatives: PCInitiativeInput[]) {
+  if (!state.activeScene) return
+
+  const entries: InitiativeEntry[] = []
+
+  // Create PC entries
+  for (const pc of pcInitiatives) {
+    entries.push({
+      id: crypto.randomUUID(),
+      name: pc.playerName,
+      type: 'pc',
+      roleId: pc.roleId,
+      roleSkill: pc.roleSkill,
+      initiative: pc.roll,
+      hasActedThisRound: false
+    })
+  }
+
+  // Create threat entries (auto-roll using initiativeBonus)
+  for (const threat of state.activeScene.threats) {
+    if (threat.isDefeated) continue
+
+    const bonus = threat.initiativeBonus ?? 0
+    // Roll 1d20 + bonus
+    const roll = Math.floor(Math.random() * 20) + 1 + bonus
+
+    entries.push({
+      id: crypto.randomUUID(),
+      name: threat.name,
+      type: 'threat',
+      threatId: threat.id,
+      initiative: roll,
+      hasActedThisRound: false
+    })
+  }
+
+  // Sort descending by initiative
+  entries.sort((a, b) => b.initiative - a.initiative)
+
+  state.activeScene.initiativeOrder = entries
+  state.activeScene.currentTurnIndex = 0
+  state.activeScene.initiativeRolled = true
+
+  broadcast('initiative-update', entries)
+  saveToLocalStorage()
+}
+
+function getCurrentTurn(): InitiativeEntry | null {
+  if (!state.activeScene || !state.activeScene.initiativeRolled) return null
+  return state.activeScene.initiativeOrder[state.activeScene.currentTurnIndex] ?? null
+}
+
+function nextTurn() {
+  if (!state.activeScene || !state.activeScene.initiativeRolled) return
+
+  const order = state.activeScene.initiativeOrder
+  const currentIdx = state.activeScene.currentTurnIndex
+
+  // Mark current as acted
+  if (order[currentIdx]) {
+    order[currentIdx].hasActedThisRound = true
+  }
+
+  // Find next who hasn't acted
+  let nextIdx = (currentIdx + 1) % order.length
+
+  // If we've wrapped around, check if everyone has acted
+  if (nextIdx <= currentIdx || order.every(e => e.hasActedThisRound)) {
+    // Everyone has acted - advance round
+    advanceRound()
+    // Reset hasActedThisRound for all
+    for (const entry of order) {
+      entry.hasActedThisRound = false
+    }
+    // Reset routine actions for all threats
+    resetRoutineActions()
+    nextIdx = 0
+  }
+
+  state.activeScene.currentTurnIndex = nextIdx
+
+  broadcast('turn-change', {
+    currentTurnIndex: nextIdx,
+    initiativeOrder: order
+  })
+  saveToLocalStorage()
+}
+
+function delayTurn() {
+  if (!state.activeScene || !state.activeScene.initiativeRolled) return
+
+  const order = state.activeScene.initiativeOrder
+  const currentIdx = state.activeScene.currentTurnIndex
+
+  // Can't delay if last in order this round
+  const remainingEntries = order.filter((e, i) => i > currentIdx && !e.hasActedThisRound)
+  if (remainingEntries.length === 0) return
+
+  // Remove current from position and insert one spot later
+  const [current] = order.splice(currentIdx, 1)
+  order.splice(currentIdx + 1, 0, current)
+
+  // Current turn index stays the same (now points to next combatant)
+  broadcast('turn-change', {
+    currentTurnIndex: currentIdx,
+    initiativeOrder: order
+  })
+  saveToLocalStorage()
+}
+
+function endRound() {
+  if (!state.activeScene || !state.activeScene.initiativeRolled) return
+
+  // Mark all remaining as acted
+  for (const entry of state.activeScene.initiativeOrder) {
+    entry.hasActedThisRound = true
+  }
+
+  // Advance round
+  advanceRound()
+
+  // Reset for new round
+  for (const entry of state.activeScene.initiativeOrder) {
+    entry.hasActedThisRound = false
+  }
+  resetRoutineActions()
+  state.activeScene.currentTurnIndex = 0
+
+  broadcast('turn-change', {
+    currentTurnIndex: 0,
+    initiativeOrder: state.activeScene.initiativeOrder
+  })
+  saveToLocalStorage()
+}
+
+function skipInitiative() {
+  // Mark initiative as rolled without actually rolling (for GMs who don't want initiative)
+  if (!state.activeScene) return
+
+  state.activeScene.initiativeRolled = true
+  state.activeScene.initiativeOrder = []
+  state.activeScene.currentTurnIndex = 0
+  saveToLocalStorage()
+}
+
+// ============ Routine Management ============
+
+function useRoutineAction(threatId: string, actionId: string) {
+  if (!state.activeScene) return
+
+  const threat = state.activeScene.threats.find(t => t.id === threatId)
+  if (!threat) return
+
+  if (!threat.routineActionsUsed) {
+    threat.routineActionsUsed = []
+  }
+
+  if (!threat.routineActionsUsed.includes(actionId)) {
+    threat.routineActionsUsed.push(actionId)
+  }
+
+  broadcast('threat-update', threat)
+  saveToLocalStorage()
+}
+
+function resetRoutineActions() {
+  if (!state.activeScene) return
+
+  for (const threat of state.activeScene.threats) {
+    threat.routineActionsUsed = []
+  }
+  // Note: This is called as part of round change, so no separate broadcast needed
+}
+
+function getAvailableRoutineActions(threatId: string): ThreatRoutineAction[] {
+  if (!state.activeScene) return []
+
+  const threat = state.activeScene.threats.find(t => t.id === threatId)
+  if (!threat || !threat.routine) return []
+
+  const used = threat.routineActionsUsed ?? []
+  return threat.routine.actions.filter(action => !used.includes(action.id))
+}
+
+function isRoutineActionUsed(threatId: string, actionId: string): boolean {
+  if (!state.activeScene) return false
+
+  const threat = state.activeScene.threats.find(t => t.id === threatId)
+  if (!threat) return false
+
+  return threat.routineActionsUsed?.includes(actionId) ?? false
+}
+
 // ============ Role Management ============
 
 function assignRole(roleId: string, playerName: string, playerId?: string) {
@@ -364,39 +589,6 @@ function unassignRole(roleId: string) {
     state.activeScene.roles.splice(idx, 1)
     broadcast('role-assignment', state.activeScene.roles)
     saveToLocalStorage()
-  }
-}
-
-// ============ Custom Roles ============
-
-function addCustomRole(role: StarshipRole) {
-  const newRole: StarshipRole = {
-    ...role,
-    id: crypto.randomUUID(),
-    type: 'custom',
-    isCustom: true
-  }
-  state.customRoles.push(newRole)
-  saveCustomRoles()
-  return newRole
-}
-
-function updateCustomRole(roleId: string, updates: Partial<StarshipRole>) {
-  const idx = state.customRoles.findIndex(r => r.id === roleId)
-  if (idx !== -1) {
-    state.customRoles[idx] = {
-      ...state.customRoles[idx],
-      ...updates
-    }
-    saveCustomRoles()
-  }
-}
-
-function deleteCustomRole(roleId: string) {
-  const idx = state.customRoles.findIndex(r => r.id === roleId)
-  if (idx !== -1) {
-    state.customRoles.splice(idx, 1)
-    saveCustomRoles()
   }
 }
 
@@ -491,22 +683,6 @@ function loadFromLocalStorage() {
   }
 }
 
-function saveCustomRoles() {
-  localStorage.setItem(CUSTOM_ROLES_KEY, JSON.stringify(state.customRoles))
-}
-
-function loadCustomRoles() {
-  const saved = localStorage.getItem(CUSTOM_ROLES_KEY)
-  if (saved) {
-    try {
-      state.customRoles = JSON.parse(saved)
-    } catch (e) {
-      console.warn('[Starship] Failed to load custom roles:', e)
-      state.customRoles = []
-    }
-  }
-}
-
 // ============ View Management ============
 
 function setGMView(isGM: boolean) {
@@ -534,7 +710,6 @@ function init() {
 
   initChannel()
   loadFromLocalStorage()
-  loadCustomRoles()
 
   console.log('[Starship] ======== INIT COMPLETE ========')
 }
@@ -586,13 +761,21 @@ export function useStarshipStore() {
     setRound,
     addVP,
     setVP,
+    // Initiative management
+    rollInitiative,
+    getCurrentTurn,
+    nextTurn,
+    delayTurn,
+    endRound,
+    skipInitiative,
+    // Routine management
+    useRoutineAction,
+    resetRoutineActions,
+    getAvailableRoutineActions,
+    isRoutineActionUsed,
     // Role management
     assignRole,
     unassignRole,
-    // Custom roles
-    addCustomRole,
-    updateCustomRole,
-    deleteCustomRole,
     // Action log
     logAction,
     // URL sharing

@@ -1,12 +1,62 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
+import { getRoleName } from '../../data/starshipRoles'
+import type { StarshipAction } from '../../types/starship'
 import ThreatCard from './ThreatCard.vue'
+import InitiativeTracker from './InitiativeTracker.vue'
+import InitiativeRollModal from './InitiativeRollModal.vue'
+import ActionRollPanel from './ActionRollPanel.vue'
+import ActionLogDisplay from './ActionLogDisplay.vue'
 
 const store = useStarshipStore()
 
+// Track whether to show initiative modal
+const showInitiativeModal = ref(false)
+
 const scene = computed(() => store.state.activeScene)
 const starship = computed(() => scene.value?.starship)
+
+// Initiative state
+const initiativeRolled = computed(() => scene.value?.initiativeRolled ?? false)
+const currentTurn = computed(() => store.getCurrentTurn())
+
+// Get scene-specific actions for the current PC's role
+const currentTurnActions = computed((): StarshipAction[] => {
+  if (!currentTurn.value || currentTurn.value.type !== 'pc' || !scene.value) return []
+  const roleId = currentTurn.value.roleId
+  if (!roleId) return []
+
+  // Filter scene actions where the action's role field matches the current role
+  // role field can be: "pilot", "gunner", "any", "captain|pilot", "magic_officer|science_officer"
+  return scene.value.starshipActions.filter(action => {
+    if (action.role === 'any') return true
+    const allowedRoles = action.role.split('|')
+    return allowedRoles.includes(roleId)
+  })
+})
+
+const currentTurnRoleName = computed(() => {
+  if (!currentTurn.value || currentTurn.value.type !== 'pc') return ''
+  return getRoleName(currentTurn.value.roleId || '')
+})
+
+// Check if a threat is the current turn
+function isThreatCurrentTurn(threatId: string): boolean {
+  if (!currentTurn.value) return false
+  return currentTurn.value.threatId === threatId
+}
+
+// Auto-show initiative modal when scene starts without initiative
+watch(
+  () => scene.value?.isActive,
+  (isActive) => {
+    if (isActive && scene.value && !scene.value.initiativeRolled) {
+      showInitiativeModal.value = true
+    }
+  },
+  { immediate: true }
+)
 
 // Quick damage input
 const damageAmount = ref(0)
@@ -100,7 +150,25 @@ const isVictory = computed(() => {
 
 // Actions
 function nextRound() {
-  store.advanceRound()
+  if (initiativeRolled.value) {
+    // Use initiative system
+    store.nextTurn()
+  } else {
+    // Manual round advancement
+    store.advanceRound()
+  }
+}
+
+function openInitiativeModal() {
+  showInitiativeModal.value = true
+}
+
+function closeInitiativeModal() {
+  showInitiativeModal.value = false
+}
+
+function onInitiativeStart() {
+  showInitiativeModal.value = false
 }
 
 function addVP(amount: number) {
@@ -143,6 +211,12 @@ function toggleThreatDefeated(threatId: string) {
   }
 }
 
+function clearActionLog() {
+  if (scene.value) {
+    scene.value.actionLog = []
+  }
+}
+
 function endScene() {
   if (confirm('End this scene?')) {
     store.endScene()
@@ -152,6 +226,14 @@ function endScene() {
 
 <template>
   <div v-if="scene && starship" class="scene-runner">
+    <!-- Initiative Roll Modal -->
+    <InitiativeRollModal
+      v-if="showInitiativeModal"
+      :scene="scene"
+      @close="closeInitiativeModal"
+      @start="onInitiativeStart"
+    />
+
     <!-- Scene Header -->
     <div class="scene-header panel">
       <div class="scene-info">
@@ -162,13 +244,44 @@ function endScene() {
       <div class="round-tracker">
         <span class="round-label">Round</span>
         <span class="round-number">{{ scene.currentRound }}</span>
-        <button class="btn btn-primary btn-sm" @click="nextRound">Next Round</button>
+        <button
+          v-if="!initiativeRolled"
+          class="btn btn-secondary btn-sm"
+          @click="openInitiativeModal"
+        >
+          Roll Initiative
+        </button>
+        <button
+          v-else
+          class="btn btn-primary btn-sm"
+          @click="nextRound"
+        >
+          Next Turn
+        </button>
       </div>
     </div>
 
     <div class="runner-content">
-      <!-- Left Column: Ship Status -->
+      <!-- Left Column: Ship Status & Initiative -->
       <div class="ship-column">
+        <!-- Initiative Tracker (when rolled) -->
+        <InitiativeTracker
+          v-if="initiativeRolled && scene.initiativeOrder.length > 0"
+          :scene="scene"
+        />
+
+        <!-- PC Action Roll Panel (when it's a PC's turn) -->
+        <ActionRollPanel
+          v-if="currentTurn?.type === 'pc' && currentTurnActions.length > 0"
+          :turn="currentTurn"
+          :actions="currentTurnActions"
+          :role-name="currentTurnRoleName"
+          :role-id="currentTurn.roleId || ''"
+          :scene-level="scene.level"
+          :ship-bonuses="starship.bonuses"
+          @action-resolved="nextRound"
+        />
+
         <!-- Ship Status Card -->
         <div class="ship-card panel">
           <h3 class="card-title">{{ starship.name }}</h3>
@@ -258,6 +371,16 @@ function endScene() {
             VICTORY!
           </div>
         </div>
+
+        <!-- Additional Objectives -->
+        <div v-if="scene.additionalObjectives && scene.additionalObjectives.length > 0" class="objectives-card panel">
+          <h3 class="card-title">Additional Objectives</h3>
+          <ul class="objectives-list">
+            <li v-for="(obj, idx) in scene.additionalObjectives" :key="idx" class="objective-item">
+              {{ obj }}
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Right Column: Threats -->
@@ -274,6 +397,7 @@ function endScene() {
             v-for="threat in scene.threats"
             :key="threat.id"
             :threat="threat"
+            :is-current-turn="isThreatCurrentTurn(threat.id)"
             @damage="(amt) => damageThreat(threat.id, amt)"
             @heal="(amt) => healThreat(threat.id, amt)"
             @toggle-defeated="toggleThreatDefeated(threat.id)"
@@ -281,6 +405,14 @@ function endScene() {
         </div>
       </div>
     </div>
+
+    <!-- Action Log -->
+    <ActionLogDisplay
+      v-if="scene.actionLog.length > 0"
+      :log="scene.actionLog"
+      :current-round="scene.currentRound"
+      @clear="clearActionLog"
+    />
 
     <!-- Scene Description -->
     <div v-if="scene.description" class="scene-description panel">
@@ -565,6 +697,30 @@ function endScene() {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   border-radius: var(--radius-sm);
+}
+
+/* Objectives */
+.objectives-card {
+  padding: 1rem;
+}
+
+.objectives-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.objective-item {
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--color-text);
 }
 
 /* Threats */

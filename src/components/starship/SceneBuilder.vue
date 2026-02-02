@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import type { SavedScene, StarshipThreat, VictoryCondition } from '../../types/starship'
 import { createEmptySavedScene, createDefaultThreat, createDefaultStarship } from '../../types/starship'
+import { getStarshipSceneXP } from '../../utils/dcTable'
 import ThreatCard from './ThreatCard.vue'
 
 const emit = defineEmits<{
@@ -42,6 +43,8 @@ watch(
         starship: { ...activeScene.starship },
         threats: activeScene.threats.map(t => ({ ...t })),
         roles: [...activeScene.roles],
+        availableRoles: [...(activeScene.availableRoles || [])],
+        starshipActions: [...(activeScene.starshipActions || [])],
         savedAt: Date.now()
       }
     }
@@ -66,39 +69,50 @@ function removeThreat(index: number) {
   scene.value.threats.splice(index, 1)
 }
 
-// XP Calculation (reuse creature XP formula)
-const CREATURE_XP_BY_LEVEL_DIFF: Record<number, number> = {
-  [-4]: 10,
-  [-3]: 15,
-  [-2]: 20,
-  [-1]: 30,
-  [0]: 40,
-  [1]: 60,
-  [2]: 80,
-  [3]: 120,
-  [4]: 160,
-}
-
-function getThreatXP(threatLevel: number, partyLevel: number): number {
-  const diff = Math.max(-4, Math.min(4, threatLevel - partyLevel))
-  return CREATURE_XP_BY_LEVEL_DIFF[diff] ?? 40
-}
+// XP Calculation using complex hazard XP (correct for starship scenes)
+const partySize = computed(() => scene.value.partySize ?? 4)
 
 const totalXP = computed(() => {
-  const partyLevel = scene.value.level
+  const sceneLevel = scene.value.level
   return scene.value.threats.reduce((sum, threat) => {
-    return sum + getThreatXP(threat.level, partyLevel)
+    return sum + getStarshipSceneXP(threat.level, sceneLevel)
   }, 0)
+})
+
+// XP budget adjusts +20 per player above 4
+const xpBudgetAdjustment = computed(() => {
+  const extra = partySize.value - 4
+  return extra > 0 ? extra * 20 : 0
 })
 
 const difficulty = computed(() => {
   const xp = totalXP.value
-  if (xp >= 160) return { label: 'Extreme', color: 'var(--color-danger)' }
-  if (xp >= 120) return { label: 'Severe', color: 'var(--color-warning)' }
-  if (xp >= 80) return { label: 'Moderate', color: 'var(--color-success)' }
-  if (xp >= 60) return { label: 'Low', color: 'var(--color-info)' }
+  const adj = xpBudgetAdjustment.value
+
+  if (xp >= 160 + adj) return { label: 'Extreme', color: 'var(--color-danger)' }
+  if (xp >= 120 + adj) return { label: 'Severe', color: 'var(--color-warning)' }
+  if (xp >= 80 + adj) return { label: 'Moderate', color: 'var(--color-success)' }
+  if (xp >= 60 + adj) return { label: 'Low', color: 'var(--color-info)' }
   return { label: 'Trivial', color: 'var(--color-text-dim)' }
 })
+
+// Objective management
+function addObjective() {
+  if (!scene.value.additionalObjectives) {
+    scene.value.additionalObjectives = []
+  }
+  scene.value.additionalObjectives.push('')
+}
+
+function updateObjective(index: number, value: string) {
+  if (!scene.value.additionalObjectives) return
+  scene.value.additionalObjectives[index] = value
+}
+
+function removeObjective(index: number) {
+  if (!scene.value.additionalObjectives) return
+  scene.value.additionalObjectives.splice(index, 1)
+}
 
 // Save and Start
 function saveScene() {
@@ -163,6 +177,17 @@ function resetScene() {
               @input="updateField('level', parseInt(($event.target as HTMLInputElement).value) || 1)"
               min="1"
               max="20"
+            />
+          </label>
+          <label class="form-label form-label-sm">
+            <span>Party</span>
+            <input
+              type="number"
+              class="input input-number"
+              :value="scene.partySize ?? 4"
+              @input="updateField('partySize', parseInt(($event.target as HTMLInputElement).value) || 4)"
+              min="1"
+              max="8"
             />
           </label>
         </div>
@@ -233,6 +258,30 @@ function resetScene() {
         </label>
       </div>
 
+      <!-- Additional Objectives -->
+      <div class="form-section">
+        <h4 class="section-title">Additional Objectives</h4>
+        <div class="objectives-list">
+          <div
+            v-for="(obj, idx) in (scene.additionalObjectives ?? [])"
+            :key="idx"
+            class="objective-row"
+          >
+            <input
+              type="text"
+              class="input objective-input"
+              :value="obj"
+              @input="updateObjective(idx, ($event.target as HTMLInputElement).value)"
+              placeholder="Objective description..."
+            />
+            <button class="remove-btn" @click="removeObjective(idx)">&times;</button>
+          </div>
+          <button class="btn btn-secondary add-objective-btn" @click="addObjective">
+            + Add Objective
+          </button>
+        </div>
+      </div>
+
       <!-- Threats -->
       <div class="form-section">
         <div class="section-header">
@@ -240,6 +289,7 @@ function resetScene() {
           <div class="xp-display">
             <span class="xp-label">XP:</span>
             <span class="xp-value">{{ totalXP }}</span>
+            <span v-if="xpBudgetAdjustment > 0" class="xp-adjustment">(+{{ xpBudgetAdjustment }} budget)</span>
             <span class="difficulty-badge" :style="{ background: difficulty.color }">
               {{ difficulty.label }}
             </span>
@@ -456,6 +506,11 @@ function resetScene() {
   color: var(--color-text);
 }
 
+.xp-adjustment {
+  font-size: 0.625rem;
+  color: var(--color-info);
+}
+
 .difficulty-badge {
   padding: 0.125rem 0.375rem;
   font-size: 0.625rem;
@@ -470,6 +525,44 @@ function resetScene() {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Objectives */
+.objectives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.objective-row {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.objective-input {
+  flex: 1;
+}
+
+.add-objective-btn {
+  width: 100%;
+  justify-content: center;
+  border-style: dashed;
+  font-size: 0.75rem;
+}
+
+.remove-btn {
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.remove-btn:hover {
+  color: var(--color-danger);
 }
 
 .add-threat-btn {

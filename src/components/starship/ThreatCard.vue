@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { StarshipThreat, ThreatType } from '../../types/starship'
+import { computed, ref } from 'vue'
+import type { StarshipThreat, ThreatType, ThreatRoutine, TacticalRole } from '../../types/starship'
+import ThreatRoutineDisplay from './ThreatRoutineDisplay.vue'
+import ThreatRoutineEditor from './ThreatRoutineEditor.vue'
 
 const props = defineProps<{
   threat: StarshipThreat
   editing?: boolean
+  isCurrentTurn?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -15,11 +18,44 @@ const emit = defineEmits<{
   (e: 'toggle-defeated'): void
 }>()
 
+// Track expanded state for routine display
+const showRoutine = ref(false)
+
+// Track whether routine editor is open in editing mode
+const showRoutineEditor = ref(false)
+
+// Summary text for collapsed routine
+const routineSummary = computed(() => {
+  const routine = props.threat.routine
+  if (!routine || !routine.actions.length) return null
+  const actionCount = routine.actions.length
+  const types = [...new Set(routine.actions.map(a => a.type))]
+  return `${routine.actionsPerTurn} actions/turn, ${actionCount} ${actionCount === 1 ? 'ability' : 'abilities'} (${types.join(', ')})`
+})
+
+function onRoutineUpdate(routine: ThreatRoutine) {
+  emit('update', { routine })
+}
+
+function onRoutineEditorClose() {
+  showRoutineEditor.value = false
+}
+
 const threatTypes: { value: ThreatType; label: string }[] = [
   { value: 'enemy_ship', label: 'Enemy Ship' },
   { value: 'hazard', label: 'Hazard' },
   { value: 'environmental', label: 'Environmental' }
 ]
+
+const tacticalRoles: { value: TacticalRole; label: string; description: string; color: string }[] = [
+  { value: 'standard', label: 'Standard', description: 'Targets the party ship directly', color: 'var(--color-text-dim)' },
+  { value: 'complication', label: 'Complication', description: 'Penalizes crew unless addressed', color: 'var(--color-warning)' },
+  { value: 'indiscriminate', label: 'Indiscriminate', description: 'Hits everyone equally', color: 'var(--color-info)' }
+]
+
+const currentTacticalRole = computed(() => {
+  return tacticalRoles.find(r => r.value === props.threat.tacticalRole) ?? tacticalRoles[0]
+})
 
 const typeIcon = computed(() => {
   switch (props.threat.type) {
@@ -59,7 +95,11 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
 <template>
   <div
     class="threat-card"
-    :class="{ editing, defeated: threat.isDefeated }"
+    :class="{
+      editing,
+      defeated: threat.isDefeated,
+      'current-turn': isCurrentTurn
+    }"
   >
     <!-- Editing Mode -->
     <template v-if="editing">
@@ -85,6 +125,19 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
           >
             <option v-for="t in threatTypes" :key="t.value" :value="t.value">
               {{ t.label }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field-label">
+          <span>Tactical Role</span>
+          <select
+            class="input select"
+            :value="threat.tacticalRole ?? 'standard'"
+            @change="updateField('tacticalRole', ($event.target as HTMLSelectElement).value as TacticalRole)"
+          >
+            <option v-for="r in tacticalRoles" :key="r.value" :value="r.value">
+              {{ r.label }}
             </option>
           </select>
         </label>
@@ -122,7 +175,73 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
               @input="updateField('ac', parseInt(($event.target as HTMLInputElement).value) || 0)"
             />
           </label>
+
+          <label class="field-label">
+            <span>Fortitude</span>
+            <input
+              type="number"
+              class="input input-number"
+              :value="threat.fortitude"
+              @input="updateField('fortitude', parseInt(($event.target as HTMLInputElement).value) || 0)"
+            />
+          </label>
+
+          <label class="field-label">
+            <span>Reflex</span>
+            <input
+              type="number"
+              class="input input-number"
+              :value="threat.reflex"
+              @input="updateField('reflex', parseInt(($event.target as HTMLInputElement).value) || 0)"
+            />
+          </label>
+
+          <label class="field-label">
+            <span>Max Shields</span>
+            <input
+              type="number"
+              class="input input-number"
+              :value="threat.maxShields"
+              @input="updateField('maxShields', parseInt(($event.target as HTMLInputElement).value) || 0)"
+              min="0"
+            />
+          </label>
+
+          <label class="field-label">
+            <span>Shield Regen</span>
+            <input
+              type="number"
+              class="input input-number"
+              :value="threat.shieldRegen"
+              @input="updateField('shieldRegen', parseInt(($event.target as HTMLInputElement).value) || 0)"
+              min="0"
+            />
+          </label>
         </template>
+      </div>
+
+      <!-- Initiative Section -->
+      <div class="threat-fields initiative-fields">
+        <label class="field-label">
+          <span>Initiative Skill</span>
+          <input
+            type="text"
+            class="input"
+            :value="threat.initiativeSkill"
+            @input="updateField('initiativeSkill', ($event.target as HTMLInputElement).value)"
+            placeholder="Piloting"
+          />
+        </label>
+
+        <label class="field-label">
+          <span>Initiative Bonus</span>
+          <input
+            type="number"
+            class="input input-number"
+            :value="threat.initiativeBonus"
+            @input="updateField('initiativeBonus', parseInt(($event.target as HTMLInputElement).value) || 0)"
+          />
+        </label>
       </div>
 
       <label class="field-label description-field">
@@ -135,6 +254,27 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
           rows="2"
         ></textarea>
       </label>
+
+      <!-- Routine Editor Integration -->
+      <div class="routine-edit-section">
+        <button
+          v-if="!showRoutineEditor"
+          class="edit-routine-btn"
+          @click="showRoutineEditor = true"
+        >
+          {{ threat.routine?.actions?.length ? 'Edit Routine' : '+ Add Routine' }}
+        </button>
+        <span v-if="!showRoutineEditor && routineSummary" class="routine-summary">
+          {{ routineSummary }}
+        </span>
+
+        <ThreatRoutineEditor
+          v-if="showRoutineEditor"
+          :routine="threat.routine"
+          @update="onRoutineUpdate"
+          @close="onRoutineEditorClose"
+        />
+      </div>
     </template>
 
     <!-- Display Mode (during scene run) -->
@@ -145,6 +285,14 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
           <span class="threat-name">{{ threat.name }}</span>
           <span class="threat-meta">Level {{ threat.level }} {{ threatTypes.find(t => t.value === threat.type)?.label }}</span>
         </div>
+        <span
+          v-if="threat.tacticalRole && threat.tacticalRole !== 'standard'"
+          class="tactical-badge"
+          :style="{ borderColor: currentTacticalRole.color, color: currentTacticalRole.color }"
+          :title="currentTacticalRole.description"
+        >
+          {{ currentTacticalRole.label }}
+        </span>
         <div v-if="threat.ac" class="threat-ac">
           <span class="ac-label">AC</span>
           <span class="ac-value">{{ threat.ac }}</span>
@@ -184,6 +332,24 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         </span>
       </div>
 
+      <!-- Routine Toggle -->
+      <button
+        v-if="threat.routine"
+        class="routine-toggle-btn"
+        :class="{ expanded: showRoutine }"
+        @click="showRoutine = !showRoutine"
+      >
+        {{ showRoutine ? 'Hide Routine' : 'Show Routine' }}
+        <span class="toggle-icon">{{ showRoutine ? '▼' : '▶' }}</span>
+      </button>
+
+      <!-- Routine Display (expandable) -->
+      <ThreatRoutineDisplay
+        v-if="showRoutine && threat.routine"
+        :threat="threat"
+        class="routine-section"
+      />
+
       <!-- Defeat Toggle -->
       <button
         class="defeat-btn"
@@ -211,6 +377,11 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
 
 .threat-card.defeated {
   opacity: 0.5;
+}
+
+.threat-card.current-turn {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.2);
 }
 
 .threat-header {
@@ -272,6 +443,19 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-accent);
+}
+
+/* Tactical Role Badge */
+.tactical-badge {
+  padding: 0.125rem 0.375rem;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  cursor: help;
 }
 
 .remove-btn {
@@ -457,5 +641,85 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   background: var(--color-danger);
   border-color: var(--color-danger);
   color: white;
+}
+
+/* Routine Toggle */
+.routine-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 0.5rem;
+}
+
+.routine-toggle-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.routine-toggle-btn.expanded {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.toggle-icon {
+  font-size: 0.5rem;
+  transition: transform 0.15s ease;
+}
+
+.routine-section {
+  margin-bottom: 0.5rem;
+}
+
+/* Initiative fields */
+.initiative-fields {
+  margin-top: 0.5rem;
+}
+
+/* Routine edit section */
+.routine-edit-section {
+  margin-top: 0.5rem;
+}
+
+.edit-routine-btn {
+  width: 100%;
+  padding: 0.375rem;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edit-routine-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  border-style: solid;
+}
+
+.routine-summary {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
 }
 </style>

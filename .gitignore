@@ -42,6 +42,10 @@ coverage/
 *.temp
 .cache/
 
+# Implementation notes (not for repo)
+STARSHIP_TODO.md
+TODO*.md
+
 # TypeScript cache
 *.tsbuildinfo
 

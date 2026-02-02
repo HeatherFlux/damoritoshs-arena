@@ -10,11 +10,19 @@
 }
 
 /* Action icon class - uses ligatures */
+/* The icon font glyphs extend beyond their text origin on the left,
+   so we use a fixed-size box with overflow visible */
 .action-icon {
   font-family: 'Pathfinder-Icons', sans-serif;
   font-size: 1.1em;
   line-height: 1;
   vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5em;
+  min-height: 1em;
+  overflow: visible;
   /* Enable ligatures - required for the font to work */
   font-variant-ligatures: common-ligatures discretionary-ligatures;
   font-feature-settings: "liga" 1, "dlig" 1;

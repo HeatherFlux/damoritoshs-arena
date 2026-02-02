@@ -1,269 +1,104 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
-import { STARSHIP_ROLES } from '../../data/starshipRoles'
-import { STARSHIP_TEMPLATES, getScaledStats, type CustomShip, createEmptyCustomShip } from '../../data/starshipTemplates'
-import type { StarshipThreat, StarshipRole } from '../../types/starship'
-import { createDefaultThreat } from '../../types/starship'
-import RoleCard from './RoleCard.vue'
-import RolePdfExport from './RolePdfExport.vue'
-import CustomRoleBuilder from './CustomRoleBuilder.vue'
+import { getRoleName, getRoleColor, STARSHIP_ROLES } from '../../data/starshipRoles'
+import { OFFICIAL_SCENES, cloneOfficialScene } from '../../data/starshipScenes'
+import type { StarshipThreat, SavedScene, StarshipAction } from '../../types/starship'
+import { createDefaultThreat, createEmptySavedScene } from '../../types/starship'
+import ActionEditor from './ActionEditor.vue'
 
 const store = useStarshipStore()
 
-// Tab state
-type Tab = 'roles' | 'scene'
-const activeTab = ref<Tab>('roles')
-
-// Modals
-const showPdfExport = ref(false)
-const showCustomRoleBuilder = ref(false)
-const showCustomShipEditor = ref(false)
-const editingCustomRole = ref<StarshipRole | null>(null)
-
-// Role deck - instances of roles (can have duplicates like 2 gunners)
-interface RoleInstance {
-  instanceId: string
-  role: StarshipRole
-}
-const selectedRoleCards = ref<RoleInstance[]>([])
-const roleToAdd = ref<string>('')
-
 // Scene state
-const selectedShipId = ref<string>('explorer')
-const sceneLevel = ref(1)
-const threats = ref<StarshipThreat[]>([])
 const isSceneRunning = ref(false)
 const currentRound = ref(1)
+
+// Scene-first setup: activeSetup holds the loaded/editable scene data
+const activeSetup = ref<SavedScene | null>(null)
+
+// Scene selector
+const selectedExample = ref<string>('')
+const previewScene = ref<SavedScene | null>(null)
+
+watch(selectedExample, (id) => {
+  previewScene.value = id ? OFFICIAL_SCENES.find(s => s.id === id) || null : null
+})
 
 // Damage input state
 const shipDamageInput = ref(0)
 const threatDamageInputs = ref<Record<string, number>>({})
 
-// Custom ships storage
-const customShips = ref<CustomShip[]>([])
-const editingCustomShip = ref<CustomShip | null>(null)
-
-// Load custom ships and role deck from localStorage
-onMounted(() => {
-  store.setGMView(true)
-  const saved = localStorage.getItem('sf2e-custom-ships')
-  if (saved) {
-    try {
-      customShips.value = JSON.parse(saved)
-    } catch (e) {
-      console.warn('Failed to load custom ships:', e)
-    }
-  }
-  loadRoleDeck()
-})
-
-// Reload role deck when custom roles change (so newly created roles appear)
-watch(() => store.state.customRoles, () => {
-  loadRoleDeck()
-}, { deep: true })
-
-function saveCustomShips() {
-  localStorage.setItem('sf2e-custom-ships', JSON.stringify(customShips.value))
-}
-
-// Computed
-const allRoles = computed(() => [...STARSHIP_ROLES, ...store.state.customRoles])
-
-// Role deck management
-function addRoleToDeck() {
-  if (!roleToAdd.value) return
-
-  const role = allRoles.value.find(r => r.id === roleToAdd.value)
-  if (!role) return
-
-  selectedRoleCards.value.push({
-    instanceId: crypto.randomUUID(),
-    role: role
-  })
-
-  saveRoleDeck()
-}
-
-function removeRoleFromDeck(instanceId: string) {
-  selectedRoleCards.value = selectedRoleCards.value.filter(r => r.instanceId !== instanceId)
-  saveRoleDeck()
-}
-
-function clearRoleDeck() {
-  selectedRoleCards.value = []
-  saveRoleDeck()
-}
-
-function openCustomRoleBuilder(role?: StarshipRole) {
-  editingCustomRole.value = role || null
-  showCustomRoleBuilder.value = true
-}
-
-function closeCustomRoleBuilder() {
-  showCustomRoleBuilder.value = false
-  editingCustomRole.value = null
-  editingInstanceId.value = null
-}
-
-// Track which role instance is being edited (to update the deck after save)
-const editingInstanceId = ref<string | null>(null)
-
-function handleEditRole(role: StarshipRole, instanceId: string) {
-  editingInstanceId.value = instanceId
-
-  if (role.isCustom) {
-    // Edit custom role directly
-    openCustomRoleBuilder(role)
-  } else {
-    // Create a modified copy of a built-in role
-    const roleCopy: StarshipRole = {
-      ...role,
-      id: crypto.randomUUID(),
-      name: `${role.name} (Modified)`,
-      isCustom: true,
-      actions: role.actions.map(a => ({
-        ...a,
-        id: crypto.randomUUID(),
-        outcomes: { ...a.outcomes }
-      })),
-      primarySkills: [...role.primarySkills]
-    }
-    openCustomRoleBuilder(roleCopy)
-  }
-}
-
-// Update the deck when a role is saved from the builder
-watch(() => showCustomRoleBuilder.value, (isOpen, wasOpen) => {
-  if (wasOpen && !isOpen && editingInstanceId.value) {
-    // Builder just closed - update the role in the deck if it was a new custom version
-    const instance = selectedRoleCards.value.find(r => r.instanceId === editingInstanceId.value)
-    if (instance && editingCustomRole.value) {
-      // Find the newly created/updated custom role
-      const updatedRole = store.state.customRoles.find(r => r.id === editingCustomRole.value?.id)
-        || store.state.customRoles[store.state.customRoles.length - 1]
-      if (updatedRole) {
-        instance.role = updatedRole
-        saveRoleDeck()
-      }
-    }
-    editingInstanceId.value = null
-  }
-})
-
-function deleteCustomRole(roleId: string) {
-  // Remove from deck if present
-  selectedRoleCards.value = selectedRoleCards.value.filter(r => r.role.id !== roleId)
-  saveRoleDeck()
-  // Delete from store
-  store.deleteCustomRole(roleId)
-}
-
-function saveRoleDeck() {
-  // Save just the role IDs and instance IDs so we can reconstruct
-  const toSave = selectedRoleCards.value.map(r => ({
-    instanceId: r.instanceId,
-    roleId: r.role.id
-  }))
-  localStorage.setItem('sf2e-role-deck', JSON.stringify(toSave))
-}
-
-function loadRoleDeck() {
-  const saved = localStorage.getItem('sf2e-role-deck')
-  if (!saved) return
-
-  try {
-    const parsed = JSON.parse(saved) as { instanceId: string; roleId: string }[]
-    selectedRoleCards.value = parsed
-      .map(item => {
-        const role = allRoles.value.find(r => r.id === item.roleId)
-        if (!role) return null
-        return { instanceId: item.instanceId, role }
-      })
-      .filter((item): item is RoleInstance => item !== null)
-  } catch (e) {
-    console.warn('Failed to load role deck:', e)
-  }
-}
-
-// Roles for PDF export - use selected roles if any, otherwise all roles
-const rolesForExport = computed(() => {
-  if (selectedRoleCards.value.length > 0) {
-    return selectedRoleCards.value.map(r => r.role)
-  }
-  return allRoles.value
-})
-
-const currentShip = computed(() => {
-  // Check custom ships first
-  const custom = customShips.value.find(s => s.id === selectedShipId.value)
-  if (custom) {
-    return {
-      name: custom.name,
-      level: custom.level,
-      ac: custom.ac,
-      fortitude: custom.fortitude,
-      reflex: custom.reflex,
-      maxHP: custom.maxHP,
-      currentHP: custom.maxHP,
-      maxShields: custom.maxShields,
-      currentShields: custom.maxShields,
-      shieldRegen: custom.shieldRegen,
-      bonuses: custom.bonuses
-    }
-  }
-
-  // Otherwise use template
-  const template = STARSHIP_TEMPLATES.find(t => t.id === selectedShipId.value)
-  if (template) {
-    return {
-      name: template.name,
-      ...getScaledStats(template, sceneLevel.value)
-    }
-  }
-
-  return null
-})
-
-// Scene ship HP tracking (separate from template)
+// Ship HP tracking during scene run
 const shipCurrentHP = ref(0)
 const shipCurrentShields = ref(0)
 
-function startScene() {
-  if (!currentShip.value) return
+onMounted(() => {
+  store.setGMView(true)
+})
 
-  shipCurrentHP.value = currentShip.value.maxHP
-  shipCurrentShields.value = currentShip.value.maxShields
+// ============ Scene Setup ============
+
+function loadExampleScene() {
+  if (!previewScene.value) return
+
+  const scene = cloneOfficialScene(previewScene.value)
+  activeSetup.value = scene
+
+  // Reset selector (keep the preview visible until a new selection)
+  selectedExample.value = ''
+  previewScene.value = null
+}
+
+function loadCustomScene() {
+  activeSetup.value = createEmptySavedScene()
+}
+
+function startScene() {
+  if (!activeSetup.value) return
+
+  const setup = activeSetup.value
+  shipCurrentHP.value = setup.starship.maxHP
+  shipCurrentShields.value = setup.starship.maxShields
   currentRound.value = 1
   isSceneRunning.value = true
 
   // Update store for player view sync
   store.state.activeScene = {
     id: crypto.randomUUID(),
-    name: `${currentShip.value.name} Scene`,
-    level: sceneLevel.value,
-    description: '',
-    victoryCondition: 'defeat',
+    name: setup.name,
+    level: setup.level,
+    description: setup.description,
+    victoryCondition: setup.victoryCondition,
+    vpRequired: setup.vpRequired,
+    customCondition: setup.customCondition,
     starship: {
       id: crypto.randomUUID(),
-      name: currentShip.value.name,
-      level: sceneLevel.value,
-      ac: currentShip.value.ac,
-      fortitude: currentShip.value.fortitude,
-      reflex: currentShip.value.reflex,
-      maxShields: currentShip.value.maxShields,
+      name: setup.starship.name,
+      level: setup.starship.level,
+      ac: setup.starship.ac,
+      fortitude: setup.starship.fortitude,
+      reflex: setup.starship.reflex,
+      maxShields: setup.starship.maxShields,
       currentShields: shipCurrentShields.value,
-      shieldRegen: currentShip.value.shieldRegen,
-      maxHP: currentShip.value.maxHP,
+      shieldRegen: setup.starship.shieldRegen,
+      maxHP: setup.starship.maxHP,
       currentHP: shipCurrentHP.value,
-      bonuses: currentShip.value.bonuses
+      bonuses: setup.starship.bonuses
     },
-    threats: threats.value,
+    threats: setup.threats,
     roles: [],
+    availableRoles: [...setup.availableRoles],
+    starshipActions: [...setup.starshipActions],
+    partySize: setup.partySize ?? 4,
+    additionalObjectives: [...(setup.additionalObjectives ?? [])],
+    roleDescriptions: { ...(setup.roleDescriptions ?? {}) },
     currentRound: 1,
     currentVP: 0,
     isActive: true,
-    actionLog: []
+    actionLog: [],
+    initiativeOrder: [],
+    currentTurnIndex: 0,
+    initiativeRolled: false
   }
 }
 
@@ -274,36 +109,38 @@ function endScene() {
 
 function nextRound() {
   currentRound.value++
-  // Regenerate shields
-  if (currentShip.value) {
+  if (activeSetup.value) {
     shipCurrentShields.value = Math.min(
-      currentShip.value.maxShields,
-      shipCurrentShields.value + currentShip.value.shieldRegen
+      activeSetup.value.starship.maxShields,
+      shipCurrentShields.value + activeSetup.value.starship.shieldRegen
     )
+    // Regenerate threat shields
+    for (const threat of activeSetup.value.threats) {
+      if (threat.isDefeated) continue
+      if (threat.shieldRegen && threat.shieldRegen > 0 && threat.maxShields && threat.currentShields !== undefined) {
+        threat.currentShields = Math.min(threat.maxShields, threat.currentShields + threat.shieldRegen)
+      }
+    }
   }
-  // Update store
   if (store.state.activeScene) {
     store.state.activeScene.currentRound = currentRound.value
     store.state.activeScene.starship.currentShields = shipCurrentShields.value
+    if (activeSetup.value) {
+      store.state.activeScene.threats = [...activeSetup.value.threats]
+    }
   }
 }
 
 function damageShip(amount: number) {
   let remaining = amount
-
-  // Shields first
   if (shipCurrentShields.value > 0) {
     const shieldDmg = Math.min(shipCurrentShields.value, remaining)
     shipCurrentShields.value -= shieldDmg
     remaining -= shieldDmg
   }
-
-  // Then HP
   if (remaining > 0) {
     shipCurrentHP.value = Math.max(0, shipCurrentHP.value - remaining)
   }
-
-  // Update store
   if (store.state.activeScene) {
     store.state.activeScene.starship.currentShields = shipCurrentShields.value
     store.state.activeScene.starship.currentHP = shipCurrentHP.value
@@ -311,58 +148,59 @@ function damageShip(amount: number) {
 }
 
 function healShip(amount: number) {
-  if (currentShip.value) {
-    shipCurrentHP.value = Math.min(currentShip.value.maxHP, shipCurrentHP.value + amount)
+  if (activeSetup.value) {
+    shipCurrentHP.value = Math.min(activeSetup.value.starship.maxHP, shipCurrentHP.value + amount)
     if (store.state.activeScene) {
       store.state.activeScene.starship.currentHP = shipCurrentHP.value
     }
   }
 }
 
-// Threat management
+// ============ Threat Management (setup) ============
+
 function addThreat() {
-  threats.value.push(createDefaultThreat())
+  if (!activeSetup.value) return
+  activeSetup.value.threats.push(createDefaultThreat())
 }
 
 function updateThreat(index: number, field: keyof StarshipThreat, value: unknown) {
-  if (threats.value[index]) {
-    (threats.value[index] as Record<string, unknown>)[field] = value
+  if (!activeSetup.value) return
+  const t = activeSetup.value.threats[index]
+  if (t) {
+    (t as Record<string, unknown>)[field] = value
     if (store.state.activeScene) {
-      store.state.activeScene.threats = [...threats.value]
+      store.state.activeScene.threats = [...activeSetup.value.threats]
     }
   }
 }
 
 function removeThreat(index: number) {
-  threats.value.splice(index, 1)
+  if (!activeSetup.value) return
+  activeSetup.value.threats.splice(index, 1)
   if (store.state.activeScene) {
-    store.state.activeScene.threats = [...threats.value]
+    store.state.activeScene.threats = [...activeSetup.value.threats]
   }
 }
 
 function damageThreat(index: number, amount: number) {
-  const threat = threats.value[index]
+  if (!activeSetup.value) return
+  const threat = activeSetup.value.threats[index]
   if (!threat) return
 
   let remaining = amount
-
-  // Damage shields first
   if (threat.currentShields !== undefined && threat.currentShields > 0) {
     const shieldDmg = Math.min(threat.currentShields, remaining)
     threat.currentShields -= shieldDmg
     remaining -= shieldDmg
   }
-
-  // Then HP
   if (remaining > 0 && threat.currentHP !== undefined) {
     threat.currentHP = Math.max(0, threat.currentHP - remaining)
     if (threat.currentHP === 0) {
       threat.isDefeated = true
     }
   }
-
   if (store.state.activeScene) {
-    store.state.activeScene.threats = [...threats.value]
+    store.state.activeScene.threats = [...activeSetup.value.threats]
   }
 }
 
@@ -381,36 +219,119 @@ function applyThreatDamage(index: number, threatId: string) {
   }
 }
 
-// Custom ship editor
-function openCustomShipEditor(ship?: CustomShip) {
-  editingCustomShip.value = ship ? { ...ship } : createEmptyCustomShip()
-  showCustomShipEditor.value = true
+// ============ Role Management (setup) ============
+
+const customRoleName = ref('')
+
+function addRole(roleId: string) {
+  if (!activeSetup.value || !roleId) return
+  activeSetup.value.availableRoles.push(roleId)
 }
 
-function saveCustomShip() {
-  if (!editingCustomShip.value) return
+function addCustomRole() {
+  if (!activeSetup.value || !customRoleName.value.trim()) return
+  // Convert to snake_case id: "Social Media Manager" → "social_media_manager"
+  const id = customRoleName.value.trim().toLowerCase().replace(/\s+/g, '_')
+  activeSetup.value.availableRoles.push(id)
+  customRoleName.value = ''
+}
 
-  const idx = customShips.value.findIndex(s => s.id === editingCustomShip.value!.id)
-  if (idx !== -1) {
-    customShips.value[idx] = editingCustomShip.value
+function removeRole(index: number) {
+  if (!activeSetup.value) return
+  activeSetup.value.availableRoles.splice(index, 1)
+}
+
+// ============ Action Management (setup) ============
+
+const editingActionId = ref<string | null>(null)
+
+function addAction() {
+  if (!activeSetup.value) return
+  const action: StarshipAction = {
+    id: crypto.randomUUID(),
+    name: 'New Action',
+    actionCost: 2,
+    role: 'any',
+    skills: [],
+    description: '',
+    outcomes: { criticalSuccess: '', success: '' }
+  }
+  activeSetup.value.starshipActions.push(action)
+  editingActionId.value = action.id
+}
+
+function addQuickWeapon() {
+  if (!activeSetup.value) return
+  const action: StarshipAction = {
+    id: crypto.randomUUID(),
+    name: 'Ship Weapon',
+    actionCost: 2,
+    role: 'gunner',
+    skills: [],
+    description: 'Fire a ship weapon at a threat.',
+    isAttack: true,
+    damage: '2d10+8',
+    traits: [],
+    outcomes: {
+      criticalSuccess: 'Double damage.',
+      success: 'Full damage.',
+      failure: 'Miss.',
+      criticalFailure: 'Miss and the weapon jams until repaired.'
+    }
+  }
+  activeSetup.value.starshipActions.push(action)
+  editingActionId.value = action.id
+}
+
+function updateAction(index: number, action: StarshipAction) {
+  if (!activeSetup.value) return
+  activeSetup.value.starshipActions[index] = action
+}
+
+function removeAction(index: number) {
+  if (!activeSetup.value) return
+  const removed = activeSetup.value.starshipActions[index]
+  activeSetup.value.starshipActions.splice(index, 1)
+  if (editingActionId.value === removed?.id) {
+    editingActionId.value = null
+  }
+}
+
+// Group actions by role for display
+function getActionsGroupedByRole(): { role: string; actions: { action: StarshipAction; index: number }[] }[] {
+  if (!activeSetup.value) return []
+  const groups = new Map<string, { action: StarshipAction; index: number }[]>()
+  activeSetup.value.starshipActions.forEach((action, index) => {
+    const role = action.role
+    if (!groups.has(role)) groups.set(role, [])
+    groups.get(role)!.push({ action, index })
+  })
+  return Array.from(groups.entries()).map(([role, actions]) => ({ role, actions }))
+}
+
+// ============ Role Descriptions ============
+
+function updateRoleDescription(roleId: string, desc: string) {
+  if (!activeSetup.value) return
+  if (!activeSetup.value.roleDescriptions) {
+    activeSetup.value.roleDescriptions = {}
+  }
+  if (desc.trim()) {
+    activeSetup.value.roleDescriptions[roleId] = desc
   } else {
-    customShips.value.push(editingCustomShip.value)
-  }
-
-  saveCustomShips()
-  showCustomShipEditor.value = false
-  editingCustomShip.value = null
-}
-
-function deleteCustomShip(id: string) {
-  customShips.value = customShips.value.filter(s => s.id !== id)
-  saveCustomShips()
-  if (selectedShipId.value === id) {
-    selectedShipId.value = 'explorer'
+    delete activeSetup.value.roleDescriptions[roleId]
   }
 }
 
-// Player view
+// ============ Party Size ============
+
+function updatePartySize(size: number) {
+  if (!activeSetup.value) return
+  activeSetup.value.partySize = Math.max(1, Math.min(8, size))
+}
+
+// ============ Player View ============
+
 function openPlayerView() {
   store.openPlayerView()
 }
@@ -426,261 +347,331 @@ async function copyShareLink() {
 
 <template>
   <div class="starship-panel">
-    <!-- Header with tabs -->
+    <!-- Header -->
     <header class="panel-header">
       <div class="header-title">
         <span class="title-icon">[*]</span>
         <span>STARSHIP SCENES</span>
+        <span v-if="isSceneRunning" class="live-dot"></span>
       </div>
-
-      <nav class="tabs">
-        <button
-          class="tab"
-          :class="{ active: activeTab === 'roles' }"
-          @click="activeTab = 'roles'"
-        >
-          Roles
-        </button>
-        <button
-          class="tab"
-          :class="{ active: activeTab === 'scene' }"
-          @click="activeTab = 'scene'"
-        >
-          Scene
-          <span v-if="isSceneRunning" class="live-dot"></span>
-        </button>
-      </nav>
     </header>
 
-    <!-- ROLES TAB -->
-    <div v-if="activeTab === 'roles'" class="tab-content">
-      <div class="roles-toolbar">
-        <div class="role-selector">
-          <select v-model="roleToAdd" class="input">
-            <option value="">Select a role to add...</option>
-            <optgroup label="Core Roles">
-              <option v-for="role in STARSHIP_ROLES" :key="role.id" :value="role.id">
-                {{ role.name }}
-              </option>
-            </optgroup>
-            <optgroup v-if="store.state.customRoles.length > 0" label="Custom Roles">
-              <option v-for="role in store.state.customRoles" :key="role.id" :value="role.id">
-                {{ role.name }}
-              </option>
-            </optgroup>
-          </select>
-          <button class="btn btn-primary" @click="addRoleToDeck" :disabled="!roleToAdd">
-            Add Role
-          </button>
-        </div>
-
-        <div class="roles-actions">
-          <button class="btn btn-secondary" @click="showPdfExport = true">
-            Print Role Cards
-          </button>
-          <button class="btn btn-secondary" @click="openCustomRoleBuilder()">
-            + Custom Role
-          </button>
-          <button
-            v-if="selectedRoleCards.length > 0"
-            class="btn btn-danger btn-sm"
-            @click="clearRoleDeck"
-          >
-            Clear All
-          </button>
-        </div>
-
-        <!-- Custom Roles Management -->
-        <div v-if="store.state.customRoles.length > 0" class="custom-roles-list">
-          <span class="custom-roles-label">Custom Roles:</span>
-          <div class="custom-role-chips">
-            <div v-for="role in store.state.customRoles" :key="role.id" class="custom-role-chip">
-              <span class="chip-name">{{ role.name }}</span>
-              <button class="chip-btn edit" @click="openCustomRoleBuilder(role)" title="Edit">&#9998;</button>
-              <button class="chip-btn delete" @click="deleteCustomRole(role.id)" title="Delete">&times;</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="selectedRoleCards.length === 0" class="empty-state">
-        <p>No roles selected. Use the dropdown above to add roles to your deck.</p>
-        <p class="hint">You can add multiple of the same role (e.g., 2 Gunners).</p>
-      </div>
-
-      <div v-else class="roles-grid">
-        <div v-for="instance in selectedRoleCards" :key="instance.instanceId" class="role-wrapper">
-          <button
-            class="remove-role-btn"
-            @click="removeRoleFromDeck(instance.instanceId)"
-            title="Remove this role"
-          >
-            &times;
-          </button>
-          <RoleCard
-            :role="instance.role"
-            :show-actions="true"
-            :editable="true"
-            @edit="handleEditRole($event, instance.instanceId)"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- SCENE TAB -->
-    <div v-if="activeTab === 'scene'" class="tab-content">
+    <!-- SCENE CONTENT -->
+    <div class="tab-content">
       <!-- Not running: Setup -->
       <template v-if="!isSceneRunning">
         <div class="scene-setup">
-          <!-- Ship Selection -->
+          <!-- Scene Selector -->
           <section class="setup-section">
-            <h3 class="section-title">Select Starship</h3>
-
-            <div class="ship-selector">
-              <select v-model="selectedShipId" class="input">
-                <optgroup label="Pre-built Ships">
-                  <option v-for="t in STARSHIP_TEMPLATES" :key="t.id" :value="t.id">
-                    {{ t.name }} - {{ t.description.substring(0, 50) }}...
-                  </option>
-                </optgroup>
-                <optgroup v-if="customShips.length > 0" label="Custom Ships">
-                  <option v-for="s in customShips" :key="s.id" :value="s.id">
-                    {{ s.name }} (Level {{ s.level }})
-                  </option>
-                </optgroup>
+            <h3 class="section-title">Load a Scene</h3>
+            <div class="example-selector">
+              <select v-model="selectedExample" class="input">
+                <option value="">Choose an official scene...</option>
+                <option
+                  v-for="scene in OFFICIAL_SCENES"
+                  :key="scene.id"
+                  :value="scene.id"
+                >
+                  {{ scene.name }} (Level {{ scene.level }})
+                </option>
               </select>
-
-              <button class="btn btn-secondary" @click="openCustomShipEditor()">
-                + Custom Ship
-              </button>
               <button
-                v-if="customShips.find(s => s.id === selectedShipId)"
-                class="btn btn-danger btn-sm"
-                @click="deleteCustomShip(selectedShipId)"
-                title="Delete custom ship"
+                class="btn btn-primary"
+                :disabled="!selectedExample"
+                @click="loadExampleScene"
               >
-                &times;
+                Load
               </button>
             </div>
 
-            <!-- Level selector for templates -->
-            <div v-if="!customShips.find(s => s.id === selectedShipId)" class="level-row">
-              <label>Scene Level:</label>
-              <input
-                type="number"
-                v-model.number="sceneLevel"
-                min="1"
-                max="20"
-                class="input input-sm"
-              />
+            <!-- Preview card -->
+            <div v-if="previewScene" class="example-preview panel">
+              <div class="example-preview-header">
+                <span class="example-preview-name">{{ previewScene.name }}</span>
+                <span class="example-preview-level">Level {{ previewScene.level }}</span>
+              </div>
+              <p class="example-preview-desc">{{ previewScene.description }}</p>
+              <div class="example-preview-meta">
+                <span class="meta-tag">
+                  {{ previewScene.starship.name }}
+                  &mdash; HP {{ previewScene.starship.maxHP }} / Shields {{ previewScene.starship.maxShields }}
+                </span>
+                <span class="meta-tag threats-tag">
+                  {{ previewScene.threats.length }} threat{{ previewScene.threats.length === 1 ? '' : 's' }}
+                </span>
+                <span v-if="previewScene.vpRequired" class="meta-tag vp-tag">
+                  {{ previewScene.vpRequired }} VP required
+                </span>
+              </div>
+              <!-- Roles preview -->
+              <div class="preview-roles">
+                <span
+                  v-for="(roleId, idx) in previewScene.availableRoles"
+                  :key="idx"
+                  class="role-chip"
+                >
+                  {{ getRoleName(roleId) }}
+                </span>
+              </div>
+              <!-- Actions count -->
+              <div class="preview-actions-summary">
+                {{ previewScene.starshipActions.length }} scene actions
+              </div>
             </div>
 
-            <!-- Ship Stats Preview -->
-            <div v-if="currentShip" class="ship-preview panel">
-              <div class="ship-name">{{ currentShip.name }}</div>
+            <div class="or-divider">
+              <span>or</span>
+            </div>
+
+            <button class="btn btn-secondary" @click="loadCustomScene">
+              Create Custom Scene
+            </button>
+          </section>
+
+          <!-- Loaded Setup -->
+          <template v-if="activeSetup">
+            <!-- Scene Info (editable) -->
+            <section class="setup-section">
+              <h3 class="section-title">Scene Details</h3>
+              <div class="scene-info-row">
+                <label class="form-field flex-1">
+                  <span>Name</span>
+                  <input v-model="activeSetup.name" class="input" placeholder="Scene name" />
+                </label>
+                <label class="form-field" style="width: 80px;">
+                  <span>Level</span>
+                  <input type="number" v-model.number="activeSetup.level" class="input" min="1" max="20" />
+                </label>
+                <label class="form-field" style="width: 80px;">
+                  <span>Party</span>
+                  <input type="number" :value="activeSetup.partySize ?? 4" @input="updatePartySize(parseInt(($event.target as HTMLInputElement).value) || 4)" class="input" min="1" max="8" />
+                </label>
+              </div>
+              <p v-if="(activeSetup.partySize ?? 4) > 4" class="scaling-hint">
+                Consider increasing VP targets by {{ ((activeSetup.partySize ?? 4) - 4) * 2 }} for {{ activeSetup.partySize }} players.
+              </p>
+              <label class="form-field">
+                <span>Description</span>
+                <textarea v-model="activeSetup.description" class="input textarea" rows="2" placeholder="Scene description..."></textarea>
+              </label>
+            </section>
+
+            <!-- Ship Stats (inline editable) -->
+            <section class="setup-section">
+              <h3 class="section-title">{{ activeSetup.starship.name }}</h3>
               <div class="ship-stats">
                 <div class="stat">
                   <span class="stat-label">AC</span>
-                  <span class="stat-value">{{ currentShip.ac }}</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.ac" />
                 </div>
                 <div class="stat">
                   <span class="stat-label">Fort</span>
-                  <span class="stat-value">+{{ currentShip.fortitude }}</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.fortitude" />
                 </div>
                 <div class="stat">
                   <span class="stat-label">Ref</span>
-                  <span class="stat-value">+{{ currentShip.reflex }}</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.reflex" />
                 </div>
                 <div class="stat">
                   <span class="stat-label">HP</span>
-                  <span class="stat-value">{{ currentShip.maxHP }}</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.maxHP" />
                 </div>
                 <div class="stat">
                   <span class="stat-label">Shields</span>
-                  <span class="stat-value">{{ currentShip.maxShields }} (+{{ currentShip.shieldRegen }}/rd)</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.maxShields" />
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Regen</span>
+                  <input type="number" class="stat-input" v-model.number="activeSetup.starship.shieldRegen" />
                 </div>
               </div>
-              <div v-if="Object.keys(currentShip.bonuses).length > 0" class="ship-bonuses">
-                <span v-for="(val, key) in currentShip.bonuses" :key="key" class="bonus-tag">
+              <div v-if="Object.keys(activeSetup.starship.bonuses).length > 0" class="ship-bonuses">
+                <span v-for="(val, key) in activeSetup.starship.bonuses" :key="key" class="bonus-tag">
                   {{ key }} +{{ val }}
                 </span>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <!-- Threats -->
-          <section class="setup-section">
-            <div class="section-header">
-              <h3 class="section-title">Threats</h3>
-              <button class="btn btn-secondary btn-sm" @click="addThreat">+ Add Threat</button>
-            </div>
+            <!-- Roles -->
+            <section class="setup-section">
+              <div class="section-header">
+                <h3 class="section-title">Crew Roles</h3>
+                <select class="input role-add-select" @change="addRole(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
+                  <option value="">+ Standard Role</option>
+                  <option v-for="role in STARSHIP_ROLES" :key="role.id" :value="role.id">
+                    {{ role.name }}
+                  </option>
+                </select>
+              </div>
 
-            <div v-if="threats.length === 0" class="empty-state">
-              No threats added. Add enemy ships or hazards.
-            </div>
+              <div class="custom-role-row">
+                <input
+                  v-model="customRoleName"
+                  class="input custom-role-input"
+                  placeholder="Custom role name..."
+                  @keyup.enter="addCustomRole"
+                />
+                <button class="btn btn-secondary btn-sm" :disabled="!customRoleName.trim()" @click="addCustomRole">
+                  + Custom
+                </button>
+              </div>
 
-            <div v-else class="threats-list">
-              <div v-for="(threat, idx) in threats" :key="threat.id" class="threat-card panel">
-                <div class="threat-header">
-                  <input
-                    :value="threat.name"
-                    @input="updateThreat(idx, 'name', ($event.target as HTMLInputElement).value)"
-                    class="input threat-name-input"
-                    placeholder="Threat name"
-                  />
-                  <button class="btn-icon" @click="removeThreat(idx)">&times;</button>
+              <div v-if="activeSetup.availableRoles.length === 0" class="empty-state empty-state-sm">
+                No roles assigned. Add crew roles above.
+              </div>
+
+              <div v-else class="role-chips-section">
+                <div class="role-chips">
+                  <span
+                    v-for="(roleId, idx) in activeSetup.availableRoles"
+                    :key="idx"
+                    class="role-chip removable"
+                    :style="{ borderColor: getRoleColor(roleId), color: getRoleColor(roleId) }"
+                    @click="removeRole(idx)"
+                    :title="'Click to remove ' + getRoleName(roleId)"
+                  >
+                    {{ getRoleName(roleId) }}
+                    <span class="role-remove">&times;</span>
+                  </span>
                 </div>
-                <div class="threat-stats">
-                  <label>
-                    <span>Level</span>
-                    <input
-                      type="number"
-                      :value="threat.level"
-                      @input="updateThreat(idx, 'level', parseInt(($event.target as HTMLInputElement).value) || 1)"
-                      class="input input-sm"
-                      min="1"
-                    />
-                  </label>
-                  <label>
-                    <span>HP</span>
-                    <input
-                      type="number"
-                      :value="threat.maxHP"
-                      @input="updateThreat(idx, 'maxHP', parseInt(($event.target as HTMLInputElement).value) || 1); updateThreat(idx, 'currentHP', parseInt(($event.target as HTMLInputElement).value) || 1)"
-                      class="input input-sm"
-                      min="1"
-                    />
-                  </label>
-                  <label>
-                    <span>Shields</span>
-                    <input
-                      type="number"
-                      :value="threat.maxShields"
-                      @input="updateThreat(idx, 'maxShields', parseInt(($event.target as HTMLInputElement).value) || 0); updateThreat(idx, 'currentShields', parseInt(($event.target as HTMLInputElement).value) || 0)"
-                      class="input input-sm"
-                      min="0"
-                    />
-                  </label>
-                  <label>
-                    <span>AC</span>
-                    <input
-                      type="number"
-                      :value="threat.ac"
-                      @input="updateThreat(idx, 'ac', parseInt(($event.target as HTMLInputElement).value) || 10)"
-                      class="input input-sm"
-                    />
-                  </label>
+
+                <!-- Role Descriptions -->
+                <div class="role-descriptions">
+                  <div
+                    v-for="roleId in [...new Set(activeSetup.availableRoles)]"
+                    :key="'desc-' + roleId"
+                    class="role-desc-row"
+                  >
+                    <label class="role-desc-label" :style="{ color: getRoleColor(roleId) }">
+                      {{ getRoleName(roleId) }}
+                    </label>
+                    <textarea
+                      class="input textarea role-desc-textarea"
+                      :value="activeSetup.roleDescriptions?.[roleId] ?? ''"
+                      @input="updateRoleDescription(roleId, ($event.target as HTMLTextAreaElement).value)"
+                      :placeholder="'Describe what the ' + getRoleName(roleId).toLowerCase() + ' does in this scene...'"
+                      rows="1"
+                    ></textarea>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <!-- Start Button -->
-          <div class="start-row">
-            <button class="btn btn-primary btn-lg" @click="startScene" :disabled="!currentShip">
-              Start Scene
-            </button>
-          </div>
+            <!-- Actions (Editable) -->
+            <section class="setup-section">
+              <div class="section-header">
+                <h3 class="section-title">Scene Actions ({{ activeSetup.starshipActions.length }})</h3>
+                <div class="action-add-buttons">
+                  <button class="btn btn-secondary btn-sm" @click="addAction">+ Add Action</button>
+                  <button class="btn btn-secondary btn-sm" @click="addQuickWeapon">+ Quick Weapon</button>
+                </div>
+              </div>
+
+              <div v-if="activeSetup.starshipActions.length === 0" class="empty-state empty-state-sm">
+                No actions yet. Add crew actions or quick weapons above.
+              </div>
+
+              <div v-else class="actions-editor-list">
+                <template v-for="group in getActionsGroupedByRole()" :key="group.role">
+                  <div class="action-group-header" :style="{ color: getRoleColor(group.role) }">
+                    {{ group.role === 'any' ? 'Any Role' : getRoleName(group.role) }}
+                  </div>
+                  <div v-for="{ action, index } in group.actions" :key="action.id">
+                    <!-- Expanded editor -->
+                    <ActionEditor
+                      v-if="editingActionId === action.id"
+                      :action="action"
+                      :available-roles="activeSetup.availableRoles"
+                      @update="(a) => updateAction(index, a)"
+                      @remove="removeAction(index)"
+                      @close="editingActionId = null"
+                    />
+                    <!-- Collapsed summary -->
+                    <div v-else class="action-item clickable" @click="editingActionId = action.id">
+                      <span class="action-name">{{ action.name }}</span>
+                      <span v-if="action.isAttack" class="action-attack-badge">ATK</span>
+                      <span class="action-cost">{{ action.actionCost }}A</span>
+                      <button class="btn-icon-sm" @click.stop="removeAction(index)">&times;</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </section>
+
+            <!-- Threats -->
+            <section class="setup-section">
+              <div class="section-header">
+                <h3 class="section-title">Threats</h3>
+                <button class="btn btn-secondary btn-sm" @click="addThreat">+ Add Threat</button>
+              </div>
+
+              <div v-if="activeSetup.threats.length === 0" class="empty-state">
+                No threats added. Add enemy ships or hazards.
+              </div>
+
+              <div v-else class="threats-list">
+                <div v-for="(threat, idx) in activeSetup.threats" :key="threat.id" class="threat-card panel">
+                  <div class="threat-header">
+                    <input
+                      :value="threat.name"
+                      @input="updateThreat(idx, 'name', ($event.target as HTMLInputElement).value)"
+                      class="input threat-name-input"
+                      placeholder="Threat name"
+                    />
+                    <button class="btn-icon" @click="removeThreat(idx)">&times;</button>
+                  </div>
+                  <div class="threat-stats">
+                    <label>
+                      <span>Level</span>
+                      <input
+                        type="number"
+                        :value="threat.level"
+                        @input="updateThreat(idx, 'level', parseInt(($event.target as HTMLInputElement).value) || 1)"
+                        class="input input-sm"
+                        min="1"
+                      />
+                    </label>
+                    <label>
+                      <span>HP</span>
+                      <input
+                        type="number"
+                        :value="threat.maxHP"
+                        @input="updateThreat(idx, 'maxHP', parseInt(($event.target as HTMLInputElement).value) || 1); updateThreat(idx, 'currentHP', parseInt(($event.target as HTMLInputElement).value) || 1)"
+                        class="input input-sm"
+                        min="1"
+                      />
+                    </label>
+                    <label>
+                      <span>Shields</span>
+                      <input
+                        type="number"
+                        :value="threat.maxShields"
+                        @input="updateThreat(idx, 'maxShields', parseInt(($event.target as HTMLInputElement).value) || 0); updateThreat(idx, 'currentShields', parseInt(($event.target as HTMLInputElement).value) || 0)"
+                        class="input input-sm"
+                        min="0"
+                      />
+                    </label>
+                    <label>
+                      <span>AC</span>
+                      <input
+                        type="number"
+                        :value="threat.ac"
+                        @input="updateThreat(idx, 'ac', parseInt(($event.target as HTMLInputElement).value) || 10)"
+                        class="input input-sm"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Start Button -->
+            <div class="start-row">
+              <button class="btn btn-primary btn-lg" @click="startScene">
+                Start Scene
+              </button>
+            </div>
+          </template>
         </div>
       </template>
 
@@ -704,31 +695,31 @@ async function copyShareLink() {
           </div>
 
           <!-- Ship Status -->
-          <section v-if="currentShip" class="ship-status panel">
-            <h3 class="ship-status-name">{{ currentShip.name }}</h3>
+          <section v-if="activeSetup" class="ship-status panel">
+            <h3 class="ship-status-name">{{ activeSetup.starship.name }}</h3>
 
             <div class="hp-bars">
               <div class="hp-bar-group">
                 <div class="hp-label">
                   <span>Shields</span>
-                  <span>{{ shipCurrentShields }} / {{ currentShip.maxShields }}</span>
+                  <span>{{ shipCurrentShields }} / {{ activeSetup.starship.maxShields }}</span>
                 </div>
                 <div class="hp-bar">
                   <div
                     class="hp-fill shields"
-                    :style="{ width: (shipCurrentShields / currentShip.maxShields * 100) + '%' }"
+                    :style="{ width: (shipCurrentShields / activeSetup.starship.maxShields * 100) + '%' }"
                   ></div>
                 </div>
               </div>
               <div class="hp-bar-group">
                 <div class="hp-label">
                   <span>Hull</span>
-                  <span>{{ shipCurrentHP }} / {{ currentShip.maxHP }}</span>
+                  <span>{{ shipCurrentHP }} / {{ activeSetup.starship.maxHP }}</span>
                 </div>
                 <div class="hp-bar">
                   <div
                     class="hp-fill hull"
-                    :style="{ width: (shipCurrentHP / currentShip.maxHP * 100) + '%' }"
+                    :style="{ width: (shipCurrentHP / activeSetup.starship.maxHP * 100) + '%' }"
                   ></div>
                 </div>
               </div>
@@ -749,11 +740,11 @@ async function copyShareLink() {
           </section>
 
           <!-- Threats -->
-          <section v-if="threats.length > 0" class="threats-section">
+          <section v-if="activeSetup && activeSetup.threats.length > 0" class="threats-section">
             <h3 class="section-title">Threats</h3>
             <div class="threats-grid">
               <div
-                v-for="(threat, idx) in threats"
+                v-for="(threat, idx) in activeSetup.threats"
                 :key="threat.id"
                 class="threat-runner-card panel"
                 :class="{ defeated: threat.isDefeated }"
@@ -802,82 +793,6 @@ async function copyShareLink() {
         </div>
       </template>
     </div>
-
-    <!-- Modals -->
-    <Teleport to="body">
-      <!-- PDF Export -->
-      <div v-if="showPdfExport" class="modal-overlay" @click.self="showPdfExport = false">
-        <div class="modal-content">
-          <RolePdfExport :roles="rolesForExport" @close="showPdfExport = false" />
-        </div>
-      </div>
-
-      <!-- Custom Role Builder -->
-      <div v-if="showCustomRoleBuilder" class="modal-overlay" @click.self="closeCustomRoleBuilder">
-        <div class="modal-content modal-lg">
-          <CustomRoleBuilder :editing-role="editingCustomRole" @close="closeCustomRoleBuilder" />
-        </div>
-      </div>
-
-      <!-- Custom Ship Editor -->
-      <div v-if="showCustomShipEditor" class="modal-overlay" @click.self="showCustomShipEditor = false">
-        <div class="modal">
-          <div class="modal-header">
-            <h3>{{ editingCustomShip?.id ? 'Edit' : 'New' }} Custom Ship</h3>
-            <button class="btn-icon" @click="showCustomShipEditor = false">&times;</button>
-          </div>
-
-          <div v-if="editingCustomShip" class="modal-body">
-            <label class="form-field">
-              <span>Ship Name</span>
-              <input v-model="editingCustomShip.name" class="input" placeholder="Ship name" />
-            </label>
-
-            <div class="form-row">
-              <label class="form-field">
-                <span>Level</span>
-                <input type="number" v-model.number="editingCustomShip.level" class="input" min="1" max="20" />
-              </label>
-              <label class="form-field">
-                <span>AC</span>
-                <input type="number" v-model.number="editingCustomShip.ac" class="input" />
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label class="form-field">
-                <span>Fortitude</span>
-                <input type="number" v-model.number="editingCustomShip.fortitude" class="input" />
-              </label>
-              <label class="form-field">
-                <span>Reflex</span>
-                <input type="number" v-model.number="editingCustomShip.reflex" class="input" />
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label class="form-field">
-                <span>Max HP</span>
-                <input type="number" v-model.number="editingCustomShip.maxHP" class="input" min="1" />
-              </label>
-              <label class="form-field">
-                <span>Max Shields</span>
-                <input type="number" v-model.number="editingCustomShip.maxShields" class="input" min="0" />
-              </label>
-              <label class="form-field">
-                <span>Shield Regen</span>
-                <input type="number" v-model.number="editingCustomShip.shieldRegen" class="input" min="0" />
-              </label>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showCustomShipEditor = false">Cancel</button>
-            <button class="btn btn-primary" @click="saveCustomShip">Save Ship</button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -913,35 +828,6 @@ async function copyShareLink() {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.tab {
-  position: relative;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-dim);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.tab:hover {
-  border-color: var(--color-accent);
-  color: var(--color-text);
-}
-
-.tab.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-bg);
-}
-
 .live-dot {
   display: inline-block;
   width: 8px;
@@ -963,152 +849,7 @@ async function copyShareLink() {
   padding: 1rem;
 }
 
-/* ROLES TAB */
-.roles-toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.role-selector {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.role-selector select {
-  flex: 1;
-  min-width: 200px;
-}
-
-.roles-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
-  background: transparent;
-}
-
-.role-wrapper {
-  position: relative;
-  background: transparent;
-}
-
-.remove-role-btn {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: var(--color-bg);
-  border: 2px solid var(--color-danger);
-  border-radius: var(--radius-sm);
-  color: var(--color-danger);
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.remove-role-btn:hover {
-  background: var(--color-danger);
-  color: white;
-  transform: scale(1.1);
-}
-
-.hint {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  margin-top: 0.5rem;
-}
-
-/* Custom Roles Management */
-.custom-roles-list {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.custom-roles-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.custom-role-chips {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.custom-role-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(var(--color-bg-surface-rgb, 20, 22, 28), 0.7);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.chip-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.chip-btn {
-  padding: 0.25rem 0.5rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  font-size: 0.875rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s ease;
-}
-
-.chip-btn.edit {
-  color: var(--color-accent);
-}
-
-.chip-btn.edit:hover {
-  background: var(--color-accent);
-  color: var(--color-bg);
-  border-color: var(--color-accent);
-}
-
-.chip-btn.delete {
-  color: var(--color-danger);
-}
-
-.chip-btn.delete:hover {
-  background: var(--color-danger);
-  color: white;
-  border-color: var(--color-danger);
-}
-
-/* SCENE TAB */
+/* SCENE SETUP */
 .scene-setup {
   max-width: 800px;
   margin: 0 auto;
@@ -1138,44 +879,131 @@ async function copyShareLink() {
   margin-bottom: 0;
 }
 
-.ship-selector {
+/* EXAMPLE SELECTOR */
+.example-selector {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
 }
 
-.ship-selector select {
+.example-selector select {
   flex: 1;
 }
 
-.level-row {
+.or-divider {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.875rem;
+  gap: 1rem;
+  margin: 1rem 0;
+  color: var(--color-text-dim);
+  font-size: 0.75rem;
+  text-transform: uppercase;
 }
 
-.level-row .input-sm {
-  width: 80px;
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.ship-preview {
-  padding: 1rem;
+.example-preview {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-accent);
 }
 
-.ship-name {
-  font-size: 1.125rem;
+.example-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.example-preview-name {
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-accent);
-  margin-bottom: 0.75rem;
 }
 
+.example-preview-level {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  padding: 0.125rem 0.5rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.example-preview-desc {
+  font-size: 0.8125rem;
+  color: var(--color-text-dim);
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+}
+
+.example-preview-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.meta-tag {
+  padding: 0.125rem 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+}
+
+.threats-tag {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.vp-tag {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.preview-roles {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.375rem;
+}
+
+.preview-actions-summary {
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+  font-style: italic;
+}
+
+/* Scene Info Editing */
+.scene-info-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 50px;
+  font-family: inherit;
+}
+
+/* SHIP STATS */
 .ship-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 0.5rem;
 }
 
@@ -1197,6 +1025,36 @@ async function copyShareLink() {
   font-family: 'JetBrains Mono', monospace;
 }
 
+.stat-input {
+  width: 60px;
+  padding: 0.25rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.stat-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Hide number input spinners */
+.stat-input::-webkit-inner-spin-button,
+.stat-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stat-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .ship-bonuses {
   display: flex;
   gap: 0.5rem;
@@ -1211,6 +1069,197 @@ async function copyShareLink() {
   border-radius: var(--radius-sm);
 }
 
+/* ROLE CHIPS */
+.role-chips {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.role-chip {
+  padding: 0.25rem 0.625rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.role-chip.removable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.15s ease;
+}
+
+.role-chip.removable:hover {
+  opacity: 0.7;
+}
+
+.role-remove {
+  font-size: 0.875rem;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.role-add-select {
+  width: auto;
+  max-width: 160px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.custom-role-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.custom-role-input {
+  flex: 1;
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+}
+
+.empty-state-sm {
+  padding: 1rem;
+  font-size: 0.8125rem;
+}
+
+/* SCALING HINT */
+.scaling-hint {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.6875rem;
+  color: var(--color-info);
+  font-style: italic;
+}
+
+/* ROLE DESCRIPTIONS */
+.role-chips-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.role-descriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.role-desc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.role-desc-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-desc-textarea {
+  min-height: 32px;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* ACTIONS LIST (EDITABLE) */
+.action-add-buttons {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.actions-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.action-group-header {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.375rem 0 0.125rem 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-top: 0.25rem;
+}
+
+.action-group-header:first-child {
+  margin-top: 0;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+.action-item.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.action-item.clickable:hover {
+  border-color: var(--color-accent);
+}
+
+.action-name {
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-attack-badge {
+  padding: 0.0625rem 0.25rem;
+  background: var(--color-danger);
+  color: white;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.action-cost {
+  font-size: 0.6875rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.btn-icon-sm {
+  padding: 0.125rem 0.375rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.btn-icon-sm:hover {
+  color: var(--color-danger);
+}
+
+/* THREATS */
 .empty-state {
   padding: 2rem;
   text-align: center;
@@ -1369,10 +1418,6 @@ async function copyShareLink() {
   flex-wrap: wrap;
 }
 
-.divider {
-  color: var(--color-border);
-}
-
 .threats-section {
   margin-top: 1.5rem;
 }
@@ -1453,6 +1498,17 @@ async function copyShareLink() {
   font-size: 0.8rem;
 }
 
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-field span {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+
 /* BUTTONS */
 .btn-icon {
   padding: 0.25rem 0.5rem;
@@ -1499,87 +1555,5 @@ async function copyShareLink() {
   background: var(--color-success);
   color: white;
   border-color: var(--color-success);
-}
-
-/* MODAL */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: auto;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.modal-lg {
-  width: 700px;
-}
-
-.modal {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  min-width: 400px;
-  max-width: 500px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.modal-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-accent);
-}
-
-.modal-body {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.form-field span {
-  font-size: 0.75rem;
-  color: var(--color-text-dim);
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.form-row .form-field {
-  flex: 1;
 }
 </style>

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
-import { STARSHIP_ROLES } from '../../data/starshipRoles'
-import type { StarshipRole } from '../../types/starship'
-import RoleCard from './RoleCard.vue'
+import { getRoleName, getRoleColor } from '../../data/starshipRoles'
+import type { StarshipAction } from '../../types/starship'
 
 const store = useStarshipStore()
 
@@ -19,68 +18,45 @@ const statusLabel = computed(() => {
   }
 })
 
-// Role deck loaded from localStorage
-interface RoleInstance {
-  instanceId: string
-  role: StarshipRole
-}
-const roleDeck = ref<RoleInstance[]>([])
-const expandedRoleId = ref<string | null>(null)
-
-function loadRoleDeck() {
-  const allRoles = [...STARSHIP_ROLES, ...store.state.customRoles]
-  const saved = localStorage.getItem('sf2e-role-deck')
-  if (!saved) {
-    roleDeck.value = []
-    return
-  }
-
-  try {
-    const parsed = JSON.parse(saved) as { instanceId: string; roleId: string }[]
-    roleDeck.value = parsed
-      .map(item => {
-        const role = allRoles.find(r => r.id === item.roleId)
-        if (!role) return null
-        return { instanceId: item.instanceId, role }
+// Deduplicated unique role types from the scene's availableRoles
+const uniqueRoles = computed(() => {
+  if (!scene.value) return []
+  const seen = new Set<string>()
+  const roles: { id: string; name: string; color: string }[] = []
+  for (const roleId of scene.value.availableRoles) {
+    if (!seen.has(roleId)) {
+      seen.add(roleId)
+      roles.push({
+        id: roleId,
+        name: getRoleName(roleId),
+        color: getRoleColor(roleId)
       })
-      .filter((item): item is RoleInstance => item !== null)
-  } catch (e) {
-    console.warn('Failed to load role deck:', e)
-    roleDeck.value = []
+    }
   }
+  return roles
+})
+
+// Actions grouped by role
+function getActionsForRole(roleId: string): StarshipAction[] {
+  if (!scene.value) return []
+  return scene.value.starshipActions.filter(action => {
+    if (action.role === 'any') return true
+    const allowedRoles = action.role.split('|')
+    return allowedRoles.includes(roleId)
+  })
 }
 
-function toggleRole(instanceId: string) {
-  if (expandedRoleId.value === instanceId) {
-    expandedRoleId.value = null
-  } else {
-    expandedRoleId.value = instanceId
-  }
-}
-
-// Listen for storage changes (when GM updates the deck)
-function handleStorageChange(e: StorageEvent) {
-  if (e.key === 'sf2e-role-deck') {
-    loadRoleDeck()
-  }
+// Count how many seats this role has
+function getRoleCount(roleId: string): number {
+  if (!scene.value) return 0
+  return scene.value.availableRoles.filter(r => r === roleId).length
 }
 
 onMounted(() => {
   store.setGMView(false)
   store.ensureChannel()
-  loadRoleDeck()
-  window.addEventListener('storage', handleStorageChange)
   syncStatus.value = 'connected'
 })
-
-onUnmounted(() => {
-  window.removeEventListener('storage', handleStorageChange)
-})
-
-// Reload when custom roles change
-watch(() => store.state.customRoles, () => {
-  loadRoleDeck()
-}, { deep: true })
 
 // Computed values from active scene
 const scene = computed(() => store.state.activeScene)
@@ -169,32 +145,70 @@ const hpColor = computed(() => {
         <p>Waiting for GM to start a scene...</p>
       </section>
 
-      <!-- Roles Section -->
-      <section class="roles-section">
-        <h3 class="section-title">Crew Roles</h3>
+      <!-- Additional Objectives -->
+      <section v-if="scene?.additionalObjectives && scene.additionalObjectives.length > 0" class="objectives-section">
+        <h3 class="section-title">Objectives</h3>
+        <ul class="objectives-list">
+          <li v-for="(obj, idx) in scene.additionalObjectives" :key="idx" class="objective-item">
+            {{ obj }}
+          </li>
+        </ul>
+      </section>
 
-        <div v-if="roleDeck.length === 0" class="no-roles">
-          No roles assigned yet.
-        </div>
+      <!-- Role Action Cards -->
+      <section v-if="uniqueRoles.length > 0" class="roles-section">
+        <h3 class="section-title">Crew Roles &amp; Actions</h3>
 
-        <div v-else class="role-list">
+        <div class="role-cards">
           <div
-            v-for="instance in roleDeck"
-            :key="instance.instanceId"
-            class="role-item"
-            :class="{ expanded: expandedRoleId === instance.instanceId }"
+            v-for="role in uniqueRoles"
+            :key="role.id"
+            class="role-card"
+            :style="{ borderColor: role.color }"
           >
-            <button
-              class="role-button"
-              @click="toggleRole(instance.instanceId)"
-            >
-              <span class="role-name">{{ instance.role.name }}</span>
-              <span class="role-skills">{{ instance.role.primarySkills.join(', ') }}</span>
-              <span class="expand-icon">{{ expandedRoleId === instance.instanceId ? '▼' : '▶' }}</span>
-            </button>
+            <div class="role-card-header" :style="{ color: role.color }">
+              <span class="role-card-name">{{ role.name }}</span>
+              <span v-if="getRoleCount(role.id) > 1" class="role-card-count">&times;{{ getRoleCount(role.id) }}</span>
+            </div>
 
-            <div v-if="expandedRoleId === instance.instanceId" class="role-card-wrapper">
-              <RoleCard :role="instance.role" :show-actions="true" />
+            <p v-if="scene?.roleDescriptions?.[role.id]" class="role-description">
+              {{ scene.roleDescriptions[role.id] }}
+            </p>
+
+            <div class="role-card-actions">
+              <div
+                v-for="action in getActionsForRole(role.id)"
+                :key="action.id"
+                class="action-card"
+              >
+                <div class="action-card-header">
+                  <span class="action-card-name">{{ action.name }}</span>
+                  <span class="action-card-cost">{{ action.actionCost }}A</span>
+                </div>
+                <p class="action-card-desc">{{ action.description }}</p>
+                <div v-if="action.outcomes" class="action-outcomes">
+                  <div v-if="action.outcomes.criticalSuccess" class="outcome crit-success">
+                    <span class="outcome-label">Crit</span>
+                    <span class="outcome-text">{{ action.outcomes.criticalSuccess }}</span>
+                  </div>
+                  <div v-if="action.outcomes.success" class="outcome success">
+                    <span class="outcome-label">Pass</span>
+                    <span class="outcome-text">{{ action.outcomes.success }}</span>
+                  </div>
+                  <div v-if="action.outcomes.failure" class="outcome failure">
+                    <span class="outcome-label">Fail</span>
+                    <span class="outcome-text">{{ action.outcomes.failure }}</span>
+                  </div>
+                  <div v-if="action.outcomes.criticalFailure" class="outcome crit-failure">
+                    <span class="outcome-label">Fumble</span>
+                    <span class="outcome-text">{{ action.outcomes.criticalFailure }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="getActionsForRole(role.id).length === 0" class="no-actions">
+                No scene-specific actions
+              </div>
             </div>
           </div>
         </div>
@@ -381,6 +395,45 @@ const hpColor = computed(() => {
   50% { opacity: 0.6; }
 }
 
+/* Objectives */
+.objectives-section {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.objectives-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.objective-item {
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+/* Role descriptions */
+.role-description {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  line-height: 1.4;
+  margin: 0 0 0.5rem 0;
+  padding: 0.375rem 0.5rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-style: italic;
+}
+
 /* Roles Section */
 .roles-section {
   flex: 1;
@@ -395,68 +448,132 @@ const hpColor = computed(() => {
   margin-bottom: 0.75rem;
 }
 
-.no-roles {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-dim);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
+/* Role Cards */
+.role-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.role-list {
+.role-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+.role-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.role-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-card-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.role-card-actions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.role-item {
-  background: var(--color-bg-surface);
+/* Action Cards */
+.action-card {
+  padding: 0.625rem 0.75rem;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: border-color 0.15s ease;
+  border-radius: var(--radius-sm);
 }
 
-.role-item.expanded {
-  border-color: var(--color-accent);
-}
-
-.role-button {
-  width: 100%;
+.action-card-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
 }
 
-.role-button:hover {
-  background: var(--color-bg-hover);
-}
-
-.role-name {
-  font-size: 1rem;
+.action-card-name {
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text);
 }
 
-.role-skills {
-  flex: 1;
+.action-card-cost {
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  padding: 0.125rem 0.375rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+
+.action-card-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  line-height: 1.4;
+  margin: 0 0 0.375rem 0;
+}
+
+/* Outcomes */
+.action-outcomes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.outcome {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+
+.outcome-label {
+  flex-shrink: 0;
+  width: 3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.outcome-text {
   color: var(--color-text-dim);
 }
 
-.expand-icon {
-  font-size: 0.75rem;
-  color: var(--color-text-dim);
+.outcome.crit-success .outcome-label {
+  color: var(--color-success);
 }
 
-.role-card-wrapper {
-  padding: 0 0.75rem 0.75rem;
+.outcome.success .outcome-label {
+  color: var(--color-info);
+}
+
+.outcome.failure .outcome-label {
+  color: var(--color-warning);
+}
+
+.outcome.crit-failure .outcome-label {
+  color: var(--color-danger);
+}
+
+.no-actions {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  font-style: italic;
+  padding: 0.375rem 0;
 }
 
 /* Sync Badge */

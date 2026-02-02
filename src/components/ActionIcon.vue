@@ -38,7 +38,12 @@ const ligature = computed(() => {
   font-size: 1.1em;
   line-height: 1;
   vertical-align: middle;
-  margin-left: 0.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5em;
+  min-height: 1em;
+  overflow: visible;
   /* Enable ligatures - required for the font to work */
   font-variant-ligatures: common-ligatures discretionary-ligatures;
   font-feature-settings: "liga" 1, "dlig" 1;

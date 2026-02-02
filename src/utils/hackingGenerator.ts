@@ -1,4 +1,5 @@
 import type { Computer, AccessPoint, ComputerType, AccessPointType, SkillCheck, Vulnerability, Countermeasure } from '../types/hacking'
+import { getDCForLevel } from './dcTable'
 
 // Starfinder-themed word lists
 
@@ -365,19 +366,6 @@ function generateConnections(nodeCount: number): Map<number, number[]> {
   }
 
   return connections
-}
-
-// DC by level table (PF2e/SF2e standard)
-const DC_BY_LEVEL: Record<number, number> = {
-  0: 14, 1: 15, 2: 16, 3: 18, 4: 19, 5: 20,
-  6: 22, 7: 23, 8: 24, 9: 26, 10: 27,
-  11: 28, 12: 30, 13: 31, 14: 32, 15: 34,
-  16: 35, 17: 36, 18: 38, 19: 39, 20: 40
-}
-
-function getDCForLevel(level: number): number {
-  const clampedLevel = Math.max(0, Math.min(20, level))
-  return DC_BY_LEVEL[clampedLevel] ?? 15
 }
 
 // Generate hack skills for a node
