@@ -85,12 +85,25 @@ function closeImportModal() {
   importResult.value = null
 }
 
+function handleFileImport(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    importJson.value = e.target?.result as string || ''
+    handleImport()
+  }
+  reader.readAsText(file)
+  // Reset input so the same file can be re-selected
+  ;(event.target as HTMLInputElement).value = ''
+}
+
 function handleImport() {
   if (!importJson.value.trim()) {
     importResult.value = {
       success: false,
       warnings: [],
-      errors: ['Please paste Pathbuilder JSON export']
+      errors: ['Please upload a file or paste a Pathbuilder / Pathmuncher JSON export']
     }
     return
   }
@@ -189,7 +202,7 @@ function importAnother() {
           + Add Player
         </button>
         <button class="btn-primary" @click="openImportModal">
-          Import from Pathbuilder
+          Import from Pathbuilder / Pathmuncher
         </button>
       </div>
 
@@ -246,7 +259,6 @@ function importAnother() {
           >
             <span class="font-semibold text-text capitalize flex items-center gap-1.5">
               {{ getConditionDef(conditionKey)?.name || conditionKey }}
-              <span v-if="getConditionDef(conditionKey)?.hasValue" class="text-[0.625rem] text-warning">★</span>
             </span>
             <span class="text-[0.6875rem] text-dim">{{ getConditionDef(conditionKey)?.shortDescription }}</span>
           </button>
@@ -262,9 +274,9 @@ function importAnother() {
       @click.self="closeImportModal"
     >
       <div class="modal max-w-[600px]">
-        <h3 class="mb-4">Import from Pathbuilder</h3>
+        <h3 class="mb-4">Import from Pathbuilder / Pathmuncher</h3>
         <p class="text-dim text-sm mb-4">
-          Export your character from Pathbuilder using the "Export to JSON" option, then paste the JSON below.
+          Export your character from Pathbuilder using "Export to JSON", or use a Pathmuncher JSON export. Upload a file or paste the JSON below.
         </p>
 
         <!-- Success State -->
@@ -297,11 +309,20 @@ function importAnother() {
 
         <!-- Input State -->
         <template v-else>
+          <label
+            class="flex items-center justify-center gap-2 px-4 py-3 mb-3 rounded-md border-2 border-dashed border-border text-sm text-dim cursor-pointer transition-colors hover:border-accent hover:text-accent"
+          >
+            <span>Choose JSON file...</span>
+            <input type="file" accept=".json,application/json" class="hidden" @change="handleFileImport" />
+          </label>
+
+          <div class="text-center text-[0.6875rem] text-muted mb-3">or paste JSON below</div>
+
           <textarea
             v-model="importJson"
             class="input w-full font-mono text-xs p-3 resize-y mb-4"
             placeholder='{"success":true,"build":{"name":"Character Name",...}}'
-            rows="8"
+            rows="6"
             :disabled="isImporting"
           ></textarea>
 

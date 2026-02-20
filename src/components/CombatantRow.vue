@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
-import { VALUED_CONDITIONS } from '../types/combat'
 import type { Combatant } from '../types/combat'
 import CreatureCard from './CreatureCard.vue'
 import ActionIcon from './ActionIcon.vue'
@@ -87,6 +86,14 @@ function decrementCondition(condition: string) {
   }
 }
 
+function incrementCondition(condition: string, event: Event) {
+  event.preventDefault()
+  const cond = props.combatant.conditions.find(c => c.name === condition)
+  if (cond?.value !== undefined) {
+    combatStore.updateConditionValue(props.combatant.id, condition, cond.value + 1)
+  }
+}
+
 function toggleStatblock() {
   if (props.combatant.creature || props.combatant.hazard) {
     showStatblock.value = !showStatblock.value
@@ -164,15 +171,21 @@ const hasExpandableDetails = computed(() => {
 
       <!-- Row 3: Conditions -->
       <div class="flex flex-wrap gap-1 items-center">
-        <span
-          v-for="cond in combatant.conditions"
-          :key="cond.name"
-          class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize"
-          :class="{ 'bg-danger text-white': cond.value }"
-          @click="decrementCondition(cond.name)"
-        >
-          {{ cond.name }}{{ cond.value ? ` ${cond.value}` : '' }}
-        </span>
+        <template v-for="cond in combatant.conditions" :key="cond.name">
+          <span v-if="cond.value !== undefined" class="condition-badge valued">
+            <button class="condition-adj" @click="decrementCondition(cond.name)">-</button>
+            <span class="condition-label" :title="getConditionTooltip(cond.name)">{{ cond.name }} {{ cond.value }}</span>
+            <button class="condition-adj" @click="incrementCondition(cond.name, $event)">+</button>
+          </span>
+          <span
+            v-else
+            class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize"
+            :title="getConditionTooltip(cond.name) + '\n\nClick to remove'"
+            @click="decrementCondition(cond.name)"
+          >
+            {{ cond.name }}
+          </span>
+        </template>
         <button class="w-5 h-5 p-0 text-xs bg-elevated border border-dashed border-border rounded text-text" @click="emit('showConditions')">+</button>
       </div>
     </div>
@@ -258,16 +271,21 @@ const hasExpandableDetails = computed(() => {
       <!-- Conditions -->
       <div class="overflow-hidden">
         <div class="flex flex-wrap gap-1 items-center">
-          <span
-            v-for="cond in combatant.conditions"
-            :key="cond.name"
-            class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize hover:bg-danger hover:text-white"
-            :class="{ 'bg-danger': cond.value }"
-            @click="decrementCondition(cond.name)"
-            :title="getConditionTooltip(cond.name) + '\n\nClick to ' + (VALUED_CONDITIONS.includes(cond.name) ? 'decrease' : 'remove')"
-          >
-            {{ cond.name }}{{ cond.value ? ` ${cond.value}` : '' }}
-          </span>
+          <template v-for="cond in combatant.conditions" :key="cond.name">
+            <span v-if="cond.value !== undefined" class="condition-badge valued">
+              <button class="condition-adj" @click="decrementCondition(cond.name)">-</button>
+              <span class="condition-label" :title="getConditionTooltip(cond.name)">{{ cond.name }} {{ cond.value }}</span>
+              <button class="condition-adj" @click="incrementCondition(cond.name, $event)">+</button>
+            </span>
+            <span
+              v-else
+              class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize hover:bg-danger hover:text-white"
+              :title="getConditionTooltip(cond.name) + '\n\nClick to remove'"
+              @click="decrementCondition(cond.name)"
+            >
+              {{ cond.name }}
+            </span>
+          </template>
           <button
             class="w-4.5 h-4.5 p-0 text-xs leading-none bg-elevated border border-dashed border-border rounded text-text"
             @click="emit('showConditions')"
@@ -419,6 +437,44 @@ const hasExpandableDetails = computed(() => {
 </template>
 
 <style scoped>
+/* Condition badges with +/- */
+.condition-badge {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 0.625rem;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.condition-badge.valued {
+  background: var(--color-danger);
+  color: white;
+}
+
+.condition-badge .condition-label {
+  padding: 0.3rem 0.375rem;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.condition-badge .condition-adj {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: white;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.condition-badge .condition-adj:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
 /* Initiative input */
 .init-input {
   width: 2.5rem;
