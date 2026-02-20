@@ -2,9 +2,11 @@
 import { ref, computed } from 'vue'
 import { useSettingsStore, themes, backgroundStyles, type ThemeId, type BackgroundStyle } from '../stores/settingsStore'
 import { useEncounterStore } from '../stores/encounterStore'
+import { usePartyStore } from '../stores/partyStore'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
-const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures } = useEncounterStore()
+const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, getHazardStats, importCustomHazards, exportCustomHazards, clearCustomHazards } = useEncounterStore()
+const partyStore = usePartyStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -21,6 +23,18 @@ const creatureStats = computed(() => getCreatureStats())
 const importStatus = ref<'idle' | 'success' | 'error'>('idle')
 const importMessage = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+
+// Hazard data state
+const hazardStats = computed(() => getHazardStats())
+const hazardImportStatus = ref<'idle' | 'success' | 'error'>('idle')
+const hazardImportMessage = ref('')
+const hazardFileInput = ref<HTMLInputElement | null>(null)
+
+// Party data state
+const partyImportStatus = ref<'idle' | 'success' | 'error'>('idle')
+const partyImportMessage = ref('')
+const partyFileInput = ref<HTMLInputElement | null>(null)
+const partyCount = computed(() => partyStore.state.parties.length)
 
 async function handleTestWebhook() {
   webhookTestStatus.value = 'testing'
@@ -75,6 +89,99 @@ function handleClearCustom() {
   if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
     clearCustomCreatures()
   }
+}
+
+// Hazard handlers
+function handleHazardImportClick() {
+  hazardFileInput.value?.click()
+}
+
+function handleHazardFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = e.target?.result as string
+      const count = importCustomHazards(json)
+      hazardImportStatus.value = 'success'
+      hazardImportMessage.value = `Imported ${count} hazards`
+    } catch (err) {
+      hazardImportStatus.value = 'error'
+      hazardImportMessage.value = 'Invalid JSON file'
+    }
+    setTimeout(() => {
+      hazardImportStatus.value = 'idle'
+      hazardImportMessage.value = ''
+    }, 3000)
+  }
+  reader.readAsText(file)
+  target.value = ''
+}
+
+function handleHazardExport() {
+  const json = exportCustomHazards()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'custom-hazards.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleClearCustomHazards() {
+  if (confirm('Clear all custom/imported hazards? Bundled hazards will remain.')) {
+    clearCustomHazards()
+  }
+}
+
+// Party handlers
+function handlePartyImportClick() {
+  partyFileInput.value?.click()
+}
+
+function handlePartyFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = e.target?.result as string
+      const result = partyStore.importParties(json)
+      if (result.success) {
+        partyImportStatus.value = 'success'
+        partyImportMessage.value = `Imported ${result.imported} parties`
+      } else {
+        partyImportStatus.value = 'error'
+        partyImportMessage.value = result.error || 'Import failed'
+      }
+    } catch (err) {
+      partyImportStatus.value = 'error'
+      partyImportMessage.value = 'Invalid JSON file'
+    }
+    setTimeout(() => {
+      partyImportStatus.value = 'idle'
+      partyImportMessage.value = ''
+    }, 3000)
+  }
+  reader.readAsText(file)
+  target.value = ''
+}
+
+function handlePartyExport() {
+  const json = partyStore.exportParties()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'parties.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 </script>
 
@@ -266,6 +373,113 @@ function handleClearCustom() {
             >
               Clear Custom Creatures
             </button>
+          </div>
+        </div>
+
+        <!-- Hazard Data Section -->
+        <div>
+          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Hazard Data</h3>
+
+          <div class="p-3 bg-elevated space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium text-text">Loaded Hazards</span>
+                <p class="text-xs text-dim mt-0.5">
+                  {{ hazardStats.total }} total ({{ hazardStats.bundled }} bundled, {{ hazardStats.custom }} custom)
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-dim">
+              Bundled hazards from SF2e. Import JSON to add your own custom hazards.
+            </p>
+
+            <div class="flex gap-2">
+              <input
+                ref="hazardFileInput"
+                type="file"
+                accept=".json"
+                class="hidden"
+                @change="handleHazardFileSelect"
+              />
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :class="{
+                  'btn-success': hazardImportStatus === 'success',
+                  'btn-danger': hazardImportStatus === 'error',
+                }"
+                @click="handleHazardImportClick"
+              >
+                {{ hazardImportMessage || 'Import JSON' }}
+              </button>
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :disabled="hazardStats.custom === 0"
+                @click="handleHazardExport"
+              >
+                Export Custom
+              </button>
+            </div>
+
+            <button
+              v-if="hazardStats.custom > 0"
+              type="button"
+              class="btn-danger text-sm w-full"
+              @click="handleClearCustomHazards"
+            >
+              Clear Custom Hazards
+            </button>
+          </div>
+        </div>
+
+        <!-- Party Data Section -->
+        <div>
+          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Party Data</h3>
+
+          <div class="p-3 bg-elevated space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium text-text">Saved Parties</span>
+                <p class="text-xs text-dim mt-0.5">
+                  {{ partyCount }} {{ partyCount === 1 ? 'party' : 'parties' }} saved
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-dim">
+              Export and import party configurations with player data.
+            </p>
+
+            <div class="flex gap-2">
+              <input
+                ref="partyFileInput"
+                type="file"
+                accept=".json"
+                class="hidden"
+                @change="handlePartyFileSelect"
+              />
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :class="{
+                  'btn-success': partyImportStatus === 'success',
+                  'btn-danger': partyImportStatus === 'error',
+                }"
+                @click="handlePartyImportClick"
+              >
+                {{ partyImportMessage || 'Import JSON' }}
+              </button>
+              <button
+                type="button"
+                class="btn-secondary text-sm flex-1"
+                :disabled="partyCount === 0"
+                @click="handlePartyExport"
+              >
+                Export Parties
+              </button>
+            </div>
           </div>
         </div>
       </div>

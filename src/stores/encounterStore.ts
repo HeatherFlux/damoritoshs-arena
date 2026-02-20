@@ -472,6 +472,40 @@ function getHazardStats() {
   return { total: state.hazards.length, bundled: bundledCount, custom: customCount }
 }
 
+function exportCustomHazards(): string {
+  const bundledIds = new Set(HAZARDS.map(h => h.id))
+  const customOnly = state.hazards.filter(h => !bundledIds.has(h.id))
+  return JSON.stringify(customOnly, null, 2)
+}
+
+function importCustomHazards(json: string): number {
+  try {
+    const imported = JSON.parse(json) as Hazard[]
+    if (!Array.isArray(imported)) throw new Error('Invalid format')
+
+    const existingIds = new Set(state.hazards.map(h => h.id))
+    const newHazards = imported.filter(h => !existingIds.has(h.id))
+
+    if (newHazards.length > 0) {
+      state.hazards.push(...newHazards)
+      const bundledIds = new Set(HAZARDS.map(h => h.id))
+      const customOnly = state.hazards.filter(h => !bundledIds.has(h.id))
+      saveCustomHazards(customOnly)
+    }
+
+    return newHazards.length
+  } catch (e) {
+    console.error('Failed to import hazards:', e)
+    throw new Error('Invalid hazard data')
+  }
+}
+
+function clearCustomHazards() {
+  const bundledIds = new Set(HAZARDS.map(h => h.id))
+  state.hazards = state.hazards.filter(h => bundledIds.has(h.id))
+  localStorage.removeItem(HAZARDS_STORAGE_KEY)
+}
+
 export const useEncounterStore = () => ({
   // State
   state,
@@ -519,4 +553,7 @@ export const useEncounterStore = () => ({
   // Hazard management
   addCustomHazard,
   getHazardStats,
+  exportCustomHazards,
+  importCustomHazards,
+  clearCustomHazards,
 })
