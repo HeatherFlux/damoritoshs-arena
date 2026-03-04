@@ -7,7 +7,7 @@ import { useCustomPanelStore } from '../stores/customPanelStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
-  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom'
+  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop'
 }>()
 
 const combatStore = useCombatStore()
@@ -532,6 +532,7 @@ onUnmounted(() => {
         mode === 'hacking' ? 'HACK' :
         mode === 'custom' ? 'FORGE' :
         mode === 'starship' ? 'HELM' :
+        mode === 'shop' ? 'SHOP' :
         'BUILD'
       }}</span>
     </div>

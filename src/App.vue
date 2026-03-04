@@ -14,6 +14,7 @@ import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
 import StarshipPanel from './components/starship/StarshipPanel.vue'
 import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
+import ShopPanel from './components/shop/ShopPanel.vue'
 import CollapsibleSidebar from './components/CollapsibleSidebar.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
@@ -54,7 +55,7 @@ onUnmounted(() => {
 const showSettingsModal = ref(false)
 const showMobileNav = ref(false)
 
-type Tab = 'builder' | 'combat' | 'hacking' | 'starship' | 'custom'
+type Tab = 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop'
 const activeTab = ref<Tab>('builder')
 
 function setTab(tab: Tab) {
@@ -160,6 +161,13 @@ function handleRunEncounter() {
           >
             <span class="text-accent mr-1">&gt;</span> CUSTOM
           </button>
+          <button
+            class="nav-tab"
+            :class="{ 'nav-tab-active': activeTab === 'shop' }"
+            @click="activeTab = 'shop'"
+          >
+            <span class="text-accent mr-1">&gt;</span> SHOP
+          </button>
         </nav>
       </div>
 
@@ -226,6 +234,13 @@ function handleRunEncounter() {
           @click="setTab('custom')"
         >
           <span class="text-accent mr-1">&gt;</span> CUSTOM
+        </button>
+        <button
+          class="nav-tab w-full text-left"
+          :class="{ 'nav-tab-active': activeTab === 'shop' }"
+          @click="setTab('shop')"
+        >
+          <span class="text-accent mr-1">&gt;</span> SHOP
         </button>
       </nav>
     </header>
@@ -332,6 +347,11 @@ function handleRunEncounter() {
       <!-- Custom Creature/Hazard Builder Tab -->
       <template v-else-if="activeTab === 'custom'">
         <CustomPanel />
+      </template>
+
+      <!-- Shop Generator Tab -->
+      <template v-else-if="activeTab === 'shop'">
+        <ShopPanel />
       </template>
 
       <!-- Roll History Panel (for builder only) -->
