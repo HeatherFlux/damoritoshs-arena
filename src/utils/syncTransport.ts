@@ -236,7 +236,7 @@ class WebSocketTransport implements SyncTransport {
   }
 }
 
-// Singleton instance
+// Singleton instance (used by hacking store)
 let transport: SyncTransport | null = null
 
 export function getSyncTransport(): SyncTransport {
@@ -244,6 +244,12 @@ export function getSyncTransport(): SyncTransport {
     transport = new WebSocketTransport()
   }
   return transport
+}
+
+// Factory function: creates a new independent transport instance
+// Use this when multiple features need simultaneous WebSocket connections
+export function createSyncTransport(): SyncTransport {
+  return new WebSocketTransport()
 }
 
 // Reset transport (for testing or cleanup)

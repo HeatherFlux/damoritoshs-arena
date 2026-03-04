@@ -279,6 +279,11 @@ export interface StarshipState {
   sessionId: string
   isGMView: boolean
   showPlayerView: boolean
+  // Real-time sync state
+  wsConnectionState: 'disconnected' | 'connecting' | 'connected' | 'error'
+  isRemoteSyncEnabled: boolean
+  // Scene editing state (sidebar <-> panel communication)
+  editingSceneId: string | null
 }
 
 // Sync message types for BroadcastChannel
@@ -351,8 +356,12 @@ export function createSceneFromSaved(saved: SavedScene): StarshipScene {
   return {
     ...saved,
     id: crypto.randomUUID(),
-    // Deep copy mutable state
-    starship: { ...saved.starship },
+    // Deep copy mutable state, reset current values to max
+    starship: {
+      ...saved.starship,
+      currentHP: saved.starship.maxHP,
+      currentShields: saved.starship.maxShields
+    },
     threats: saved.threats.map(t => ({
       ...t,
       currentHP: t.maxHP,

@@ -12,6 +12,7 @@ import GlitchOverlay from './components/GlitchOverlay.vue'
 import HackingPanel from './components/hacking/HackingPanel.vue'
 import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
 import StarshipPanel from './components/starship/StarshipPanel.vue'
+import SceneSidebar from './components/starship/SceneSidebar.vue'
 import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
 import ShopPanel from './components/shop/ShopPanel.vue'
@@ -21,8 +22,11 @@ import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
 import { useSettingsStore, themes } from './stores/settingsStore'
 import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
+import { useStarshipStore } from './stores/starshipStore'
+import type { SavedScene } from './types/starship'
 
 const store = useEncounterStore()
+const starshipStore = useStarshipStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
 const { settings } = useSettingsStore()
@@ -91,6 +95,56 @@ function handleImport() {
 
 function handleRunEncounter() {
   activeTab.value = 'combat'
+}
+
+// ============ Starship Scene Import/Export ============
+
+const showStarshipImportModal = ref(false)
+const starshipImportText = ref('')
+const starshipImportError = ref('')
+
+// Reference to the StarshipPanel component for save/load
+const starshipPanelRef = ref<{ loadSceneFromSidebar: (scene: SavedScene) => void; saveCurrentSetup: () => void } | null>(null)
+
+function handleStarshipExport() {
+  const json = starshipStore.exportScenes()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'starship-scenes.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleStarshipImport() {
+  try {
+    starshipStore.importScenes(starshipImportText.value)
+    showStarshipImportModal.value = false
+    starshipImportText.value = ''
+    starshipImportError.value = ''
+  } catch (e) {
+    starshipImportError.value = 'Invalid JSON data'
+  }
+}
+
+function handleStarshipFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    starshipImportText.value = reader.result as string
+  }
+  reader.readAsText(file)
+}
+
+function handleStarshipLoadScene(scene: SavedScene) {
+  starshipPanelRef.value?.loadSceneFromSidebar(scene)
+}
+
+function handleStarshipSaveCurrent() {
+  starshipPanelRef.value?.saveCurrentSetup()
 }
 
 </script>
@@ -341,7 +395,15 @@ function handleRunEncounter() {
 
       <!-- Starship Encounter Tab -->
       <template v-else-if="activeTab === 'starship'">
-        <StarshipPanel />
+        <CollapsibleSidebar side="left" storageKey="starshipLeft">
+          <SceneSidebar
+            @load-scene="handleStarshipLoadScene"
+            @save-current="handleStarshipSaveCurrent"
+            @import="showStarshipImportModal = true"
+            @export="handleStarshipExport"
+          />
+        </CollapsibleSidebar>
+        <StarshipPanel ref="starshipPanelRef" />
       </template>
 
       <!-- Custom Creature/Hazard Builder Tab -->
@@ -378,6 +440,31 @@ function handleRunEncounter() {
         <div class="flex justify-end gap-2 mt-4">
           <button class="btn btn-secondary" @click="showImportModal = false">Cancel</button>
           <button class="btn btn-primary" @click="handleImport">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Starship Import Modal -->
+    <div v-if="showStarshipImportModal" class="modal-overlay" @click.self="showStarshipImportModal = false">
+      <div class="modal">
+        <h3 class="mb-2">Import Starship Scenes</h3>
+        <p class="text-dim text-sm mb-4">Paste exported scene JSON or upload a file:</p>
+        <input
+          type="file"
+          accept=".json"
+          class="mb-3 text-sm"
+          @change="handleStarshipFileUpload"
+        />
+        <textarea
+          v-model="starshipImportText"
+          class="input w-full font-mono text-xs p-3 resize-y"
+          placeholder='[{"id": "...", "name": "...", ...}]'
+          rows="10"
+        ></textarea>
+        <p v-if="starshipImportError" class="text-danger mt-2">{{ starshipImportError }}</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button class="btn btn-secondary" @click="showStarshipImportModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="handleStarshipImport">Import</button>
         </div>
       </div>
     </div>

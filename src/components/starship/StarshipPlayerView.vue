@@ -1,21 +1,32 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import { getRoleName, getRoleColor } from '../../data/starshipRoles'
 import type { StarshipAction } from '../../types/starship'
 
 const store = useStarshipStore()
 
-// Sync status
-type SyncStatus = 'connecting' | 'connected' | 'local-only'
-const syncStatus = ref<SyncStatus>('connecting')
+// Sync status — derived from store's WebSocket state
+const syncStatus = computed(() => {
+  if (store.state.isRemoteSyncEnabled) {
+    return store.state.wsConnectionState === 'connected' ? 'connected' as const
+      : store.state.wsConnectionState === 'connecting' ? 'connecting' as const
+      : 'local-only' as const
+  }
+  // BroadcastChannel only (same device)
+  return 'connected' as const
+})
 
 const statusLabel = computed(() => {
-  switch (syncStatus.value) {
-    case 'connected': return 'LIVE'
-    case 'connecting': return 'SYNC...'
-    default: return 'SNAPSHOT'
+  if (store.state.isRemoteSyncEnabled) {
+    switch (store.state.wsConnectionState) {
+      case 'connected': return 'LIVE (REMOTE)'
+      case 'connecting': return 'SYNC...'
+      case 'error': return 'ERROR'
+      default: return 'OFFLINE'
+    }
   }
+  return 'LIVE'
 })
 
 // Deduplicated unique role types from the scene's availableRoles
@@ -52,10 +63,22 @@ function getRoleCount(roleId: string): number {
   return scene.value.availableRoles.filter(r => r === roleId).length
 }
 
-onMounted(() => {
+onMounted(async () => {
   store.setGMView(false)
   store.ensureChannel()
-  syncStatus.value = 'connected'
+
+  // If URL indicates WebSocket sync, join the remote session
+  if (store.hasRemoteSyncInUrl()) {
+    const hash = window.location.hash
+    const sessionMatch = hash.match(/[?&]session=([^&]+)/)
+    if (sessionMatch) {
+      await store.joinRemoteSession(sessionMatch[1])
+    }
+  }
+})
+
+onUnmounted(() => {
+  store.disableRemoteSync()
 })
 
 // Computed values from active scene

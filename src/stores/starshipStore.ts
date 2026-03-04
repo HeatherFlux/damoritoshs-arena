@@ -17,6 +17,7 @@ import {
   createSceneFromSaved,
   createEmptySavedScene
 } from '../types/starship'
+import { createSyncTransport, isWebSocketSupported, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 // Storage keys
 const STORAGE_KEY = 'sf2e-starship'
@@ -46,8 +47,16 @@ const state = reactive<StarshipState>({
   editingStarship: null,
   sessionId: '',
   isGMView: true,
-  showPlayerView: false
+  showPlayerView: false,
+  // Real-time sync
+  wsConnectionState: 'disconnected',
+  isRemoteSyncEnabled: false,
+  // Scene editing state
+  editingSceneId: null
 })
+
+// WebSocket transport reference (independent instance, not the hacking singleton)
+let wsTransport: ReturnType<typeof createSyncTransport> | null = null
 
 // BroadcastChannel for cross-tab sync
 let channel: BroadcastChannel | null = null
@@ -77,7 +86,10 @@ function initChannel() {
 }
 
 function broadcast(type: StarshipSyncMessageType, payload: unknown) {
-  if (channel && state.isGMView) {
+  if (!state.isGMView) return
+
+  // Local tabs via BroadcastChannel
+  if (channel) {
     const message: StarshipSyncMessage = {
       type,
       payload,
@@ -85,6 +97,11 @@ function broadcast(type: StarshipSyncMessageType, payload: unknown) {
     }
     console.log('[Starship] Broadcasting:', type)
     channel.postMessage(message)
+  }
+
+  // Remote devices via WebSocket (only if GM and sync enabled)
+  if (wsTransport && state.isRemoteSyncEnabled) {
+    wsTransport.send({ type, payload })
   }
 }
 
@@ -620,11 +637,112 @@ function logAction(
   return entry
 }
 
+// ============ Remote Sync (WebSocket) ============
+
+function handleRemoteMessage(message: SyncMessage) {
+  const { type, payload } = message
+  console.log('[Starship] Remote message:', type, 'isGM:', state.isGMView)
+
+  // Handle init message (full state sync on connect)
+  if (type === 'init') {
+    if (state.isGMView) {
+      console.log('[Starship] GM ignoring init message - GM is source of truth')
+      return
+    }
+    const p = payload as { scene: StarshipScene | null }
+    state.activeScene = p.scene
+    return
+  }
+
+  // Same handling as BroadcastChannel messages
+  const syncMessage = { type: type as StarshipSyncMessageType, payload, timestamp: Date.now() }
+  handleSyncMessage(syncMessage)
+}
+
+async function enableRemoteSync(): Promise<boolean> {
+  console.log('[Starship] enableRemoteSync() called, session:', state.sessionId)
+
+  if (!isWebSocketSupported()) {
+    console.warn('[Starship] WebSocket not supported')
+    return false
+  }
+
+  try {
+    wsTransport = createSyncTransport()
+    wsTransport.onMessage = handleRemoteMessage
+    wsTransport.onStateChange = (newState: ConnectionState) => {
+      console.log('[Starship] WebSocket state changed:', newState)
+      state.wsConnectionState = newState
+    }
+
+    await wsTransport.connect(state.sessionId, 'gm')
+    state.isRemoteSyncEnabled = true
+
+    // Send current scene state to any connected players
+    if (state.activeScene) {
+      wsTransport.send({ type: 'init', payload: { scene: state.activeScene } })
+    }
+
+    console.log('[Starship] Remote sync enabled as GM')
+    return true
+  } catch (e) {
+    console.error('[Starship] Failed to enable remote sync:', e)
+    state.isRemoteSyncEnabled = false
+    state.wsConnectionState = 'error'
+    return false
+  }
+}
+
+async function joinRemoteSession(sessionId: string): Promise<boolean> {
+  console.log('[Starship] joinRemoteSession() called, session:', sessionId)
+
+  if (!isWebSocketSupported()) {
+    console.warn('[Starship] WebSocket not supported')
+    return false
+  }
+
+  try {
+    wsTransport = createSyncTransport()
+    wsTransport.onMessage = handleRemoteMessage
+    wsTransport.onStateChange = (newState: ConnectionState) => {
+      console.log('[Starship] WebSocket state changed:', newState)
+      state.wsConnectionState = newState
+    }
+
+    await wsTransport.connect(sessionId, 'player')
+    state.isRemoteSyncEnabled = true
+
+    console.log('[Starship] Joined remote session as player')
+    return true
+  } catch (e) {
+    console.error('[Starship] Failed to join remote session:', e)
+    state.isRemoteSyncEnabled = false
+    state.wsConnectionState = 'error'
+    return false
+  }
+}
+
+function disableRemoteSync(): void {
+  if (wsTransport) {
+    wsTransport.disconnect()
+    wsTransport = null
+  }
+  state.isRemoteSyncEnabled = false
+  state.wsConnectionState = 'disconnected'
+  console.log('[Starship] Remote sync disabled')
+}
+
+function hasRemoteSyncInUrl(): boolean {
+  const hash = window.location.hash
+  return hash.includes('sync=ws')
+}
+
 // ============ URL Sharing ============
 
 function generateShareUrl(): string {
   const baseUrl = window.location.origin + window.location.pathname
-  return `${baseUrl}#/starship/view?session=${state.sessionId}`
+  const syncParam = state.isRemoteSyncEnabled ? '&sync=ws' : ''
+  return `${baseUrl}#/starship/view?session=${state.sessionId}${syncParam}`
 }
 
 function openPlayerView() {
@@ -787,6 +905,11 @@ export function useStarshipStore() {
     // View management
     setGMView,
     togglePlayerView,
-    ensureChannel
+    ensureChannel,
+    // Remote sync
+    enableRemoteSync,
+    joinRemoteSession,
+    disableRemoteSync,
+    hasRemoteSyncInUrl
   }
 }

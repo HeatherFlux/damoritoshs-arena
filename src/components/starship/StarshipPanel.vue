@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import { getRoleName, getRoleColor, STARSHIP_ROLES } from '../../data/starshipRoles'
 import { OFFICIAL_SCENES, cloneOfficialScene } from '../../data/starshipScenes'
-import type { StarshipThreat, SavedScene, StarshipAction } from '../../types/starship'
+import type { StarshipThreat, SavedScene, StarshipAction, VictoryCondition } from '../../types/starship'
 import { createDefaultThreat, createEmptySavedScene } from '../../types/starship'
 import ActionEditor from './ActionEditor.vue'
+import VictoryConditionEditor from './VictoryConditionEditor.vue'
+import ThreatCard from './ThreatCard.vue'
 
 const store = useStarshipStore()
 
-// Scene state
-const isSceneRunning = ref(false)
-const currentRound = ref(1)
+// Scene state — derived from store (persists across tab switches)
+const isSceneRunning = computed(() => store.state.activeScene !== null)
+const currentRound = computed(() => store.state.activeScene?.currentRound ?? 1)
+const shipCurrentHP = computed(() => store.state.activeScene?.starship.currentHP ?? 0)
+const shipCurrentShields = computed(() => store.state.activeScene?.starship.currentShields ?? 0)
 
 // Scene-first setup: activeSetup holds the loaded/editable scene data
 const activeSetup = ref<SavedScene | null>(null)
@@ -24,16 +28,42 @@ watch(selectedExample, (id) => {
   previewScene.value = id ? OFFICIAL_SCENES.find(s => s.id === id) || null : null
 })
 
-// Damage input state
+// Damage input state (UI-only)
 const shipDamageInput = ref(0)
 const threatDamageInputs = ref<Record<string, number>>({})
 
-// Ship HP tracking during scene run
-const shipCurrentHP = ref(0)
-const shipCurrentShields = ref(0)
+// Sync UI state
+const syncEnabling = ref(false)
 
 onMounted(() => {
   store.setGMView(true)
+
+  // If store already has an active scene (restored from localStorage), rebuild activeSetup
+  if (store.state.activeScene) {
+    const scene = store.state.activeScene
+    activeSetup.value = {
+      id: scene.id,
+      name: scene.name,
+      level: scene.level,
+      description: scene.description,
+      victoryCondition: scene.victoryCondition,
+      vpRequired: scene.vpRequired,
+      customCondition: scene.customCondition,
+      starship: { ...scene.starship, bonuses: { ...scene.starship.bonuses } },
+      threats: scene.threats.map(t => ({ ...t })),
+      roles: [...scene.roles],
+      availableRoles: [...scene.availableRoles],
+      starshipActions: [...scene.starshipActions],
+      partySize: scene.partySize,
+      additionalObjectives: [...(scene.additionalObjectives ?? [])],
+      roleDescriptions: { ...(scene.roleDescriptions ?? {}) },
+      savedAt: Date.now()
+    }
+  }
+})
+
+onUnmounted(() => {
+  store.disableRemoteSync()
 })
 
 // ============ Scene Setup ============
@@ -57,103 +87,26 @@ function startScene() {
   if (!activeSetup.value) return
 
   const setup = activeSetup.value
-  shipCurrentHP.value = setup.starship.maxHP
-  shipCurrentShields.value = setup.starship.maxShields
-  currentRound.value = 1
-  isSceneRunning.value = true
 
-  // Update store for player view sync
-  store.state.activeScene = {
-    id: crypto.randomUUID(),
-    name: setup.name,
-    level: setup.level,
-    description: setup.description,
-    victoryCondition: setup.victoryCondition,
-    vpRequired: setup.vpRequired,
-    customCondition: setup.customCondition,
-    starship: {
-      id: crypto.randomUUID(),
-      name: setup.starship.name,
-      level: setup.starship.level,
-      ac: setup.starship.ac,
-      fortitude: setup.starship.fortitude,
-      reflex: setup.starship.reflex,
-      maxShields: setup.starship.maxShields,
-      currentShields: shipCurrentShields.value,
-      shieldRegen: setup.starship.shieldRegen,
-      maxHP: setup.starship.maxHP,
-      currentHP: shipCurrentHP.value,
-      bonuses: setup.starship.bonuses
-    },
-    threats: setup.threats,
-    roles: [],
-    availableRoles: [...setup.availableRoles],
-    starshipActions: [...setup.starshipActions],
-    partySize: setup.partySize ?? 4,
-    additionalObjectives: [...(setup.additionalObjectives ?? [])],
-    roleDescriptions: { ...(setup.roleDescriptions ?? {}) },
-    currentRound: 1,
-    currentVP: 0,
-    isActive: true,
-    actionLog: [],
-    initiativeOrder: [],
-    currentTurnIndex: 0,
-    initiativeRolled: false
-  }
+  // Store is the source of truth — startScene sets activeScene
+  store.startScene(setup)
 }
 
 function endScene() {
-  isSceneRunning.value = false
   store.endScene()
+  activeSetup.value = null
 }
 
 function nextRound() {
-  currentRound.value++
-  if (activeSetup.value) {
-    shipCurrentShields.value = Math.min(
-      activeSetup.value.starship.maxShields,
-      shipCurrentShields.value + activeSetup.value.starship.shieldRegen
-    )
-    // Regenerate threat shields
-    for (const threat of activeSetup.value.threats) {
-      if (threat.isDefeated) continue
-      if (threat.shieldRegen && threat.shieldRegen > 0 && threat.maxShields && threat.currentShields !== undefined) {
-        threat.currentShields = Math.min(threat.maxShields, threat.currentShields + threat.shieldRegen)
-      }
-    }
-  }
-  if (store.state.activeScene) {
-    store.state.activeScene.currentRound = currentRound.value
-    store.state.activeScene.starship.currentShields = shipCurrentShields.value
-    if (activeSetup.value) {
-      store.state.activeScene.threats = [...activeSetup.value.threats]
-    }
-  }
+  store.advanceRound()
 }
 
 function damageShip(amount: number) {
-  let remaining = amount
-  if (shipCurrentShields.value > 0) {
-    const shieldDmg = Math.min(shipCurrentShields.value, remaining)
-    shipCurrentShields.value -= shieldDmg
-    remaining -= shieldDmg
-  }
-  if (remaining > 0) {
-    shipCurrentHP.value = Math.max(0, shipCurrentHP.value - remaining)
-  }
-  if (store.state.activeScene) {
-    store.state.activeScene.starship.currentShields = shipCurrentShields.value
-    store.state.activeScene.starship.currentHP = shipCurrentHP.value
-  }
+  store.damageStarship(amount)
 }
 
 function healShip(amount: number) {
-  if (activeSetup.value) {
-    shipCurrentHP.value = Math.min(activeSetup.value.starship.maxHP, shipCurrentHP.value + amount)
-    if (store.state.activeScene) {
-      store.state.activeScene.starship.currentHP = shipCurrentHP.value
-    }
-  }
+  store.healStarship(amount)
 }
 
 // ============ Threat Management (setup) ============
@@ -163,28 +116,20 @@ function addThreat() {
   activeSetup.value.threats.push(createDefaultThreat())
 }
 
-function updateThreat(index: number, field: keyof StarshipThreat, value: unknown) {
+function updateThreatFromCard(index: number, updates: Partial<StarshipThreat>) {
   if (!activeSetup.value) return
-  const t = activeSetup.value.threats[index]
-  if (t) {
-    (t as Record<string, unknown>)[field] = value
-    if (store.state.activeScene) {
-      store.state.activeScene.threats = [...activeSetup.value.threats]
-    }
-  }
+  activeSetup.value.threats[index] = { ...activeSetup.value.threats[index], ...updates }
 }
 
 function removeThreat(index: number) {
   if (!activeSetup.value) return
   activeSetup.value.threats.splice(index, 1)
-  if (store.state.activeScene) {
-    store.state.activeScene.threats = [...activeSetup.value.threats]
-  }
 }
 
 function damageThreat(index: number, amount: number) {
-  if (!activeSetup.value) return
-  const threat = activeSetup.value.threats[index]
+  const scene = store.state.activeScene
+  if (!scene) return
+  const threat = scene.threats[index]
   if (!threat) return
 
   let remaining = amount
@@ -199,9 +144,12 @@ function damageThreat(index: number, amount: number) {
       threat.isDefeated = true
     }
   }
-  if (store.state.activeScene) {
-    store.state.activeScene.threats = [...activeSetup.value.threats]
-  }
+  // Threat is already in store.state.activeScene.threats — broadcast the update
+  store.updateThreat(threat.id, {
+    currentHP: threat.currentHP,
+    currentShields: threat.currentShields,
+    isDefeated: threat.isDefeated
+  })
 }
 
 function applyShipDamage() {
@@ -343,6 +291,67 @@ async function copyShareLink() {
   copySuccess.value = true
   setTimeout(() => copySuccess.value = false, 2000)
 }
+
+async function toggleRemoteSync() {
+  if (store.state.isRemoteSyncEnabled) {
+    store.disableRemoteSync()
+  } else {
+    syncEnabling.value = true
+    await store.enableRemoteSync()
+    syncEnabling.value = false
+  }
+}
+
+// ============ Setup Warnings ============
+
+const setupWarnings = computed(() => {
+  if (!activeSetup.value) return []
+  const warnings: string[] = []
+  if (activeSetup.value.threats.length === 0) {
+    warnings.push('No threats added')
+  }
+  if (activeSetup.value.starshipActions.length === 0) {
+    warnings.push('No scene actions defined')
+  }
+  if (activeSetup.value.availableRoles.length === 0) {
+    warnings.push('No crew roles assigned')
+  }
+  if (activeSetup.value.victoryCondition === 'victory_points' && !activeSetup.value.vpRequired) {
+    warnings.push('No VP target set')
+  }
+  if (activeSetup.value.victoryCondition === 'survival' && !activeSetup.value.survivalRounds) {
+    warnings.push('No survival rounds set')
+  }
+  return warnings
+})
+
+// ============ Save / Load for Sidebar ============
+
+function saveCurrentSetup() {
+  if (!activeSetup.value) return
+  activeSetup.value.savedAt = Date.now()
+  store.saveScene(activeSetup.value)
+  store.state.editingSceneId = activeSetup.value.id
+}
+
+function loadSceneFromSidebar(scene: SavedScene) {
+  activeSetup.value = JSON.parse(JSON.stringify(scene))
+}
+
+// Watch editingSceneId changes (from sidebar clicks)
+watch(() => store.state.editingSceneId, (newId) => {
+  if (!newId) return
+  const scene = store.state.savedScenes.find(s => s.id === newId)
+  if (scene) {
+    activeSetup.value = JSON.parse(JSON.stringify(scene))
+  }
+})
+
+// Expose methods for parent (App.vue) to call via ref
+defineExpose({
+  loadSceneFromSidebar,
+  saveCurrentSetup
+})
 </script>
 
 <template>
@@ -454,6 +463,22 @@ async function copyShareLink() {
                 <span>Description</span>
                 <textarea v-model="activeSetup.description" class="input textarea" rows="2" placeholder="Scene description..."></textarea>
               </label>
+            </section>
+
+            <!-- Victory Conditions -->
+            <section class="setup-section">
+              <VictoryConditionEditor
+                :victory-condition="activeSetup.victoryCondition"
+                :vp-required="activeSetup.vpRequired"
+                :survival-rounds="activeSetup.survivalRounds"
+                :custom-condition="activeSetup.customCondition"
+                :additional-objectives="activeSetup.additionalObjectives"
+                @update:victory-condition="(v: VictoryCondition) => activeSetup!.victoryCondition = v"
+                @update:vp-required="(v: number) => activeSetup!.vpRequired = v"
+                @update:survival-rounds="(v: number) => activeSetup!.survivalRounds = v"
+                @update:custom-condition="(v: string) => activeSetup!.customCondition = v"
+                @update:additional-objectives="(v: string[]) => activeSetup!.additionalObjectives = v"
+              />
             </section>
 
             <!-- Ship Stats (inline editable) -->
@@ -610,63 +635,30 @@ async function copyShareLink() {
               </div>
 
               <div v-else class="threats-list">
-                <div v-for="(threat, idx) in activeSetup.threats" :key="threat.id" class="threat-card panel">
-                  <div class="threat-header">
-                    <input
-                      :value="threat.name"
-                      @input="updateThreat(idx, 'name', ($event.target as HTMLInputElement).value)"
-                      class="input threat-name-input"
-                      placeholder="Threat name"
-                    />
-                    <button class="btn-icon" @click="removeThreat(idx)">&times;</button>
-                  </div>
-                  <div class="threat-stats">
-                    <label>
-                      <span>Level</span>
-                      <input
-                        type="number"
-                        :value="threat.level"
-                        @input="updateThreat(idx, 'level', parseInt(($event.target as HTMLInputElement).value) || 1)"
-                        class="input input-sm"
-                        min="1"
-                      />
-                    </label>
-                    <label>
-                      <span>HP</span>
-                      <input
-                        type="number"
-                        :value="threat.maxHP"
-                        @input="updateThreat(idx, 'maxHP', parseInt(($event.target as HTMLInputElement).value) || 1); updateThreat(idx, 'currentHP', parseInt(($event.target as HTMLInputElement).value) || 1)"
-                        class="input input-sm"
-                        min="1"
-                      />
-                    </label>
-                    <label>
-                      <span>Shields</span>
-                      <input
-                        type="number"
-                        :value="threat.maxShields"
-                        @input="updateThreat(idx, 'maxShields', parseInt(($event.target as HTMLInputElement).value) || 0); updateThreat(idx, 'currentShields', parseInt(($event.target as HTMLInputElement).value) || 0)"
-                        class="input input-sm"
-                        min="0"
-                      />
-                    </label>
-                    <label>
-                      <span>AC</span>
-                      <input
-                        type="number"
-                        :value="threat.ac"
-                        @input="updateThreat(idx, 'ac', parseInt(($event.target as HTMLInputElement).value) || 10)"
-                        class="input input-sm"
-                      />
-                    </label>
-                  </div>
-                </div>
+                <ThreatCard
+                  v-for="(threat, idx) in activeSetup.threats"
+                  :key="threat.id"
+                  :threat="threat"
+                  :editing="true"
+                  @update="(updates) => updateThreatFromCard(idx, updates)"
+                  @remove="removeThreat(idx)"
+                />
               </div>
             </section>
 
-            <!-- Start Button -->
+            <!-- Setup Warnings -->
+            <div v-if="setupWarnings.length > 0" class="setup-warnings">
+              <div v-for="warning in setupWarnings" :key="warning" class="warning-item">
+                <span class="warning-icon">[!]</span>
+                {{ warning }}
+              </div>
+            </div>
+
+            <!-- Start / Save Buttons -->
             <div class="start-row">
+              <button class="btn btn-secondary btn-lg" @click="saveCurrentSetup">
+                Save as Custom Scene
+              </button>
               <button class="btn btn-primary btn-lg" @click="startScene">
                 Start Scene
               </button>
@@ -686,6 +678,14 @@ async function copyShareLink() {
               <button class="btn btn-sm" @click="nextRound">Next Round</button>
             </div>
             <div class="runner-actions">
+              <button
+                class="btn btn-sm"
+                :class="store.state.isRemoteSyncEnabled ? 'btn-success' : 'btn-secondary'"
+                :disabled="syncEnabling"
+                @click="toggleRemoteSync"
+              >
+                {{ syncEnabling ? 'Connecting...' : store.state.isRemoteSyncEnabled ? 'Sync ON' : 'Remote Sync' }}
+              </button>
               <button class="btn btn-accent btn-sm" @click="openPlayerView">Player View</button>
               <button class="btn btn-secondary btn-sm" @click="copyShareLink">
                 {{ copySuccess ? 'Copied!' : 'Copy Link' }}
@@ -695,31 +695,31 @@ async function copyShareLink() {
           </div>
 
           <!-- Ship Status -->
-          <section v-if="activeSetup" class="ship-status panel">
-            <h3 class="ship-status-name">{{ activeSetup.starship.name }}</h3>
+          <section v-if="store.state.activeScene" class="ship-status panel">
+            <h3 class="ship-status-name">{{ store.state.activeScene.starship.name }}</h3>
 
             <div class="hp-bars">
               <div class="hp-bar-group">
                 <div class="hp-label">
                   <span>Shields</span>
-                  <span>{{ shipCurrentShields }} / {{ activeSetup.starship.maxShields }}</span>
+                  <span>{{ shipCurrentShields }} / {{ store.state.activeScene.starship.maxShields }}</span>
                 </div>
                 <div class="hp-bar">
                   <div
                     class="hp-fill shields"
-                    :style="{ width: (shipCurrentShields / activeSetup.starship.maxShields * 100) + '%' }"
+                    :style="{ width: (shipCurrentShields / store.state.activeScene.starship.maxShields * 100) + '%' }"
                   ></div>
                 </div>
               </div>
               <div class="hp-bar-group">
                 <div class="hp-label">
                   <span>Hull</span>
-                  <span>{{ shipCurrentHP }} / {{ activeSetup.starship.maxHP }}</span>
+                  <span>{{ shipCurrentHP }} / {{ store.state.activeScene.starship.maxHP }}</span>
                 </div>
                 <div class="hp-bar">
                   <div
                     class="hp-fill hull"
-                    :style="{ width: (shipCurrentHP / activeSetup.starship.maxHP * 100) + '%' }"
+                    :style="{ width: (shipCurrentHP / store.state.activeScene.starship.maxHP * 100) + '%' }"
                   ></div>
                 </div>
               </div>
@@ -740,11 +740,11 @@ async function copyShareLink() {
           </section>
 
           <!-- Threats -->
-          <section v-if="activeSetup && activeSetup.threats.length > 0" class="threats-section">
+          <section v-if="store.state.activeScene && store.state.activeScene.threats.length > 0" class="threats-section">
             <h3 class="section-title">Threats</h3>
             <div class="threats-grid">
               <div
-                v-for="(threat, idx) in activeSetup.threats"
+                v-for="(threat, idx) in store.state.activeScene.threats"
                 :key="threat.id"
                 class="threat-runner-card panel"
                 :class="{ defeated: threat.isDefeated }"
@@ -1308,9 +1308,37 @@ async function copyShareLink() {
   width: 70px;
 }
 
+/* SETUP WARNINGS */
+.setup-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.warning-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 8%, var(--color-bg));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.warning-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
 .start-row {
   display: flex;
   justify-content: center;
+  gap: 0.75rem;
   padding-top: 1rem;
 }
 
