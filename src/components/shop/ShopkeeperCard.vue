@@ -34,7 +34,7 @@ defineEmits<{
       </span>
       <span class="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded"
             :class="{
-              'bg-success/20 text-success': npc.pricingTendency === 'fair' || npc.pricingTendency === 'discount',
+              'bg-success/20 text-success': npc.pricingTendency === 'fair',
               'bg-warning/20 text-warning': npc.pricingTendency === 'haggler' || npc.pricingTendency === 'overcharger',
               'bg-danger/20 text-danger': npc.pricingTendency === 'gouger',
             }">

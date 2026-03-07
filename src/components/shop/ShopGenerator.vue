@@ -33,13 +33,6 @@ const SETTLEMENT_OPTIONS: { value: SettlementSize; label: string }[] = [
   { value: 'megacity', label: 'Megacity / Station' },
 ]
 
-const CATEGORY_ICONS: Record<string, string> = {
-  weapon: '',
-  armor: '',
-  shield: '',
-  equipment: '',
-}
-
 const CATEGORY_LABELS: Record<string, string> = {
   weapon: 'Weapons',
   armor: 'Armor',

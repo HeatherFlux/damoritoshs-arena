@@ -23,7 +23,7 @@ export type SF2eAncestry =
   | 'xenodruid'
   | 'ysoki'
 
-export type PricingTendency = 'fair' | 'haggler' | 'overcharger' | 'discount' | 'gouger'
+export type PricingTendency = 'fair' | 'haggler' | 'overcharger' | 'gouger'
 
 export interface GeneratedNPC {
   name: string

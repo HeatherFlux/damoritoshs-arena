@@ -480,11 +480,10 @@ const APPEARANCE_TEMPLATES: Record<SF2eAncestry, string[]> = {
 // ===== PRICING TENDENCIES =====
 
 const PRICING_TENDENCIES: { tendency: PricingTendency; label: string; weight: number }[] = [
-  { tendency: 'fair', label: 'Fair Dealer — standard prices', weight: 4 },
-  { tendency: 'haggler', label: 'Haggler — enjoys negotiation, flexible on price', weight: 3 },
-  { tendency: 'overcharger', label: 'Overcharger — prices run 10-20% high', weight: 2 },
-  { tendency: 'discount', label: 'Discount Dealer — prices run 5-15% low', weight: 2 },
-  { tendency: 'gouger', label: 'Price Gouger — monopoly pricing, 25%+ markup', weight: 1 },
+  { tendency: 'fair', label: 'Fair Dealer — straightforward, no games', weight: 4 },
+  { tendency: 'haggler', label: 'Haggler — loves to negotiate, expects back-and-forth', weight: 3 },
+  { tendency: 'overcharger', label: 'Overcharger — always pushes for more, knows what they have', weight: 2 },
+  { tendency: 'gouger', label: 'Price Gouger — take it or leave it, they know you need it', weight: 1 },
 ]
 
 // ===== SPECIALTY KNOWLEDGE =====
