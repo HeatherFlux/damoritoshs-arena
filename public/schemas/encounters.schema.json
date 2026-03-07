@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/encounters.schema.json",
+  "title": "Encounters",
+  "description": "Array of encounter definitions with embedded creature/hazard data",
+  "x-import-info": {
+    "storeMethod": "encounterStore.importEncounters(json)",
+    "notes": "Each encounter contains full creature and hazard objects (not references). Encounters with duplicate IDs are skipped on import. The XP is calculated automatically from partyLevel and partySize.",
+    "exampleFile": "/schemas/examples/encounters.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/Encounter"
+  },
+  "definitions": {
+    "Encounter": {
+      "type": "object",
+      "required": ["id", "name", "creatures", "partyLevel", "partySize"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "creatures": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/EncounterCreature" }
+        },
+        "hazards": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/EncounterHazard" }
+        },
+        "partyLevel": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "partySize": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "EncounterCreature": {
+      "type": "object",
+      "required": ["creature", "count", "adjustment"],
+      "properties": {
+        "creature": {
+          "description": "Full creature stat block object (see creatures.schema.json)",
+          "type": "object"
+        },
+        "count": { "type": "integer", "minimum": 1 },
+        "adjustment": { "type": "string", "enum": ["normal", "elite", "weak"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "EncounterHazard": {
+      "type": "object",
+      "required": ["hazard", "count"],
+      "properties": {
+        "hazard": {
+          "description": "Full hazard stat block object (see hazards.schema.json)",
+          "type": "object"
+        },
+        "count": { "type": "integer", "minimum": 1 },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

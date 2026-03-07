@@ -45,6 +45,7 @@ coverage/
 # Implementation notes (not for repo)
 STARSHIP_TODO.md
 TODO*.md
+CinematicShipCombat
 
 # TypeScript cache
 *.tsbuildinfo

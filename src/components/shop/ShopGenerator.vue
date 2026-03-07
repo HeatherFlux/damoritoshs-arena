@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useShopStore } from '../../stores/shopStore'
 import type { ShopType, SettlementSize } from '../../types/shop'
+import { npcToText } from '../../utils/npcGenerator'
 import ItemRow from './ItemRow.vue'
+import ShopkeeperCard from './ShopkeeperCard.vue'
 
 const store = useShopStore()
 
@@ -32,10 +34,10 @@ const SETTLEMENT_OPTIONS: { value: SettlementSize; label: string }[] = [
 ]
 
 const CATEGORY_ICONS: Record<string, string> = {
-  weapon: '\u2694\uFE0F',
-  armor: '\uD83D\uDEE1\uFE0F',
-  shield: '\uD83D\uDD30',
-  equipment: '\u2699\uFE0F',
+  weapon: '',
+  armor: '',
+  shield: '',
+  equipment: '',
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -80,6 +82,25 @@ function toggleCategory(cat: string) {
     collapsedCategories.value.delete(cat)
   } else {
     collapsedCategories.value.add(cat)
+  }
+}
+
+function rerollShopkeeper() {
+  store.generateNewShopkeeper()
+}
+
+async function copyShopkeeper() {
+  if (!store.state.currentShopkeeper) return
+  const text = npcToText(store.state.currentShopkeeper)
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
   }
 }
 
@@ -171,6 +192,15 @@ doGenerate()
         </span>
       </div>
 
+      <!-- Shopkeeper -->
+      <ShopkeeperCard
+        v-if="store.state.currentShopkeeper"
+        :npc="store.state.currentShopkeeper"
+        class="mb-4"
+        @reroll="rerollShopkeeper"
+        @copy="copyShopkeeper"
+      />
+
       <!-- Category sections -->
       <div class="flex flex-col gap-3">
         <div
@@ -183,8 +213,7 @@ doGenerate()
             class="w-full flex items-center gap-2 px-3 py-2.5 bg-elevated hover:bg-hover transition-colors text-left cursor-pointer"
             @click="toggleCategory(cat)"
           >
-            <span class="text-base">{{ CATEGORY_ICONS[cat] || '\uD83D\uDCE6' }}</span>
-            <span class="text-xs font-bold uppercase tracking-wider text-text flex-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-accent flex-1">
               {{ CATEGORY_LABELS[cat] || cat }}
             </span>
             <span class="text-[0.625rem] text-dim">{{ items.length }} items</span>

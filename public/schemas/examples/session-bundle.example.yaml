@@ -1,0 +1,207 @@
+# Session Bundle Example
+# Import this file via Settings > Import Session Bundle
+# Supports both YAML and JSON formats
+
+name: "Session 12 - The Vault of Stars"
+description: "The crew infiltrates an Azlanti space station to retrieve stolen navigation data."
+partyLevel: 8
+
+# Custom creatures used by encounters below
+creatures:
+  - id: "custom-vault-guardian"
+    name: "Vault Guardian"
+    level: 8
+    traits: ["Construct", "Tech"]
+    size: "large"
+    source: "Custom"
+    perception: 18
+    senses: ["darkvision", "motion sense 60 feet"]
+    languages: []
+    skills:
+      Athletics: 20
+      Intimidation: 16
+    abilities:
+      str: 6
+      dex: 4
+      con: 5
+      int: -3
+      wis: 2
+      cha: -2
+    ac: 27
+    saves:
+      fort: 19
+      ref: 14
+      will: 12
+    hp: 140
+    immunities: ["bleed", "mental"]
+    resistances: ["physical 5"]
+    weaknesses: ["electricity 10"]
+    speed: "25 feet"
+    attacks:
+      - name: "Plasma Fist"
+        type: "melee"
+        bonus: 20
+        damage: "2d10+8 bludgeoning plus 1d6 fire"
+        traits: ["reach 10 feet"]
+        actions: 1
+      - name: "Integrated Laser"
+        type: "ranged"
+        bonus: 18
+        damage: "2d8+4 fire"
+        traits: ["range 60 feet", "tech"]
+        actions: 1
+    specialAbilities:
+      - name: "Lockdown Protocol"
+        actions: 2
+        description: "The vault guardian activates emergency lockdown. Doors within 30 feet lock (DC 26 to Force Open)."
+
+# Custom hazards
+hazards:
+  - id: "custom-laser-grid"
+    name: "Laser Security Grid"
+    level: 7
+    complexity: "complex"
+    type: "trap"
+    trapSubtypes: ["tech"]
+    traits: ["Complex", "Tech", "Trap"]
+    source: "Custom"
+    description: "A network of criss-crossing laser beams fills the corridor."
+    stealthDC: 25
+    trigger: "A creature enters the grid zone"
+    damage: "4d6 fire"
+    saveDC: 25
+    saveType: "reflex"
+    actions:
+      - name: "Laser Sweep"
+        trigger: "A creature enters or starts its turn in the grid"
+        effect: "Targets must attempt a DC 25 Reflex save. Failure: 4d6 fire."
+    routine: "The grid sweeps once per round."
+    actionsPerRound: 1
+
+# Party configuration
+party:
+  name: "The Stellar Corsairs"
+  players:
+    - name: "Peebles"
+      level: 8
+      maxHP: 90
+      ac: 27
+      class: "Operative"
+    - name: "FunGus"
+      level: 8
+      maxHP: 85
+      ac: 26
+      class: "Mystic"
+    - name: "Poppy"
+      level: 8
+      maxHP: 96
+      ac: 26
+      class: "Cleric"
+    - name: "Alces"
+      level: 8
+      maxHP: 88
+      ac: 27
+      class: "Ranger"
+    - name: "Drakesh"
+      level: 8
+      maxHP: 110
+      ac: 28
+      class: "Fighter"
+
+# Encounters reference creatures/hazards defined above
+encounters:
+  - name: "Hangar Bay Ambush"
+    partyLevel: 8
+    partySize: 5
+    notes: "Two guardians activate when the party enters the hangar."
+    creatures:
+      - creatureId: "custom-vault-guardian"
+        count: 2
+        adjustment: "normal"
+    hazards:
+      - hazardId: "custom-laser-grid"
+        count: 1
+
+  - name: "Guard Patrol"
+    partyLevel: 8
+    partySize: 5
+    creatures:
+      - creatureName: "Anacite Wingbot"  # References existing AoN creature by name
+        count: 3
+        adjustment: "elite"
+
+# Hacking encounter
+hacking:
+  - name: "Station Security Terminal"
+    computer:
+      name: "AZL-SEC Node"
+      level: 8
+      type: "tech"
+      description: "The station's primary security terminal."
+      successDescription: "You gain access to camera feeds and door controls."
+      accessPoints:
+        - id: "ap-console"
+          name: "Primary Console"
+          type: "physical"
+          state: "locked"
+          position: { x: 0.3, y: 0.4 }
+          connectedTo: ["ap-wireless"]
+          hackSkills:
+            - skill: "Computers"
+              dc: 26
+              proficiency: "trained"
+          vulnerabilities:
+            - id: "v-badge"
+              name: "Clone security badge"
+              skills:
+                - skill: "Thievery"
+                  dc: 24
+              dcReduction: 2
+          countermeasures:
+            - id: "cm-lockout"
+              name: "System Lockout"
+              failureThreshold: 2
+              disableSkills:
+                - skill: "Computers"
+                  dc: 28
+              description: "Terminal locks out for 10 minutes."
+        - id: "ap-wireless"
+          name: "Wireless Relay"
+          type: "remote"
+          state: "locked"
+          position: { x: 0.7, y: 0.5 }
+          connectedTo: ["ap-console"]
+          hackSkills:
+            - skill: "Computers"
+              dc: 28
+              proficiency: "expert"
+
+# Starship scene
+starship:
+  - name: "Escape from the Station"
+    level: 8
+    description: "The station's defense fleet scrambles as the crew escapes."
+    victoryCondition: "escape"
+    starship:
+      name: "The Corsair"
+      ac: 25
+      fortitude: 20
+      reflex: 22
+      maxHP: 120
+      maxShields: 40
+      shieldRegen: 10
+    threats:
+      - name: "Azlanti Interceptor"
+        type: "enemy_ship"
+        level: 7
+        maxHP: 80
+        ac: 23
+        maxShields: 20
+        shieldRegen: 5
+
+# Shop
+shops:
+  - name: "Black Market Dealer"
+    shopType: "blackmarket"
+    settlement: "metropolis"
+    partyLevel: 8

@@ -3,6 +3,9 @@ import { ref, computed } from 'vue'
 import { useSettingsStore, themes, backgroundStyles, type ThemeId, type BackgroundStyle } from '../stores/settingsStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
+import SchemaSection from './SchemaSection.vue'
+import SchemaViewerModal from './SchemaViewerModal.vue'
+import SessionBundleImporter from './SessionBundleImporter.vue'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
 const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, getHazardStats, importCustomHazards, exportCustomHazards, clearCustomHazards } = useEncounterStore()
@@ -11,6 +14,20 @@ const partyStore = usePartyStore()
 defineEmits<{
   (e: 'close'): void
 }>()
+
+// Schema viewer state
+const showSchemaViewer = ref(false)
+const viewingSchemaId = ref('')
+const showBundleImporter = ref(false)
+
+function openSchemaViewer(schemaId: string) {
+  viewingSchemaId.value = schemaId
+  showSchemaViewer.value = true
+}
+
+function openBundleImporter() {
+  showBundleImporter.value = true
+}
 
 const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
 const bgStyleList = Object.entries(backgroundStyles) as [BackgroundStyle, typeof backgroundStyles[BackgroundStyle]][]
@@ -482,12 +499,32 @@ function handlePartyExport() {
             </div>
           </div>
         </div>
+
+        <!-- Data Schemas & Bundle Import Section -->
+        <SchemaSection
+          @view-schema="openSchemaViewer"
+          @open-bundle-importer="openBundleImporter"
+        />
       </div>
 
       <div class="mt-6 pt-4 border-t border-border">
         <p class="text-xs text-muted text-center">Settings are saved automatically</p>
       </div>
     </div>
+
+    <!-- Schema Viewer Modal -->
+    <SchemaViewerModal
+      v-if="showSchemaViewer"
+      :schema-id="viewingSchemaId"
+      @close="showSchemaViewer = false"
+    />
+
+    <!-- Session Bundle Importer Modal -->
+    <SessionBundleImporter
+      v-if="showBundleImporter"
+      @close="showBundleImporter = false"
+      @imported="showBundleImporter = false"
+    />
   </div>
 </template>
 

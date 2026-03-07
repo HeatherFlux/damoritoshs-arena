@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/hazards.schema.json",
+  "title": "Hazards",
+  "description": "Array of SF2e/PF2e hazards (traps, environmental, haunts) for import",
+  "x-import-info": {
+    "storeMethod": "encounterStore.importCustomHazards(json)",
+    "notes": "Each hazard must have a unique 'id'. Hazards with IDs matching existing bundled hazards will be skipped. Use prefix 'custom-hazard-' for custom IDs.",
+    "exampleFile": "/schemas/examples/hazards.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/Hazard"
+  },
+  "definitions": {
+    "Hazard": {
+      "type": "object",
+      "required": ["id", "name", "level", "complexity", "type", "traits", "source", "description", "actions"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "integer", "minimum": -1, "maximum": 25 },
+        "complexity": { "type": "string", "enum": ["simple", "complex"] },
+        "type": { "type": "string", "enum": ["trap", "environmental", "haunt"] },
+        "trapSubtypes": { "type": "array", "items": { "type": "string", "enum": ["mechanical", "magical", "tech"] } },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string" },
+        "description": { "type": "string" },
+        "isObvious": { "type": "boolean" },
+        "stealthDC": { "type": "integer" },
+        "stealthBand": { "type": "string", "enum": ["extreme", "high", "low"] },
+        "disableMethods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "skill", "proficiency", "dcBand"],
+            "properties": {
+              "id": { "type": "string" },
+              "skill": { "type": "string" },
+              "proficiency": { "type": "string", "enum": ["untrained", "trained", "expert", "master", "legendary"] },
+              "dcBand": { "type": "string", "enum": ["extreme", "high", "low"] },
+              "dcOverride": { "type": "integer" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "hasPhysicalComponent": { "type": "boolean" },
+        "ac": { "type": "integer" },
+        "saves": {
+          "type": "object",
+          "properties": {
+            "fortitude": { "type": "integer" },
+            "reflex": { "type": "integer" },
+            "will": { "type": "integer" }
+          }
+        },
+        "hardness": { "type": "integer" },
+        "hp": { "type": "integer" },
+        "bt": { "type": "integer" },
+        "trigger": { "type": "string" },
+        "effect": { "type": "string" },
+        "reset": { "type": "string" },
+        "damage": { "type": "string" },
+        "damageType": { "type": "string" },
+        "saveDC": { "type": "integer" },
+        "saveType": { "type": "string", "enum": ["fortitude", "reflex", "will"] },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "effect"],
+            "properties": {
+              "name": { "type": "string" },
+              "trigger": { "type": "string" },
+              "effect": { "type": "string" },
+              "damage": { "type": "string" },
+              "dc": { "type": "integer" },
+              "save": { "type": "string" },
+              "traits": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "routine": { "type": "string" },
+        "actionsPerRound": { "type": "integer" }
+      }
+    }
+  }
+}

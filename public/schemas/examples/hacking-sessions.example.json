@@ -1,0 +1,68 @@
+[
+  {
+    "id": "hack-station-security",
+    "name": "Station Security Terminal",
+    "computer": {
+      "id": "comp-azl-sec",
+      "name": "AZL-SEC Node",
+      "level": 8,
+      "type": "tech",
+      "description": "The station's primary security terminal controls door locks, camera feeds, and alarm systems.",
+      "successDescription": "You gain access to security camera feeds and can unlock doors remotely for the next hour.",
+      "criticalSuccessDescription": "You also disable the station's alarm system and gain a +2 circumstance bonus to Stealth checks for the duration.",
+      "accessPoints": [
+        {
+          "id": "ap-console",
+          "name": "Primary Console",
+          "type": "physical",
+          "state": "locked",
+          "position": { "x": 0.3, "y": 0.4 },
+          "connectedTo": ["ap-wireless"],
+          "dc": 26,
+          "successesRequired": 1,
+          "hackSkills": [
+            { "skill": "Computers", "dc": 26, "proficiency": "trained" }
+          ],
+          "vulnerabilities": [
+            {
+              "id": "v-badge",
+              "name": "Clone a security badge",
+              "skills": [
+                { "skill": "Thievery", "dc": 24 },
+                { "skill": "Crafting", "dc": 26 }
+              ],
+              "dcReduction": 2
+            }
+          ],
+          "countermeasures": [
+            {
+              "id": "cm-lockout",
+              "name": "System Lockout",
+              "failureThreshold": 2,
+              "noticeDC": 22,
+              "noticeSkills": ["Computers", "Perception"],
+              "disableSkills": [
+                { "skill": "Computers", "dc": 28 }
+              ],
+              "description": "The terminal locks out the user for 10 minutes. An alarm sounds alerting nearby guards."
+            }
+          ]
+        },
+        {
+          "id": "ap-wireless",
+          "name": "Wireless Relay",
+          "type": "remote",
+          "state": "locked",
+          "position": { "x": 0.7, "y": 0.5 },
+          "connectedTo": ["ap-console"],
+          "dc": 28,
+          "successesRequired": 2,
+          "hackSkills": [
+            { "skill": "Computers", "dc": 28, "proficiency": "expert" }
+          ]
+        }
+      ]
+    },
+    "savedAt": 1709251200000
+  }
+]

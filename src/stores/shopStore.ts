@@ -7,6 +7,8 @@ import type {
   SettlementConfig,
   GeneratedShop,
 } from '../types/shop'
+import type { GeneratedNPC } from '../types/npc'
+import { generateShopkeeper, npcToText } from '../utils/npcGenerator'
 
 // ===== SHOP NAME GENERATION =====
 const SHOP_PREFIXES: Record<ShopType, string[]> = {
@@ -124,6 +126,7 @@ const allItems = itemsData as unknown as ShopItem[]
 
 const state = reactive({
   currentShop: null as GeneratedShop | null,
+  currentShopkeeper: null as GeneratedNPC | null,
   searchQuery: '',
   searchCategory: 'all' as string,
   searchLevelMin: null as number | null,
@@ -204,13 +207,23 @@ function generateShop(): GeneratedShop {
   }
 
   state.currentShop = shop
+  generateNewShopkeeper()
   return shop
+}
+
+function generateNewShopkeeper() {
+  state.currentShopkeeper = generateShopkeeper(state.shopType)
 }
 
 function shopToText(shop: GeneratedShop): string {
   const LABELS: Record<string, string> = { weapon: 'Weapons', armor: 'Armor', shield: 'Shields', equipment: 'Equipment & Gear' }
   let text = `# ${shop.name}\n`
   text += `${shop.settlement} | Party Level ${shop.partyLevel} | ${shop.levelRange} | ${shop.itemCount} items\n\n`
+
+  if (state.currentShopkeeper) {
+    text += npcToText(state.currentShopkeeper) + '\n'
+  }
+
   for (const [cat, items] of Object.entries(shop.inventory)) {
     text += `## ${LABELS[cat] || cat}\n`
     for (const item of items) {
@@ -227,6 +240,7 @@ export function useShopStore() {
     allItems,
     searchResults,
     generateShop,
+    generateNewShopkeeper,
     shopToText,
   }
 }

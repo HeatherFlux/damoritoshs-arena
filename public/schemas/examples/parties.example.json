@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "exportedAt": "2025-03-01T00:00:00.000Z",
+  "parties": [
+    {
+      "id": "party-stellar-corsairs",
+      "name": "The Stellar Corsairs",
+      "players": [
+        {
+          "id": "p-peebles",
+          "name": "Peebles",
+          "level": 8,
+          "maxHP": 90,
+          "ac": 27,
+          "class": "Operative",
+          "ancestry": "Anadi",
+          "perception": 18,
+          "fortitude": 14,
+          "reflex": 19,
+          "will": 16
+        },
+        {
+          "id": "p-fungus",
+          "name": "FunGus",
+          "level": 8,
+          "maxHP": 85,
+          "ac": 26,
+          "class": "Mystic",
+          "ancestry": "Leshy",
+          "perception": 17,
+          "fortitude": 15,
+          "reflex": 14,
+          "will": 19
+        },
+        {
+          "id": "p-poppy",
+          "name": "Poppy",
+          "level": 8,
+          "maxHP": 96,
+          "ac": 26,
+          "class": "Cleric",
+          "perception": 19,
+          "fortitude": 16,
+          "reflex": 14,
+          "will": 19
+        },
+        {
+          "id": "p-alces",
+          "name": "Alces",
+          "level": 8,
+          "maxHP": 88,
+          "ac": 27,
+          "class": "Ranger",
+          "perception": 19,
+          "fortitude": 17,
+          "reflex": 18,
+          "will": 15
+        },
+        {
+          "id": "p-drakesh",
+          "name": "Drakesh",
+          "level": 8,
+          "maxHP": 110,
+          "ac": 28,
+          "class": "Fighter",
+          "ancestry": "Half-Dragon",
+          "perception": 16,
+          "fortitude": 19,
+          "reflex": 16,
+          "will": 14
+        }
+      ],
+      "createdAt": "2025-01-15T00:00:00.000Z",
+      "updatedAt": "2025-03-01T00:00:00.000Z"
+    }
+  ],
+  "activePartyId": "party-stellar-corsairs"
+}

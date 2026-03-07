@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/starship-scenes.schema.json",
+  "title": "Starship Scenes",
+  "description": "Array of saved SF2e cinematic starship scene templates",
+  "x-import-info": {
+    "storeMethod": "starshipStore.importScenes(json)",
+    "notes": "Scenes with matching IDs will be replaced on import. Each scene includes starship stats, threats with routines, role assignments, and victory conditions.",
+    "exampleFile": "/schemas/examples/starship-scenes.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/SavedScene"
+  },
+  "definitions": {
+    "SavedScene": {
+      "type": "object",
+      "required": ["id", "name", "level", "description", "victoryCondition", "starship", "threats", "roles", "availableRoles", "starshipActions", "savedAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "description": { "type": "string" },
+        "victoryCondition": { "type": "string", "enum": ["defeat", "victory_points", "survival", "escape", "custom"] },
+        "vpRequired": { "type": "integer" },
+        "survivalRounds": { "type": "integer" },
+        "customCondition": { "type": "string" },
+        "starship": { "$ref": "#/definitions/Starship" },
+        "threats": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/StarshipThreat" }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["roleId", "playerName"],
+            "properties": {
+              "roleId": { "type": "string" },
+              "playerId": { "type": "string" },
+              "playerName": { "type": "string" }
+            }
+          }
+        },
+        "availableRoles": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "starshipActions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/StarshipAction" }
+        },
+        "partySize": { "type": "integer" },
+        "additionalObjectives": { "type": "array", "items": { "type": "string" } },
+        "roleDescriptions": { "type": "object", "additionalProperties": { "type": "string" } },
+        "savedAt": { "type": "number" }
+      }
+    },
+    "Starship": {
+      "type": "object",
+      "required": ["id", "name", "level", "ac", "fortitude", "reflex", "maxShields", "currentShields", "shieldRegen", "maxHP", "currentHP"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "integer" },
+        "ac": { "type": "integer" },
+        "fortitude": { "type": "integer" },
+        "reflex": { "type": "integer" },
+        "maxShields": { "type": "integer" },
+        "currentShields": { "type": "integer" },
+        "shieldRegen": { "type": "integer" },
+        "maxHP": { "type": "integer" },
+        "currentHP": { "type": "integer" },
+        "bonuses": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "StarshipThreat": {
+      "type": "object",
+      "required": ["id", "name", "type", "level", "isDefeated"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["enemy_ship", "hazard", "environmental"] },
+        "level": { "type": "integer" },
+        "maxHP": { "type": "integer" },
+        "currentHP": { "type": "integer" },
+        "maxShields": { "type": "integer" },
+        "currentShields": { "type": "integer" },
+        "shieldRegen": { "type": "integer" },
+        "ac": { "type": "integer" },
+        "description": { "type": "string" },
+        "fortitude": { "type": "integer" },
+        "reflex": { "type": "integer" },
+        "initiativeSkill": { "type": "string" },
+        "initiativeBonus": { "type": "integer" },
+        "tacticalRole": { "type": "string", "enum": ["standard", "complication", "indiscriminate"] },
+        "routine": {
+          "type": "object",
+          "required": ["actionsPerTurn", "description", "actions"],
+          "properties": {
+            "actionsPerTurn": { "type": "integer" },
+            "description": { "type": "string" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ThreatRoutineAction" }
+            }
+          }
+        },
+        "isDefeated": { "type": "boolean" }
+      }
+    },
+    "ThreatRoutineAction": {
+      "type": "object",
+      "required": ["id", "name", "actionCost", "type", "description"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "actionCost": { "type": "integer", "enum": [1, 2, 3] },
+        "type": { "type": "string", "enum": ["attack", "skill_check", "ability", "movement"] },
+        "description": { "type": "string" },
+        "attackBonus": { "type": "integer" },
+        "damage": { "type": "string" },
+        "damageType": { "type": "string" },
+        "traits": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "StarshipAction": {
+      "type": "object",
+      "required": ["id", "name", "actionCost", "role", "skills", "description", "outcomes"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "actionCost": { "type": "integer", "enum": [1, 2, 3] },
+        "role": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "dc": { "type": "integer" },
+        "description": { "type": "string" },
+        "outcomes": {
+          "type": "object",
+          "required": ["criticalSuccess", "success"],
+          "properties": {
+            "criticalSuccess": { "type": "string" },
+            "success": { "type": "string" },
+            "failure": { "type": "string" },
+            "criticalFailure": { "type": "string" }
+          }
+        },
+        "isAttack": { "type": "boolean" },
+        "damage": { "type": "string" },
+        "traits": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

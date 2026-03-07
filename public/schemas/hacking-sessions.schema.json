@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/hacking-sessions.schema.json",
+  "title": "Hacking Sessions",
+  "description": "Array of saved SF2e hacking encounters with computer stat blocks",
+  "x-import-info": {
+    "storeMethod": "hackingStore.state.savedEncounters (merge directly)",
+    "notes": "Each saved encounter wraps a Computer object. The computer defines access points, vulnerabilities, and countermeasures per SF2e rules.",
+    "exampleFile": "/schemas/examples/hacking-sessions.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/SavedHackingEncounter"
+  },
+  "definitions": {
+    "SavedHackingEncounter": {
+      "type": "object",
+      "required": ["id", "name", "computer", "savedAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "computer": { "$ref": "#/definitions/Computer" },
+        "savedAt": { "type": "number", "description": "Unix timestamp in milliseconds" }
+      }
+    },
+    "Computer": {
+      "type": "object",
+      "required": ["id", "name", "level", "type", "accessPoints"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "type": { "type": "string", "enum": ["tech", "magic", "hybrid"] },
+        "description": { "type": "string" },
+        "successDescription": { "type": "string" },
+        "criticalSuccessDescription": { "type": "string" },
+        "failureDescription": { "type": "string" },
+        "accessPoints": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AccessPoint" }
+        }
+      }
+    },
+    "AccessPoint": {
+      "type": "object",
+      "required": ["id", "name", "type", "state", "position", "connectedTo"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["physical", "remote", "magical"] },
+        "state": { "type": "string", "enum": ["locked", "active", "breached", "alarmed"] },
+        "position": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "connectedTo": { "type": "array", "items": { "type": "string" } },
+        "dc": { "type": "integer" },
+        "successesRequired": { "type": "integer", "minimum": 1 },
+        "hackSkills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "dc"],
+            "properties": {
+              "skill": { "type": "string" },
+              "dc": { "type": "integer" },
+              "proficiency": { "type": "string", "enum": ["untrained", "trained", "expert", "master", "legendary"] }
+            }
+          }
+        },
+        "vulnerabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "skills", "dcReduction"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["skill", "dc"],
+                  "properties": {
+                    "skill": { "type": "string" },
+                    "dc": { "type": "integer" }
+                  }
+                }
+              },
+              "dcReduction": { "type": "integer", "minimum": 1, "maximum": 3 }
+            }
+          }
+        },
+        "countermeasures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "failureThreshold", "disableSkills", "description"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "failureThreshold": { "type": "integer", "minimum": 1 },
+              "noticeDC": { "type": "integer" },
+              "noticeSkills": { "type": "array", "items": { "type": "string" } },
+              "disableSkills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["skill", "dc"],
+                  "properties": {
+                    "skill": { "type": "string" },
+                    "dc": { "type": "integer" }
+                  }
+                }
+              },
+              "description": { "type": "string" },
+              "isPersistent": { "type": "boolean" }
+            }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

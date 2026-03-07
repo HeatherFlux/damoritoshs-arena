@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/creatures.schema.json",
+  "title": "Creatures",
+  "description": "Array of SF2e/PF2e creature stat blocks for import into Damoritosh's Arena",
+  "x-import-info": {
+    "storeMethod": "encounterStore.importCustomCreatures(json)",
+    "notes": "Each creature must have a unique 'id'. Creatures with IDs matching existing bundled creatures will be skipped. Use the prefix 'custom-' for custom creature IDs.",
+    "exampleFile": "/schemas/examples/creatures.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/Creature"
+  },
+  "definitions": {
+    "Creature": {
+      "type": "object",
+      "required": ["id", "name", "level", "traits", "size", "source", "perception", "ac", "saves", "hp", "speed", "attacks", "specialAbilities"],
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier. Use 'custom-' prefix for custom creatures." },
+        "name": { "type": "string" },
+        "level": { "type": "integer", "minimum": -1, "maximum": 25 },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "size": { "type": "string", "enum": ["tiny", "small", "medium", "large", "huge", "gargantuan"] },
+        "source": { "type": "string" },
+        "perception": { "type": "integer" },
+        "senses": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "languages": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "skills": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Skill name → modifier mapping"
+        },
+        "abilities": {
+          "type": "object",
+          "required": ["str", "dex", "con", "int", "wis", "cha"],
+          "properties": {
+            "str": { "type": "integer" },
+            "dex": { "type": "integer" },
+            "con": { "type": "integer" },
+            "int": { "type": "integer" },
+            "wis": { "type": "integer" },
+            "cha": { "type": "integer" }
+          }
+        },
+        "items": { "type": "array", "items": { "type": "string" } },
+        "ac": { "type": "integer" },
+        "saves": {
+          "type": "object",
+          "required": ["fort", "ref", "will"],
+          "properties": {
+            "fort": { "type": "integer" },
+            "ref": { "type": "integer" },
+            "will": { "type": "integer" }
+          }
+        },
+        "hp": { "type": "integer", "minimum": 1 },
+        "immunities": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "resistances": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "weaknesses": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "speed": { "type": "string", "description": "e.g. '25 feet, fly 40 feet'" },
+        "attacks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attack" }
+        },
+        "spells": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SpellEntry" }
+        },
+        "specialAbilities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SpecialAbility" }
+        },
+        "description": { "type": "string" }
+      }
+    },
+    "Attack": {
+      "type": "object",
+      "required": ["name", "type", "bonus", "damage", "traits", "actions"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["melee", "ranged", "area"] },
+        "bonus": { "type": "integer" },
+        "damage": { "type": "string", "description": "e.g. '2d8+6 slashing'" },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "actions": { "type": "integer", "enum": [1, 2, 3] },
+        "range": { "type": "string" },
+        "area": { "type": "string" }
+      }
+    },
+    "SpellEntry": {
+      "type": "object",
+      "required": ["level", "spells"],
+      "properties": {
+        "level": { "type": "integer" },
+        "spells": { "type": "array", "items": { "type": "string" } },
+        "dc": { "type": "integer" },
+        "attack": { "type": "integer" }
+      }
+    },
+    "SpecialAbility": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "actions": {
+          "description": "Action cost: 0 (passive), 1-3 (actions), 'reaction', or 'free'",
+          "oneOf": [
+            { "type": "integer", "enum": [0, 1, 2, 3] },
+            { "type": "string", "enum": ["reaction", "free"] }
+          ]
+        },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" }
+      }
+    }
+  }
+}

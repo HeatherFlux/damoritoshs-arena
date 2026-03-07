@@ -1,0 +1,81 @@
+[
+  {
+    "id": "scene-station-escape",
+    "name": "Escape from the Station",
+    "level": 8,
+    "description": "The station's defense fleet scrambles as the party makes their escape. Three interceptors move to cut off the exit vector.",
+    "victoryCondition": "escape",
+    "starship": {
+      "id": "ship-corsair",
+      "name": "The Corsair",
+      "level": 8,
+      "ac": 25,
+      "fortitude": 20,
+      "reflex": 22,
+      "maxShields": 40,
+      "currentShields": 40,
+      "shieldRegen": 10,
+      "maxHP": 120,
+      "currentHP": 120,
+      "bonuses": { "Piloting": 2 }
+    },
+    "threats": [
+      {
+        "id": "threat-interceptor-1",
+        "name": "Azlanti Interceptor Alpha",
+        "type": "enemy_ship",
+        "level": 7,
+        "maxHP": 80,
+        "currentHP": 80,
+        "maxShields": 20,
+        "currentShields": 20,
+        "shieldRegen": 5,
+        "ac": 23,
+        "fortitude": 18,
+        "reflex": 20,
+        "initiativeSkill": "Piloting",
+        "initiativeBonus": 14,
+        "tacticalRole": "standard",
+        "routine": {
+          "actionsPerTurn": 2,
+          "description": "The interceptor focuses fire on the nearest target.",
+          "actions": [
+            {
+              "id": "act-laser",
+              "name": "Laser Cannon",
+              "actionCost": 2,
+              "type": "attack",
+              "description": "Fire laser cannon at target ship",
+              "attackBonus": 18,
+              "damage": "3d8+6 fire",
+              "damageType": "fire",
+              "traits": ["range 120 feet"]
+            }
+          ]
+        },
+        "isDefeated": false
+      }
+    ],
+    "roles": [],
+    "availableRoles": ["captain", "engineer", "gunner", "pilot", "science_officer"],
+    "starshipActions": [
+      {
+        "id": "action-evasive",
+        "name": "Evasive Maneuvers",
+        "actionCost": 2,
+        "role": "pilot",
+        "skills": ["Piloting"],
+        "dc": 26,
+        "description": "The pilot performs evasive maneuvers to avoid incoming fire.",
+        "outcomes": {
+          "criticalSuccess": "The ship gains a +2 circumstance bonus to AC and Reflex until the start of your next turn.",
+          "success": "The ship gains a +1 circumstance bonus to AC until the start of your next turn.",
+          "failure": "No effect.",
+          "criticalFailure": "The ship is off-balance; it takes a -1 circumstance penalty to AC until the start of your next turn."
+        }
+      }
+    ],
+    "partySize": 5,
+    "savedAt": 1709251200000
+  }
+]

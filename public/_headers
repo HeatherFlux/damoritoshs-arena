@@ -15,3 +15,7 @@
 
 /build-info.json
   Cache-Control: no-cache, no-store, must-revalidate
+
+/schemas/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600

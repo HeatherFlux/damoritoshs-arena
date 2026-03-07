@@ -1,0 +1,214 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/session-bundle.schema.json",
+  "title": "Session Bundle",
+  "description": "Unified YAML/JSON bundle containing all data for a game session. Import via the Session Bundle Importer in Settings to populate all stores at once.",
+  "x-import-info": {
+    "format": "YAML or JSON",
+    "notes": "The session bundle is the recommended way for AI agents to prepare a full game session. Creatures/hazards defined in the bundle are imported first, then encounters can reference them by 'creatureId' or 'creatureName'. Unresolved references produce warnings but do not block import.",
+    "exampleFile": "/schemas/examples/session-bundle.example.yaml"
+  },
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Session name, e.g. 'Session 12 - The Vault of Stars'"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief session description for GM reference"
+    },
+    "partyLevel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Default party level for encounters in this session"
+    },
+    "creatures": {
+      "type": "array",
+      "description": "Custom creatures used by this session. Imported before encounters so they can be referenced.",
+      "items": {
+        "type": "object",
+        "description": "Full Creature object (see creatures.schema.json)",
+        "required": ["id", "name", "level"]
+      }
+    },
+    "hazards": {
+      "type": "array",
+      "description": "Custom hazards used by this session.",
+      "items": {
+        "type": "object",
+        "description": "Full Hazard object (see hazards.schema.json)",
+        "required": ["id", "name", "level"]
+      }
+    },
+    "party": {
+      "type": "object",
+      "description": "Party configuration for the session",
+      "required": ["name", "players"],
+      "properties": {
+        "name": { "type": "string" },
+        "players": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "maxHP", "ac"],
+            "properties": {
+              "name": { "type": "string" },
+              "level": { "type": "integer" },
+              "maxHP": { "type": "integer" },
+              "ac": { "type": "integer" },
+              "class": { "type": "string" },
+              "ancestry": { "type": "string" },
+              "perception": { "type": "integer" },
+              "fortitude": { "type": "integer" },
+              "reflex": { "type": "integer" },
+              "will": { "type": "integer" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "encounters": {
+      "type": "array",
+      "description": "Encounters for the session. Creatures can be referenced by creatureId/creatureName.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "partyLevel": { "type": "integer" },
+          "partySize": { "type": "integer" },
+          "notes": { "type": "string" },
+          "creatures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "creatureId": {
+                  "type": "string",
+                  "description": "Reference a creature by its ID (from the creatures array or existing store)"
+                },
+                "creatureName": {
+                  "type": "string",
+                  "description": "Reference a creature by name (fuzzy matched against all loaded creatures)"
+                },
+                "count": { "type": "integer", "minimum": 1, "default": 1 },
+                "adjustment": {
+                  "type": "string",
+                  "enum": ["normal", "elite", "weak"],
+                  "default": "normal"
+                }
+              }
+            }
+          },
+          "hazards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hazardId": { "type": "string" },
+                "hazardName": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1, "default": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "hacking": {
+      "type": "array",
+      "description": "Hacking encounters with computer stat blocks",
+      "items": {
+        "type": "object",
+        "required": ["name", "computer"],
+        "properties": {
+          "name": { "type": "string" },
+          "computer": {
+            "type": "object",
+            "description": "Full Computer object (see hacking-sessions.schema.json)",
+            "required": ["name", "level", "type", "accessPoints"]
+          }
+        }
+      }
+    },
+    "starship": {
+      "type": "array",
+      "description": "Starship scene templates",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "level": { "type": "integer" },
+          "description": { "type": "string" },
+          "victoryCondition": { "type": "string", "enum": ["defeat", "victory_points", "survival", "escape", "custom"] },
+          "vpRequired": { "type": "integer" },
+          "survivalRounds": { "type": "integer" },
+          "customCondition": { "type": "string" },
+          "starship": {
+            "type": "object",
+            "description": "PC starship stats",
+            "properties": {
+              "name": { "type": "string" },
+              "ac": { "type": "integer" },
+              "fortitude": { "type": "integer" },
+              "reflex": { "type": "integer" },
+              "maxHP": { "type": "integer" },
+              "maxShields": { "type": "integer" },
+              "shieldRegen": { "type": "integer" }
+            }
+          },
+          "threats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type", "level"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string", "enum": ["enemy_ship", "hazard", "environmental"] },
+                "level": { "type": "integer" },
+                "maxHP": { "type": "integer" },
+                "ac": { "type": "integer" },
+                "maxShields": { "type": "integer" },
+                "shieldRegen": { "type": "integer" },
+                "fortitude": { "type": "integer" },
+                "reflex": { "type": "integer" },
+                "description": { "type": "string" },
+                "routine": { "type": "object" }
+              }
+            }
+          },
+          "starshipActions": {
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        }
+      }
+    },
+    "shops": {
+      "type": "array",
+      "description": "Shop configurations to generate inventory for",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "shopType": {
+            "type": "string",
+            "enum": ["general", "weapons", "armor", "tech", "medical", "grenades", "magic", "blackmarket"],
+            "default": "general"
+          },
+          "settlement": {
+            "type": "string",
+            "enum": ["outpost", "village", "city", "metropolis", "megacity"],
+            "default": "city"
+          },
+          "partyLevel": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

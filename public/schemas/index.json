@@ -1,0 +1,58 @@
+{
+  "title": "Damoritosh's Arena - Data Schemas",
+  "description": "Schema index for AI agents. Fetch individual schemas to understand import formats for creatures, hazards, encounters, hacking sessions, starship scenes, parties, and session bundles.",
+  "version": "1.0.0",
+  "baseUrl": "https://damoritoshs-arena.pages.dev/schemas",
+  "sessionBundleSchema": "/schemas/session-bundle.schema.json",
+  "schemas": [
+    {
+      "id": "creatures",
+      "name": "Creatures",
+      "description": "SF2e/PF2e creature stat blocks for encounter building",
+      "schemaUrl": "/schemas/creatures.schema.json",
+      "exampleUrl": "/schemas/examples/creatures.example.json"
+    },
+    {
+      "id": "hazards",
+      "name": "Hazards",
+      "description": "Traps, environmental hazards, and haunts",
+      "schemaUrl": "/schemas/hazards.schema.json",
+      "exampleUrl": "/schemas/examples/hazards.example.json"
+    },
+    {
+      "id": "parties",
+      "name": "Parties",
+      "description": "Party configurations with player characters",
+      "schemaUrl": "/schemas/parties.schema.json",
+      "exampleUrl": "/schemas/examples/parties.example.json"
+    },
+    {
+      "id": "encounters",
+      "name": "Encounters",
+      "description": "Encounter definitions with creature/hazard references and XP",
+      "schemaUrl": "/schemas/encounters.schema.json",
+      "exampleUrl": "/schemas/examples/encounters.example.json"
+    },
+    {
+      "id": "hacking-sessions",
+      "name": "Hacking Sessions",
+      "description": "SF2e hackable computer encounters with access points and countermeasures",
+      "schemaUrl": "/schemas/hacking-sessions.schema.json",
+      "exampleUrl": "/schemas/examples/hacking-sessions.example.json"
+    },
+    {
+      "id": "starship-scenes",
+      "name": "Starship Scenes",
+      "description": "SF2e cinematic starship scene templates",
+      "schemaUrl": "/schemas/starship-scenes.schema.json",
+      "exampleUrl": "/schemas/examples/starship-scenes.example.json"
+    },
+    {
+      "id": "session-bundle",
+      "name": "Session Bundle",
+      "description": "Unified YAML/JSON bundle containing all data for a game session",
+      "schemaUrl": "/schemas/session-bundle.schema.json",
+      "exampleUrl": "/schemas/examples/session-bundle.example.yaml"
+    }
+  ]
+}

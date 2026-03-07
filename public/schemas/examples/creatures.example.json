@@ -1,0 +1,68 @@
+[
+  {
+    "id": "custom-vault-guardian",
+    "name": "Vault Guardian",
+    "level": 8,
+    "traits": ["Construct", "Tech"],
+    "size": "large",
+    "source": "Custom",
+    "perception": 18,
+    "senses": ["darkvision", "motion sense 60 feet"],
+    "languages": [],
+    "skills": {
+      "Athletics": 20,
+      "Intimidation": 16
+    },
+    "abilities": {
+      "str": 6,
+      "dex": 4,
+      "con": 5,
+      "int": -3,
+      "wis": 2,
+      "cha": -2
+    },
+    "ac": 27,
+    "saves": {
+      "fort": 19,
+      "ref": 14,
+      "will": 12
+    },
+    "hp": 140,
+    "immunities": ["bleed", "death effects", "disease", "doomed", "drained", "fatigued", "healing", "mental", "necromancy", "nonlethal attacks", "paralyzed", "poison", "sickened", "unconscious"],
+    "resistances": ["physical 5 (except adamantine)"],
+    "weaknesses": ["electricity 10"],
+    "speed": "25 feet",
+    "attacks": [
+      {
+        "name": "Plasma Fist",
+        "type": "melee",
+        "bonus": 20,
+        "damage": "2d10+8 bludgeoning plus 1d6 fire",
+        "traits": ["reach 10 feet"],
+        "actions": 1
+      },
+      {
+        "name": "Integrated Laser",
+        "type": "ranged",
+        "bonus": 18,
+        "damage": "2d8+4 fire",
+        "traits": ["range 60 feet", "tech"],
+        "actions": 1
+      }
+    ],
+    "specialAbilities": [
+      {
+        "name": "Lockdown Protocol",
+        "actions": 2,
+        "traits": ["tech"],
+        "description": "The vault guardian activates emergency lockdown. All doors within 30 feet slam shut and lock (DC 26 to Force Open). The guardian gains a +2 circumstance bonus to AC until the start of its next turn."
+      },
+      {
+        "name": "Threat Assessment",
+        "actions": "reaction",
+        "description": "Trigger: A creature the guardian can see makes a hostile action. Effect: The guardian Steps toward the triggering creature."
+      }
+    ],
+    "description": "An ancient security construct built to guard Azlanti vaults. Its chassis is scarred but still functional."
+  }
+]

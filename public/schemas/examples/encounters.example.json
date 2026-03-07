@@ -1,0 +1,42 @@
+[
+  {
+    "id": "enc-hangar-ambush",
+    "name": "Hangar Bay Ambush",
+    "creatures": [
+      {
+        "creature": {
+          "id": "custom-vault-guardian",
+          "name": "Vault Guardian",
+          "level": 8,
+          "traits": ["Construct", "Tech"],
+          "size": "large",
+          "source": "Custom",
+          "perception": 18,
+          "senses": ["darkvision"],
+          "languages": [],
+          "skills": { "Athletics": 20 },
+          "abilities": { "str": 6, "dex": 4, "con": 5, "int": -3, "wis": 2, "cha": -2 },
+          "ac": 27,
+          "saves": { "fort": 19, "ref": 14, "will": 12 },
+          "hp": 140,
+          "immunities": [],
+          "resistances": [],
+          "weaknesses": [],
+          "speed": "25 feet",
+          "attacks": [
+            { "name": "Plasma Fist", "type": "melee", "bonus": 20, "damage": "2d10+8 bludgeoning", "traits": [], "actions": 1 }
+          ],
+          "specialAbilities": []
+        },
+        "count": 2,
+        "adjustment": "normal"
+      }
+    ],
+    "hazards": [],
+    "partyLevel": 8,
+    "partySize": 5,
+    "notes": "The guardians activate when the party enters the hangar. One blocks the exit while the other advances.",
+    "createdAt": "2025-03-01T00:00:00.000Z",
+    "updatedAt": "2025-03-01T00:00:00.000Z"
+  }
+]

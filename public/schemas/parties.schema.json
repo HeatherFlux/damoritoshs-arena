@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/parties.schema.json",
+  "title": "Parties",
+  "description": "Party configurations with player characters for import",
+  "x-import-info": {
+    "storeMethod": "partyStore.importParties(json, 'merge')",
+    "notes": "Import envelope requires 'version' and 'parties' array. Player IDs are regenerated on merge to avoid conflicts.",
+    "exampleFile": "/schemas/examples/parties.example.json"
+  },
+  "type": "object",
+  "required": ["version", "parties"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "parties": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Party" }
+    },
+    "activePartyId": { "type": ["string", "null"] }
+  },
+  "definitions": {
+    "Party": {
+      "type": "object",
+      "required": ["id", "name", "players"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "players": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Player" }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Player": {
+      "type": "object",
+      "required": ["id", "name", "maxHP", "ac"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "maxHP": { "type": "integer", "minimum": 1 },
+        "ac": { "type": "integer", "minimum": 0 },
+        "level": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "class": { "type": "string" },
+        "ancestry": { "type": "string" },
+        "perception": { "type": "integer" },
+        "fortitude": { "type": "integer" },
+        "reflex": { "type": "integer" },
+        "will": { "type": "integer" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
