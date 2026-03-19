@@ -1,5 +1,5 @@
 # Session Bundle Example
-# Import this file via Settings > Import Session Bundle
+# Import this file via Settings > Homebrew Upload > Session Bundle
 # Supports both YAML and JSON formats
 
 name: "Session 12 - The Vault of Stars"
@@ -55,6 +55,54 @@ creatures:
         actions: 2
         description: "The vault guardian activates emergency lockdown. Doors within 30 feet lock (DC 26 to Force Open)."
 
+  - id: "custom-azlanti-operative"
+    name: "Azlanti Operative"
+    level: 7
+    traits: ["Humanoid", "Azlanti"]
+    size: "medium"
+    source: "Custom"
+    perception: 17
+    senses: ["low-light vision"]
+    languages: ["Azlanti", "Common"]
+    skills:
+      Stealth: 19
+      Acrobatics: 17
+      Deception: 15
+      Athletics: 14
+    abilities:
+      str: 2
+      dex: 5
+      con: 3
+      int: 3
+      wis: 3
+      cha: 1
+    ac: 26
+    saves:
+      fort: 14
+      ref: 18
+      will: 15
+    hp: 105
+    speed: "30 feet"
+    attacks:
+      - name: "Tactical Dagger"
+        type: "melee"
+        bonus: 18
+        damage: "2d4+7 piercing"
+        traits: ["agile", "finesse"]
+        actions: 1
+      - name: "Arc Pistol"
+        type: "ranged"
+        bonus: 18
+        damage: "2d6+4 electricity"
+        traits: ["range 30 feet", "tech"]
+        actions: 1
+    specialAbilities:
+      - name: "Sneak Attack"
+        description: "Deals an extra 2d6 precision damage to flat-footed creatures."
+      - name: "Quick Vanish"
+        actions: 1
+        description: "The operative Hides or Sneaks as a single action."
+
 # Custom hazards
 hazards:
   - id: "custom-laser-grid"
@@ -75,8 +123,22 @@ hazards:
       - name: "Laser Sweep"
         trigger: "A creature enters or starts its turn in the grid"
         effect: "Targets must attempt a DC 25 Reflex save. Failure: 4d6 fire."
-    routine: "The grid sweeps once per round."
+    routine: "The grid sweeps once per round, targeting all creatures in the zone."
     actionsPerRound: 1
+
+  - id: "custom-gravity-well"
+    name: "Gravity Well Anomaly"
+    level: 8
+    complexity: "simple"
+    type: "environmental"
+    traits: ["Environmental"]
+    source: "Custom"
+    description: "A malfunctioning gravity generator creates a dangerous pull toward the deck."
+    stealthDC: 28
+    trigger: "A creature moves within 15 feet of the generator"
+    damage: "3d8 bludgeoning"
+    saveDC: 26
+    saveType: "fortitude"
 
 # Party configuration
 party:
@@ -125,10 +187,23 @@ encounters:
   - name: "Guard Patrol"
     partyLevel: 8
     partySize: 5
+    notes: "Operatives ambush from the shadows near the data vault."
     creatures:
-      - creatureName: "Anacite Wingbot"  # References existing AoN creature by name
+      - creatureId: "custom-azlanti-operative"
         count: 3
+        adjustment: "normal"
+
+  - name: "Vault Approach"
+    partyLevel: 8
+    partySize: 5
+    notes: "A single elite guardian protects the final corridor, with a gravity hazard."
+    creatures:
+      - creatureId: "custom-vault-guardian"
+        count: 1
         adjustment: "elite"
+    hazards:
+      - hazardId: "custom-gravity-well"
+        count: 1
 
 # Hacking encounter
 hacking:
@@ -176,12 +251,179 @@ hacking:
               dc: 28
               proficiency: "expert"
 
-# Starship scene
+  - name: "Navigation Database"
+    computer:
+      name: "NAV-CORE"
+      level: 9
+      type: "hybrid"
+      description: "The station's navigation archive, protected by both tech and magical wards."
+      successDescription: "You download the stolen star charts and can plot a course to the hidden relay."
+      criticalSuccessDescription: "You also discover encrypted Azlanti fleet movements."
+      accessPoints:
+        - id: "ap-terminal"
+          name: "Data Terminal"
+          type: "physical"
+          state: "locked"
+          position: { x: 0.2, y: 0.5 }
+          connectedTo: ["ap-firewall", "ap-ward"]
+          hackSkills:
+            - skill: "Computers"
+              dc: 28
+              proficiency: "trained"
+        - id: "ap-firewall"
+          name: "Quantum Firewall"
+          type: "remote"
+          state: "locked"
+          position: { x: 0.5, y: 0.3 }
+          connectedTo: ["ap-terminal", "ap-core"]
+          hackSkills:
+            - skill: "Computers"
+              dc: 30
+              proficiency: "expert"
+          countermeasures:
+            - id: "cm-trace"
+              name: "Active Trace"
+              failureThreshold: 1
+              disableSkills:
+                - skill: "Computers"
+                  dc: 30
+              description: "Triggers station-wide alert, all future DCs increase by 2."
+        - id: "ap-ward"
+          name: "Arcane Ward"
+          type: "magical"
+          state: "locked"
+          position: { x: 0.5, y: 0.7 }
+          connectedTo: ["ap-terminal", "ap-core"]
+          hackSkills:
+            - skill: "Arcana"
+              dc: 27
+              proficiency: "trained"
+            - skill: "Occultism"
+              dc: 29
+              proficiency: "trained"
+          vulnerabilities:
+            - id: "v-dispel"
+              name: "Dispel resonance frequency"
+              skills:
+                - skill: "Arcana"
+                  dc: 25
+              dcReduction: 3
+        - id: "ap-core"
+          name: "Navigation Core"
+          type: "physical"
+          state: "locked"
+          position: { x: 0.8, y: 0.5 }
+          connectedTo: ["ap-firewall", "ap-ward"]
+          hackSkills:
+            - skill: "Computers"
+              dc: 30
+              proficiency: "master"
+
+# Starship scene with full roles, actions, and threat routines
 starship:
   - name: "Escape from the Station"
     level: 8
-    description: "The station's defense fleet scrambles as the crew escapes."
+    description: "The station's defense fleet scrambles as the crew escapes with the stolen nav data. Fighters pour from the hangar bays while the station's weapon batteries come online."
     victoryCondition: "escape"
+    partySize: 5
+
+    # Which roles are available in this scene
+    availableRoles:
+      - "captain"
+      - "engineer"
+      - "gunner"
+      - "gunner"       # Two gunner seats
+      - "pilot"
+      - "science_officer"
+
+    # Pre-assign roles to party members
+    roles:
+      - roleId: "captain"
+        playerName: "Poppy"
+      - roleId: "pilot"
+        playerName: "Alces"
+      - roleId: "gunner"
+        playerName: "Drakesh"
+      - roleId: "gunner"
+        playerName: "Peebles"
+      - roleId: "engineer"
+        playerName: "FunGus"
+
+    # Flavor text for each role in this scene
+    roleDescriptions:
+      captain: "Coordinate the crew and keep morale up as fighters swarm in."
+      pilot: "Navigate through the station's debris field and outrun the interceptors."
+      gunner: "Man the forward and aft weapon batteries."
+      engineer: "Keep the shields up and reroute power as systems take hits."
+      science_officer: "Scan for a safe jump point and jam enemy targeting."
+
+    # Scene-specific actions available to crew
+    starshipActions:
+      - id: "act-evasive"
+        name: "Evasive Maneuvers"
+        actionCost: 2
+        role: "pilot"
+        skills: ["Piloting"]
+        description: "Attempt a DC 26 Piloting check. Success: ship gains +2 AC until your next turn."
+        outcomes:
+          criticalSuccess: "+2 AC and one enemy attack automatically misses."
+          success: "+2 AC until your next turn."
+          failure: "No effect."
+          criticalFailure: "You oversteer — ship is flat-footed until your next turn."
+      - id: "act-broadside"
+        name: "Broadside"
+        actionCost: 2
+        role: "gunner"
+        skills: []
+        description: "Fire the main cannon at a target."
+        isAttack: true
+        damage: "3d10+8 fire"
+        traits: ["range 120 ft"]
+        outcomes:
+          criticalSuccess: "Double damage."
+          success: "Full damage."
+          failure: "Miss."
+          criticalFailure: "Miss and the weapon jams (requires repair)."
+      - id: "act-boost-shields"
+        name: "Boost Shields"
+        actionCost: 2
+        role: "engineer"
+        skills: ["Crafting"]
+        description: "Attempt a DC 26 Crafting check to restore shields."
+        outcomes:
+          criticalSuccess: "Restore 20 shields."
+          success: "Restore 10 shields."
+          failure: "No effect."
+          criticalFailure: "Shield emitter overloads — lose 5 shields."
+      - id: "act-scan-jump"
+        name: "Calculate Jump Point"
+        actionCost: 2
+        role: "science_officer"
+        skills: ["Computers"]
+        description: "Attempt a DC 28 Computers check to calculate a Drift jump. Each success earns 1 Escape Point (need 5 to escape)."
+        outcomes:
+          criticalSuccess: "Earn 2 Escape Points."
+          success: "Earn 1 Escape Point."
+          failure: "No progress — interference is too strong."
+          criticalFailure: "Lose 1 Escape Point as calculations corrupt."
+      - id: "act-inspire"
+        name: "Rally the Crew"
+        actionCost: 1
+        role: "captain"
+        skills: ["Diplomacy", "Intimidation"]
+        description: "Attempt a DC 24 Diplomacy or Intimidation check."
+        outcomes:
+          criticalSuccess: "All crew gain +2 to their next check."
+          success: "One crew member gains +1 to their next check."
+          failure: "No effect."
+          criticalFailure: "Your panic is contagious — one crew member takes -1."
+
+    # Additional victory info
+    additionalObjectives:
+      - "Earn 5 Escape Points via Calculate Jump Point to enter the Drift"
+      - "Bonus: defeat both interceptors before jumping for extra XP"
+
+    # The party's ship
     starship:
       name: "The Corsair"
       ac: 25
@@ -190,14 +432,114 @@ starship:
       maxHP: 120
       maxShields: 40
       shieldRegen: 10
+      bonuses:
+        Piloting: 2
+        Computers: 1
+
+    # Threats with full routines
     threats:
-      - name: "Azlanti Interceptor"
+      - name: "Azlanti Interceptor Alpha"
         type: "enemy_ship"
         level: 7
         maxHP: 80
         ac: 23
         maxShields: 20
         shieldRegen: 5
+        fortitude: 18
+        reflex: 20
+        description: "A sleek Azlanti fighter with twin plasma cannons."
+        initiativeSkill: "Piloting"
+        initiativeBonus: 16
+        routine:
+          actionsPerTurn: 3
+          description: "The interceptor closes distance and fires, then repositions."
+          actions:
+            - id: "int-close"
+              name: "Close Distance"
+              actionCost: 1
+              type: "movement"
+              description: "The interceptor moves into firing range."
+            - id: "int-plasma"
+              name: "Plasma Cannon"
+              actionCost: 2
+              type: "attack"
+              attackBonus: 19
+              damage: "2d10+6"
+              damageType: "fire"
+              traits: ["range 100 ft"]
+              description: "Fires twin plasma cannons at the party's ship."
+              effectOnCriticalSuccess: "Target catches fire — 1d6 persistent fire damage."
+        specialAbilities:
+          - name: "Afterburner Dodge"
+            trigger: "The interceptor is targeted by an attack"
+            description: "Once per round, the interceptor can attempt a DC 22 Reflex save to halve damage from a single attack."
+
+      - name: "Azlanti Interceptor Beta"
+        type: "enemy_ship"
+        level: 7
+        maxHP: 80
+        ac: 23
+        maxShields: 20
+        shieldRegen: 5
+        fortitude: 18
+        reflex: 20
+        description: "The wingman, flanking from the opposite side."
+        initiativeSkill: "Piloting"
+        initiativeBonus: 16
+        routine:
+          actionsPerTurn: 3
+          description: "Flanks and fires, trying to catch the crew in crossfire."
+          actions:
+            - id: "int2-flank"
+              name: "Flanking Approach"
+              actionCost: 1
+              type: "movement"
+              description: "Repositions to flank the party's ship."
+            - id: "int2-plasma"
+              name: "Plasma Cannon"
+              actionCost: 2
+              type: "attack"
+              attackBonus: 19
+              damage: "2d10+6"
+              damageType: "fire"
+              traits: ["range 100 ft"]
+              description: "Fires plasma cannons from the flank."
+          variations:
+            - trigger: "Alpha is destroyed"
+              actions:
+                - id: "int2-rage"
+                  name: "Vengeful Barrage"
+                  actionCost: 3
+                  type: "attack"
+                  attackBonus: 17
+                  damage: "3d10+6"
+                  damageType: "fire"
+                  traits: ["range 100 ft"]
+                  description: "Unleashes a desperate full barrage at -2 to hit but +1d10 damage."
+
+      - name: "Station Defense Battery"
+        type: "hazard"
+        level: 8
+        ac: 28
+        maxHP: 60
+        description: "The station's automated turret tracks the fleeing ship."
+        initiativeSkill: "Perception"
+        initiativeBonus: 20
+        routine:
+          actionsPerTurn: 2
+          description: "The battery targets the nearest ship each round."
+          actions:
+            - id: "bat-fire"
+              name: "Heavy Laser"
+              actionCost: 2
+              type: "attack"
+              attackBonus: 22
+              damage: "3d8+10"
+              damageType: "fire"
+              traits: ["range 200 ft"]
+              description: "Fires a heavy laser blast."
+              effectOnCriticalSuccess: "Disables one random system (engineer must repair)."
+        immunities: ["mental"]
 
 # Shop
 shops:

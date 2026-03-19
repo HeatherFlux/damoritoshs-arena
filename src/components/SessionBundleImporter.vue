@@ -175,26 +175,8 @@ function reset() {
           Import a YAML or JSON session bundle containing creatures, encounters, hacking sessions, starship scenes, and more.
         </p>
 
-        <!-- Mode Toggle -->
-        <div class="flex gap-1 mb-3">
-          <button
-            class="tab-btn text-xs px-3 py-1.5"
-            :class="{ 'tab-btn-active': activeMode === 'file' }"
-            @click="activeMode = 'file'; reset()"
-          >
-            Upload File
-          </button>
-          <button
-            class="tab-btn text-xs px-3 py-1.5"
-            :class="{ 'tab-btn-active': activeMode === 'paste' }"
-            @click="activeMode = 'paste'; reset()"
-          >
-            Paste Content
-          </button>
-        </div>
-
         <!-- File Upload -->
-        <div v-if="activeMode === 'file'" class="mb-3">
+        <div class="flex gap-2 mb-3">
           <input
             ref="fileInput"
             type="file"
@@ -203,15 +185,21 @@ function reset() {
             @change="handleFileSelect"
           />
           <button
-            class="btn-secondary w-full py-3 text-sm border-dashed"
+            class="btn-secondary flex-1 py-3 text-sm border-dashed"
             @click="handleFileClick"
           >
-            {{ fileName || 'Choose .yaml or .json file...' }}
+            {{ fileName || 'Choose a file' }}
+          </button>
+          <button
+            class="btn-secondary flex-1 py-3 text-sm border-dashed"
+            @click="activeMode = 'paste'"
+          >
+            Paste content...
           </button>
         </div>
 
-        <!-- Paste Area -->
-        <div v-else class="mb-3">
+        <!-- Paste Area (shown when activated) -->
+        <div v-if="activeMode === 'paste'" class="mb-3">
           <textarea
             v-model="textContent"
             @input="handlePasteInput"
@@ -276,22 +264,4 @@ function reset() {
 </template>
 
 <style scoped>
-.tab-btn {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-dim);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.tab-btn:hover {
-  color: var(--color-text);
-  border-color: var(--color-accent);
-}
-
-.tab-btn-active {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  background: var(--color-bg);
-}
 </style>

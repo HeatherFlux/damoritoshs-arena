@@ -14,6 +14,7 @@ const showEditor = ref(false)
 const showSavedList = ref(false)
 const copySuccess = ref(false)
 const partyLevel = ref(5)
+const hackingFileInput = ref<HTMLInputElement | null>(null)
 
 // Mobile collapsible sections
 const mobileControlsOpen = ref(false)
@@ -119,6 +120,31 @@ function deleteSelectedEncounter(id: string) {
   }
 }
 
+function handleImportFileClick() {
+  hackingFileInput.value?.click()
+}
+
+function handleImportFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = e.target?.result as string
+      const count = store.importEncounters(json)
+      if (count > 0) {
+        showSavedList.value = true
+      }
+    } catch (err) {
+      alert('Invalid JSON file')
+    }
+  }
+  reader.readAsText(file)
+  target.value = ''
+}
+
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString('en-US', {
     month: 'short',
@@ -187,7 +213,14 @@ function formatDate(timestamp: number): string {
                 </button>
               </div>
 
-              <div v-if="showSavedList && store.state.savedEncounters.length > 0" class="saved-list">
+              <input
+                ref="hackingFileInput"
+                type="file"
+                accept=".json"
+                class="hidden"
+                @change="handleImportFileSelect"
+              />
+              <div v-if="showSavedList" class="saved-list">
                 <div
                   v-for="enc in store.state.savedEncounters"
                   :key="enc.id"
@@ -199,6 +232,12 @@ function formatDate(timestamp: number): string {
                   </div>
                   <button class="saved-delete" @click="deleteSelectedEncounter(enc.id)">×</button>
                 </div>
+                <div v-if="store.state.savedEncounters.length === 0" class="saved-empty">
+                  No saved encounters yet
+                </div>
+                <button class="saved-import-btn" @click="handleImportFileClick">
+                  &uarr; Import from file
+                </button>
               </div>
             </div>
 
@@ -917,6 +956,32 @@ function formatDate(timestamp: number): string {
 
 .saved-delete:hover {
   color: var(--color-danger);
+}
+
+.saved-empty {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.saved-import-btn {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.saved-import-btn:hover {
+  background: var(--color-bg-hover);
 }
 
 /* Buttons */

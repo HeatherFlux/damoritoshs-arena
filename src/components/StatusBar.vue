@@ -7,7 +7,7 @@ import { useCustomPanelStore } from '../stores/customPanelStore'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
-  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop'
+  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop' | 'prep'
 }>()
 
 const combatStore = useCombatStore()
@@ -128,6 +128,25 @@ const customMessages = [
   'HOMEBREW MODE ENGAGED',
 ]
 
+const prepMessages = [
+  'SESSION PREP SUITE ACTIVE',
+  'LAZY DM PROTOCOLS ENGAGED',
+  'SCENE GRAPH INITIALIZED',
+  'SECRET GENERATOR LOADED',
+  'NPC DATABANK SYNCED',
+  'LOCATION SCANNER READY',
+  'STRONG START ARMED',
+  'INSPIRATION ENGINE ONLINE',
+  'ADVENTURE PLANNER ACTIVE',
+  'NARRATIVE SYSTEMS NOMINAL',
+  'ENCOUNTER OUTLINE READY',
+  'CLUE WEAVER STANDING BY',
+  'STORY ARC ANALYZER ON',
+  'READY FOR SESSION PREP',
+  'PREP SYSTEMS: GREEN',
+  'ADVENTURE FORGE ONLINE',
+]
+
 const starshipMessages = [
   'HELM CONTROLS ONLINE',
   'DRIFT ENGINE PRIMED',
@@ -161,6 +180,7 @@ const currentMessages = computed(() => {
   if (props.mode === 'hacking') return hackingMessages
   if (props.mode === 'custom') return customMessages
   if (props.mode === 'starship') return starshipMessages
+  if (props.mode === 'prep') return prepMessages
   return builderMessages
 })
 
@@ -400,6 +420,18 @@ onUnmounted(() => {
       </div>
     </template>
 
+    <!-- PREP MODE -->
+    <template v-else-if="mode === 'prep'">
+      <div class="status-section">
+        <span class="status-label">MODE</span>
+        <span class="status-badge status-badge-prep">PREP</span>
+      </div>
+
+      <div class="status-section">
+        <span class="status-muted">ADVENTURE PREP SYSTEMS READY</span>
+      </div>
+    </template>
+
     <!-- HACKING MODE -->
     <template v-else-if="mode === 'hacking'">
       <!-- Computer Name -->
@@ -525,7 +557,8 @@ onUnmounted(() => {
         'indicator-combat': mode === 'combat' && combat,
         'indicator-hacking': mode === 'hacking',
         'indicator-custom': mode === 'custom',
-        'indicator-starship': mode === 'starship'
+        'indicator-starship': mode === 'starship',
+        'indicator-prep': mode === 'prep'
       }"></span>
       <span class="status-label">{{
         mode === 'combat' ? 'COMBAT' :
@@ -533,6 +566,7 @@ onUnmounted(() => {
         mode === 'custom' ? 'FORGE' :
         mode === 'starship' ? 'HELM' :
         mode === 'shop' ? 'SHOP' :
+        mode === 'prep' ? 'PREP' :
         'BUILD'
       }}</span>
     </div>
@@ -662,6 +696,7 @@ onUnmounted(() => {
 .status-badge-extreme { background: var(--color-danger-subtle); color: var(--color-danger); }
 .status-badge-starship { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
 .status-badge-hacking { background: var(--color-secondary-subtle, rgba(0, 255, 136, 0.15)); color: var(--color-secondary); border: 1px solid rgba(0, 255, 136, 0.3); }
+.status-badge-prep { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
 
 /* Difficulty badge */
 .difficulty-badge {
@@ -722,6 +757,11 @@ onUnmounted(() => {
   animation: pulse-glow-starship 1.5s ease-in-out infinite;
 }
 
+.status-indicator.indicator-prep {
+  background: #3b82f6;
+  animation: pulse-glow-prep 2s ease-in-out infinite;
+}
+
 @keyframes pulse-glow-hacking {
   0%, 100% { box-shadow: 0 0 4px var(--color-secondary); }
   50% { box-shadow: 0 0 12px var(--color-secondary); }
@@ -735,6 +775,11 @@ onUnmounted(() => {
 @keyframes pulse-glow-starship {
   0%, 100% { box-shadow: 0 0 4px #8b5cf6; }
   50% { box-shadow: 0 0 12px #8b5cf6; }
+}
+
+@keyframes pulse-glow-prep {
+  0%, 100% { box-shadow: 0 0 4px #3b82f6; }
+  50% { box-shadow: 0 0 12px #3b82f6; }
 }
 
 @keyframes pulse-glow {

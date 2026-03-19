@@ -3,13 +3,17 @@ import { ref, computed } from 'vue'
 import { useSettingsStore, themes, backgroundStyles, type ThemeId, type BackgroundStyle } from '../stores/settingsStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
-import SchemaSection from './SchemaSection.vue'
+import { useHackingStore } from '../stores/hackingStore'
+import { useStarshipStore } from '../stores/starshipStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
-const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, getHazardStats, importCustomHazards, exportCustomHazards, clearCustomHazards } = useEncounterStore()
+const encounterStore = useEncounterStore()
+const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCustomCreatures, getHazardStats, importCustomHazards, exportCustomHazards, clearCustomHazards } = encounterStore
 const partyStore = usePartyStore()
+const hackingStore = useHackingStore()
+const starshipStore = useStarshipStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -32,26 +36,23 @@ function openBundleImporter() {
 const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
 const bgStyleList = Object.entries(backgroundStyles) as [BackgroundStyle, typeof backgroundStyles[BackgroundStyle]][]
 
+// Collapsible sections
+const expandedSections = ref<Set<string>>(new Set())
+
+function toggleSection(id: string) {
+  if (expandedSections.value.has(id)) {
+    expandedSections.value.delete(id)
+  } else {
+    expandedSections.value.add(id)
+  }
+}
+
+function isSectionOpen(id: string) {
+  return expandedSections.value.has(id)
+}
+
 // Discord webhook state
 const webhookTestStatus = ref<'idle' | 'testing' | 'success' | 'error'>('idle')
-
-// Creature data state
-const creatureStats = computed(() => getCreatureStats())
-const importStatus = ref<'idle' | 'success' | 'error'>('idle')
-const importMessage = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
-
-// Hazard data state
-const hazardStats = computed(() => getHazardStats())
-const hazardImportStatus = ref<'idle' | 'success' | 'error'>('idle')
-const hazardImportMessage = ref('')
-const hazardFileInput = ref<HTMLInputElement | null>(null)
-
-// Party data state
-const partyImportStatus = ref<'idle' | 'success' | 'error'>('idle')
-const partyImportMessage = ref('')
-const partyFileInput = ref<HTMLInputElement | null>(null)
-const partyCount = computed(() => partyStore.state.parties.length)
 
 async function handleTestWebhook() {
   webhookTestStatus.value = 'testing'
@@ -62,143 +63,178 @@ async function handleTestWebhook() {
   }, 3000)
 }
 
-function handleImportClick() {
-  fileInput.value?.click()
+// ---- Data import/export ----
+
+// Status tracking per data type
+const importStatuses = ref<Record<string, { status: 'idle' | 'success' | 'error'; message: string }>>({})
+function getImportStatus(key: string) {
+  return importStatuses.value[key] || { status: 'idle', message: '' }
 }
 
-function handleFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const json = e.target?.result as string
-      const count = importCustomCreatures(json)
-      importStatus.value = 'success'
-      importMessage.value = `Imported ${count} creatures`
-    } catch (err) {
-      importStatus.value = 'error'
-      importMessage.value = 'Invalid JSON file'
-    }
-    setTimeout(() => {
-      importStatus.value = 'idle'
-      importMessage.value = ''
-    }, 3000)
-  }
-  reader.readAsText(file)
-  target.value = '' // Reset so same file can be selected again
+function setImportResult(key: string, status: 'success' | 'error', message: string) {
+  importStatuses.value[key] = { status, message }
+  setTimeout(() => {
+    importStatuses.value[key] = { status: 'idle', message: '' }
+  }, 3000)
 }
 
-function handleExport() {
-  const json = exportCustomCreatures()
-  const blob = new Blob([json], { type: 'application/json' })
+function triggerImport(key: string) {
+  const el = document.getElementById(`file-input-${key}`) as HTMLInputElement | null
+  el?.click()
+}
+
+function downloadJson(data: string, filename: string) {
+  const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'custom-creatures.json'
+  a.download = filename
   a.click()
   URL.revokeObjectURL(url)
 }
 
-function handleClearCustom() {
-  if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
-    clearCustomCreatures()
-  }
+// Computed stats
+const creatureStats = computed(() => getCreatureStats())
+const hazardStats = computed(() => getHazardStats())
+const partyCount = computed(() => partyStore.state.parties.length)
+const encounterCount = computed(() => encounterStore.state.encounters.length)
+const hackingCount = computed(() => hackingStore.state.savedEncounters.length)
+const starshipCount = computed(() => starshipStore.state.savedScenes.length)
+
+// Data row definitions
+interface DataRow {
+  key: string
+  label: string
+  count: string
+  schemaId?: string
+  schemaFile?: string
+  canExport: boolean
+  canClear?: boolean
+  onImport: (json: string) => void
+  onExport: () => void
+  onClear?: () => void
+  exportFilename: string
 }
 
-// Hazard handlers
-function handleHazardImportClick() {
-  hazardFileInput.value?.click()
-}
-
-function handleHazardFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const json = e.target?.result as string
-      const count = importCustomHazards(json)
-      hazardImportStatus.value = 'success'
-      hazardImportMessage.value = `Imported ${count} hazards`
-    } catch (err) {
-      hazardImportStatus.value = 'error'
-      hazardImportMessage.value = 'Invalid JSON file'
-    }
-    setTimeout(() => {
-      hazardImportStatus.value = 'idle'
-      hazardImportMessage.value = ''
-    }, 3000)
-  }
-  reader.readAsText(file)
-  target.value = ''
-}
-
-function handleHazardExport() {
-  const json = exportCustomHazards()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'custom-hazards.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function handleClearCustomHazards() {
-  if (confirm('Clear all custom/imported hazards? Bundled hazards will remain.')) {
-    clearCustomHazards()
-  }
-}
-
-// Party handlers
-function handlePartyImportClick() {
-  partyFileInput.value?.click()
-}
-
-function handlePartyFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const json = e.target?.result as string
+const dataRows = computed<DataRow[]>(() => [
+  {
+    key: 'creatures',
+    label: 'Creatures',
+    count: `${creatureStats.value.total} (${creatureStats.value.custom} custom)`,
+    schemaId: 'creatures',
+    schemaFile: 'creatures.schema.json',
+    canExport: creatureStats.value.custom > 0,
+    canClear: creatureStats.value.custom > 0,
+    onImport: (json: string) => {
+      const n = importCustomCreatures(json)
+      setImportResult('creatures', 'success', `+${n}`)
+    },
+    onExport: () => downloadJson(exportCustomCreatures(), 'custom-creatures.json'),
+    onClear: () => {
+      if (confirm('Clear all custom/imported creatures? Bundled creatures will remain.')) {
+        clearCustomCreatures()
+      }
+    },
+    exportFilename: 'custom-creatures.json',
+  },
+  {
+    key: 'hazards',
+    label: 'Hazards',
+    count: `${hazardStats.value.total} (${hazardStats.value.custom} custom)`,
+    schemaId: 'hazards',
+    schemaFile: 'hazards.schema.json',
+    canExport: hazardStats.value.custom > 0,
+    canClear: hazardStats.value.custom > 0,
+    onImport: (json: string) => {
+      const n = importCustomHazards(json)
+      setImportResult('hazards', 'success', `+${n}`)
+    },
+    onExport: () => downloadJson(exportCustomHazards(), 'custom-hazards.json'),
+    onClear: () => {
+      if (confirm('Clear all custom/imported hazards? Bundled hazards will remain.')) {
+        clearCustomHazards()
+      }
+    },
+    exportFilename: 'custom-hazards.json',
+  },
+  {
+    key: 'parties',
+    label: 'Parties',
+    count: `${partyCount.value}`,
+    schemaId: 'parties',
+    schemaFile: 'parties.schema.json',
+    canExport: partyCount.value > 0,
+    onImport: (json: string) => {
       const result = partyStore.importParties(json)
       if (result.success) {
-        partyImportStatus.value = 'success'
-        partyImportMessage.value = `Imported ${result.imported} parties`
+        setImportResult('parties', 'success', `+${result.imported}`)
       } else {
-        partyImportStatus.value = 'error'
-        partyImportMessage.value = result.error || 'Import failed'
+        throw new Error(result.error)
       }
+    },
+    onExport: () => downloadJson(partyStore.exportParties(), 'parties.json'),
+    exportFilename: 'parties.json',
+  },
+  {
+    key: 'encounters',
+    label: 'Encounters',
+    count: `${encounterCount.value}`,
+    schemaId: 'encounters',
+    schemaFile: 'encounters.schema.json',
+    canExport: encounterCount.value > 0,
+    onImport: (json: string) => {
+      encounterStore.importEncounters(json)
+      setImportResult('encounters', 'success', 'Imported')
+    },
+    onExport: () => downloadJson(encounterStore.exportEncounters(), 'encounters.json'),
+    exportFilename: 'encounters.json',
+  },
+  {
+    key: 'hacking',
+    label: 'Hacking',
+    count: `${hackingCount.value}`,
+    schemaId: 'hacking-sessions',
+    schemaFile: 'hacking-sessions.schema.json',
+    canExport: hackingCount.value > 0,
+    onImport: (json: string) => {
+      const n = hackingStore.importEncounters(json)
+      setImportResult('hacking', 'success', `+${n}`)
+    },
+    onExport: () => downloadJson(hackingStore.exportEncounters(), 'hacking-sessions.json'),
+    exportFilename: 'hacking-sessions.json',
+  },
+  {
+    key: 'starship',
+    label: 'Starship',
+    count: `${starshipCount.value}`,
+    schemaId: 'starship-scenes',
+    schemaFile: 'starship-scenes.schema.json',
+    canExport: starshipCount.value > 0,
+    onImport: (json: string) => {
+      starshipStore.importScenes(json)
+      setImportResult('starship', 'success', 'Imported')
+    },
+    onExport: () => downloadJson(starshipStore.exportScenes(), 'starship-scenes.json'),
+    exportFilename: 'starship-scenes.json',
+  },
+])
+
+function handleFileSelect(event: Event, row: DataRow) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = e.target?.result as string
+      row.onImport(json)
     } catch (err) {
-      partyImportStatus.value = 'error'
-      partyImportMessage.value = 'Invalid JSON file'
+      setImportResult(row.key, 'error', 'Invalid')
     }
-    setTimeout(() => {
-      partyImportStatus.value = 'idle'
-      partyImportMessage.value = ''
-    }, 3000)
   }
   reader.readAsText(file)
   target.value = ''
-}
-
-function handlePartyExport() {
-  const json = partyStore.exportParties()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'parties.json'
-  a.click()
-  URL.revokeObjectURL(url)
 }
 </script>
 
@@ -218,57 +254,13 @@ function handlePartyExport() {
         </button>
       </div>
 
-      <div class="space-y-6">
-        <!-- Theme Section -->
+      <div class="space-y-4">
+
+        <!-- Dice Rolling -->
         <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Theme</h3>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              v-for="[id, theme] in themeList"
-              :key="id"
-              @click="setTheme(id)"
-              class="theme-option"
-              :class="{ 'theme-option-active': settings.theme === id }"
-              :style="{ '--theme-color': theme.accent }"
-            >
-              <span class="theme-swatch" :style="{ background: theme.accent }"></span>
-              <div class="flex-1 text-left">
-                <span class="block text-sm font-semibold">{{ theme.name }}</span>
-                <span class="block text-xs text-dim">{{ theme.description }}</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Background Animation Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Background Animation</h3>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              v-for="[id, bgStyle] in bgStyleList"
-              :key="id"
-              @click="setSetting('backgroundStyle', id)"
-              class="bg-option"
-              :class="{ 'bg-option-active': settings.backgroundStyle === id }"
-            >
-              <span class="bg-icon" :class="`bg-icon-${id}`"></span>
-              <div class="flex-1 text-left">
-                <span class="block text-sm font-semibold">{{ bgStyle.name }}</span>
-                <span class="block text-xs text-dim">{{ bgStyle.description }}</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Dice Rolling Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Dice Rolling</h3>
-
-          <label class="flex items-center justify-between p-3 bg-elevated cursor-pointer hover:bg-border transition-colors">
+          <label class="flex items-center justify-between p-2.5 bg-elevated cursor-pointer hover:bg-border transition-colors">
             <div class="flex-1">
-              <span class="font-medium text-text">Auto-roll damage</span>
+              <span class="text-sm font-medium text-text">Auto-roll damage</span>
               <p class="text-xs text-dim mt-0.5">Automatically roll damage when rolling to hit</p>
             </div>
             <button
@@ -283,231 +275,238 @@ function handlePartyExport() {
             </button>
           </label>
         </div>
-
-        <!-- Integrations Section -->
+        
+        <!-- Theme Section (collapsible) -->
         <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Integrations</h3>
+          <button class="section-header" @click="toggleSection('theme')">
+            <span class="section-chevron" :class="{ open: isSectionOpen('theme') }">&rsaquo;</span>
+            <span>&gt; Theme</span>
+          </button>
 
-          <div class="space-y-3">
-            <!-- Discord Webhook URL -->
-            <div class="p-3 bg-elevated">
-              <div class="flex items-center justify-between mb-2">
-                <span class="font-medium text-text">Discord Webhook</span>
-                <button
-                  type="button"
-                  role="switch"
-                  :aria-checked="settings.discordWebhookEnabled"
-                  @click="toggleSetting('discordWebhookEnabled')"
-                  class="toggle-switch"
-                  :class="{ 'toggle-on': settings.discordWebhookEnabled }"
-                  :disabled="!settings.discordWebhookUrl"
-                >
-                  <span class="toggle-thumb" :class="{ 'toggle-thumb-on': settings.discordWebhookEnabled }"></span>
-                </button>
-              </div>
-              <p class="text-xs text-dim mb-3">Send combat logs and rolls to a Discord channel</p>
+          <div v-if="isSectionOpen('theme')" class="section-body">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                v-for="[id, theme] in themeList"
+                :key="id"
+                @click="setTheme(id)"
+                class="theme-option"
+                :class="{ 'theme-option-active': settings.theme === id }"
+                :style="{ '--theme-color': theme.accent }"
+              >
+                <span class="theme-swatch" :style="{ background: theme.accent }"></span>
+                <div class="flex-1 text-left">
+                  <span class="block text-sm font-semibold">{{ theme.name }}</span>
+                  <span class="block text-xs text-dim">{{ theme.description }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
 
-              <div class="flex gap-2">
+        <!-- Background Animation (collapsible) -->
+        <div>
+          <button class="section-header" @click="toggleSection('bg')">
+            <span class="section-chevron" :class="{ open: isSectionOpen('bg') }">&rsaquo;</span>
+            <span>&gt; Background</span>
+          </button>
+
+          <div v-if="isSectionOpen('bg')" class="section-body">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                v-for="[id, bgStyle] in bgStyleList"
+                :key="id"
+                @click="setSetting('backgroundStyle', id)"
+                class="bg-option"
+                :class="{ 'bg-option-active': settings.backgroundStyle === id }"
+              >
+                <span class="bg-icon" :class="`bg-icon-${id}`"></span>
+                <div class="flex-1 text-left">
+                  <span class="block text-sm font-semibold">{{ bgStyle.name }}</span>
+                  <span class="block text-xs text-dim">{{ bgStyle.description }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discord (collapsible) -->
+        <div>
+          <button class="section-header" @click="toggleSection('discord')">
+            <span class="section-chevron" :class="{ open: isSectionOpen('discord') }">&rsaquo;</span>
+            <span>&gt; Discord Webhook</span>
+            <span v-if="settings.discordWebhookEnabled" class="ml-auto text-xs text-accent">ON</span>
+          </button>
+
+          <div v-if="isSectionOpen('discord')" class="section-body space-y-3">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-dim">Send combat logs and rolls to Discord</p>
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="settings.discordWebhookEnabled"
+                @click="toggleSetting('discordWebhookEnabled')"
+                class="toggle-switch"
+                :class="{ 'toggle-on': settings.discordWebhookEnabled }"
+                :disabled="!settings.discordWebhookUrl"
+              >
+                <span class="toggle-thumb" :class="{ 'toggle-thumb-on': settings.discordWebhookEnabled }"></span>
+              </button>
+            </div>
+
+            <div class="flex gap-2">
+              <input
+                type="url"
+                :value="settings.discordWebhookUrl"
+                @input="setSetting('discordWebhookUrl', ($event.target as HTMLInputElement).value)"
+                placeholder="https://discord.com/api/webhooks/..."
+                class="input flex-1 text-sm"
+              />
+              <button
+                type="button"
+                class="btn-secondary text-sm px-3 whitespace-nowrap"
+                :class="{
+                  'btn-success': webhookTestStatus === 'success',
+                  'btn-danger': webhookTestStatus === 'error',
+                }"
+                :disabled="!settings.discordWebhookUrl || webhookTestStatus === 'testing'"
+                @click="handleTestWebhook"
+              >
+                <span v-if="webhookTestStatus === 'idle'">Test</span>
+                <span v-else-if="webhookTestStatus === 'testing'">...</span>
+                <span v-else-if="webhookTestStatus === 'success'">OK</span>
+                <span v-else-if="webhookTestStatus === 'error'">Fail</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management (collapsible) -->
+        <div>
+          <button class="section-header" @click="toggleSection('homebrew')">
+            <span class="section-chevron" :class="{ open: isSectionOpen('homebrew') }">&rsaquo;</span>
+            <span>&gt; Homebrew Upload</span>
+          </button>
+
+          <div v-if="isSectionOpen('homebrew')" class="section-body">
+            <!-- Compact data rows -->
+            <div class="data-list">
+              <div
+                v-for="row in dataRows"
+                :key="row.key"
+                class="data-row"
+              >
                 <input
-                  type="url"
-                  :value="settings.discordWebhookUrl"
-                  @input="setSetting('discordWebhookUrl', ($event.target as HTMLInputElement).value)"
-                  placeholder="https://discord.com/api/webhooks/..."
-                  class="input flex-1 text-sm"
+                  :id="`file-input-${row.key}`"
+                  type="file"
+                  accept=".json"
+                  class="hidden"
+                  @change="handleFileSelect($event, row)"
                 />
-                <button
-                  type="button"
-                  class="btn-secondary text-sm px-3 whitespace-nowrap"
-                  :class="{
-                    'btn-success': webhookTestStatus === 'success',
-                    'btn-danger': webhookTestStatus === 'error',
-                  }"
-                  :disabled="!settings.discordWebhookUrl || webhookTestStatus === 'testing'"
-                  @click="handleTestWebhook"
-                >
-                  <span v-if="webhookTestStatus === 'idle'">Test</span>
-                  <span v-else-if="webhookTestStatus === 'testing'">...</span>
-                  <span v-else-if="webhookTestStatus === 'success'">✓</span>
-                  <span v-else-if="webhookTestStatus === 'error'">✗</span>
-                </button>
+
+                <div class="data-row-label">
+                  <span class="text-sm font-medium text-text">{{ row.label }}</span>
+                  <span class="data-row-count">{{ row.count }}</span>
+                </div>
+
+                <div class="data-row-actions">
+                  <!-- Import status flash -->
+                  <span
+                    v-if="getImportStatus(row.key).status !== 'idle'"
+                    class="text-xs px-1"
+                    :class="{
+                      'text-green-400': getImportStatus(row.key).status === 'success',
+                      'text-red-400': getImportStatus(row.key).status === 'error',
+                    }"
+                  >
+                    {{ getImportStatus(row.key).message }}
+                  </span>
+
+                  <!-- Import -->
+                  <button
+                    type="button"
+                    class="data-btn"
+                    title="Import JSON"
+                    @click="triggerImport(row.key)"
+                  >
+                    &uarr;
+                  </button>
+
+                  <!-- Export -->
+                  <button
+                    type="button"
+                    class="data-btn"
+                    :class="{ disabled: !row.canExport }"
+                    :disabled="!row.canExport"
+                    title="Export JSON"
+                    @click="row.onExport()"
+                  >
+                    &darr;
+                  </button>
+
+                  <!-- Schema -->
+                  <button
+                    v-if="row.schemaId"
+                    type="button"
+                    class="data-btn"
+                    title="View schema"
+                    @click="openSchemaViewer(row.schemaId!)"
+                  >
+                    { }
+                  </button>
+
+                  <!-- Clear (creatures/hazards only) -->
+                  <button
+                    v-if="row.onClear && row.canClear"
+                    type="button"
+                    class="data-btn data-btn-danger"
+                    title="Clear custom data"
+                    @click="row.onClear!()"
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session Bundle -->
+            <div class="mt-3 pt-3 border-t border-border">
+              <div class="data-row">
+                <div class="data-row-label">
+                  <span class="text-sm font-medium text-text">Session Bundle</span>
+                  <span class="data-row-count">YAML/JSON</span>
+                </div>
+                <div class="data-row-actions">
+                  <button
+                    type="button"
+                    class="data-btn"
+                    title="View schema"
+                    @click="openSchemaViewer('session-bundle')"
+                  >
+                    { }
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-primary text-xs px-2.5 py-1"
+                    @click="openBundleImporter"
+                  >
+                    Import
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Creature Data Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Creature Data</h3>
-
-          <div class="p-3 bg-elevated space-y-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="font-medium text-text">Loaded Creatures</span>
-                <p class="text-xs text-dim mt-0.5">
-                  {{ creatureStats.total }} total ({{ creatureStats.bundled }} bundled, {{ creatureStats.custom }} custom/AoN)
-                </p>
-              </div>
-            </div>
-
-            <p class="text-xs text-dim">
-              Bundled creatures from AoN. Import JSON to add your own custom creatures.
-            </p>
-
-            <div class="flex gap-2">
-              <input
-                ref="fileInput"
-                type="file"
-                accept=".json"
-                class="hidden"
-                @change="handleFileSelect"
-              />
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :class="{
-                  'btn-success': importStatus === 'success',
-                  'btn-danger': importStatus === 'error',
-                }"
-                @click="handleImportClick"
-              >
-                {{ importMessage || 'Import JSON' }}
-              </button>
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :disabled="creatureStats.custom === 0"
-                @click="handleExport"
-              >
-                Export Custom
-              </button>
-            </div>
-
-            <button
-              v-if="creatureStats.custom > 0"
-              type="button"
-              class="btn-danger text-sm w-full"
-              @click="handleClearCustom"
-            >
-              Clear Custom Creatures
-            </button>
-          </div>
-        </div>
-
-        <!-- Hazard Data Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Hazard Data</h3>
-
-          <div class="p-3 bg-elevated space-y-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="font-medium text-text">Loaded Hazards</span>
-                <p class="text-xs text-dim mt-0.5">
-                  {{ hazardStats.total }} total ({{ hazardStats.bundled }} bundled, {{ hazardStats.custom }} custom)
-                </p>
-              </div>
-            </div>
-
-            <p class="text-xs text-dim">
-              Bundled hazards from SF2e. Import JSON to add your own custom hazards.
-            </p>
-
-            <div class="flex gap-2">
-              <input
-                ref="hazardFileInput"
-                type="file"
-                accept=".json"
-                class="hidden"
-                @change="handleHazardFileSelect"
-              />
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :class="{
-                  'btn-success': hazardImportStatus === 'success',
-                  'btn-danger': hazardImportStatus === 'error',
-                }"
-                @click="handleHazardImportClick"
-              >
-                {{ hazardImportMessage || 'Import JSON' }}
-              </button>
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :disabled="hazardStats.custom === 0"
-                @click="handleHazardExport"
-              >
-                Export Custom
-              </button>
-            </div>
-
-            <button
-              v-if="hazardStats.custom > 0"
-              type="button"
-              class="btn-danger text-sm w-full"
-              @click="handleClearCustomHazards"
-            >
-              Clear Custom Hazards
-            </button>
-          </div>
-        </div>
-
-        <!-- Party Data Section -->
-        <div>
-          <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Party Data</h3>
-
-          <div class="p-3 bg-elevated space-y-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="font-medium text-text">Saved Parties</span>
-                <p class="text-xs text-dim mt-0.5">
-                  {{ partyCount }} {{ partyCount === 1 ? 'party' : 'parties' }} saved
-                </p>
-              </div>
-            </div>
-
-            <p class="text-xs text-dim">
-              Export and import party configurations with player data.
-            </p>
-
-            <div class="flex gap-2">
-              <input
-                ref="partyFileInput"
-                type="file"
-                accept=".json"
-                class="hidden"
-                @change="handlePartyFileSelect"
-              />
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :class="{
-                  'btn-success': partyImportStatus === 'success',
-                  'btn-danger': partyImportStatus === 'error',
-                }"
-                @click="handlePartyImportClick"
-              >
-                {{ partyImportMessage || 'Import JSON' }}
-              </button>
-              <button
-                type="button"
-                class="btn-secondary text-sm flex-1"
-                :disabled="partyCount === 0"
-                @click="handlePartyExport"
-              >
-                Export Parties
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Data Schemas & Bundle Import Section -->
-        <SchemaSection
-          @view-schema="openSchemaViewer"
-          @open-bundle-importer="openBundleImporter"
-        />
       </div>
 
-      <div class="mt-6 pt-4 border-t border-border">
+      <div class="mt-6 pt-4 border-t border-border space-y-3">
+        <a
+          href="https://discord.gg/ABaEmFuyjs"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-secondary w-full text-sm py-2 text-center block"
+        >
+          Join the Community
+        </a>
         <p class="text-xs text-muted text-center">Settings are saved automatically</p>
       </div>
     </div>
@@ -529,6 +528,46 @@ function handlePartyExport() {
 </template>
 
 <style scoped>
+/* Collapsible sections */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.section-header:hover {
+  color: var(--color-accent);
+}
+
+.section-chevron {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.15s;
+  font-weight: bold;
+}
+
+.section-chevron.open {
+  transform: rotate(90deg);
+}
+
+.section-body {
+  padding: 0.75rem 0;
+}
+
+/* Theme options */
 .theme-option {
   display: flex;
   align-items: center;
@@ -570,6 +609,7 @@ function handlePartyExport() {
   box-shadow: 0 0 10px var(--theme-color);
 }
 
+/* Toggle switch */
 .toggle-switch {
   position: relative;
   width: 2.75rem;
@@ -744,5 +784,80 @@ function handlePartyExport() {
 @keyframes miniBlink {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 0.8; }
+}
+
+/* Data list */
+.data-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.1s;
+}
+
+.data-row:last-child {
+  border-bottom: none;
+}
+
+.data-row:hover {
+  background: var(--color-bg-elevated);
+}
+
+.data-row-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.data-row-count {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.data-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.data-btn {
+  padding: 0.2rem 0.4rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  font-size: 0.7rem;
+  font-family: monospace;
+  cursor: pointer;
+  transition: all 0.1s;
+  line-height: 1;
+}
+
+.data-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.data-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.data-btn.disabled:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-dim);
+}
+
+.data-btn-danger:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 </style>

@@ -91,9 +91,15 @@ export interface BundleStarship {
     maxHP?: number
     maxShields?: number
     shieldRegen?: number
+    bonuses?: Record<string, number>
   }
   threats?: BundleStarshipThreat[]
+  roles?: { roleId: string; playerName: string; playerId?: string }[]
+  availableRoles?: string[]
   starshipActions?: object[]
+  partySize?: number
+  additionalObjectives?: string[]
+  roleDescriptions?: Record<string, string>
 }
 
 export interface BundleShop {
@@ -527,6 +533,12 @@ export function importSessionBundle(
       }))
 
       const base = createEmptySavedScene()
+
+      // Map starship bonuses if provided
+      if (s.starship?.bonuses && starship !== defaultStarship) {
+        starship.bonuses = s.starship.bonuses
+      }
+
       return {
         ...base,
         id: crypto.randomUUID(),
@@ -539,7 +551,12 @@ export function importSessionBundle(
         customCondition: s.customCondition,
         starship,
         threats,
+        roles: (s.roles ?? []) as SavedScene['roles'],
+        availableRoles: s.availableRoles ?? base.availableRoles,
         starshipActions: (s.starshipActions ?? []) as SavedScene['starshipActions'],
+        partySize: s.partySize ?? base.partySize,
+        additionalObjectives: s.additionalObjectives,
+        roleDescriptions: s.roleDescriptions,
         savedAt: Date.now(),
       }
     })

@@ -284,6 +284,27 @@ function togglePlayerView() {
   state.showPlayerView = !state.showPlayerView
 }
 
+// Import/Export
+function exportEncounters(): string {
+  return JSON.stringify(state.savedEncounters, null, 2)
+}
+
+function importEncounters(json: string): number {
+  const imported = JSON.parse(json) as SavedHackingEncounter[]
+  if (!Array.isArray(imported)) throw new Error('Invalid format')
+
+  let count = 0
+  for (const enc of imported) {
+    // Skip duplicates by ID
+    if (!state.savedEncounters.find(e => e.id === enc.id)) {
+      state.savedEncounters.push(enc)
+      count++
+    }
+  }
+  saveEncountersToStorage()
+  return count
+}
+
 // Encounter management
 function saveEncounter(name?: string) {
   if (!state.computer) return null
@@ -629,6 +650,9 @@ export function useHackingStore() {
     clearEffects,
     setGMView,
     togglePlayerView,
+    // Import/Export
+    exportEncounters,
+    importEncounters,
     // Encounter management
     saveEncounter,
     loadEncounter,
