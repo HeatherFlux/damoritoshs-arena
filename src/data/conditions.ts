@@ -9,6 +9,7 @@ export interface ConditionEffect {
   allChecks?: number        // All checks and DCs
   allSaves?: number
   perception?: number
+  skillChecks?: number      // Penalty to skill checks only (not attacks/saves)
   attackRolls?: number
   reflex?: number
   fortitude?: number
@@ -158,13 +159,9 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     name: 'Dying',
     hasValue: true,
     description: 'You\'re bleeding out or otherwise at death\'s door. While you have this condition, you\'re unconscious. Dying always includes a value, and if it ever reaches dying 4, you die. When you\'re dying, you must attempt a recovery check at the start of your turn each round to determine whether you get better or worse. Your dying condition increases by 1 if you take damage while dying, or by 2 if you take damage from an enemy\'s critical hit or a critical failure on your save. If you lose the dying condition by succeeding at a recovery check and are still at 0 Hit Points, you remain unconscious, but you can wake up as described in that condition. You lose the dying condition automatically and wake up if you ever have 1 Hit Point or more. Any time you lose the dying condition, you gain the wounded 1 condition, or increase your wounded condition value by 1 if you already have that condition.',
-    shortDescription: 'Near death; recovery checks',
+    shortDescription: 'Near death; recovery checks (also unconscious)',
     effects: {
       cannotAct: true,
-      offGuard: true,
-      ac: -4,
-      perception: -4,
-      reflex: -4,
     },
     group: 'death',
   },
@@ -175,9 +172,8 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     description: 'You\'re carrying more weight than you can manage. While you\'re encumbered, you are clumsy 1 and take a 10-foot penalty to all your Speeds. As with all penalties to your Speed, this can\'t reduce your Speed below 5 feet.',
     shortDescription: 'Clumsy 1; -10 ft Speed',
     effects: {
-      acPerValue: -1,
-      reflexPerValue: -1,
-      dexChecksPerValue: -1,
+      ac: -1,
+      reflex: -1,
     },
     group: 'other',
   },
@@ -201,7 +197,7 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     shortDescription: '-2 Perception and skills',
     effects: {
       perception: -2,
-      allChecks: -2,
+      skillChecks: -2,
     },
     group: 'other',
   },
@@ -234,7 +230,6 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     shortDescription: 'Penalty to all checks and DCs',
     effects: {
       allChecksPerValue: -1,
-      acPerValue: -1,
     },
     decreasesAtEndOfTurn: true,
     group: 'other',
@@ -365,7 +360,6 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     shortDescription: 'Penalty to all checks; cannot ingest',
     effects: {
       allChecksPerValue: -1,
-      acPerValue: -1,
     },
     group: 'other',
   },
@@ -399,8 +393,6 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
       intChecksPerValue: -1,
       wisChecksPerValue: -1,
       chaChecksPerValue: -1,
-      willPerValue: -1,
-      perceptionPerValue: -1,
     },
     group: 'lowered-abilities',
   },
@@ -455,10 +447,9 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     name: 'Suppressed',
     hasValue: false,
     description: 'You\'ve been affected by a high volume of incoming fire or a particularly dangerous attack that forces you to act less efficiently for your own safety. You take a –1 circumstance penalty to attack rolls and a –10-foot status penalty to all your Speeds.',
-    shortDescription: 'Off-guard; -2 attacks in area',
+    shortDescription: '-1 attacks; -10 ft Speed',
     effects: {
-      offGuard: true,
-      attackRolls: -2,
+      attackRolls: -1,
     },
     group: 'other',
   },
@@ -467,9 +458,31 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     name: 'Untethered',
     hasValue: false,
     description: 'You\'re in a zero gravity (or similar) environment without a means of movement and float without support. You can\'t take move actions unless they specify they can be used in your current environment. At the end of your turn, you move 5 feet in the last direction you moved. You can take the Push Off action (see below) to change directions and the distance moved. Once you gain a means of moving in your environment, you lose this condition. Typically, a creature with the untethered condition in zero-gravity also gains the clumsy 1 and off-guard conditions while untethered.',
-    shortDescription: 'Confused; ongoing mental damage',
+    shortDescription: 'Zero-g drift; cannot move normally',
     effects: {
       offGuard: true,
+    },
+    group: 'other',
+  },
+
+  'status-penalty': {
+    name: 'Status Penalty',
+    hasValue: true,
+    description: 'A generic status penalty from a spell, ability, or other effect that doesn\'t match a named condition. Apply the value as a status penalty to all checks and DCs. Use the notes field on the combatant to record the source and which checks are affected if it\'s not everything.',
+    shortDescription: 'Custom penalty to checks/DCs',
+    effects: {
+      allChecksPerValue: -1,
+    },
+    group: 'other',
+  },
+
+  'circumstance-penalty': {
+    name: 'Circumstance Penalty',
+    hasValue: true,
+    description: 'A generic circumstance penalty from terrain, positioning, or other situational effects. Apply the value as a circumstance penalty to all checks and DCs. Use the notes field to record the source and scope.',
+    shortDescription: 'Custom circumstance penalty',
+    effects: {
+      allChecksPerValue: -1,
     },
     group: 'other',
   },
@@ -550,6 +563,7 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
 // Combat-relevant conditions for the condition picker (alphabetized)
 export const COMBAT_CONDITIONS = [
   'blinded',
+  'circumstance-penalty',
   'clumsy',
   'concealed',
   'confused',
@@ -580,6 +594,7 @@ export const COMBAT_CONDITIONS = [
   'restrained',
   'sickened',
   'slowed',
+  'status-penalty',
   'stunned',
   'stupefied',
   'suppressed',
@@ -605,6 +620,7 @@ export function calculateConditionEffects(
   reflex: number
   will: number
   attackRolls: number
+  skillChecks: number
   damage: number
   maxHPReduction: number
   isOffGuard: boolean
@@ -620,6 +636,7 @@ export function calculateConditionEffects(
     reflex: 0,
     will: 0,
     attackRolls: 0,
+    skillChecks: 0,
     damage: 0,
     maxHPReduction: 0,
     isOffGuard: false,
@@ -643,9 +660,11 @@ export function calculateConditionEffects(
     if (effects.reflex) result.reflex += effects.reflex
     if (effects.will) result.will += effects.will
     if (effects.attackRolls) result.attackRolls += effects.attackRolls
+    if (effects.skillChecks) result.skillChecks += effects.skillChecks
     if (effects.allChecks) {
       result.perception += effects.allChecks
       result.attackRolls += effects.allChecks
+      result.skillChecks += effects.allChecks
     }
     if (effects.allSaves) {
       result.fortitude += effects.allSaves
@@ -665,6 +684,7 @@ export function calculateConditionEffects(
       result.ac += effects.allChecksPerValue * value
       result.perception += effects.allChecksPerValue * value
       result.attackRolls += effects.allChecksPerValue * value
+      result.skillChecks += effects.allChecksPerValue * value
       result.fortitude += effects.allChecksPerValue * value
       result.reflex += effects.allChecksPerValue * value
       result.will += effects.allChecksPerValue * value

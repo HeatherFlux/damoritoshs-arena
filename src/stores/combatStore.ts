@@ -5,8 +5,222 @@ import type { Combat, Combatant } from '../types/combat'
 import { getAdjustedHP, getAdjustedAC } from '../types/combat'
 import { parsePathbuilderJSON, type ImportResult } from '../utils/pathbuilderImport'
 import { sendTurnChange } from '../utils/discordIntegration'
+import { createSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 const STORAGE_KEY = 'sf2e-combat'
+const SYNC_CHANNEL = 'sf2e-combat-sync'
+
+// Types for player view data (no HP or stats exposed)
+export interface CombatPlayerData {
+  combatants: {
+    name: string
+    conditions: { name: string; value?: number }[]
+    isDead: boolean
+    isPlayer: boolean
+    isActive: boolean
+  }[]
+  round: number
+  turn: number
+  combatName: string
+  isActive: boolean
+}
+
+// BroadcastChannel for same-device sync
+let channel: BroadcastChannel | null = null
+
+function initChannel() {
+  if (channel) return
+  try {
+    channel = new BroadcastChannel(SYNC_CHANNEL)
+    channel.onmessage = (event) => {
+      if (event.data?.type === 'combat-state' && !isGMView) {
+        playerViewData.value = event.data.payload as CombatPlayerData
+      }
+      // GM responds to state requests from player views
+      if (event.data?.type === 'request-state' && isGMView) {
+        broadcastCombatState()
+      }
+    }
+  } catch (e) {
+    // BroadcastChannel not supported
+  }
+}
+
+/**
+ * Build sanitized player data from a Combat object (no HP/AC exposed).
+ * Used both for broadcasting and for localStorage fallback.
+ */
+function buildPlayerData(combat: Combat | null): CombatPlayerData {
+  if (!combat) {
+    return { combatants: [], round: 0, turn: 0, combatName: '', isActive: false }
+  }
+  const sorted = [...combat.combatants].sort((a, b) => b.initiative - a.initiative)
+  return {
+    combatants: sorted.map(c => ({
+      name: c.name,
+      conditions: c.conditions.map(cond => ({ name: cond.name, value: cond.value })),
+      isDead: c.isDead,
+      isPlayer: c.isPlayer,
+      isActive: c.isActive,
+    })),
+    round: combat.round,
+    turn: combat.turn,
+    combatName: combat.name,
+    isActive: combat.isActive,
+  }
+}
+
+/**
+ * Request current state from GM tab (called by player view on mount).
+ * Also loads from localStorage as an immediate fallback.
+ */
+function requestStateFromGM() {
+  // Immediate fallback: load sanitized state from localStorage
+  // This means the player view works even if the GM tab is closed
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const combat = JSON.parse(saved) as Combat
+      combat.createdAt = new Date(combat.createdAt)
+      playerViewData.value = buildPlayerData(combat)
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+
+  // Then request fresh state from GM tab via BroadcastChannel
+  if (!channel) initChannel()
+  if (channel) {
+    channel.postMessage({ type: 'request-state' })
+  }
+}
+
+// ============================================
+// WebSocket sync for cross-device player view
+// ============================================
+
+let wsTransport: ReturnType<typeof createSyncTransport> | null = null
+let combatSessionId: string = ''
+const remoteSyncState = reactive({
+  enabled: false,
+  connectionState: 'disconnected' as ConnectionState,
+})
+
+function getCombatSessionId(): string {
+  if (!combatSessionId) {
+    // Check URL first (for player views)
+    const hash = window.location.hash
+    const match = hash.match(/[?&]session=([^&]+)/)
+    if (match) {
+      combatSessionId = match[1]
+    } else {
+      combatSessionId = Math.random().toString(36).substring(2, 10)
+    }
+  }
+  return combatSessionId
+}
+
+function handleRemoteCombatMessage(message: SyncMessage) {
+  if (message.type === 'combat-state' && !isGMView) {
+    playerViewData.value = message.payload as CombatPlayerData
+  }
+  // GM responds to remote state requests
+  if (message.type === 'request-state' && isGMView) {
+    broadcastCombatState()
+  }
+}
+
+async function enableCombatRemoteSync(): Promise<boolean> {
+  if (!isWebSocketSupported()) return false
+
+  try {
+    wsTransport = createSyncTransport()
+    wsTransport.onMessage = handleRemoteCombatMessage
+    wsTransport.onStateChange = (newState) => {
+      remoteSyncState.connectionState = newState
+    }
+
+    await wsTransport.connect(getCombatSessionId(), 'gm')
+    remoteSyncState.enabled = true
+
+    // Send current state to any connected players
+    if (state.combat) {
+      wsTransport.send({ type: 'combat-state', payload: buildPlayerData(state.combat) })
+    }
+    return true
+  } catch (e) {
+    console.error('[Combat] Failed to enable remote sync:', e)
+    remoteSyncState.enabled = false
+    remoteSyncState.connectionState = 'error'
+    return false
+  }
+}
+
+async function joinCombatRemoteSession(sessionId: string): Promise<boolean> {
+  if (!isWebSocketSupported()) return false
+
+  try {
+    combatSessionId = sessionId
+    wsTransport = createSyncTransport()
+    wsTransport.onMessage = handleRemoteCombatMessage
+    wsTransport.onStateChange = (newState) => {
+      remoteSyncState.connectionState = newState
+    }
+
+    await wsTransport.connect(sessionId, 'player')
+    remoteSyncState.enabled = true
+
+    // Request current state from GM
+    wsTransport.send({ type: 'request-state', payload: null })
+    return true
+  } catch (e) {
+    console.error('[Combat] Failed to join remote session:', e)
+    remoteSyncState.enabled = false
+    remoteSyncState.connectionState = 'error'
+    return false
+  }
+}
+
+function disableCombatRemoteSync() {
+  if (wsTransport) {
+    wsTransport.disconnect()
+    wsTransport = null
+  }
+  remoteSyncState.enabled = false
+  remoteSyncState.connectionState = 'disconnected'
+}
+
+function generateCombatShareUrl(): string {
+  const baseUrl = window.location.origin + window.location.pathname
+  const sessionId = getCombatSessionId()
+  return `${baseUrl}#/combat/view?session=${sessionId}&sync=ws`
+}
+
+function hasCombatRemoteSyncInUrl(): boolean {
+  return window.location.hash.includes('sync=ws')
+}
+
+function getCombatSessionFromUrl(): string | null {
+  const match = window.location.hash.match(/[?&]session=([^&]+)/)
+  return match ? match[1] : null
+}
+
+function broadcastCombatState() {
+  if (!channel) initChannel()
+  if (!channel) return
+
+  const payload = buildPlayerData(state.combat)
+  channel.postMessage({ type: 'combat-state', payload })
+
+  // Also send over WebSocket if remote sync is enabled
+  if (wsTransport && remoteSyncState.enabled && isGMView) {
+    wsTransport.send({ type: 'combat-state', payload })
+  }
+}
+
+// Player view state
+let isGMView = true
+const playerViewData = reactive<{ value: CombatPlayerData | null }>({ value: null })
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 9)
@@ -82,12 +296,14 @@ function startCombat(name: string = 'Combat'): Combat {
   }
   state.combat = combat
   saveToStorage(combat)
+  broadcastCombatState()
   return combat
 }
 
 function endCombat() {
   state.combat = null
   saveToStorage(null)
+  broadcastCombatState()
 }
 
 function addPlayer(name: string, initiative: number, hp: number, ac: number): Combatant {
@@ -111,6 +327,7 @@ function addPlayer(name: string, initiative: number, hp: number, ac: number): Co
 
   state.combat!.combatants.push(combatant)
   saveToStorage(state.combat)
+  broadcastCombatState()
   return combatant
 }
 
@@ -159,6 +376,7 @@ function addCreature(
 
   state.combat!.combatants.push(combatant)
   saveToStorage(state.combat)
+  broadcastCombatState()
   return combatant
 }
 
@@ -200,6 +418,7 @@ function addHazard(hazard: Hazard, customName?: string): Combatant {
 
   state.combat!.combatants.push(combatant)
   saveToStorage(state.combat)
+  broadcastCombatState()
   return combatant
 }
 
@@ -214,6 +433,7 @@ function removeCombatant(id: string) {
       state.combat.turn = 0
     }
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -224,6 +444,7 @@ function setInitiative(id: string, initiative: number) {
   if (combatant) {
     combatant.initiative = initiative
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -235,6 +456,7 @@ function rollInitiative(id: string) {
     const roll = Math.floor(Math.random() * 20) + 1
     combatant.initiative = roll + combatant.initiativeBonus
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -248,6 +470,7 @@ function rollAllInitiative() {
     }
   })
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function nextTurn() {
@@ -270,6 +493,7 @@ function nextTurn() {
 
   state.combat.turn = nextIndex
   saveToStorage(state.combat)
+  broadcastCombatState()
 
   // Send turn change to Discord
   const nextCombatant = sorted[nextIndex]
@@ -301,12 +525,14 @@ function previousTurn() {
 
   state.combat.turn = prevIndex
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function setTurn(index: number) {
   if (!state.combat) return
   state.combat.turn = Math.max(0, Math.min(index, sortedCombatants.value.length - 1))
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function applyDamage(id: string, damage: number) {
@@ -330,6 +556,7 @@ function applyDamage(id: string, damage: number) {
   }
 
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function applyHealing(id: string, healing: number) {
@@ -346,6 +573,7 @@ function applyHealing(id: string, healing: number) {
   }
 
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function setHP(id: string, hp: number) {
@@ -358,6 +586,7 @@ function setHP(id: string, hp: number) {
   combatant.isDead = combatant.currentHP <= 0
 
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function setTempHP(id: string, tempHP: number) {
@@ -367,6 +596,7 @@ function setTempHP(id: string, tempHP: number) {
   if (combatant) {
     combatant.tempHP = Math.max(0, tempHP)
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -378,6 +608,7 @@ function setMaxHP(id: string, maxHP: number) {
     combatant.maxHP = Math.max(1, maxHP)
     combatant.currentHP = Math.min(combatant.currentHP, combatant.maxHP)
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -396,6 +627,7 @@ function addCondition(id: string, condition: string, value?: number) {
   }
 
   saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function removeCondition(id: string, condition: string) {
@@ -408,6 +640,7 @@ function removeCondition(id: string, condition: string) {
   if (index !== -1) {
     combatant.conditions.splice(index, 1)
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -435,6 +668,7 @@ function setNotes(id: string, notes: string) {
   if (combatant) {
     combatant.notes = notes
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -448,6 +682,7 @@ function toggleDead(id: string) {
       combatant.currentHP = 0
     }
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -458,6 +693,7 @@ function updateCombatantName(id: string, name: string) {
   if (combatant) {
     combatant.name = name
     saveToStorage(state.combat)
+    broadcastCombatState()
   }
 }
 
@@ -516,6 +752,7 @@ function importPlayerFromPathbuilder(json: string): ImportResult {
 
   state.combat!.combatants.push(combatant)
   saveToStorage(state.combat)
+  broadcastCombatState()
 
   // Return result with the created combatant
   return {
@@ -530,12 +767,27 @@ function clearAndStartCombat(name: string = 'Combat'): Combat {
   return startCombat(name)
 }
 
+function setGMView(isGM: boolean) {
+  isGMView = isGM
+  initChannel()
+}
+
+function ensureChannel() {
+  initChannel()
+}
+
+function openPlayerView() {
+  broadcastCombatState()
+  window.open(`${window.location.pathname}#/combat/view`, '_blank')
+}
+
 export const useCombatStore = () => ({
   state,
   sortedCombatants,
   currentCombatant,
   nextCombatant,
   aliveCombatants,
+  playerViewData,
 
   startCombat,
   endCombat,
@@ -562,4 +814,19 @@ export const useCombatStore = () => ({
   toggleDead,
   updateCombatantName,
   importPlayerFromPathbuilder,
+  setGMView,
+  ensureChannel,
+  openPlayerView,
+  broadcastCombatState,
+  requestStateFromGM,
+
+  // Remote sync (cross-device)
+  remoteSyncState,
+  enableCombatRemoteSync,
+  joinCombatRemoteSession,
+  disableCombatRemoteSync,
+  generateCombatShareUrl,
+  hasCombatRemoteSyncInUrl,
+  getCombatSessionFromUrl,
+  isSyncAvailable: isSyncAvailable,
 })

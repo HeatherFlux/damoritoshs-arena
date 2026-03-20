@@ -340,9 +340,17 @@ function deleteEncounter(encounterId: string) {
 function generateShareUrl(includeRemoteSync = true): string {
   if (!state.computer) return window.location.href
 
-  // Minify computer data for shorter URLs
-  // n=name, l=level, t=type, d=description, ap=accessPoints
-  // Access point: id, n=name, t=type, s=state, p=position, c=connectedTo
+  const baseUrl = window.location.origin + window.location.pathname
+
+  // When remote sync is enabled, skip embedding state — player gets it via WebSocket.
+  // This keeps URLs short enough to share in Discord/chat.
+  if (includeRemoteSync && state.isRemoteSyncEnabled) {
+    const url = `${baseUrl}#/hacking/view?session=${state.sessionId}&sync=ws`
+    console.log('[Hacking] Share URL (sync, no state):', url.length, 'chars')
+    return url
+  }
+
+  // Without sync: embed full state in URL (offline/same-device fallback)
   const minified = {
     n: state.computer.name,
     l: state.computer.level,
@@ -361,14 +369,10 @@ function generateShareUrl(includeRemoteSync = true): string {
 
   const json = JSON.stringify(minified)
   const encoded = btoa(encodeURIComponent(json))
-  const baseUrl = window.location.origin + window.location.pathname
 
-  // If remote sync is enabled, add hint for player to connect via WebSocket
-  const syncParam = includeRemoteSync && state.isRemoteSyncEnabled ? '&sync=ws' : ''
+  console.log('[Hacking] Share URL (with state):', encoded.length, 'chars')
 
-  console.log('[Hacking] Share URL length:', encoded.length, 'chars', syncParam ? '(with sync)' : '')
-
-  return `${baseUrl}#/hacking/view?session=${state.sessionId}&state=${encoded}${syncParam}`
+  return `${baseUrl}#/hacking/view?session=${state.sessionId}&state=${encoded}`
 }
 
 function loadFromUrl(): boolean {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { COMBAT_CONDITIONS, VALUED_CONDITIONS } from '../types/combat'
@@ -18,6 +18,19 @@ const newPlayerHP = ref(50)
 const newPlayerAC = ref(20)
 
 const showConditionPicker = ref<string | null>(null)
+const conditionSearch = ref('')
+
+const filteredConditions = computed(() => {
+  const search = conditionSearch.value.toLowerCase().trim()
+  if (!search) return COMBAT_CONDITIONS
+  return COMBAT_CONDITIONS.filter(key => {
+    const def = CONDITION_DEFS[key]
+    if (!def) return key.includes(search)
+    return key.includes(search)
+      || def.name.toLowerCase().includes(search)
+      || def.shortDescription.toLowerCase().includes(search)
+  })
+})
 
 // Pathbuilder import state
 const showImportModal = ref(false)
@@ -59,6 +72,16 @@ function addPlayer() {
   showAddPlayer.value = false
 }
 
+const conditionSearchInput = ref<HTMLInputElement | null>(null)
+
+// Auto-focus search when condition picker opens
+watch(showConditionPicker, (val) => {
+  if (val) {
+    conditionSearch.value = ''
+    nextTick(() => conditionSearchInput.value?.focus())
+  }
+})
+
 function addConditionToCombatant(combatantId: string, conditionKey: string) {
   const needsValue = VALUED_CONDITIONS.includes(conditionKey)
   combatStore.addCondition(combatantId, conditionKey, needsValue ? 1 : undefined)
@@ -67,6 +90,25 @@ function addConditionToCombatant(combatantId: string, conditionKey: string) {
 
 function getConditionDef(key: string) {
   return CONDITION_DEFS[key]
+}
+
+async function toggleRemoteSync() {
+  if (combatStore.remoteSyncState.enabled) {
+    combatStore.disableCombatRemoteSync()
+  } else {
+    const success = await combatStore.enableCombatRemoteSync()
+    if (success) {
+      const url = combatStore.generateCombatShareUrl()
+      try {
+        await navigator.clipboard.writeText(url)
+        alert('Sync enabled! Player view URL copied to clipboard.\n\nShare this with your players:\n' + url)
+      } catch {
+        alert('Sync enabled! Share this URL with players:\n\n' + url)
+      }
+    } else {
+      alert('Failed to connect to sync server.')
+    }
+  }
 }
 
 const hasCombat = computed(() => combatStore.state.combat !== null)
@@ -169,6 +211,18 @@ function importAnother() {
           <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.rollAllInitiative()">
             Roll All Init
           </button>
+          <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.openPlayerView()" title="Open player view in new window (same device)">
+            Player View
+          </button>
+          <button
+            v-if="combatStore.isSyncAvailable()"
+            class="btn-xs lg:btn-sm"
+            :class="combatStore.remoteSyncState.enabled ? 'bg-success text-white' : 'btn-secondary'"
+            @click="toggleRemoteSync"
+            :title="combatStore.remoteSyncState.enabled ? 'Click to stop sharing. Session URL copied to clipboard.' : 'Share player view to other devices via sync server'"
+          >
+            {{ combatStore.remoteSyncState.enabled ? 'Syncing...' : 'Share' }}
+          </button>
           <button class="btn-danger btn-xs lg:btn-sm" @click="combatStore.endCombat()">
             End Combat
           </button>
@@ -248,10 +302,18 @@ function importAnother() {
       @click.self="showConditionPicker = null"
     >
       <div class="modal max-w-[700px] max-h-[80vh] flex flex-col">
-        <h3 class="mb-4">Add Condition</h3>
-        <div class="flex flex-col gap-1.5 my-4 max-h-[500px] overflow-y-auto">
+        <h3 class="mb-2">Add Condition</h3>
+        <input
+          v-model="conditionSearch"
+          type="text"
+          class="w-full px-3 py-2 mb-3 bg-elevated border border-border rounded-md text-text text-sm focus:outline-none focus:border-accent"
+          placeholder="Search conditions..."
+          ref="conditionSearchInput"
+          @keydown.escape="showConditionPicker = null"
+        />
+        <div class="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto">
           <button
-            v-for="conditionKey in COMBAT_CONDITIONS"
+            v-for="conditionKey in filteredConditions"
             :key="conditionKey"
             class="flex flex-col items-start gap-0.5 px-3.5 py-2.5 text-[0.8125rem] text-left bg-elevated border border-border rounded-md transition-all duration-150 hover:bg-accent/15 hover:border-accent"
             :title="getConditionDef(conditionKey)?.description"
@@ -259,11 +321,15 @@ function importAnother() {
           >
             <span class="font-semibold text-text capitalize flex items-center gap-1.5">
               {{ getConditionDef(conditionKey)?.name || conditionKey }}
+              <span v-if="getConditionDef(conditionKey)?.hasValue" class="text-[0.5625rem] px-1 py-0.5 bg-accent/20 text-accent rounded font-normal">valued</span>
             </span>
             <span class="text-[0.6875rem] text-dim">{{ getConditionDef(conditionKey)?.shortDescription }}</span>
           </button>
+          <div v-if="filteredConditions.length === 0" class="text-center py-4 text-dim text-sm">
+            No conditions match "{{ conditionSearch }}"
+          </div>
         </div>
-        <button class="btn-secondary" @click="showConditionPicker = null">Cancel</button>
+        <button class="btn-secondary mt-3" @click="showConditionPicker = null">Cancel</button>
       </div>
     </div>
 

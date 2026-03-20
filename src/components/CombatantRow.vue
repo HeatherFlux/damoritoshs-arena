@@ -324,7 +324,7 @@ const hasExpandableDetails = computed(() => {
     <!-- Expandable Statblock (Creature) -->
     <Transition name="statblock">
       <div v-if="showStatblock && combatant.creature" class="p-4 bg-surface border border-border border-t-0 rounded-b-lg -mt-0.5">
-        <CreatureCard :creature="combatant.creature" :show-recall-knowledge="false" />
+        <CreatureCard :creature="combatant.creature" :show-recall-knowledge="false" :condition-penalties="conditionEffects" />
       </div>
     </Transition>
 

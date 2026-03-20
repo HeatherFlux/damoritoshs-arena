@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PF2e/SF2e Conditions Reference — Damoritosh's Arena</title>
+  <style>
+    :root { --bg: #0a0d10; --surface: #0f1318; --border: #1e2832; --text: #e8eef4; --dim: #7a8b9a; --accent: #8B1EE1; --danger: #E11E3C; --success: #1EE14A; --warning: #E1CB1E; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.5; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent); }
+    h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); color: var(--accent); }
+    .subtitle { color: var(--dim); font-size: 0.875rem; margin-bottom: 2rem; }
+    .cond { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.75rem 1rem; margin-bottom: 0.5rem; }
+    .cond-header { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .cond-name { font-weight: 700; font-size: 0.9375rem; }
+    .tag { font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-weight: 600; text-transform: uppercase; }
+    .tag-valued { background: rgba(139,30,225,0.2); color: var(--accent); }
+    .tag-decrease { background: rgba(30,225,74,0.2); color: var(--success); }
+    .cond-short { color: var(--dim); font-size: 0.8125rem; margin-left: auto; }
+    .cond-effects { margin-top: 0.5rem; font-size: 0.8125rem; }
+    .cond-effects strong { color: var(--danger); }
+    .cond-effects .flag { color: var(--warning); }
+    .cond-desc { margin-top: 0.375rem; font-size: 0.75rem; color: var(--dim); }
+    .search { width: 100%; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.375rem; color: var(--text); font-size: 0.875rem; margin-bottom: 1.5rem; }
+    .search:focus { outline: none; border-color: var(--accent); }
+    .hidden { display: none; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>PF2e / SF2e Conditions Reference</h1>
+  <p class="subtitle">Quick reference for <a href="/">Damoritosh's Arena</a>. Verified against Archives of Nethys (Remaster + SF2e).</p>
+  <input type="text" class="search" id="search" placeholder="Search conditions..." oninput="filterConditions(this.value)">
+
+  <h2>Combat Conditions</h2>
+  <div id="conditions">
+
+    <div class="cond" data-name="blinded">
+      <div class="cond-header">
+        <span class="cond-name">Blinded</span>
+        <span class="cond-short">Cannot see; -4 Perception</span>
+      </div>
+      <div class="cond-effects"><strong>-4 status</strong> to Perception (if vision is only precise sense). <span class="flag">Cannot see.</span> Auto crit-fail vision-based Perception checks. Immune to visual effects.</div>
+    </div>
+
+    <div class="cond" data-name="clumsy">
+      <div class="cond-header">
+        <span class="cond-name">Clumsy</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Penalty to Dex checks, AC, Reflex</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to Dex-based checks and DCs: AC, Reflex saves, ranged attack rolls, Acrobatics, Stealth, Thievery.</div>
+    </div>
+
+    <div class="cond" data-name="concealed">
+      <div class="cond-header">
+        <span class="cond-name">Concealed</span>
+        <span class="cond-short">DC 5 flat check to target</span>
+      </div>
+      <div class="cond-effects">Attacker must succeed at a <strong>DC 5 flat check</strong> when targeting you. Area effects bypass this.</div>
+    </div>
+
+    <div class="cond" data-name="confused">
+      <div class="cond-header">
+        <span class="cond-name">Confused</span>
+        <span class="cond-short">Off-guard; attack randomly</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard.</span> Attack wildly at random targets. Can't Delay, Ready, or use reactions. DC 11 flat check to recover when taking damage.</div>
+    </div>
+
+    <div class="cond" data-name="controlled">
+      <div class="cond-header">
+        <span class="cond-name">Controlled</span>
+        <span class="cond-short">Controller dictates actions</span>
+      </div>
+      <div class="cond-effects">No direct numeric penalties. Controller dictates all actions.</div>
+    </div>
+
+    <div class="cond" data-name="dazzled">
+      <div class="cond-header">
+        <span class="cond-name">Dazzled</span>
+        <span class="cond-short">Everything concealed</span>
+      </div>
+      <div class="cond-effects">If vision is only precise sense, all creatures/objects are concealed from you (DC 5 flat check to target).</div>
+    </div>
+
+    <div class="cond" data-name="deafened">
+      <div class="cond-header">
+        <span class="cond-name">Deafened</span>
+        <span class="cond-short">Cannot hear; -2 Perception</span>
+      </div>
+      <div class="cond-effects"><strong>-2 status</strong> to Perception for initiative and sound-based checks. <span class="flag">Cannot hear.</span> DC 5 flat check for auditory actions. Immune to auditory effects.</div>
+    </div>
+
+    <div class="cond" data-name="doomed">
+      <div class="cond-header">
+        <span class="cond-name">Doomed</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Closer to death</span>
+      </div>
+      <div class="cond-effects">Dying value at which you die reduced by doomed value. If max dying reaches 0, instant death. Decreases by 1 per full rest.</div>
+    </div>
+
+    <div class="cond" data-name="drained">
+      <div class="cond-header">
+        <span class="cond-name">Drained</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Penalty to Con; reduced max HP</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to Con-based checks (including Fortitude). Lose <strong>level × value HP</strong> and reduce max HP by same. Decreases by 1 per full rest.</div>
+    </div>
+
+    <div class="cond" data-name="dying">
+      <div class="cond-header">
+        <span class="cond-name">Dying</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Near death; recovery checks</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Unconscious (grants -4 AC/Perc/Reflex, off-guard, cannot act, blinded).</span> Recovery check at start of turn. Dying 4 = death. +1 on damage, +2 on enemy crit or crit-fail save.</div>
+    </div>
+
+    <div class="cond" data-name="encumbered">
+      <div class="cond-header">
+        <span class="cond-name">Encumbered</span>
+        <span class="cond-short">Clumsy 1; -10 ft Speed</span>
+      </div>
+      <div class="cond-effects">Equivalent to <strong>Clumsy 1</strong> (-1 AC, -1 Reflex, -1 Dex checks). -10 ft to all Speeds (min 5 ft).</div>
+    </div>
+
+    <div class="cond" data-name="enfeebled">
+      <div class="cond-header">
+        <span class="cond-name">Enfeebled</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Penalty to Str checks and damage</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to Str-based checks (melee attack rolls, Athletics) and Str-based damage rolls.</div>
+    </div>
+
+    <div class="cond" data-name="fascinated">
+      <div class="cond-header">
+        <span class="cond-name">Fascinated</span>
+        <span class="cond-short">-2 Perception and skills</span>
+      </div>
+      <div class="cond-effects"><strong>-2 status</strong> to Perception and skill checks only (NOT attacks or saves). Can't use unrelated concentrate actions. Ends on hostile action against you/allies.</div>
+    </div>
+
+    <div class="cond" data-name="fatigued">
+      <div class="cond-header">
+        <span class="cond-name">Fatigued</span>
+        <span class="cond-short">-1 AC and saves</span>
+      </div>
+      <div class="cond-effects"><strong>-1 status</strong> to AC and all saving throws. Can't use exploration activities. Recover after full rest.</div>
+    </div>
+
+    <div class="cond" data-name="fleeing">
+      <div class="cond-header">
+        <span class="cond-name">Fleeing</span>
+        <span class="cond-short">Must flee</span>
+      </div>
+      <div class="cond-effects">Must spend all actions escaping. Can't Delay or Ready.</div>
+    </div>
+
+    <div class="cond" data-name="frightened">
+      <div class="cond-header">
+        <span class="cond-name">Frightened</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="tag tag-decrease">-1/turn</span>
+        <span class="cond-short">Penalty to ALL checks and DCs</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to ALL checks and DCs (AC, attacks, saves, Perception, skills, spell DCs). Decreases by 1 at end of your turn.</div>
+    </div>
+
+    <div class="cond" data-name="glitching">
+      <div class="cond-header">
+        <span class="cond-name">Glitching</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Equipment malfunction (SF2e)</span>
+      </div>
+      <div class="cond-effects">Flat check DC 5+value at turn start. <strong>On failure: item penalty = value</strong> to all checks/DCs. On crit fail: also stunned 1. On crit success: reduce value by 1.</div>
+    </div>
+
+    <div class="cond" data-name="grabbed">
+      <div class="cond-header">
+        <span class="cond-name">Grabbed</span>
+        <span class="cond-short">Off-guard; immobilized</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard. Immobilized.</span> DC 5 flat check for manipulate actions.</div>
+    </div>
+
+    <div class="cond" data-name="off-guard">
+      <div class="cond-header">
+        <span class="cond-name">Off-Guard</span>
+        <span class="cond-short">-2 AC</span>
+      </div>
+      <div class="cond-effects"><strong>-2 circumstance</strong> to AC. Can apply to specific creatures or all.</div>
+    </div>
+
+    <div class="cond" data-name="paralyzed">
+      <div class="cond-header">
+        <span class="cond-name">Paralyzed</span>
+        <span class="cond-short">Cannot act; off-guard</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard. Cannot act</span> (except Recall Knowledge and mind-only actions). Senses still function in visible area.</div>
+    </div>
+
+    <div class="cond" data-name="persistent-damage">
+      <div class="cond-header">
+        <span class="cond-name">Persistent Damage</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Ongoing damage each turn</span>
+      </div>
+      <div class="cond-effects">Take damage at end of each turn, then DC 15 flat check to recover. Assisted recovery reduces DC to 10.</div>
+    </div>
+
+    <div class="cond" data-name="prone">
+      <div class="cond-header">
+        <span class="cond-name">Prone</span>
+        <span class="cond-short">Off-guard; -2 attacks</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard.</span> <strong>-2 circumstance</strong> to attack rolls. Can only Crawl or Stand. Can Take Cover for +4 vs ranged.</div>
+    </div>
+
+    <div class="cond" data-name="quickened">
+      <div class="cond-header">
+        <span class="cond-name">Quickened</span>
+        <span class="cond-short">+1 action per turn</span>
+      </div>
+      <div class="cond-effects">Gain 1 additional action at start of turn. Often restricted to specific action types.</div>
+    </div>
+
+    <div class="cond" data-name="restrained">
+      <div class="cond-header">
+        <span class="cond-name">Restrained</span>
+        <span class="cond-short">Off-guard; immobilized; limited actions</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard. Immobilized.</span> Can only attempt to Escape or Force Open bonds. Overrides grabbed.</div>
+    </div>
+
+    <div class="cond" data-name="sickened">
+      <div class="cond-header">
+        <span class="cond-name">Sickened</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Penalty to all checks; cannot ingest</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to ALL checks and DCs. Can't ingest anything. Can retch (1 action) to attempt Fort save to reduce by 1 (2 on crit success).</div>
+    </div>
+
+    <div class="cond" data-name="slowed">
+      <div class="cond-header">
+        <span class="cond-name">Slowed</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Fewer actions per turn</span>
+      </div>
+      <div class="cond-effects">Reduce actions regained at start of turn by slowed value.</div>
+    </div>
+
+    <div class="cond" data-name="stunned">
+      <div class="cond-header">
+        <span class="cond-name">Stunned</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Cannot act; lose actions</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Cannot act.</span> Lose total actions equal to stunned value (may span multiple turns). Overrides slowed.</div>
+    </div>
+
+    <div class="cond" data-name="stupefied">
+      <div class="cond-header">
+        <span class="cond-name">Stupefied</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Penalty to mental checks; spell disruption</span>
+      </div>
+      <div class="cond-effects"><strong>Status penalty = value</strong> to Int/Wis/Cha-based checks and DCs (Will saves, spell attacks/DCs, Perception, mental skills). Spell disruption flat check DC 5+value.</div>
+    </div>
+
+    <div class="cond" data-name="suppressed">
+      <div class="cond-header">
+        <span class="cond-name">Suppressed</span>
+        <span class="cond-short">-1 attacks; -10 ft Speed (SF2e)</span>
+      </div>
+      <div class="cond-effects"><strong>-1 circumstance</strong> to attack rolls. -10 ft status penalty to all Speeds.</div>
+    </div>
+
+    <div class="cond" data-name="unconscious">
+      <div class="cond-header">
+        <span class="cond-name">Unconscious</span>
+        <span class="cond-short">-4 AC/Perception/Reflex; cannot act</span>
+      </div>
+      <div class="cond-effects"><strong>-4 status</strong> to AC, Perception, and Reflex. <span class="flag">Off-guard. Cannot act. Cannot see.</span> Fall prone, drop items.</div>
+    </div>
+
+    <div class="cond" data-name="wounded">
+      <div class="cond-header">
+        <span class="cond-name">Wounded</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Increases dying severity</span>
+      </div>
+      <div class="cond-effects">When you gain dying, increase dying value by wounded value. Ends on Treat Wounds success or full HP + 10 min rest.</div>
+    </div>
+
+    <h2>SF2e-Specific Conditions</h2>
+
+    <div class="cond" data-name="glitching">
+      <div class="cond-header">
+        <span class="cond-name">Glitching</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Equipment malfunction</span>
+      </div>
+      <div class="cond-effects">See above in combat conditions.</div>
+    </div>
+
+    <div class="cond" data-name="suppressed">
+      <div class="cond-header">
+        <span class="cond-name">Suppressed</span>
+        <span class="cond-short">Suppressive fire</span>
+      </div>
+      <div class="cond-effects">See above in combat conditions.</div>
+    </div>
+
+    <div class="cond" data-name="untethered">
+      <div class="cond-header">
+        <span class="cond-name">Untethered</span>
+        <span class="cond-short">Zero-g drift; cannot move normally</span>
+      </div>
+      <div class="cond-effects"><span class="flag">Off-guard.</span> Can't take move actions. Drift 5 ft in last direction at end of turn. Typically also Clumsy 1. Use Push Off to change direction.</div>
+    </div>
+
+    <h2>Custom Penalties</h2>
+
+    <div class="cond" data-name="status-penalty">
+      <div class="cond-header">
+        <span class="cond-name">Status Penalty</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Generic status penalty</span>
+      </div>
+      <div class="cond-effects">For spells/abilities that impose a <strong>status penalty</strong> not matching a named condition. Value applies to all checks and DCs. Use combatant notes to record source and scope.</div>
+    </div>
+
+    <div class="cond" data-name="circumstance-penalty">
+      <div class="cond-header">
+        <span class="cond-name">Circumstance Penalty</span>
+        <span class="tag tag-valued">valued</span>
+        <span class="cond-short">Generic circumstance penalty</span>
+      </div>
+      <div class="cond-effects">For terrain, positioning, or situational <strong>circumstance penalties</strong>. Value applies to all checks and DCs. Use combatant notes to record source and scope.</div>
+    </div>
+
+  </div>
+
+  <script>
+    function filterConditions(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.cond').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.classList.toggle('hidden', q && !text.includes(q));
+      });
+    }
+  </script>
+</body>
+</html>

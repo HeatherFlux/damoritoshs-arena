@@ -5,19 +5,54 @@ import { rollD20, rollDamage, formatModifier, getRecallKnowledgeDCs, getRecallKn
 import { useSettingsStore } from '../stores/settingsStore'
 import ActionIcon from './ActionIcon.vue'
 
+/**
+ * Condition penalties to apply to rolls (from CombatantRow when in combat).
+ * When absent, rolls use raw creature stats (encounter builder mode).
+ */
+export interface ConditionPenalties {
+  attackRolls: number
+  perception: number
+  fortitude: number
+  reflex: number
+  will: number
+  skillChecks: number
+  damage: number
+}
+
 const props = defineProps<{
   creature: Creature
   showRecallKnowledge?: boolean
+  conditionPenalties?: ConditionPenalties
 }>()
 
 const { settings } = useSettingsStore()
 
+const penalties = computed(() => props.conditionPenalties ?? {
+  attackRolls: 0, perception: 0, fortitude: 0, reflex: 0, will: 0, skillChecks: 0, damage: 0,
+})
+
+/**
+ * Get the penalty for a specific roll type.
+ * Maps save/perception/skill names to the appropriate condition penalty.
+ */
+function getPenalty(rollName: string): number {
+  const name = rollName.toLowerCase()
+  if (name === 'perception') return penalties.value.perception
+  if (name === 'fortitude') return penalties.value.fortitude
+  if (name === 'reflex') return penalties.value.reflex
+  if (name === 'will') return penalties.value.will
+  // Ability checks and skills use the general skill penalty
+  return penalties.value.skillChecks
+}
+
 function roll(name: string, modifier: number) {
-  rollD20(modifier, name, props.creature.name)
+  const penalty = getPenalty(name)
+  rollD20(modifier + penalty, name, props.creature.name)
 }
 
 function rollAttack(attackName: string, bonus: number, damage: string) {
-  rollD20(bonus, attackName, props.creature.name)
+  const attackPenalty = penalties.value.attackRolls
+  rollD20(bonus + attackPenalty, attackName, props.creature.name)
 
   // Auto-roll damage if enabled in settings
   if (settings.autoRollDamage) {
@@ -130,7 +165,11 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
     <div class="mb-1.5">
       <span class="rollable" @click="roll('Perception', creature.perception)">
         <strong>Perception</strong>
-        <span class="roll-value">{{ formatModifier(creature.perception) }}</span>
+        <span v-if="penalties.perception < 0" class="roll-value roll-penalized">
+          <span class="roll-base-struck">{{ formatModifier(creature.perception) }}</span>
+          {{ formatModifier(creature.perception + penalties.perception) }}
+        </span>
+        <span v-else class="roll-value">{{ formatModifier(creature.perception) }}</span>
       </span>
       <span v-if="creature.senses.length">; {{ creature.senses.join(', ') }}</span>
     </div>
@@ -146,7 +185,11 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
       <template v-for="(value, skill, index) in creature.skills" :key="skill">
         <span class="rollable" @click="roll(String(skill), value)">
           <span class="roll-label">{{ skill }}</span>
-          <span class="roll-value">{{ formatModifier(value) }}</span>
+          <span v-if="penalties.skillChecks < 0" class="roll-value roll-penalized">
+            <span class="roll-base-struck">{{ formatModifier(value) }}</span>
+            {{ formatModifier(value + penalties.skillChecks) }}
+          </span>
+          <span v-else class="roll-value">{{ formatModifier(value) }}</span>
         </span>
         <span v-if="index < Object.keys(creature.skills).length - 1">, </span>
       </template>
@@ -185,13 +228,28 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
     <div class="flex flex-wrap gap-2 mb-1.5">
       <span><strong>AC</strong> <span class="text-accent font-bold">{{ creature.ac }}</span></span>
       <span class="rollable" @click="roll('Fortitude', creature.saves.fort)">
-        <strong>Fort</strong> <span class="roll-value">{{ formatModifier(creature.saves.fort) }}</span>
+        <strong>Fort</strong>
+        <span v-if="penalties.fortitude < 0" class="roll-value roll-penalized">
+          <span class="roll-base-struck">{{ formatModifier(creature.saves.fort) }}</span>
+          {{ formatModifier(creature.saves.fort + penalties.fortitude) }}
+        </span>
+        <span v-else class="roll-value">{{ formatModifier(creature.saves.fort) }}</span>
       </span>
       <span class="rollable" @click="roll('Reflex', creature.saves.ref)">
-        <strong>Ref</strong> <span class="roll-value">{{ formatModifier(creature.saves.ref) }}</span>
+        <strong>Ref</strong>
+        <span v-if="penalties.reflex < 0" class="roll-value roll-penalized">
+          <span class="roll-base-struck">{{ formatModifier(creature.saves.ref) }}</span>
+          {{ formatModifier(creature.saves.ref + penalties.reflex) }}
+        </span>
+        <span v-else class="roll-value">{{ formatModifier(creature.saves.ref) }}</span>
       </span>
       <span class="rollable" @click="roll('Will', creature.saves.will)">
-        <strong>Will</strong> <span class="roll-value">{{ formatModifier(creature.saves.will) }}</span>
+        <strong>Will</strong>
+        <span v-if="penalties.will < 0" class="roll-value roll-penalized">
+          <span class="roll-base-struck">{{ formatModifier(creature.saves.will) }}</span>
+          {{ formatModifier(creature.saves.will + penalties.will) }}
+        </span>
+        <span v-else class="roll-value">{{ formatModifier(creature.saves.will) }}</span>
       </span>
     </div>
 
@@ -227,23 +285,23 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
           <span
             class="rollable map-btn"
             @click="rollAttack(attack.name, attack.bonus, attack.damage)"
-            :title="`1st attack: ${formatModifier(attack.bonus)}`"
+            :title="`1st attack: ${formatModifier(attack.bonus + penalties.attackRolls)}`"
           >
-            {{ formatModifier(attack.bonus) }}
+            {{ formatModifier(attack.bonus + penalties.attackRolls) }}
           </span>
           <span
             class="rollable map-btn map-btn-secondary"
             @click="rollAttack(attack.name + ' (2nd)', attack.bonus + getMAPPenalties(attack.traits).second, attack.damage)"
-            :title="`2nd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).second)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
+            :title="`2nd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).second + penalties.attackRolls)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
           >
-            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).second) }}
+            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).second + penalties.attackRolls) }}
           </span>
           <span
             class="rollable map-btn map-btn-tertiary"
             @click="rollAttack(attack.name + ' (3rd)', attack.bonus + getMAPPenalties(attack.traits).third, attack.damage)"
-            :title="`3rd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).third)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
+            :title="`3rd attack: ${formatModifier(attack.bonus + getMAPPenalties(attack.traits).third + penalties.attackRolls)}${isAgile(attack.traits) ? ' (agile)' : ''}`"
           >
-            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).third) }}
+            {{ formatModifier(attack.bonus + getMAPPenalties(attack.traits).third + penalties.attackRolls) }}
           </span>
         </span>
         <span v-if="attack.traits.filter(isValidTrait).length" class="text-xs text-dim">
@@ -275,3 +333,15 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
     </div>
   </div>
 </template>
+
+<style scoped>
+.roll-penalized {
+  color: var(--color-danger);
+}
+.roll-base-struck {
+  text-decoration: line-through;
+  opacity: 0.5;
+  margin-right: 0.25rem;
+  color: var(--color-text-dim);
+}
+</style>
