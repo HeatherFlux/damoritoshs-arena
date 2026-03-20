@@ -4,6 +4,10 @@ import CreatureSearch from './CreatureSearch.vue'
 import HazardSearch from './HazardSearch.vue'
 import PartyPanel from './PartyPanel.vue'
 
+const emit = defineEmits<{
+  (e: 'edit-creature'): void
+}>()
+
 type SearchTab = 'creatures' | 'hazards' | 'party'
 const activeTab = ref<SearchTab>('creatures')
 </script>
@@ -35,7 +39,7 @@ const activeTab = ref<SearchTab>('creatures')
     </div>
 
     <div class="flex-1 min-h-0 overflow-hidden">
-      <CreatureSearch v-if="activeTab === 'creatures'" class="h-full" />
+      <CreatureSearch v-if="activeTab === 'creatures'" class="h-full" @edit-creature="emit('edit-creature')" />
       <HazardSearch v-else-if="activeTab === 'hazards'" class="h-full" />
       <PartyPanel v-else class="h-full" />
     </div>

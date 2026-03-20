@@ -9,5 +9,10 @@ export default defineConfig(({ mode }) => {
             // Explicitly pass sync server URL to ensure Cloudflare Pages picks it up
             'import.meta.env.VITE_SYNC_SERVER_URL': JSON.stringify(env.VITE_SYNC_SERVER_URL || process.env.VITE_SYNC_SERVER_URL || ''),
         },
+        test: {
+            environment: 'happy-dom',
+            globals: true,
+            setupFiles: ['./src/test/setup.ts'],
+        },
     };
 });

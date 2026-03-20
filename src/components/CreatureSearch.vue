@@ -2,10 +2,16 @@
 import { ref, computed } from 'vue'
 import Fuse from 'fuse.js'
 import { useEncounterStore } from '../stores/encounterStore'
+import { useCustomPanelStore } from '../stores/customPanelStore'
 import type { Creature, CreatureAdjustment } from '../types/creature'
 import CreatureCard from './CreatureCard.vue'
 
+const emit = defineEmits<{
+  (e: 'edit-creature'): void
+}>()
+
 const store = useEncounterStore()
+const customPanelStore = useCustomPanelStore()
 
 const searchQuery = ref('')
 const levelFilter = ref<number | null>(null)
@@ -71,6 +77,21 @@ function clearFilters() {
   levelFilter.value = null
   traitFilter.value = ''
 }
+
+function editCreature(creature: Creature) {
+  const isCustom = store.isCustomCreature(creature.id)
+  if (isCustom) {
+    customPanelStore.startEditing(creature, false)
+  } else {
+    customPanelStore.startEditing(creature, true, ' (Custom)')
+  }
+  emit('edit-creature')
+}
+
+function cloneCreature(creature: Creature) {
+  customPanelStore.startEditing(creature, true, ' (Copy)')
+  emit('edit-creature')
+}
 </script>
 
 <template>
@@ -132,6 +153,20 @@ function clearFilters() {
             <span class="font-medium text-sm lg:text-base truncate">{{ creature.name }}</span>
           </div>
           <div class="flex gap-1 shrink-0">
+            <button
+              class="btn-secondary btn-compact text-xs"
+              title="Edit creature"
+              @click.stop="editCreature(creature)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z"/></svg>
+            </button>
+            <button
+              class="btn-secondary btn-compact text-xs"
+              title="Clone as template"
+              @click.stop="cloneCreature(creature)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+            </button>
             <button
               class="btn-secondary btn-compact text-xs"
               title="Add Weak"

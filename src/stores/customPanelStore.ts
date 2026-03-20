@@ -1,7 +1,9 @@
 import { reactive, computed } from 'vue'
+import type { Creature } from '../types/creature'
 
 /**
  * Simple store to share custom panel state with StatusBar
+ * Also manages editing/cloning state for creatures
  */
 
 interface CustomPanelState {
@@ -10,6 +12,8 @@ interface CustomPanelState {
   hazardName: string
   creatureValid: boolean
   hazardValid: boolean
+  editingCreatureId: string | null
+  pendingCreatureData: Partial<Creature> | null
 }
 
 const state = reactive<CustomPanelState>({
@@ -18,6 +22,8 @@ const state = reactive<CustomPanelState>({
   hazardName: '',
   creatureValid: false,
   hazardValid: false,
+  editingCreatureId: null,
+  pendingCreatureData: null,
 })
 
 // Current name based on mode
@@ -44,6 +50,37 @@ function setHazardState(name: string, valid: boolean) {
   state.hazardValid = valid
 }
 
+/**
+ * Start editing or cloning a creature.
+ * @param creature - The creature to edit/clone
+ * @param createNew - If true, creates a new custom creature (clone). If false, edits in place.
+ * @param nameSuffix - Optional suffix to append to name (e.g., ' (Custom)' or ' (Copy)')
+ */
+function startEditing(creature: Creature, createNew: boolean, nameSuffix?: string) {
+  // Deep clone the creature data
+  const cloned: Partial<Creature> = JSON.parse(JSON.stringify(creature))
+
+  if (createNew) {
+    // New creature: assign new ID, optionally modify name
+    state.editingCreatureId = null
+    if (nameSuffix) {
+      cloned.name = (cloned.name || '') + nameSuffix
+    }
+    // Clear the ID so addCustomCreature generates a new one
+    delete cloned.id
+  } else {
+    // Editing existing custom creature
+    state.editingCreatureId = creature.id
+  }
+
+  state.pendingCreatureData = cloned
+}
+
+function clearEditing() {
+  state.editingCreatureId = null
+  state.pendingCreatureData = null
+}
+
 export const useCustomPanelStore = () => ({
   state,
   currentName,
@@ -51,4 +88,6 @@ export const useCustomPanelStore = () => ({
   setMode,
   setCreatureState,
   setHazardState,
+  startEditing,
+  clearEditing,
 })

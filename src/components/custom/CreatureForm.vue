@@ -240,7 +240,7 @@ watch(identityComplete, (complete) => {
   if (complete && !sectionsUnlocked.value.defenses) {
     sectionsUnlocked.value.defenses = true
   }
-})
+}, { immediate: true })
 
 // Watch for defenses completion to unlock abilities
 const defensesComplete = computed(() => {
@@ -253,7 +253,7 @@ watch(defensesComplete, (complete) => {
   if (complete && !sectionsUnlocked.value.abilities) {
     sectionsUnlocked.value.abilities = true
   }
-})
+}, { immediate: true })
 
 // Watch for abilities completion to unlock attacks
 const abilitiesComplete = computed(() => {
@@ -266,6 +266,13 @@ watch(abilitiesComplete, (complete) => {
   if (complete && !sectionsUnlocked.value.attacks) {
     sectionsUnlocked.value.attacks = true
   }
+}, { immediate: true })
+
+// When model changes wholesale (edit/clone), re-check all unlock states
+watch(() => model.value.name, () => {
+  if (identityComplete.value) sectionsUnlocked.value.defenses = true
+  if (defensesComplete.value) sectionsUnlocked.value.abilities = true
+  if (abilitiesComplete.value) sectionsUnlocked.value.attacks = true
 })
 
 // Expanded sections

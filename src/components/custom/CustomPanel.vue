@@ -24,6 +24,9 @@ watch(buildMode, (mode) => {
   customPanelStore.setMode(mode)
 }, { immediate: true })
 
+// Whether we're editing an existing creature
+const isEditing = computed(() => customPanelStore.state.editingCreatureId !== null)
+
 // Success message
 const showSuccess = ref(false)
 const successMessage = ref('')
@@ -50,6 +53,14 @@ const creatureData = ref<Partial<Creature>>({
   attacks: [],
   specialAbilities: [],
 })
+
+// Watch for pending creature data from edit/clone actions
+watch(() => customPanelStore.state.pendingCreatureData, (pending) => {
+  if (pending) {
+    creatureData.value = { ...pending }
+    buildMode.value = 'creature'
+  }
+}, { immediate: true })
 
 // Form state for hazard
 const hazardData = ref<Partial<Hazard>>({
@@ -138,12 +149,20 @@ function addToList() {
       specialAbilities: creatureData.value.specialAbilities || [],
     }
 
-    encounterStore.addCustomCreature(creature)
-    successMessage.value = `${creature.name} added to creature list!`
+    if (customPanelStore.state.editingCreatureId) {
+      // Update existing custom creature
+      creature.id = customPanelStore.state.editingCreatureId
+      encounterStore.updateCustomCreature(creature.id, creature)
+      successMessage.value = `${creature.name} updated!`
+    } else {
+      encounterStore.addCustomCreature(creature)
+      successMessage.value = `${creature.name} added to creature list!`
+    }
     showSuccess.value = true
     setTimeout(() => showSuccess.value = false, 3000)
 
-    // Reset form
+    // Clear editing state and reset form
+    customPanelStore.clearEditing()
     resetCreatureForm()
   } else {
     // Create a complete hazard object
@@ -234,6 +253,7 @@ function resetHazardForm() {
 }
 
 function discardForm() {
+  customPanelStore.clearEditing()
   if (buildMode.value === 'creature') {
     resetCreatureForm()
   } else {
@@ -308,8 +328,8 @@ function discardForm() {
               :disabled="!canAdd"
               @click="addToList"
             >
-              <span class="text-lg mr-1">+</span>
-              {{ buildMode === 'creature' ? 'Add' : 'Add' }}
+              <span v-if="!isEditing" class="text-lg mr-1">+</span>
+              {{ isEditing ? 'Save Changes' : 'Add' }}
             </button>
           </div>
         </div>
@@ -394,8 +414,8 @@ function discardForm() {
             :disabled="!canAdd"
             @click="addToList"
           >
-            <span class="text-lg mr-1">+</span>
-            {{ buildMode === 'creature' ? 'Add to Creatures' : 'Add to Hazards' }}
+            <span v-if="!isEditing" class="text-lg mr-1">+</span>
+            {{ isEditing ? 'Save Changes' : (buildMode === 'creature' ? 'Add to Creatures' : 'Add to Hazards') }}
           </button>
         </div>
       </div>

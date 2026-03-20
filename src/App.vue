@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import ThreatSearch from './components/ThreatSearch.vue'
 import EncounterBuilder from './components/EncounterBuilder.vue'
 import EncounterList from './components/EncounterList.vue'
@@ -14,6 +14,7 @@ import HackingPlayerView from './components/hacking/HackingPlayerView.vue'
 import StarshipPanel from './components/starship/StarshipPanel.vue'
 import SceneSidebar from './components/starship/SceneSidebar.vue'
 import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
+import CombatPlayerView from './components/combat/CombatPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
 import ShopPanel from './components/shop/ShopPanel.vue'
 import CollapsibleSidebar from './components/CollapsibleSidebar.vue'
@@ -23,9 +24,11 @@ import { usePartyStore } from './stores/partyStore'
 import { useSettingsStore, themes } from './stores/settingsStore'
 import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
 import { useStarshipStore } from './stores/starshipStore'
+import { useCustomPanelStore } from './stores/customPanelStore'
 import type { SavedScene } from './types/starship'
 
 const store = useEncounterStore()
+const customPanelStore = useCustomPanelStore()
 const starshipStore = useStarshipStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
@@ -37,12 +40,21 @@ const currentAccentColor = computed(() => themes[settings.theme].accent)
 // Check if we're on a player view route
 const isHackingPlayerView = ref(false)
 const isStarshipPlayerView = ref(false)
+const isCombatPlayerView = ref(false)
 
 function checkRoute() {
   const hash = window.location.hash
   isHackingPlayerView.value = hash.includes('/hacking/view')
   isStarshipPlayerView.value = hash.includes('/starship/view')
+  isCombatPlayerView.value = hash.includes('/combat/view')
 }
+
+// Watch for edit/clone actions to auto-switch to Custom tab
+watch(() => customPanelStore.state.pendingCreatureData, (pending) => {
+  if (pending) {
+    activeTab.value = 'custom'
+  }
+})
 
 // Initialize Discord webhook integration
 onMounted(() => {
@@ -153,6 +165,7 @@ function handleStarshipSaveCurrent() {
   <!-- Player Views (fullscreen, no chrome) -->
   <HackingPlayerView v-if="isHackingPlayerView" />
   <StarshipPlayerView v-else-if="isStarshipPlayerView" />
+  <CombatPlayerView v-else-if="isCombatPlayerView" />
 
   <!-- Main App -->
   <div v-else class="flex flex-col h-screen overflow-hidden max-w-[100vw]">

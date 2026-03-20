@@ -442,6 +442,39 @@ function getCreatureStats() {
   return { total: state.creatures.length, bundled: bundledCount, custom: customCount }
 }
 
+function isCustomCreature(id: string): boolean {
+  const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
+  return !bundledIds.has(id)
+}
+
+function updateCustomCreature(id: string, updated: Creature): void {
+  const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
+  if (bundledIds.has(id)) {
+    console.error('Cannot update bundled creature:', id)
+    return
+  }
+  const index = state.creatures.findIndex(c => c.id === id)
+  if (index !== -1) {
+    state.creatures[index] = updated
+    const customOnly = state.creatures.filter(c => !bundledIds.has(c.id))
+    saveCustomCreatures(customOnly)
+  }
+}
+
+function deleteCustomCreature(id: string): void {
+  const bundledIds = new Set((bundledCreatures as unknown as Creature[]).map(c => c.id))
+  if (bundledIds.has(id)) {
+    console.error('Cannot delete bundled creature:', id)
+    return
+  }
+  const index = state.creatures.findIndex(c => c.id === id)
+  if (index !== -1) {
+    state.creatures.splice(index, 1)
+    const customOnly = state.creatures.filter(c => !bundledIds.has(c.id))
+    saveCustomCreatures(customOnly)
+  }
+}
+
 // Custom hazard management
 function addCustomHazard(hazard: Hazard): void {
   // Generate a unique ID if not provided
@@ -545,6 +578,9 @@ export const useEncounterStore = () => ({
 
   // Creature management
   addCustomCreature,
+  updateCustomCreature,
+  deleteCustomCreature,
+  isCustomCreature,
   importCustomCreatures,
   exportCustomCreatures,
   clearCustomCreatures,
