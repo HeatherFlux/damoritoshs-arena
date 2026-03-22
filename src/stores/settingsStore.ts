@@ -365,12 +365,17 @@ async function sendToDiscord(message: DiscordMessage): Promise<boolean> {
   }
 
   try {
+    // Discord webhooks don't return CORS headers, so browsers block
+    // normal fetch. Sending as a Blob with type 'application/json'
+    // bypasses the CORS preflight while preserving the Content-Type
+    // so Discord correctly parses the JSON body.
+    const blob = new Blob([JSON.stringify(message)], { type: 'application/json' })
     const response = await fetch(settings.discordWebhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(message),
+      body: blob,
+      mode: 'no-cors',
     })
-    return response.ok
+    return response.type === 'opaque' || response.ok
   } catch (error) {
     console.error('Failed to send Discord message:', error)
     return false
