@@ -365,17 +365,26 @@ async function sendToDiscord(message: DiscordMessage): Promise<boolean> {
   }
 
   try {
-    // Discord webhooks don't return CORS headers, so browsers block
-    // normal fetch. Sending as a Blob with type 'application/json'
-    // bypasses the CORS preflight while preserving the Content-Type
-    // so Discord correctly parses the JSON body.
-    const blob = new Blob([JSON.stringify(message)], { type: 'application/json' })
-    const response = await fetch(settings.discordWebhookUrl, {
+    // Discord webhooks don't return CORS headers, so we proxy through
+    // our Cloudflare Worker which forwards the request server-side.
+    const syncUrl = import.meta.env.VITE_SYNC_SERVER_URL as string
+    const proxyUrl = syncUrl
+      ? `${syncUrl.replace(/\/$/, '')}/discord`
+      : import.meta.env.DEV
+        ? 'http://localhost:8787/discord'
+        : null
+
+    if (!proxyUrl) {
+      console.error('Discord proxy: no VITE_SYNC_SERVER_URL configured')
+      return false
+    }
+
+    const response = await fetch(proxyUrl, {
       method: 'POST',
-      body: blob,
-      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ webhookUrl: settings.discordWebhookUrl, ...message }),
     })
-    return response.type === 'opaque' || response.ok
+    return response.ok
   } catch (error) {
     console.error('Failed to send Discord message:', error)
     return false
