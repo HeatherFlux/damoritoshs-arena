@@ -428,7 +428,7 @@ export function useSettingsStore() {
 
       const result = await sendToDiscord({
         embeds: [{
-          title: '🎮 Damoritosh\'s Arena Connected!',
+          title: 'Damoritosh\'s Arena Connected!',
           description: 'Your Discord webhook is working. Combat logs will appear here.',
           color: 0x00d4ff,
           footer: { text: 'Starfinder 2E Encounter Builder' },

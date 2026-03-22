@@ -166,10 +166,10 @@ function importAllParties(mode: 'merge' | 'replace') {
           @click="exportAllParties"
           title="Export all parties"
         >
-          📤
+          Export
         </button>
         <button class="btn-secondary btn-sm" @click="openPartyImportModal" title="Import parties">
-          📥
+          Import
         </button>
         <button class="btn-primary btn-sm" @click="createNewParty">+ New Party</button>
       </div>
@@ -217,7 +217,7 @@ function importAllParties(mode: 'merge' | 'replace') {
         <h4 class="text-sm text-dim">Players</h4>
         <div class="flex gap-1.5">
           <button class="btn-secondary btn-sm" @click="openImportModal" title="Import from Pathbuilder">
-            📥 Import
+            Import
           </button>
           <button class="btn-primary btn-sm" @click="startAddPlayer">+ Add</button>
         </div>
@@ -272,7 +272,7 @@ function importAllParties(mode: 'merge' | 'replace') {
                 <span class="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded bg-surface text-accent">AC {{ player.ac }}</span>
               </div>
               <div class="flex gap-1">
-                <button class="btn-icon btn-sm" @click="startEditPlayer(player)" title="Edit">✏️</button>
+                <button class="btn-icon btn-sm" @click="startEditPlayer(player)" title="Edit">Edit</button>
                 <button class="btn-icon btn-sm btn-danger" @click="store.removePlayer(player.id)" title="Remove">×</button>
               </div>
             </div>

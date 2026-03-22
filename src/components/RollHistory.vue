@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import IconD20 from './icons/IconD20.vue'
 import {
   getRollHistory,
   clearRollHistory,
@@ -74,7 +75,7 @@ function formatTime(date: Date): string {
     </div>
 
     <div v-if="rolls.length === 0" class="flex flex-col items-center justify-center p-8 text-dim text-center">
-      <span class="text-3xl mb-2 opacity-50">🎲</span>
+      <IconD20 :size="32" class="opacity-50 mb-2" />
       <p class="my-1">No rolls yet</p>
       <p class="text-xs text-muted">Click rollable stats in creature cards to roll dice</p>
     </div>
@@ -140,19 +141,19 @@ function formatTime(date: Date): string {
                   class="flex items-center gap-2 w-full px-3 py-2 text-xs text-left bg-transparent border-none text-text cursor-pointer transition-colors duration-100 hover:bg-elevated"
                   @click="handleCopy(roll, 'discord')"
                 >
-                  <span class="text-sm">💬</span> Discord
+                  Discord
                 </button>
                 <button
                   class="flex items-center gap-2 w-full px-3 py-2 text-xs text-left bg-transparent border-none text-text cursor-pointer transition-colors duration-100 hover:bg-elevated"
                   @click="handleCopy(roll, 'foundry')"
                 >
-                  <span class="text-sm">🎭</span> Foundry VTT
+                  Foundry VTT
                 </button>
                 <button
                   class="flex items-center gap-2 w-full px-3 py-2 text-xs text-left bg-transparent border-none text-text cursor-pointer transition-colors duration-100 hover:bg-elevated"
                   @click="handleCopy(roll, 'text')"
                 >
-                  <span class="text-sm">📝</span> Plain Text
+                  Plain Text
                 </button>
                 <button
                   class="flex items-center gap-2 w-full px-3 py-2 text-xs text-left bg-transparent border-none text-text cursor-pointer transition-colors duration-100 hover:bg-elevated"

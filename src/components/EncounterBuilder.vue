@@ -210,7 +210,7 @@ function getDifficultyBudgets() {
             class="bg-surface border border-border rounded-lg p-2 lg:p-3 border-l-3 border-l-success"
           >
             <div class="flex items-center gap-2 lg:gap-3">
-              <span class="text-base lg:text-lg">👤</span>
+              <span class="text-sm lg:text-base text-dim font-semibold">PC</span>
               <div class="flex-1 flex flex-col min-w-0">
                 <span class="font-medium text-text text-sm lg:text-base truncate">{{ player.name }}</span>
                 <span class="text-[0.625rem] lg:text-xs text-dim">

@@ -16,6 +16,7 @@
     "fetch-conditions": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"category\":\"condition\"}},\"size\":100}' -o /tmp/aon_conditions_raw.json && node scripts/fetch-conditions.mjs"
   },
   "dependencies": {
+    "@tabler/icons-vue": "^3.40.0",
     "fuse.js": "^7.0.0",
     "js-yaml": "^4.1.1",
     "pdfmake": "^0.3.3",

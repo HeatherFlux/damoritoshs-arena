@@ -111,10 +111,10 @@ function moveAction(index: number, direction: -1 | 1) {
 
 function getTypeIcon(type: ThreatActionType): string {
   switch (type) {
-    case 'attack': return '⚔️'
-    case 'skill_check': return '🎯'
-    case 'ability': return '✨'
-    case 'movement': return '➡️'
+    case 'attack': return 'ATK'
+    case 'skill_check': return 'CHK'
+    case 'ability': return 'ABL'
+    case 'movement': return 'MOV'
     default: return '•'
   }
 }

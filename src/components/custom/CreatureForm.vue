@@ -411,7 +411,7 @@ function removeAbility(index: number) {
       >
         <span class="section-chevron">{{ expandedSections.defenses ? '▼' : '▶' }}</span>
         <span class="section-title">Defenses</span>
-        <span v-if="!sectionsUnlocked.defenses" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.defenses" class="section-lock">Locked</span>
         <span v-else-if="defensesComplete" class="section-check">✓</span>
       </button>
 
@@ -494,7 +494,7 @@ function removeAbility(index: number) {
       >
         <span class="section-chevron">{{ expandedSections.abilities ? '▼' : '▶' }}</span>
         <span class="section-title">Abilities</span>
-        <span v-if="!sectionsUnlocked.abilities" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.abilities" class="section-lock">Locked</span>
         <span v-else-if="abilitiesComplete" class="section-check">✓</span>
       </button>
 
@@ -582,7 +582,7 @@ function removeAbility(index: number) {
       >
         <span class="section-chevron">{{ expandedSections.attacks ? '▼' : '▶' }}</span>
         <span class="section-title">Attacks</span>
-        <span v-if="!sectionsUnlocked.attacks" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.attacks" class="section-lock">Locked</span>
         <span v-else-if="model.attacks?.length" class="section-count">{{ model.attacks.length }}</span>
       </button>
 
@@ -603,7 +603,7 @@ function removeAbility(index: number) {
             class="attack-item"
           >
             <div class="attack-info">
-              <span class="attack-type">{{ attack.type === 'melee' ? '⚔' : '🎯' }}</span>
+              <span class="attack-type">{{ attack.type === 'melee' ? 'M' : 'R' }}</span>
               <span class="attack-name">{{ attack.name }}</span>
               <span class="attack-bonus">+{{ attack.bonus }}</span>
               <span class="attack-damage text-dim">({{ attack.damage }})</span>

@@ -45,9 +45,9 @@ function endRound() {
 
 function getEntryIcon(entry: InitiativeEntry): string {
   if (entry.type === 'pc') {
-    return '👤'
+    return 'PC'
   }
-  return '⚔️'
+  return 'NPC'
 }
 
 function getEntryColor(entry: InitiativeEntry, index: number): string {

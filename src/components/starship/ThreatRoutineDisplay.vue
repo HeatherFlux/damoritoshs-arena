@@ -106,10 +106,10 @@ function executeAction(action: ThreatRoutineAction) {
 
 function getTypeIcon(type: ThreatRoutineAction['type']): string {
   switch (type) {
-    case 'attack': return '⚔️'
-    case 'skill_check': return '🎯'
-    case 'ability': return '✨'
-    case 'movement': return '➡️'
+    case 'attack': return 'ATK'
+    case 'skill_check': return 'CHK'
+    case 'ability': return 'ABL'
+    case 'movement': return 'MOV'
     default: return '•'
   }
 }

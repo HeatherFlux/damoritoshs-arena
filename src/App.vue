@@ -345,7 +345,7 @@ function handleStarshipSaveCurrent() {
                   class="flex items-center gap-1.5 px-3 py-2 text-[0.8125rem] text-left bg-elevated border border-success rounded-md cursor-pointer transition-all duration-150 hover:bg-success/15"
                   @click="combatStore.addPlayer(player.name, player.perception || 0, player.maxHP, player.ac)"
                 >
-                  <span class="text-xs">👤</span>
+                  <span class="text-xs text-dim">·</span>
                   {{ player.name }}
                   <span class="text-[0.625rem] text-dim ml-auto">Lvl {{ player.level }}</span>
                 </button>

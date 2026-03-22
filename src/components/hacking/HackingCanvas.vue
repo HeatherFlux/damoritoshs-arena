@@ -304,7 +304,7 @@ function getStateLabel(node: AccessPoint): string {
     case 'breached':
       return '✓ BREACHED'
     case 'alarmed':
-      return '⚠ ALARMED'
+      return '! ALARMED'
     case 'active':
       const successes = node.successesRequired || 1
       return `◐ IN PROGRESS (${successes - 1}/${successes})`

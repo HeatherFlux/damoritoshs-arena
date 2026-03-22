@@ -232,16 +232,14 @@ export function formatModifier(value: number): string {
  * Export roll to Discord format (markdown)
  */
 export function exportToDiscord(roll: RollResult): string {
-  const emoji = roll.isNat20 ? '🎉' : roll.isNat1 ? '💀' : '🎲'
-
   if (roll.type === 'damage') {
-    return `${emoji} **${roll.source}** · ${roll.name}\n\`${roll.diceExpression}\` → **${roll.total}**${roll.damageType ? ` ${roll.damageType}` : ''} damage\n${roll.breakdown}`
+    return `**${roll.source}** · ${roll.name}\n\`${roll.diceExpression}\` → **${roll.total}**${roll.damageType ? ` ${roll.damageType}` : ''} damage\n${roll.breakdown}`
   }
 
-  let result = `${emoji} **${roll.source}** · ${roll.name}\n\`d20${roll.modifier >= 0 ? '+' : ''}${roll.modifier}\` → **${roll.total}**`
+  let result = `**${roll.source}** · ${roll.name}\n\`d20${roll.modifier >= 0 ? '+' : ''}${roll.modifier}\` → **${roll.total}**`
 
-  if (roll.isNat20) result += ' 🎯 **NAT 20!**'
-  if (roll.isNat1) result += ' 💥 **NAT 1!**'
+  if (roll.isNat20) result += ' **NAT 20!**'
+  if (roll.isNat1) result += ' **NAT 1!**'
 
   result += `\n${roll.breakdown}`
 

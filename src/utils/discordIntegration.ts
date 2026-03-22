@@ -44,17 +44,13 @@ async function sendRollToDiscord(roll: RollResult) {
   if (!settings.discordWebhookEnabled) return
 
   let color = COLORS.d20
-  let emoji = '🎲'
 
   if (roll.type === 'damage') {
     color = roll.isCriticalHit ? COLORS.crit : COLORS.damage
-    emoji = roll.isCriticalHit ? '💥' : '⚔️'
   } else if (roll.isNat20) {
     color = COLORS.crit
-    emoji = '🎯'
   } else if (roll.isNat1) {
     color = COLORS.fumble
-    emoji = '💀'
   }
 
   const fields: Array<{ name: string; value: string; inline?: boolean }> = []
@@ -72,12 +68,12 @@ async function sendRollToDiscord(roll: RollResult) {
   }
 
   const title = roll.isNat20
-    ? `${emoji} ${roll.name} - NAT 20!`
+    ? `${roll.name} - NAT 20!`
     : roll.isNat1
-    ? `${emoji} ${roll.name} - NAT 1!`
+    ? `${roll.name} - NAT 1!`
     : roll.isCriticalHit
-    ? `${emoji} ${roll.name} - CRITICAL!`
-    : `${emoji} ${roll.name}`
+    ? `${roll.name} - CRITICAL!`
+    : roll.name
 
   await sendToDiscord({
     embeds: [{
@@ -100,7 +96,7 @@ export async function sendTurnChange(combatantName: string, round: number, isPla
 
   await sendToDiscord({
     embeds: [{
-      title: `🎭 ${combatantName}'s Turn`,
+      title: `${combatantName}'s Turn`,
       description: `Round ${round}`,
       color: isPlayer ? COLORS.turn : COLORS.d20,
       timestamp: new Date().toISOString(),

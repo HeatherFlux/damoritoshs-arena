@@ -153,7 +153,7 @@ const sizeDisplay = computed(() => {
       <!-- Attacks -->
       <div v-if="creature.attacks?.length" class="stat-section">
         <div v-for="attack in creature.attacks" :key="attack.name" class="stat-attack">
-          <span class="attack-icon">{{ attack.type === 'melee' ? '⚔' : attack.type === 'ranged' ? '🎯' : '◎' }}</span>
+          <span class="attack-icon">{{ attack.type === 'melee' ? 'M' : attack.type === 'ranged' ? 'R' : 'S' }}</span>
           <span class="attack-name">{{ attack.name }}</span>
           <span class="attack-bonus">{{ formatMod(attack.bonus) }}</span>
           <span v-if="attack.traits?.length" class="attack-traits">({{ attack.traits.join(', ') }})</span>

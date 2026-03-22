@@ -463,7 +463,7 @@ async function enableRemoteSync(): Promise<boolean> {
       wsTransport.send({ type: 'computer', payload: state.computer })
     }
 
-    console.log('[Hacking] Remote sync enabled as GM ✓')
+    console.log('[Hacking] Remote sync enabled as GM')
     return true
   } catch (e) {
     console.error('[Hacking] Failed to enable remote sync:', e)
@@ -499,7 +499,7 @@ async function joinRemoteSession(sessionId: string): Promise<boolean> {
     await wsTransport.connect(sessionId, 'player')
     state.isRemoteSyncEnabled = true
 
-    console.log('[Hacking] Joined remote session as player ✓')
+    console.log('[Hacking] Joined remote session as player')
     return true
   } catch (e) {
     console.error('[Hacking] Failed to join remote session:', e)

@@ -349,7 +349,7 @@ function markdownToHtml(md: string): string {
       >
         <span class="section-chevron">{{ expandedSections.detection ? '▼' : '▶' }}</span>
         <span class="section-title">Detection & Disable</span>
-        <span v-if="!sectionsUnlocked.detection" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.detection" class="section-lock">Locked</span>
         <span v-else-if="model.isObvious || model.stealthDC" class="section-check">✓</span>
       </button>
 
@@ -402,7 +402,7 @@ function markdownToHtml(md: string): string {
       >
         <span class="section-chevron">{{ expandedSections.defenses ? '▼' : '▶' }}</span>
         <span class="section-title">Defenses</span>
-        <span v-if="!sectionsUnlocked.defenses" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.defenses" class="section-lock">Locked</span>
       </button>
 
       <div v-show="expandedSections.defenses && sectionsUnlocked.defenses" class="section-content">
@@ -467,7 +467,7 @@ function markdownToHtml(md: string): string {
       >
         <span class="section-chevron">{{ expandedSections.offense ? '▼' : '▶' }}</span>
         <span class="section-title">Offense</span>
-        <span v-if="!sectionsUnlocked.offense" class="section-lock">🔒</span>
+        <span v-if="!sectionsUnlocked.offense" class="section-lock">Locked</span>
       </button>
 
       <div v-show="expandedSections.offense && sectionsUnlocked.offense" class="section-content">
