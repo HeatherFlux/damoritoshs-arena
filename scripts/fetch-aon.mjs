@@ -17,6 +17,17 @@ function ensureArray(value) {
   return [];
 }
 
+/** Strip markdown links: [text](/path) → text */
+function stripMarkdownLinks(value) {
+  if (typeof value === 'string') return value.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  return value;
+}
+
+/** ensureArray + strip markdown links from each element */
+function ensureCleanArray(value) {
+  return ensureArray(value).map(s => stripMarkdownLinks(s));
+}
+
 function ensureSkills(value) {
   if (!value || typeof value !== 'object') return {};
   const result = {};
@@ -207,9 +218,19 @@ function filterAbilityNames(names) {
   });
 }
 
-function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName) {
+function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, src) {
   const abilities = [];
   if (!markdown || !abilityNames.length) return abilities;
+
+  // Build a set of all ability names for boundary detection
+  const escapedNames = abilityNames.map(raw => {
+    const { name } = parseAbilityName(raw);
+    return name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  });
+  // Lookahead pattern: stop at the next ability name, section header, or end
+  const nextAbilityBoundary = escapedNames.length > 1
+    ? `(?=\\r?\\n\\*\\*(?:${escapedNames.join('|')})\\*\\*|\\r?\\n\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)`
+    : '(?=\\r?\\n\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)';
 
   for (const rawName of abilityNames) {
     let { name: parsedName, actions: nameActions } = parseAbilityName(rawName);
@@ -221,7 +242,7 @@ function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName) {
     }
 
     const regex = new RegExp(
-      `(?:\\*\\*)?${searchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)(?=\\r?\\n\\r?\\n|\\r?\\n---|\\r?\\n<|$)`,
+      `(?:\\*\\*)?${searchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\*\\s*(?:<actions string="([^"]+)"[^>]*>)?\\s*(?:\\([^)]+\\))?\\s*(.+?)${nextAbilityBoundary}`,
       'is'
     );
     const match = markdown.match(regex);
@@ -255,6 +276,54 @@ function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName) {
     });
   }
 
+  // Fallback: scan markdown for abilities not listed in creature_ability.
+  // Look for **Name** patterns that appear after attacks/defenses section
+  // and aren't already captured.
+  const knownNames = new Set(abilities.map(a => a.name.toLowerCase()));
+  // Also skip section headers and attack names
+  const skipNames = new Set([
+    'melee', 'ranged', 'damage', 'speed', 'ac', 'hp', 'perception',
+    'str', 'dex', 'con', 'int', 'wis', 'cha', 'languages', 'skills',
+    'items', 'immunities', 'resistances', 'weaknesses', 'saving throws',
+    'fort', 'ref', 'will', 'hardness', 'frequency', 'trigger', 'effect',
+    'requirements', 'critical success', 'success', 'failure', 'critical failure',
+    'special', 'prerequisite', 'prerequisites', 'description',
+  ]);
+
+  const abilityPattern = /\*\*([A-Z][A-Za-z\s'-]+?)\*\*\s*(?:<actions string="([^"]+)"[^>]*>)?\s*(?:\(([^)]+)\))?\s*([A-Z][^]*?)(?=\n\*\*[A-Z]|\n---|\n<hr|$)/gm;
+  let fallbackMatch;
+  while ((fallbackMatch = abilityPattern.exec(markdown)) !== null) {
+    const name = fallbackMatch[1].trim();
+    if (knownNames.has(name.toLowerCase())) continue;
+    if (skipNames.has(name.toLowerCase())) continue;
+    if (/^\d/.test(name)) continue;
+    if (name.length > 40) continue; // Probably not an ability name
+
+    let fallbackActions;
+    if (fallbackMatch[2]) {
+      const actionStr = fallbackMatch[2].toLowerCase();
+      if (actionStr.includes('reaction')) fallbackActions = 'reaction';
+      else if (actionStr.includes('free')) fallbackActions = 'free';
+      else if (actionStr.includes('three') || actionStr.includes('3')) fallbackActions = 3;
+      else if (actionStr.includes('two') || actionStr.includes('2')) fallbackActions = 2;
+      else if (actionStr.includes('single') || actionStr.includes('1')) fallbackActions = 1;
+    }
+
+    const desc = (fallbackMatch[4] || '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\r?\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 500);
+
+    if (desc.length > 10) {
+      abilities.push({ name, actions: fallbackActions, description: desc });
+      knownNames.add(name.toLowerCase());
+    }
+  }
+
   return abilities;
 }
 
@@ -272,8 +341,8 @@ function adaptAoNCreature(hit) {
     size: normalizeSize(src.size),
     source: src.primary_source || 'Archives of Nethys',
     perception: typeof src.perception === 'number' ? src.perception : 0,
-    senses: ensureArray(src.sense_markdown || src.sense),
-    languages: ensureArray(src.language),
+    senses: ensureCleanArray(src.sense_markdown || src.sense),
+    languages: ensureCleanArray(src.language),
     skills: ensureSkills(src.skill_mod),
     abilities: {
       str: src.strength ?? 0,
@@ -291,12 +360,12 @@ function adaptAoNCreature(hit) {
       will: src.will_save ?? 0
     },
     hp: typeof src.hp === 'number' ? src.hp : 10,
-    immunities: ensureArray(src.immunity),
-    resistances: ensureArray(src.resistance_raw),
-    weaknesses: ensureArray(src.weakness_raw),
-    speed: src.speed_raw || src.speed_markdown || '30 feet',
+    immunities: ensureCleanArray(src.immunity),
+    resistances: ensureCleanArray(src.resistance_raw),
+    weaknesses: ensureCleanArray(src.weakness_raw),
+    speed: stripMarkdownLinks(src.speed_raw || src.speed_markdown || '30 feet'),
     attacks: parseAttacksFromMarkdown(markdown),
-    specialAbilities: parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName),
+    specialAbilities: parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, src),
     description: src.summary || '',
     rawText: src.text || ''
   };

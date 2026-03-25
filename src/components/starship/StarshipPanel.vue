@@ -275,7 +275,7 @@ function updateRoleDescription(roleId: string, desc: string) {
 
 function updatePartySize(size: number) {
   if (!activeSetup.value) return
-  activeSetup.value.partySize = Math.max(1, Math.min(8, size))
+  activeSetup.value.partySize = Math.max(1, Math.min(8, Math.floor(size)))
 }
 
 // ============ Player View ============

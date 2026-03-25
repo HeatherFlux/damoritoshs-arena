@@ -679,7 +679,7 @@ function updateConditionValue(id: string, condition: string, value: number) {
     if (value <= 0) {
       removeCondition(id, condition)
     } else {
-      cond.value = value
+      cond.value = Math.min(value, 10)
       saveToStorage(state.combat)
     }
   }

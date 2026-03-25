@@ -11,7 +11,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 5,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)"
+      "darkvision, low-light vision"
     ],
     "languages": [
       "Aballonian",
@@ -105,7 +105,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), techsense (imprecise) 100 feet"
+      "low-light vision, techsense (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -169,7 +169,11 @@
       },
       {
         "name": "Glitch Aura",
-        "description": ", primal) 20 feet. Creatures and items with the tech trait struggle to function reliably when near a botnib. Creatures with the tech trait, unattended items with the tech trait, or creatures holding equipment with the tech trait that start their turn in the aura must attempt a DC 16 Will save."
+        "description": ", primal) 20 feet. Creatures and items with the tech trait struggle to function reliably when near a botnib. Creatures with the tech trait, unattended items with the tech trait, or creatures holding equipment with the tech trait that start their turn in the aura must attempt a DC 16 Will save. **Critical Success** No effect and the creature or item is temporarily immune to the gremlin's glitch aura for 1 minute. **Success** The creature or items are unaffected. **Failure** The creature, item, or"
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 16, attack 7"
       }
     ],
     "description": "The lowly botnib, also called a computer glitch gremlin, is intuitively tied with the computerized devices and networks of the modern age. These …",
@@ -188,7 +192,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [
       "Aklo",
@@ -259,7 +263,7 @@
     "source": "Alien Core",
     "perception": 3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -341,7 +345,7 @@
     "source": "Alien Core",
     "perception": 4,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -407,7 +411,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), emotionsense (precise) 30 feet"
+      "darkvision, emotionsense (precise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -469,7 +473,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, tremorsense (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -533,7 +537,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 4,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -614,7 +618,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), [scent](/rules/461-scent) (precise) 15 feet"
+      "low-light vision, scent (precise) 15 feet"
     ],
     "languages": [],
     "skills": {
@@ -668,7 +672,7 @@
     "source": "Player Core",
     "perception": 0,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "none (understands its creator)"
@@ -730,7 +734,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -815,7 +819,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent (imprecise) 30 feet"
+      "low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -873,7 +877,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 1,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), fog vision"
+      "darkvision, fog vision"
     ],
     "languages": [
       "Common",
@@ -938,7 +942,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -992,7 +996,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -1047,7 +1051,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 2,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -1099,6 +1103,10 @@
       {
         "name": "Vitality Network",
         "description": "The sworn blade of sigils has a vitality network they share with up to 10 bonded allies. This network can store a maximum of 10 Hit Points and begins combat full."
+      },
+      {
+        "name": "Occult Spontaneous Spells",
+        "description": "DC , attack 4"
       }
     ],
     "description": "Like sworn blades of shields, the sworn blades of sigils are pledged to serve their superiors. These jinsuls focus their effort entirely on keeping …",
@@ -1115,7 +1123,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 8,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -1173,7 +1181,7 @@
     "source": "Guilt of the Grave World",
     "perception": 0,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -1240,7 +1248,7 @@
     "source": "Guilt of the Grave World",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -1318,7 +1326,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), water sense ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, water sense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -1386,7 +1394,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -1470,7 +1478,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -1542,7 +1550,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -1609,7 +1617,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -1702,7 +1710,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) (precise) 60 feet, no vision"
+      "lifesense (precise) 60 feet, no vision"
     ],
     "languages": [
       "Common",
@@ -1764,7 +1772,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 6,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -1826,7 +1834,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -1879,7 +1887,7 @@
     "source": "Guilt of the Grave World",
     "perception": 3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -1945,7 +1953,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), no hearing, scent (imprecise) 30 feet"
+      "darkvision, no hearing, scent (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -2019,7 +2027,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -2107,7 +2115,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "techsense (precise) 60 feet, [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 10 feet, no vision"
+      "techsense (precise) 60 feet, tremorsense (imprecise) 10 feet, no vision"
     ],
     "languages": [],
     "skills": {
@@ -2174,7 +2182,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), motion sense 30 feet ([imprecise](/rules/456-imprecise-senses))"
+      "darkvision, motion sense 30 feet (imprecise)"
     ],
     "languages": [
       "Shirren",
@@ -2268,7 +2276,7 @@
     "source": "Guilt of the Grave World",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -2355,7 +2363,7 @@
     "source": "Guilt of the Grave World",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -2430,7 +2438,7 @@
     "source": "Alien Core",
     "perception": 5,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -2527,7 +2535,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "scent (imprecise) 60 feet"
     ],
     "languages": [
       "Aklo",
@@ -2597,7 +2605,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -2666,7 +2674,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) (precise) 60 feet"
+      "darkvision, lifesense (precise) 60 feet"
     ],
     "languages": [
       "Chthonian",
@@ -2739,12 +2747,16 @@
     "specialAbilities": [
       {
         "name": "Buffering Zone",
-        "description": ", divine, emotion, mental) 15 feet. A creature that begins its turn within the area must attempt a DC 14 Will save."
+        "description": ", divine, emotion, mental) 15 feet. A creature that begins its turn within the area must attempt a DC 14 Will save. **Critical Success** The creature is unaffected and is temporarily immune to buffering zone for 1 day. **Success** The creature treats the buffering zone as difficult terrain for 1 round. **Failure** As success, and the creature is pushed back 5 feet and takes a –1 status penalty to attack rolls for 1 round. **Critical Failure** As failure, but the creature is pushed back beyond th"
       },
       {
         "name": "Reflect Aggression",
         "actions": "reaction",
         "description": ") **Trigger** A creature hits the erabryth with a melee or ranged Strike; **Effect** The erabryth reflects some of their attacker's anger and aggression back at them. The erabryth gains resistance 3 to the triggering damage and deals 3 mental damage to their attacker."
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 17, attack 9"
       }
     ],
     "description": "When androids die or give their bodies up for renewal—a celebrated and respected event akin to procreation—it's the silent and calm erabryths who …",
@@ -2763,7 +2775,7 @@
     "source": "Guilt of the Grave World",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Orbian",
@@ -2906,7 +2918,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -2984,7 +2996,7 @@
     "source": "Alien Core",
     "perception": 3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -3065,7 +3077,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet"
+      "darkvision 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -3135,7 +3147,7 @@
     "source": "Alien Core",
     "perception": -3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -3213,7 +3225,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -3296,7 +3308,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -3384,7 +3396,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), mycelium network"
+      "darkvision, mycelium network"
     ],
     "languages": [],
     "skills": {
@@ -3461,7 +3473,7 @@
     "source": "Guilt of the Grave World",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -3539,7 +3551,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -3641,7 +3653,7 @@
     "source": "Guilt of the Grave World",
     "perception": 4,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [
       "Common",
@@ -3723,7 +3735,7 @@
     "source": "Alien Core",
     "perception": 3,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -3796,7 +3808,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -3936,6 +3948,10 @@
       {
         "name": "Grown Together",
         "description": "A Xenowarden greenhorn's AC increases by +1 when they're within reach of at least one other Xenowarden greenhorn."
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 14, attack 6"
       }
     ],
     "description": "The Greenguards are an elite combat unit of Xenowardens known for their nature magic, often dispatched to sites of extreme ecological upheaval. New …",
@@ -3953,7 +3969,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -4032,13 +4048,14 @@
     "name": "Anacite Protector",
     "level": 2,
     "traits": [
-      "Medium"
+      "Construct",
+      "Tech"
     ],
     "size": "medium",
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)"
+      "darkvision, low-light vision"
     ],
     "languages": [
       "Aballonian",
@@ -4111,11 +4128,11 @@
     "specialAbilities": [
       {
         "name": "Shortwave",
-        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits. **Sunlight Dependency** Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely."
+        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits. **Sunlight Dependency** Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely. **Items** integrated commercial streetsweeper (10 charges)"
       },
       {
         "name": "Sunlight Dependency",
-        "description": "Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely."
+        "description": "Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely. **Items** integrated commercial streetsweeper (10 charges)"
       }
     ],
     "description": "These imposing anacites, affectionately called “guardbots” by most residents of Metal City, are keepers of the peace. Insight Array rapidly …",
@@ -4134,7 +4151,7 @@
     "source": "Guilt of the Grave World",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -4222,7 +4239,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 8,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -4286,7 +4303,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet, [lifesense](/creatures/abilities/21-lifesense) 60 feet"
+      "darkvision 60 feet, lifesense 60 feet"
     ],
     "languages": [
       "Common"
@@ -4355,7 +4372,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), electricsense ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, electricsense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -4424,7 +4441,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "scent (imprecise) 30 feet"
     ],
     "languages": [
       "Elindrian",
@@ -4473,6 +4490,10 @@
       {
         "name": "Unfetter Allies",
         "description": "While the elindrian acolyte is within 30 feet of another elindrian who's unable to move or act normally (such as if they're buried, immobilized, grabbed, paralyzed, restrained, stunned, or otherwise impeded), the elindrian acolyte becomes quickened 1 and can use the extra action to Burrow, Fly, Shove, Stride, or Strike."
+      },
+      {
+        "name": "Occult Prepared Spells",
+        "description": "DC 18, attack 10"
       }
     ],
     "description": "These elindrians are the rank-and-file worshippers of the Terror of Ukulam. Recently risen from the dead by some primal force or occult upheaval—no …",
@@ -4489,7 +4510,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), modvision ([imprecise](/rules/456-imprecise-senses)) 1,000 feet"
+      "low-light vision, modvision (imprecise) 1,000 feet"
     ],
     "languages": [
       "Common",
@@ -4552,11 +4573,15 @@
       },
       {
         "name": "Modvision",
-        "description": "An emvermod can sense items and creatures with active accounts on any community they moderate as an imprecise sense at the listed range. They recognize community members, even if they use an infosphere alias."
+        "description": "An emvermod can sense items and creatures with active accounts on any community they moderate as an imprecise sense at the listed range. They recognize community members, even if they use an infosphere alias. **Items** Comm Unit, commercial pulsecaster pistol (1 commercial battery)"
       },
       {
         "name": "Shy",
         "description": "An emvermod is naturally invisible while holding a comm unit or in a virtual space. They don't appear to have an account in any infosphere space they moderate. They can become visible, or even selectively visible, allowing only specific people to see them."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 18 1st delete (at will), motivating ringtone"
       }
     ],
     "description": "A form of house spirit, the emvermod, or “moderator fey,” is a shy resident of one or more online communities who helps keep the online space …",
@@ -4650,7 +4675,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [
       "Common",
@@ -4731,7 +4756,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -4966,7 +4991,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), radiation sense ([imprecise](/rules/456-imprecise-senses)) 1 mile"
+      "low-light vision, radiation sense (imprecise) 1 mile"
     ],
     "languages": [
       "Aklo",
@@ -5024,6 +5049,10 @@
       {
         "name": "Radiation Sense",
         "description": "A hesper can sense radiation sources, such as reactors and power cores, as an imprecise sense at the listed range."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 18, attack 10"
       }
     ],
     "description": "These nuclear fey make their homes in reactors and embody the rapidly changing nature of their radioactive homes. They shift colors to reflect their …",
@@ -5042,7 +5071,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -5120,7 +5149,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -5186,7 +5215,7 @@
     "source": "Guilt of the Grave World",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -5250,7 +5279,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "low-light vision, tremorsense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -5323,7 +5352,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -5397,6 +5426,10 @@
         "name": "Soul Warden",
         "actions": "reaction",
         "description": "**Trigger** A willing fey or creature sworn to serve an Eldest dies within 100 feet of an obrhinnshee; **Effect** The creature's soul is drawn into the obrhinnshee's hammer to be carried home."
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 17, attack 9 1st (4 slots) enhance weapon, glow up, wisp ally"
       }
     ],
     "description": "Obrhinnshees travel the Universe to expedite the return of fey souls to the First World after they die, preventing psychopomps from bringing them to …",
@@ -5414,7 +5447,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), mycelium network"
+      "darkvision, mycelium network"
     ],
     "languages": [],
     "skills": {
@@ -5494,7 +5527,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, scent (imprecise) 30 feet"
     ],
     "languages": [
       "Draconic",
@@ -5554,7 +5587,7 @@
     "source": "Guilt of the Grave World",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -5622,7 +5655,7 @@
     "source": "Guilt of the Grave World",
     "perception": 8,
     "senses": [
-      "_detect metal_ (30 feet), [low-light vision](/rules/460-low-light-vision), scent (imprecise) 30 feet"
+      "_detect metal_ (30 feet), low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [
       "Eoxian",
@@ -5676,6 +5709,10 @@
       {
         "name": "Dangerous Recycling",
         "description": "Over the course of 1 minute of uninterrupted work, a scrap rat can assemble any level 0 commercial grenade using nothing but junk. It falls apart and becomes unusable junk after 10 minutes."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 18, attack 10"
       }
     ],
     "description": "",
@@ -5694,7 +5731,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -5785,7 +5822,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), motion sense 30 feet ([imprecise](/rules/456-imprecise-senses))"
+      "darkvision, motion sense 30 feet (imprecise)"
     ],
     "languages": [
       "Shirren",
@@ -5850,7 +5887,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [
       "Common",
@@ -5919,7 +5956,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Daemonic"
@@ -5997,7 +6034,7 @@
     "source": "Alien Core",
     "perception": 7,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), poison sense ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, poison sense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -6072,7 +6109,7 @@
     "source": "Guilt of the Grave World",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Azlanti",
@@ -6150,7 +6187,7 @@
     "source": "Guilt of the Grave World",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), smoke vision"
+      "darkvision, smoke vision"
     ],
     "languages": [],
     "skills": {
@@ -6219,7 +6256,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Copaxi (can't speak any language)"
@@ -6283,7 +6320,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "tremorsense (imprecise) 60 feet"
     ],
     "languages": [
       "Aklo",
@@ -6354,7 +6391,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), emotionsense (precise) 30 feet"
+      "darkvision, emotionsense (precise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -6424,7 +6461,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), motion sense 30 feet ([imprecise](/rules/456-imprecise-senses))"
+      "darkvision, motion sense 30 feet (imprecise)"
     ],
     "languages": [
       "Shirren",
@@ -6504,7 +6541,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -6581,6 +6618,79 @@
     "rawText": " Hardlight Mascot Hardlight mascots are designed to resemble cartoons or vidgame characters and were originally created for entertainment. Hardlight Mascot Source Alien Core pg. 88 Perception +9; darkvision Languages Common Skills Athletics +10, Performance +11, Society +6, Stealth +8 Str +2 Dex +3 Con +2 Int -1 Wis +0 Cha +4 --- AC 18 Fort +7 Ref +10 Will +11 HP 45 Immunities bleed, death effects, disease, doomed, drained, fatigued, healing, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void Resistances physical 3 (except ghost killer ) Tethered 90 feet. --- Speed 25 feet Melee Single Action kick 10, 2d62 force Ranged Single Action pixel blast 12, 3d42 force Melee Single Action kick 10, 2d62 force Ranged Single Action pixel blast 12, 3d42 force "
   },
   {
+    "id": "aon-creatures--273-itaka-the-ever-craving",
+    "name": "Itaka The Ever-Craving",
+    "level": 3,
+    "traits": [
+      "Dragon",
+      "Unique"
+    ],
+    "size": "large",
+    "source": "Starfinder Society Scenario #1-15: Ruins of the World Soul",
+    "perception": 9,
+    "senses": [
+      "darkvision, scent (imprecise) 30 feet, whispers of Akiton (imprecise) 60 feet"
+    ],
+    "languages": [
+      "Akitonian",
+      "Draconic",
+      "Shobhad"
+    ],
+    "skills": {
+      "acrobatics": 8,
+      "athletics": 10,
+      "nature": 7,
+      "stealth": 8
+    },
+    "abilities": {
+      "str": 5,
+      "dex": 1,
+      "con": 3,
+      "int": 0,
+      "wis": 2,
+      "cha": 1
+    },
+    "items": [],
+    "ac": 19,
+    "saves": {
+      "fort": 10,
+      "ref": 6,
+      "will": 7
+    },
+    "hp": 45,
+    "immunities": [
+      "paralyzed",
+      "sleep"
+    ],
+    "resistances": [
+      "cold 3"
+    ],
+    "weaknesses": [],
+    "speed": "25 feet, climb 20 feet",
+    "attacks": [
+      {
+        "name": "Jaws",
+        "type": "melee",
+        "bonus": 12,
+        "damage": "1d8+5 piercing plus Grab",
+        "traits": [],
+        "actions": 1
+      }
+    ],
+    "specialAbilities": [
+      {
+        "name": "Selective Silence",
+        "description": ", primal) 5 feet. Itaka, willing creatures in the area, and creatures grabbed or restrained restrained by Itaka or an affected ally make no sound (preventing speech and auditory actions)."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 18, attack 10"
+      }
+    ],
+    "description": "",
+    "rawText": " Itaka The Ever-Craving Itaka The Ever-Craving Source Starfinder Society Scenario #1-15: Ruins of the World Soul pg. 6 Perception +9; darkvision, scent (imprecise) 30 feet, whispers of Akiton (imprecise) 60 feet Languages Akitonian, Draconic, Shobhad Skills Acrobatics +8, Athletics +10, Nature +7, Stealth +8 Str +5 Dex +1 Con +3 Int +0 Wis +2 Cha +1 Whispers of Akiton Itaka can sense living creatures, objects and effects with the primal trait, and any objects and creatures in the area of primal effects, within range. She can also speak through primal effects, bypassing her selective silence. --- AC 19 Fort +10 Ref +6 Will +7 HP 45 Immunities paralyzed, sleep Resistances cold 3 Selective Silence (aura, primal) 5 feet. Itaka, willing creatures in the area, and creatures grabbed or restrained restrained by Itaka or an affected ally make no sound (preventing speech and auditory actions). --- Speed 25 feet, climb 20 feet Melee Single Action jaws 12, 1d85 piercing plus Grab Primal Innate Spells DC 18, attack 10 - Cantrips (2nd) Frostbite, Ignition Melee Single Action jaws 12, 1d85 piercing plus Grab "
+  },
+  {
     "id": "aon-creatures--22-juvenile-glass-serpent",
     "name": "Juvenile Glass Serpent",
     "level": 3,
@@ -6593,7 +6703,7 @@
     "source": "Guilt of the Grave World",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -6666,7 +6776,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), techsense (precise) 60 feet"
+      "darkvision, techsense (precise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -6757,7 +6867,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -6849,7 +6959,7 @@
     "source": "Guilt of the Grave World",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -6927,7 +7037,7 @@
     "source": "Guilt of the Grave World",
     "perception": 12,
     "senses": [
-      "[tremorsense](/rules/462-tremorsense) 30 feet"
+      "tremorsense 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -7005,7 +7115,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) (precise) 30 feet"
+      "lifesense (precise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -7070,7 +7180,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -7148,7 +7258,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -7220,7 +7330,7 @@
     "source": "Alien Core",
     "perception": 6,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent (imprecise) 30 feet"
+      "darkvision, scent (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -7282,7 +7392,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -7345,7 +7455,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, tremorsense (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -7488,7 +7598,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "wire sense ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "wire sense (imprecise) 30 feet"
     ],
     "languages": [
       "Common",
@@ -7575,7 +7685,7 @@
     "source": "Guilt of the Grave World",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Eoxian",
@@ -7636,7 +7746,7 @@
     "specialAbilities": [
       {
         "name": "Grave Weapon",
-        "description": "The wight scientist is bound to a needler pistol it used in life."
+        "description": "The wight scientist is bound to a needler pistol it used in life. **Items** commercial armored lab coat, tactical needler pistol with 6 projectiles"
       },
       {
         "name": "Corrupting Influence",
@@ -7666,7 +7776,8 @@
     "languages": [
       "Castrovelian",
       "Common",
-      "Lashunta"
+      "Lashunta",
+      "{{creatureAbilities 37 \"telepathy\"}} 30 feet"
     ],
     "skills": {
       "acrobatics": 7,
@@ -7723,10 +7834,14 @@
         "name": "Root Deflection",
         "actions": "reaction",
         "description": ") **Trigger** The rootsworn is standing on a solid surface and would be hit by a ranged Strike; **Effect** A mass of magical roots rapidly sprout from the ground and shield the Xenowarden rootsworn from harm. The Xenowarden rootsworn gains a +2 status bonus to their AC against the triggering Strike."
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 20, attack 12"
       }
     ],
     "description": "Xenowarden rootsworn are mentors and teachers, tasked with overseeing the training and command of a platoon of roots. Most rootsworn are talented …",
-    "rawText": " Xenowarden Rootsworn Xenowarden rootsworn are mentors and teachers, tasked with overseeing the training and command of a platoon of roots. Most rootsworn are talented spellcasters who can manipulate plants, using them to shield the Xenowarden from harm and to deploy allies across the battlefield. Xenowarden Rootsworn Source Alien Core pg. 198 Perception +11 Languages Castrovelian, Common, Lashunta Skills Acrobatics +7, Diplomacy +7, Intimidation +7, Life Science Lore +7, Medicine +9, Nature +9, Survival +9, Xenowarden Lore +9 Str +0 Dex +2 Con +0 Int +2 Wis +4 Cha +2 Items commercial baton, commercial carbon skin, commercial laser pistol (2 commercial batteries) --- AC 16 Fort +5 Ref +9 Will +11 HP 35 Root Deflection Reaction (primal) Trigger The rootsworn is standing on a solid surface and would be hit by a ranged Strike; Effect A mass of magical roots rapidly sprout from the ground and shield the Xenowarden rootsworn from harm. The Xenowarden rootsworn gains a +2 status bonus to their AC against the triggering Strike. --- Speed 25 feet Melee Single Action baton 9, 1d4 bludgeoning Ranged Single Action laser pistol 9, 1d6 fire Primal Spontaneous Spells DC 20, attack 12 - Cantrips (2nd) Detect Magic, Electric Arc, Gouging Claw, Scan Environment, Tangle Vine - 1st Heal, Hydraulic Push, Sonic Scream, Thunderstrike - 2nd Entangling Flora, Summon Plant or Fungus, Verdant Code Melee Single Action baton 9, 1d4 bludgeoning Ranged Single Action laser pistol 9, 1d6 fire "
+    "rawText": " Xenowarden Rootsworn Xenowarden rootsworn are mentors and teachers, tasked with overseeing the training and command of a platoon of roots. Most rootsworn are talented spellcasters who can manipulate plants, using them to shield the Xenowarden from harm and to deploy allies across the battlefield. Xenowarden Rootsworn Source Alien Core pg. 198 Perception +11 Languages Castrovelian, Common, Lashunta; telepathy 30 feet Skills Acrobatics +7, Diplomacy +7, Intimidation +7, Life Science Lore +7, Medicine +9, Nature +9, Survival +9, Xenowarden Lore +9 Str +0 Dex +2 Con +0 Int +2 Wis +4 Cha +2 Items commercial baton, commercial carbon skin, commercial laser pistol (2 commercial batteries) --- AC 16 Fort +5 Ref +9 Will +11 HP 35 Root Deflection Reaction (primal) Trigger The rootsworn is standing on a solid surface and would be hit by a ranged Strike; Effect A mass of magical roots rapidly sprout from the ground and shield the Xenowarden rootsworn from harm. The Xenowarden rootsworn gains a +2 status bonus to their AC against the triggering Strike. --- Speed 25 feet Melee Single Action baton 9, 1d4 bludgeoning Ranged Single Action laser pistol 9, 1d6 fire Primal Spontaneous Spells DC 20, attack 12 - Cantrips (2nd) Detect Magic, Electric Arc, Gouging Claw, Scan Environment, Tangle Vine - 1st Heal, Hydraulic Push, Sonic Scream, Thunderstrike - 2nd Entangling Flora, Summon Plant or Fungus, Verdant Code Melee Single Action baton 9, 1d4 bludgeoning Ranged Single Action laser pistol 9, 1d6 fire "
   },
   {
     "id": "aon-creatures--76-yearling-arabuk",
@@ -7739,7 +7854,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet, snow vision"
+      "darkvision 60 feet, snow vision"
     ],
     "languages": [],
     "skills": {
@@ -7813,7 +7928,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) 60 feet"
+      "lifesense 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -7887,7 +8002,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -7963,7 +8078,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -8051,7 +8166,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -8125,7 +8240,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), water sense"
+      "darkvision, water sense"
     ],
     "languages": [],
     "skills": {
@@ -8189,7 +8304,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), techsense ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, techsense (imprecise) 30 feet"
     ],
     "languages": [
       "Common"
@@ -8265,7 +8380,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), mycelium network"
+      "darkvision, mycelium network"
     ],
     "languages": [
       "Common",
@@ -8331,6 +8446,10 @@
         "name": "Release Spores",
         "actions": "reaction",
         "description": "**Trigger** The elder is reduced to 0 Hit Points; **Effect** The elder releases a cloud of spores in a 10-foot burst centered on a corner of its own space that lasts for 1 round. Each creature that's in the cloud or enters it is exposed to befuddling spores. If this reaction was triggered by damage from a melee attack, the triggering creature uses the outcome one degree of success worse than the result of its roll for its Fortitude save (two degrees worse if it was a jaws Strike or other Strike "
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "These amalgamations of stolen intellects use their psychic presence to control their fungal troops on an endless journey to propagate their spores.",
@@ -8347,7 +8466,7 @@
     "source": "Alien Core",
     "perception": 9,
     "senses": [
-      "scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "scent (imprecise) 30 feet"
     ],
     "languages": [
       "Elindrian",
@@ -8414,13 +8533,15 @@
     "name": "Emissar Angel",
     "level": 4,
     "traits": [
-      "Medium"
+      "Angel",
+      "Celestial",
+      "Holy"
     ],
     "size": "medium",
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -8455,6 +8576,10 @@
       {
         "name": "Encouraging Hope",
         "description": ", divine, emotion, mental) 30 feet. Allies within the angel's aura gain a +1 status bonus to all saves against emotion and mental effects. Enemies in the area take a –1 status penalty to all saves against emotion and mental effects."
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "Emissars, or propaganda angels, are a divine embodiment of radical hope and the  celestial answer to information warfare. Some emissars spring from …",
@@ -8473,7 +8598,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), techsense (precise) 60 feet"
+      "darkvision, techsense (precise) 60 feet"
     ],
     "languages": [
       "arc network, digital telepathy, <i>truespeech</i> (can't speak any language)"
@@ -8508,10 +8633,10 @@
       "swarm mind"
     ],
     "resistances": [
-      "area damage 5, splash damage 5"
+      "bludgeoning 2, piercing 5, slashing 5"
     ],
     "weaknesses": [
-      "bludgeoning 2, piercing 5, slashing 5"
+      "area damage 5, splash damage 5"
     ],
     "speed": "20 feet, fly 40 feet",
     "attacks": [],
@@ -8539,10 +8664,14 @@
       {
         "name": "Digital Telepathy",
         "description": ", occult, tech) 100 feet. An excuba can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "Unlike all other known types of spectra, excuba spectra are fragmented creatures made of countless tiny pieces that act together as a single …",
-    "rawText": " Excuba Unlike all other known types of spectra, excuba spectra are fragmented creatures made of countless tiny pieces that act together as a single networked whole. No accounts of an excuba encounter exist before the Drift crashed, and prevailing theories hold that either the trauma of the crisis created them, or they were created by the Drift as a response to the crisis itself. Whatever the case, excuba encounters have become all too common. These spectra swarms are often dispatched to infiltrate mortal worlds as spies or observers. They collect information for more powerful spectra like wyspirias to analyze and preserve. Some speculate that excubas have always lurked in the galaxy as invisible spies for other spectra, and that the Drift Crisis merely caused them to take a new, less cohesive form. Excuba Source Alien Core pg. 176 Perception +11; darkvision, techsense (precise) 60 feet Languages arc network, digital telepathy, truespeech (can't speak any language) Skills Computers +15, Deception +12, Drift Lore +13, Occultism +11, Piloting +11, Stealth +11 Str +0 Dex +5 Con +2 Int +3 Wis +1 Cha +2 Arc Network The excuba can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the excuba can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. Slip Drive An excuba has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an excuba gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. Techsense The excuba senses creatures and objects with the tech trait as a precise sense within the listed range. --- AC 20 Fort +8 Ref +13 Will +11 HP 42 Immunities electricity, grabbed, precision, prone, restrained, swarm mind Resistances area damage 5, splash damage 5 Weaknesses bludgeoning 2, piercing 5, slashing 5 Autoencode (illusion, mental, occult, tech) An excuba's visual appearance is altered when the creature is perceived by creatures, items, and objects with the tech trait (such as robotic creatures, cameras, and sensors) unless they succeed at a Perception check against the excuba's Deception DC. Excubas in their swarm form appear to be formless shadows and are additionally concealed, while excubas in their humanoid forms register as familiar or unremarkable looking humanoids. Data Vault An excuba can store data within their body as if they were a computer. Hacking an excuba requires three successes against their Will DC to access their data. Digital Telepathy (aura, occult, tech) 100 feet. An excuba can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. --- Speed 20 feet, fly 40 feet Occult Innate Spells DC 21, attack 13 - Cantrips (2nd) Analyze Target, Implant Data, Seek the Stars - 1st Delete, Dream of Home - 2nd Caustic Conversion, Inject Nanobots, Skim Data (at will) - Constant (5th) Truespeech\n"
+    "rawText": " Excuba Unlike all other known types of spectra, excuba spectra are fragmented creatures made of countless tiny pieces that act together as a single networked whole. No accounts of an excuba encounter exist before the Drift crashed, and prevailing theories hold that either the trauma of the crisis created them, or they were created by the Drift as a response to the crisis itself. Whatever the case, excuba encounters have become all too common. These spectra swarms are often dispatched to infiltrate mortal worlds as spies or observers. They collect information for more powerful spectra like wyspirias to analyze and preserve. Some speculate that excubas have always lurked in the galaxy as invisible spies for other spectra, and that the Drift Crisis merely caused them to take a new, less cohesive form. Excuba Source Alien Core pg. 176 Perception +11; darkvision, techsense (precise) 60 feet Languages arc network, digital telepathy, truespeech (can't speak any language) Skills Computers +15, Deception +12, Drift Lore +13, Occultism +11, Piloting +11, Stealth +11 Str +0 Dex +5 Con +2 Int +3 Wis +1 Cha +2 Arc Network The excuba can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the excuba can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. Slip Drive An excuba has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an excuba gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. Techsense The excuba senses creatures and objects with the tech trait as a precise sense within the listed range. --- AC 20 Fort +8 Ref +13 Will +11 HP 42 Immunities electricity, grabbed, precision, prone, restrained, swarm mind Resistances bludgeoning 2, piercing 5, slashing 5 Weaknesses area damage 5, splash damage 5 Autoencode (illusion, mental, occult, tech) An excuba's visual appearance is altered when the creature is perceived by creatures, items, and objects with the tech trait (such as robotic creatures, cameras, and sensors) unless they succeed at a Perception check against the excuba's Deception DC. Excubas in their swarm form appear to be formless shadows and are additionally concealed, while excubas in their humanoid forms register as familiar or unremarkable looking humanoids. Data Vault An excuba can store data within their body as if they were a computer. Hacking an excuba requires three successes against their Will DC to access their data. Digital Telepathy (aura, occult, tech) 100 feet. An excuba can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. --- Speed 20 feet, fly 40 feet Occult Innate Spells DC 21, attack 13 - Cantrips (2nd) Analyze Target, Implant Data, Seek the Stars - 1st Delete, Dream of Home - 2nd Caustic Conversion, Inject Nanobots, Skim Data (at will) - Constant (5th) Truespeech\n"
   },
   {
     "id": "aon-creatures--43-faceless",
@@ -8559,7 +8688,7 @@
     "source": "Guilt of the Grave World",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), lifesense 30 feet"
+      "darkvision, lifesense 30 feet"
     ],
     "languages": [
       "Common",
@@ -8633,7 +8762,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -8706,7 +8835,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -8776,7 +8905,7 @@
     "source": "Alien Core",
     "perception": 8,
     "senses": [
-      "low light vision, telepathy sense ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low light vision, telepathy sense (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -8855,7 +8984,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [
       "Common",
@@ -8938,7 +9067,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), [scent](/rules/461-scent) (precise) 30 feet"
+      "low-light vision, scent (precise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -8991,7 +9120,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "nourishing aura ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "nourishing aura (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -9049,6 +9178,10 @@
         "name": "Vital Siphon",
         "actions": "reaction",
         "description": "**Frequency** once every 10 minutes; **Trigger** A creature within their nourishing aura uses an effect with the healing trait; **Effect** Presulea siphons half the amount that would be healed (rounded down) to heal themself or an ally within their aura instead of the original target."
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "Presulea's mortal existence ended in self-sacrifice to feed the Newborn. Presulea was remade as a quivering mound of rampant growths and pumping …",
@@ -9067,7 +9200,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -9150,7 +9283,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), mistvision"
+      "darkvision, mistvision"
     ],
     "languages": [
       "Orbian"
@@ -9199,6 +9332,10 @@
       {
         "name": "Mistvision",
         "description": "A sapient purple orb always ignores concealment caused by fog, smoke, and mist."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "Purple orbs are curious, social beings who unfailingly attempt to make contact with any life-form they encounter, though these attempts are …",
@@ -9217,7 +9354,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -9288,6 +9425,10 @@
         "name": "Debris Field",
         "actions": "reaction",
         "description": "**Trigger** The sterieid takes physical damage; **Effect** Shards of rocky debris fly off the sterieid's body, dealing 2d12 bludgeoning damage to all adjacent creatures (DC 21 basic Reflex save) and giving the sterieid the concealed condition until the end of their next turn."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 21, attack 13"
       }
     ],
     "description": "Sterieids reside on asteroids, relishing the beauty of their rocky, icy surfaces. Due to the ubiquity of asteroids, sterieids are the most common …",
@@ -9304,7 +9445,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -9345,7 +9486,7 @@
     "specialAbilities": [
       {
         "name": "Invasive Spores",
-        "description": ", disease, inhaled 10 feet) A vracinea constantly exudes sweet-smelling spores. Any creature that enters or starts its turn in the area must attempt a DC 18 Fortitude save."
+        "description": ", disease, inhaled 10 feet) A vracinea constantly exudes sweet-smelling spores. Any creature that enters or starts its turn in the area must attempt a DC 18 Fortitude save. **Critical Success** The creature is unaffected and immune to the vracinea's aura for 24 hours. **Success** The creature is unaffected. **Failure** The creature is clumsy 1 and enfeebled 1 for 1 round. **Critical Failure** As success, plus the creature is paralyzed for 1 round."
       }
     ],
     "description": "The vracinea is a large, shambling, multi-mawed plant, originally native to Castrovel but now found on many more planets. Slow and clumsy, it prefers …",
@@ -9437,6 +9578,10 @@
       {
         "name": "Temporal Resistances",
         "description": "Agent Z originally came from another timeline and isn't entirely in sync with this reality. He gains a +1 circumstance bonus to saving throws against illusions and holograms, and if he critically fails such a save, the results count as a failure instead."
+      },
+      {
+        "name": "Occult Spontaneous Spells",
+        "description": "DC , attack 14"
       }
     ],
     "description": "Agent Z is the campaign's primary antagonist, working behind the scenes and occasionally disrupting the PCs' activities. He isn't cruel and regrets …",
@@ -9455,7 +9600,7 @@
     "source": "Starfinder Murder in Metal City Deluxe Adventure",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Necril",
@@ -9621,7 +9766,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -9712,7 +9857,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -9799,7 +9944,7 @@
     "source": "Guilt of the Grave World",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), smoke vision"
+      "darkvision, smoke vision"
     ],
     "languages": [
       "Pyric"
@@ -9882,7 +10027,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -9970,7 +10115,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), emotion sense ([imprecise](/rules/456-imprecise-senses)) 60 feet, sense through"
+      "darkvision, emotion sense (imprecise) 60 feet, sense through"
     ],
     "languages": [
       "Garaggakal",
@@ -10054,7 +10199,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -10126,7 +10271,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -10189,7 +10334,7 @@
     "specialAbilities": [
       {
         "name": "Error State",
-        "description": "Before the hardlight havoc begins its turn in combat, it gains one of the following error states at random, losing any previous error state."
+        "description": "Before the hardlight havoc begins its turn in combat, it gains one of the following error states at random, losing any previous error state. **Change Character** The hardlight havoc regains 2d8 Hit Points.**Pixelation** The hardlight havoc is concealed from all creatures.**Power Leak** The hardlight havoc is stunned 1. At the end of its turn, it deals 4d6 electricity damage to creatures in a 10-foot emanation (DC 22 basic Reflex save).**Surge** The hardlight havoc is quickened until the end of i"
       },
       {
         "name": "Change Character",
@@ -10227,7 +10372,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [
       "Common",
@@ -10286,6 +10431,10 @@
       {
         "name": "Burn the Unworthy",
         "description": ", fire) 10 feet. Magical wards cause a signifer's surrounding foes to catch flame. An enemy creature that starts its turn in the area must succeed at a DC 19 Fortitude save or take 1d4 persistent fire damage. A signifer can activate and deactivate this aura as a single action that has the concentrate trait. Regardless of the result of the save, the creature is immune to the aura for 1 minute."
+      },
+      {
+        "name": "Divine Spontaneous Spells",
+        "description": "DC 22, attack 14"
       }
     ],
     "description": "A Hellknight who displays prowess, scholarly discipline, and magical acumen might attain the rank of signifer.",
@@ -10302,7 +10451,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 30 feet, smoke vision"
+      "darkvision, scent (imprecise) 30 feet, smoke vision"
     ],
     "languages": [],
     "skills": {
@@ -10377,7 +10526,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jinsul"
@@ -10433,6 +10582,10 @@
       {
         "name": "Vitality Network",
         "description": "A jinsul pontiff can channel vitality to up to four bonded allies as though they were a mystic. This network stores up to 20 Hit Points and begins combat full."
+      },
+      {
+        "name": "Occult Spontaneous Spells",
+        "description": "DC 22, attack 14"
       }
     ],
     "description": "Pontiffs rally jinsuls to a near suicidal frenzy in the throes of combat. Part magic wielder and part orator, they act as inspirational battlefield …",
@@ -10539,7 +10692,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -10618,7 +10771,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) (precise) 60 feet, no vision"
+      "lifesense (precise) 60 feet, no vision"
     ],
     "languages": [
       "Common",
@@ -10681,7 +10834,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -10762,7 +10915,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Azlanti",
@@ -10832,7 +10985,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), tremorsense ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, tremorsense (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -10896,7 +11049,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -10960,7 +11113,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Castrovelian",
@@ -11110,7 +11263,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), warp sense 15 feet"
+      "darkvision, warp sense 15 feet"
     ],
     "languages": [
       "Aklo"
@@ -11171,11 +11324,15 @@
       },
       {
         "name": "Warp Field",
-        "description": "Reality within the area becomes a different type of terrain. Structures and creatures in the area aren't transformed, and the change immediately ends when the aura moves or the wayward warp dies. The nature of the aura is chosen randomly using the table below each time the wayward warp moves. A wayward warp is immune to their own warp field's effects and to the aligned damage type, but they gain weakness 5 to the opposing damage type."
+        "description": "Reality within the area becomes a different type of terrain. Structures and creatures in the area aren't transformed, and the change immediately ends when the aura moves or the wayward warp dies. The nature of the aura is chosen randomly using the table below each time the wayward warp moves. A wayward warp is immune to their own warp field's effects and to the aligned damage type, but they gain weakness 5 to the opposing damage type. D6FIELDALIGNED DAMAGEOPPOSING DAMAGEFIELD EFFECT1Cosmic{{trai"
       },
       {
         "name": "Reality Shimmer",
         "description": "The wayward warp has concealment against attacks originating outside of their warp field."
+      },
+      {
+        "name": "Occult Spontaneous Spells",
+        "description": "DC 26, attack 14"
       }
     ],
     "description": "A wayward warp is a living dimensional rift that causes unexpected havoc as they twist the world around them. No two wayward warps look the same, and …",
@@ -11192,7 +11349,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), motion sense ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "low-light vision, motion sense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -11272,7 +11429,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), motion sense 30 feet ([imprecise](/rules/456-imprecise-senses))"
+      "darkvision, motion sense 30 feet (imprecise)"
     ],
     "languages": [
       "Shirren",
@@ -11356,7 +11513,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -11417,7 +11574,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -11479,7 +11636,7 @@
     "source": "Alien Core",
     "perception": 10,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), infrared vision ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, infrared vision (imprecise) 30 feet"
     ],
     "languages": [
       "Eoxian",
@@ -11571,7 +11728,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "sandsense ([imprecise](/rules/456-imprecise-senses)) 120 feet"
+      "sandsense (imprecise) 120 feet"
     ],
     "languages": [],
     "skills": {
@@ -11705,7 +11862,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -11771,7 +11928,7 @@
       },
       {
         "name": "Radiant Gaze",
-        "description": ", light, primal, visual) 30 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 24 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait."
+        "description": ", light, primal, visual) 30 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 24 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait. **Success** The creature is unaffected. **Failure** The creature is dazzled until the start of its next turn. **Critical Failure** The creature is blinded until the start of its next turn. **Solar-Dependent** A heliad is mysticall"
       },
       {
         "name": "Solar-Dependent",
@@ -11781,6 +11938,10 @@
         "name": "Supernova",
         "actions": "reaction",
         "description": ", light, visual) **Trigger** The heliad dies; **Effect** The heliad's body explodes into brilliant, luminous flame. Each creature in a 10-foot emanation takes 6d8 fire damage (DC 24 basic Reflex save). Creatures that critically fail are blinded for 1 minute."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 24, attack 16"
       }
     ],
     "description": "Denizens of stars throughout the galaxy, heliads tend to be sociable and friendly, but most have mercurial tempers befitting their fiery homes. …",
@@ -11799,7 +11960,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), huntersight (precise) 60 feet"
+      "darkvision, huntersight (precise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -11886,7 +12047,7 @@
     "source": "Alien Core",
     "perception": 17,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Chthonian",
@@ -11961,7 +12122,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [
       "Aklo",
@@ -12031,7 +12192,7 @@
     "source": "Guilt of the Grave World",
     "perception": 17,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), lifesense 40 feet"
+      "darkvision, lifesense 40 feet"
     ],
     "languages": [],
     "skills": {
@@ -12100,7 +12261,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -12171,7 +12332,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Sussuran"
@@ -12347,7 +12508,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), mistvision"
+      "darkvision, mistvision"
     ],
     "languages": [
       "Orbian"
@@ -12396,6 +12557,10 @@
       {
         "name": "Mistvision",
         "description": "A sapient green orb always ignores concealment caused by fog, smoke, and mist."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 24, attack 16"
       }
     ],
     "description": "Sapient green orbs only recently appeared in Pact Worlds space, and wherever they appear, purple orbs are nowhere to be found. While the history and …",
@@ -12412,7 +12577,7 @@
     "source": "Alien Core",
     "perception": 11,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -12474,7 +12639,7 @@
     "source": "Alien Core",
     "perception": 14,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Jotun"
@@ -12556,7 +12721,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Azlanti",
@@ -12635,7 +12800,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -12713,7 +12878,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Empyrean",
@@ -12776,6 +12941,10 @@
       {
         "name": "Divine Firewall",
         "description": ", divine) 20 feet. All creatures within the angel's aura gain a +1 status bonus to their AC and saving throws against attacks and effects from creatures and hazards with the unholy trait."
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 25, attack 17"
       }
     ],
     "description": "Barachius angels are imposing, helmed figures with glowing wings made of digital circuitry. They monitor the development of technology to prevent it …",
@@ -12794,7 +12963,7 @@
     "source": "Alien Core",
     "perception": 20,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -12961,7 +13130,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -13026,6 +13195,10 @@
       {
         "name": "Seize Control",
         "description": ") 20 feet. Mindless undead that begin their turn in the area must attempt a DC 22 Will save; on a failure, the Corpse Fleet recruiter seizes control of that undead. It gains the minion trait."
+      },
+      {
+        "name": "Arcane Spontaneous Spells",
+        "description": "DC 25, attack 17"
       }
     ],
     "description": "Corpse Fleet recruiters are powerful necromancers capable of maintaining control of mindless undead, creating new undead, and turning their magic …",
@@ -13045,7 +13218,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, lifesense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -13200,7 +13373,7 @@
       },
       {
         "name": "Electromagnetic Blindness",
-        "description": "Diaspora worms that take electricity damage must attempt a DC 23 Fortitude save."
+        "description": "Diaspora worms that take electricity damage must attempt a DC 23 Fortitude save. **Critical Success** The worm is unaffected. **Success** The worm is dazzled for 1 round. **Failure** The worm is blinded for 1 round. **Critical Failure** The worm is blinded for 1 round, then dazzled for 1 round."
       }
     ],
     "description": "Resembling fanged eels with manes of tendrils instead of eyes, diaspora worms originally ruled the inky depths of the ocean that later became the icy …",
@@ -13220,7 +13393,7 @@
     "source": "Alien Core",
     "perception": 12,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet, [lifesense](/creatures/abilities/21-lifesense) 60 feet"
+      "darkvision 60 feet, lifesense 60 feet"
     ],
     "languages": [
       "Common"
@@ -13293,7 +13466,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), sun sense (precise) 60 feet"
+      "darkvision, sun sense (precise) 60 feet"
     ],
     "languages": [
       "Pyric"
@@ -13384,7 +13557,7 @@
     "source": "Guilt of the Grave World",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -13450,7 +13623,7 @@
     "source": "Guilt of the Grave World",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -13553,7 +13726,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -13625,7 +13798,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) (precise) 60 feet, no vision"
+      "lifesense (precise) 60 feet, no vision"
     ],
     "languages": [],
     "skills": {
@@ -13704,7 +13877,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -13753,7 +13926,7 @@
       {
         "name": "Disorienting Patterns",
         "actions": "reaction",
-        "description": ", manipulate, mental, visual) **Trigger** A creature with darkvision within 60 feet of the void palm begins its turn; **Requirements** The void palm is in darkness; **Effect** The patterns on a void palm's mottled red fronds resemble a distant star field when viewed in the darkness. The void palm sways its fronds in a disorienting manner. The triggering creature must attempt a DC 25 Will save."
+        "description": ", manipulate, mental, visual) **Trigger** A creature with darkvision within 60 feet of the void palm begins its turn; **Requirements** The void palm is in darkness; **Effect** The patterns on a void palm's mottled red fronds resemble a distant star field when viewed in the darkness. The void palm sways its fronds in a disorienting manner. The triggering creature must attempt a DC 25 Will save. **Critical Success** The creature is unaffected and becomes immune to Disorienting Patterns for 24 hour"
       }
     ],
     "description": "A void palm poses a danger to sentient creatures and their antigravity technology alike. The plant propagates slowly yet steadily by catapulting an …",
@@ -13772,7 +13945,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet, [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet, tremorsense (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -13845,6 +14018,10 @@
         "name": "Covered in Bugs",
         "actions": "reaction",
         "description": "**Trigger** The dragon critically fails a saving throw; **Effect** Swarming insects interfere with the effect, sacrificing themselves to protect their host's body and mind. The dragon attempts a DC 17 flat check. On a success, the dragon fails the saving throw instead of critically failing."
+      },
+      {
+        "name": "Primal Prepared Spells",
+        "description": "DC 23, attack +15; **3rd** _earthbind_, _life seal_, _wall of wind_; **2nd** _entangling flora_, _environmental endurance_, _speak with animals_, _water breathing_; **1st** _ant haul_, _detect poison_, _fear_; **Cantrips (3rd)** _caustic blast_, _detect magic_, _seek the stars_, _stumble_, _tangle vine_"
       }
     ],
     "description": "Innumerable insects follow these lumbering, ravenous dragons wherever they roam, swarming around them and living in the countless orifices along the …",
@@ -13861,7 +14038,7 @@
     "source": "Alien Core",
     "perception": 17,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet, snow vision"
+      "darkvision 60 feet, snow vision"
     ],
     "languages": [],
     "skills": {
@@ -13938,7 +14115,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), eyes on the infosphere (precise)"
+      "darkvision, eyes on the infosphere (precise)"
     ],
     "languages": [
       "Common",
@@ -14020,7 +14197,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Copaxi (can't speak any language)"
@@ -14104,7 +14281,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Chthonian",
@@ -14186,7 +14363,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "lifesense (imprecise) 100 feet"
     ],
     "languages": [
       "Brethedan",
@@ -14237,7 +14414,11 @@
       {
         "name": "Atavistic Rage",
         "actions": "reaction",
-        "description": ", fear, incapacitation, mental) **Trigger** The Dreamer is reduced to half or less than half their total Hit Points; **Effect** The injured Dreamer erupts into a terrifying state of psychic fury, requiring all non-Dreamers in a 30- foot emanation to attempt a DC 24 Will save. The Dreamer gains a +2 status bonus to attack and damage rolls for 1 minute but can't use their innate spells. After they stop raging, a Dreamer can't enter an Atavistic Rage again for 1 minute."
+        "description": ", fear, incapacitation, mental) **Trigger** The Dreamer is reduced to half or less than half their total Hit Points; **Effect** The injured Dreamer erupts into a terrifying state of psychic fury, requiring all non-Dreamers in a 30- foot emanation to attempt a DC 24 Will save. The Dreamer gains a +2 status bonus to attack and damage rolls for 1 minute but can't use their innate spells. After they stop raging, a Dreamer can't enter an Atavistic Rage again for 1 minute. **Critical Success** The cre"
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 26; attack 18"
       }
     ],
     "description": "Dancing between Liavara's peach-colored clouds are the Dreamers, the psychically gifted cousins of barathus. Not native to Liavara, the Dreamers were …",
@@ -14328,7 +14509,7 @@
       },
       {
         "name": "Electromagnetic Blindness",
-        "description": "Dust worms that take electricity damage must attempt a DC 24 Fortitude save."
+        "description": "Dust worms that take electricity damage must attempt a DC 24 Fortitude save. **Critical Success** The worm is unaffected. **Success** The worm is dazzled for 1 round. **Failure** The worm is blinded for 1 round. **Critical Failure** The worm is blinded for 1 round, then dazzled for 1 round."
       }
     ],
     "description": "Diaspora worms mutated to navigate sandy or barren asteroid surfaces, and as a result, dust worms trade agility for bulk and can resist radiation. …",
@@ -14419,7 +14600,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), techsense (precise) 60 feet"
+      "darkvision, techsense (precise) 60 feet"
     ],
     "languages": [
       "arc network, digital telepathy, <i>truespeech</i> (can't speak any language)"
@@ -14498,10 +14679,14 @@
         "name": "Shift Dimensionality",
         "actions": "reaction",
         "description": "**Frequency** once per round; **Trigger** The iridia is targeted by a ranged Strike; **Effect** A rainbow of visual distortion cascades across the iridia. They desynchronize from reality and are briefly replaced by a two-dimensional rendering, gaining concealment against the triggering Strike."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 26, attack 18"
       }
     ],
     "description": "When mortals encounter spectra outside the drift, that encounter is usually with an iridia. These opalescent, bipedal ambassadors travel the cosmos …",
-    "rawText": " Iridia When mortals encounter spectra outside the drift, that encounter is usually with an iridia. These opalescent, bipedal ambassadors travel the cosmos as messengers and agents of the Drift, extolling the benefits of new and emergent technologies. They champion growth and improvement in all aspects of life but especially focus on the advancement of new technologies. Their goals often put them at odds with those who forswear controversial and dangerous tech or who approach new and untested discoveries with caution. Iridias are known to visit remote worlds in the Vast, far away from Absalom Station and the Drift lanes where Triune's original signal and the secrets of Drift travel were suppressed, lost, or misunderstood. They bring the people of these isolated worlds instructions to achieve interstellar travel and a second chance to join the galactic community. Iridia Source Alien Core pg. 177 Perception +16; darkvision, techsense (precise) 60 feet Languages arc network, digital telepathy, truespeech (can't speak any language) Skills Acrobatics +16, Computers +18, Deception +14, Diplomacy +16, Drift Lore +20, Occultism +14, Piloting +14 Str +2 Dex +4 Con +2 Int +4 Wis +2 Cha +6 Arc Network The iridia can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the iridia can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. Slip Drive An iridia has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an iridia gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. Techsense The iridia senses creatures and objects with the tech trait as a precise sense within the listed range. --- AC 26 Fort +13 Ref +18 Will +16 HP 130 Immunities electricity Resistances cold 6, sonic 6 Digital Telepathy (aura, occult, tech) 100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. Reactive Strike Reaction Shift Dimensionality Reaction Frequency once per round; Trigger The iridia is targeted by a ranged Strike; Effect A rainbow of visual distortion cascades across the iridia. They desynchronize from reality and are briefly replaced by a two-dimensional rendering, gaining concealment against the triggering Strike. --- Speed 25 feet, fly 40 feet Melee Single Action schism 18, 2d86 bludgeoning Ranged Single Action dusk ray 20, 4d8 electricity Occult Innate Spells DC 26\"}}, attack 18\"}} - Cantrips (4th) Implant Data, Seek the Stars - 1st Delete, Wisp Ally - 2nd Detect Thoughts, Inject Nanobots, Skim Data (at will) - 3rd Holographic Memory, Mending - 4th Caustic Conversion, Translocate (at will) - Constant (5th) Truespeech Melee Single Action schism 18, 2d86 bludgeoning Ranged Single Action dusk ray 20, 4d8 electricity "
+    "rawText": " Iridia When mortals encounter spectra outside the drift, that encounter is usually with an iridia. These opalescent, bipedal ambassadors travel the cosmos as messengers and agents of the Drift, extolling the benefits of new and emergent technologies. They champion growth and improvement in all aspects of life but especially focus on the advancement of new technologies. Their goals often put them at odds with those who forswear controversial and dangerous tech or who approach new and untested discoveries with caution. Iridias are known to visit remote worlds in the Vast, far away from Absalom Station and the Drift lanes where Triune's original signal and the secrets of Drift travel were suppressed, lost, or misunderstood. They bring the people of these isolated worlds instructions to achieve interstellar travel and a second chance to join the galactic community. Iridia Source Alien Core pg. 177 Perception +16; darkvision, techsense (precise) 60 feet Languages arc network, digital telepathy, truespeech (can't speak any language) Skills Acrobatics +16, Computers +18, Deception +14, Diplomacy +16, Drift Lore +20, Occultism +14, Piloting +14 Str +2 Dex +4 Con +2 Int +4 Wis +2 Cha +6 Arc Network The iridia can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the iridia can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. Slip Drive An iridia has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an iridia gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. Techsense The iridia senses creatures and objects with the tech trait as a precise sense within the listed range. --- AC 26 Fort +13 Ref +18 Will +16 HP 130 Immunities electricity Resistances cold 6, sonic 6 Digital Telepathy (aura, occult, tech) 100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. Reactive Strike Reaction Shift Dimensionality Reaction Frequency once per round; Trigger The iridia is targeted by a ranged Strike; Effect A rainbow of visual distortion cascades across the iridia. They desynchronize from reality and are briefly replaced by a two-dimensional rendering, gaining concealment against the triggering Strike. --- Speed 25 feet, fly 40 feet Melee Single Action schism 18, 2d86 bludgeoning Ranged Single Action dusk ray 20, 4d8 electricity Occult Innate Spells DC 26, attack 18 - Cantrips (4th) Implant Data, Seek the Stars - 1st Delete, Wisp Ally - 2nd Detect Thoughts, Inject Nanobots, Skim Data (at will) - 3rd Holographic Memory, Mending - 4th Caustic Conversion, Translocate (at will) - Constant (5th) Truespeech Melee Single Action schism 18, 2d86 bludgeoning Ranged Single Action dusk ray 20, 4d8 electricity "
   },
   {
     "id": "aon-creatures--269-irradiated-undead-charger",
@@ -14516,7 +14701,7 @@
     "source": "Alien Core",
     "perception": 15,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -14586,7 +14771,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "{{creatureAbilities 37 \"telepathy\"}} 1 mile (moonflowers only)"
@@ -14667,7 +14852,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), electroreception, techsense ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "darkvision, electroreception, techsense (imprecise) 100 feet"
     ],
     "languages": [],
     "skills": {
@@ -14719,11 +14904,11 @@
     "specialAbilities": [
       {
         "name": "Electroreception",
-        "description": "While in space, the shipbreaker can sense electronic signals from starships in the same star system. While it can't necessarily interpret starship signals, it has a vague sense of the intent or purpose of any given starship signal, such as \"to scan,\" \"to communicate,\" or \"to warn of danger.\" **Techsense** A shipbreaker can detect creatures and items with the tech trait as an imprecise sense at the listed range."
+        "description": "While in space, the shipbreaker can sense electronic signals from starships in the same star system. While it can't necessarily interpret starship signals, it has a vague sense of the intent or purpose of any given starship signal, such as \"to scan,\" \"to communicate,\" or \"to warn of danger.\" **Techsense** A shipbreaker can detect creatures and items with the tech trait as an imprecise sense at the listed range. **Items** advanced batteries (3 to 3,000)"
       },
       {
         "name": "Techsense",
-        "description": "A shipbreaker can detect creatures and items with the tech trait as an imprecise sense at the listed range."
+        "description": "A shipbreaker can detect creatures and items with the tech trait as an imprecise sense at the listed range. **Items** advanced batteries (3 to 3,000)"
       },
       {
         "name": "Plasma Shield",
@@ -14748,7 +14933,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -14814,6 +14999,10 @@
         "name": "Revert",
         "actions": "reaction",
         "description": "**Frequency** once per hour; **Trigger** The voidsage takes damage while projecting; **Effect** The voidsage stops projecting and gains 50 temporary Hit Points that last for 10 minutes."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 26, attack 18"
       }
     ],
     "description": "Voidsages are alghollthus who survived the battles of youth with an intact nanite network. After consuming many of their peers' own nanites, a …",
@@ -14831,7 +15020,7 @@
     "source": "Alien Core",
     "perception": 13,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Thalassic"
@@ -14985,7 +15174,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -15065,12 +15254,16 @@
       },
       {
         "name": "Akashic Interference",
-        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 23 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute."
+        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 23 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute. **Critical Success** For 1 round, when the creature attempts to Recall Knowledge, it gains a +3 status bonus to its "
       },
       {
         "name": "Deflecting Lasers",
         "actions": "reaction",
         "description": ") **Trigger** The dragon is critically hit by an attack; **Effect** The young Akashic dragon raises a web of deflecting lasers using the eyes embedded all over their body, gaining resistance 8 to all damage against the triggering attack and absorbing some of the blow's energy, recharging their Akashic Barrage. If the Akashic dragon has succeeded at a Recall Knowledge check against the creature in the last minute, they gain resistance 11 instead."
+      },
+      {
+        "name": "Occult Prepared Spells",
+        "description": "DC 26, attack +20; **3rd** _clairaudience_, _haste_, _hypercognition_, **2nd** _humanoid form_, _stupefy_, _translate_; **1st** _delete_, _disguise magic_, _sure strike_; **Cantrips (3rd)**_analyze target_, _daze_, _detect magic_, _read aura_, _shield_"
       }
     ],
     "description": "Though rarely encountered outside their crumbling, relic-filled lairs, Akashic dragons occasionally live in hubs of knowledge, such as bustling space …",
@@ -15089,7 +15282,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Diabolic",
@@ -15167,7 +15360,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [wavesense](/creatures/abilities/42-wavesense) ([imprecise](/rules/456-imprecise-senses)) 120 feet"
+      "darkvision, wavesense (imprecise) 120 feet"
     ],
     "languages": [],
     "skills": {
@@ -15233,7 +15426,7 @@
     "source": "Alien Core",
     "perception": 17,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -15312,7 +15505,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)"
+      "darkvision, low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -15416,7 +15609,7 @@
     "source": "Alien Core",
     "perception": 20,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -15509,7 +15702,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), _[see the unseen](/spells/253-see-the-unseen)_"
+      "darkvision, _see the unseen_"
     ],
     "languages": [
       "Aklo",
@@ -15590,6 +15783,10 @@
         "name": "Ichor Spray",
         "actions": "reaction",
         "description": ", occult) **Trigger** The ichor lord is dealt piercing or slashing damage; **Effect** Hallucinogenic ichor spurts from the ichor lord's wound, dealing 1d6 mental damage to non-orocoran creatures in a 10-foot emanation centered on the ichor lord (DC 28 basic Will save)."
+      },
+      {
+        "name": "Occult Spontaneous Spells",
+        "description": "DC 28, attack 20"
       }
     ],
     "description": "Orocoran ichor lords are blessed by the Newborn—ichor flows through their veins, and they can conjure short-lived fonts of ichor. Most gather …",
@@ -15610,7 +15807,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "ultrasonic pulse ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "ultrasonic pulse (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -15664,6 +15861,10 @@
       {
         "name": "Ultrasonic Pulse",
         "description": ", divine, mental) 100 feet. Liberoba constantly emits sonic pulses that are disruptive to biomatter. Creatures that enter or begin their turn in the aura must attempt a DC 28 Fortitude save to resist the nauseating pulses. On a failure, a creature is sickened 2 for 1 round; on a critical failure, it's also stunned 1 for 1 round. Liberoba can sense the presence of any creature inside ultrasonic pulse's area. This functions as an imprecise sense. Liberoba treats a creature that fail its save again"
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 28, attack 20"
       }
     ],
     "description": "Liberoba delivered the Newborn. Many appendages protrude from this creature's bizarre anatomy, each ending in bloody aucturnite shears.",
@@ -15684,7 +15885,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -15830,6 +16031,10 @@
       {
         "name": "flash grenade",
         "description": ""
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 28, attack 20"
       }
     ],
     "description": "On six recorded occasions, individuals having prolonged contact with Paradox 17 continued to display anomalous behavior afterward. Two expressed …",
@@ -15847,7 +16052,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -15925,7 +16130,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "techsense (precise) 100 feet, [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 10 feet, no vision"
+      "techsense (precise) 100 feet, tremorsense (imprecise) 10 feet, no vision"
     ],
     "languages": [],
     "skills": {
@@ -16006,7 +16211,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[tremorsense](/creatures/abilities/40-tremorsense) 60 feet, no vision"
+      "tremorsense 60 feet, no vision"
     ],
     "languages": [],
     "skills": {
@@ -16082,7 +16287,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -16164,10 +16369,18 @@
       {
         "name": "Radioactive Aura",
         "description": ", disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 25 Fortitude save against severe radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes."
+      },
+      {
+        "name": "Arcane Spontaneous Spells",
+        "description": "DC 28, attack 20"
+      },
+      {
+        "name": "Arcane Prepared Spells",
+        "description": "DC 28, attack +20; **4th** _confusion_, _fireball_, _translocate_, _vapor form_; **3rd** _blindness_, _haste_, _slow_; **2nd** _mist_, _see the unseen_, _sound body_; **1st** _command_, _grease_, _sleep_; **Cantrips (4th)** _analyze target_, _caustic blast_, _prestidigitation_, _measure_, _read aura_"
       }
     ],
     "description": "Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. …",
-    "rawText": " Young Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Young Abysium Dragon Source Alien Core pg. 46 Perception +16; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +17, Arcana +16, Athletics +21, Crafting +16, Deception +14, Intimidation +14, Stealth +15, Survival +16 Str +6 Dex +2 Con +4 Int +5 Wis +3 Cha +3 --- AC 26 Fort +19 Ref +17 Will +18 +1 status to all saves vs. magic HP 190 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 25 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 25 Fortitude save against severe radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 30 feet, climb 30 feet, fly 120 feet Melee Single Action jaws 21, 2d89 piercing plus 2d6 fire Melee Single Action claws 21, 2d109 slashing Melee Single Action tail 19, 2d129 bludgeoning Ranged Single Action artillery laser 19, 2d89 fire Arcane Spontaneous Spells DC 28, attack 20 - Cantrips (5th) Detect Magic, Ignition - 5th Fireball, Toxic Cloud, Unfettered Movement Melee Single Action jaws 21, 2d89 piercing plus 2d6 fire Melee Single Action claws 21, 2d109 slashing Melee Single Action tail 19, 2d129 bludgeoning Ranged Single Action artillery laser 19, 2d89 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure, read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure, read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure, read aura "
+    "rawText": " Young Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Young Abysium Dragon Source Alien Core pg. 46 Perception +16; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +17, Arcana +16, Athletics +21, Crafting +16, Deception +14, Intimidation +14, Stealth +15, Survival +16 Str +6 Dex +2 Con +4 Int +5 Wis +3 Cha +3 --- AC 26 Fort +19 Ref +17 Will +18 +1 status to all saves vs. magic HP 190 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 25 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 25 Fortitude save against severe radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 30 feet, climb 30 feet, fly 120 feet Melee Single Action jaws 21, 2d89 piercing plus 2d6 fire Melee Single Action claws 21, 2d109 slashing Melee Single Action tail 19, 2d129 bludgeoning Ranged Single Action artillery laser 19, 2d89 fire Arcane Spontaneous Spells DC 28, attack 20 - Cantrips (5th) Detect Magic, Ignition - 5th Fireball, Toxic Cloud, Unfettered Movement Melee Single Action jaws 21, 2d89 piercing plus 2d6 fire Melee Single Action claws 21, 2d109 slashing Melee Single Action tail 19, 2d129 bludgeoning Ranged Single Action artillery laser 19, 2d89 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure , read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure , read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure , read aura "
   },
   {
     "id": "aon-creatures--159-gwereiad",
@@ -16182,7 +16395,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "greater [darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "greater darkvision"
     ],
     "languages": [
       "Aklo",
@@ -16249,6 +16462,10 @@
       {
         "name": "Singularity Field",
         "description": ", primal) 30 feet. The area around a gwereiad inexorably draws things toward its center. Creatures entering or starting their turns inside the aura must succeed at a DC 29 Reflex save or be pulled 5 feet toward the gwereiad (10 feet on a critical failure)."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 26, attack 18"
       }
     ],
     "description": "Gwereiads are aloof and enigmatic nymphs who keep to themselves, nestling deep inside the phenomena known as black holes. Whether their solitary …",
@@ -16267,7 +16484,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), warsight (precise) 60 feet"
+      "darkvision, warsight (precise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -16346,7 +16563,7 @@
     "source": "Alien Core",
     "perception": 18,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [tremorsense](/creatures/abilities/40-tremorsense) 30 feet"
+      "darkvision, tremorsense 30 feet"
     ],
     "languages": [
       "Aklo",
@@ -16417,6 +16634,14 @@
         "name": "Debris Field",
         "actions": "reaction",
         "description": "**Trigger** The sterieid takes physical damage; **Effect** Shards of rocky debris fly off the sterieid's body, dealing 3d12 bludgeoning damage to all adjacent creatures (DC 29 basic Reflex save) and giving the sterieid the concealed condition until the end of their next turn."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 29, attack 21"
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 29, attack 21"
       }
     ],
     "description": "The largest asteroids, some many miles across, are home to sterieid queens. As these asteroids more likely have a semblance of atmosphere, sterieid …",
@@ -16434,7 +16659,7 @@
     "source": "Alien Core",
     "perception": 22,
     "senses": [
-      "[tremorsense](/creatures/abilities/40-tremorsense) (precise) 60 feet"
+      "tremorsense (precise) 60 feet"
     ],
     "languages": [
       "Petran"
@@ -16584,7 +16809,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), motion sense 30 feet ([imprecise](/rules/456-imprecise-senses))"
+      "darkvision, motion sense 30 feet (imprecise)"
     ],
     "languages": [
       "Shirren",
@@ -16658,7 +16883,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -16727,7 +16952,7 @@
       },
       {
         "name": "Quantum Duality",
-        "description": "Vorthuuls exist in two states: one in perfect tranquility, the other in perpetual agony. The vorthuul gains bonuses depending on the dominant state. They decide which is dominant as a free action when they roll initiative."
+        "description": "Vorthuuls exist in two states: one in perfect tranquility, the other in perpetual agony. The vorthuul gains bonuses depending on the dominant state. They decide which is dominant as a free action when they roll initiative. Absolute Tranquility The vorthuul gains a +1 status bonus to saves against emotion effects and resistance 10 to mental damage.Everburning Agony The vorthuul gains a +1 status bonus to saves against vitality effects and resistance 10 to fire damage. Reactive Strike [reaction]"
       }
     ],
     "description": "Vorthuuls are undead beings with two overlapping yet incongruous forms: a distorted spirit shrieking in unending torment and a pitch-black skeleton …",
@@ -16744,7 +16969,7 @@
     "source": "Alien Core",
     "perception": 16,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -16814,7 +17039,7 @@
     "source": "Alien Core",
     "perception": 22,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 30 feet, scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, lifesense (imprecise) 30 feet, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -16898,6 +17123,10 @@
         "name": "Reactive Strike",
         "actions": "reaction",
         "description": ""
+      },
+      {
+        "name": "Divine Prepared Spells",
+        "description": "DC 26, attack +18; **4th** _clear mind_, _heal_, _planar tether_; **3rd** _cleanse affliction_, _environmental endurance_, _heroism_; **2nd** _calm_, _see the unseen_, _status_, _translate_; **1st** _infuse vitality_, _sanctuary_, _spirit link_; **Cantrips (4th)** _detect magic_, _forbidding ward_, _guidance_, _reorient_, _stabilize_"
       }
     ],
     "description": "These majestic dragons embody the stellar forces that underly and balance all that exists in the universe. Cosmic dragons are wise, social, and …",
@@ -16916,7 +17145,7 @@
     "source": "Alien Core",
     "perception": 22,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet, [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 90 feet"
+      "darkvision, scent (imprecise) 60 feet, tremorsense (imprecise) 90 feet"
     ],
     "languages": [
       "Common",
@@ -16989,10 +17218,14 @@
         "name": "Covered in Bugs",
         "actions": "reaction",
         "description": "**Trigger** The dragon critically fails a saving throw; **Effect** Swarming insects interfere with the effect, sacrificing themselves to protect their host's body and mind. The dragon attempts a DC 17 flat check. On a success, the dragon fails the saving throw instead of critically failing."
+      },
+      {
+        "name": "Primal Prepared Spells",
+        "description": "DC 23, attack +15; **3rd** _earthbind_, _life seal_, _wall of wind_; **2nd** _entangling flora_, _environmental endurance_, _speak with animals_, _water breathing_; **1st** _ant haul_, _detect poison_, _fear_; **Cantrips (3rd)** _caustic blast_, _detect magic_, _seek the stars_, _stumble_, _tangle vine_"
       }
     ],
     "description": "Innumerable insects follow these lumbering, ravenous dragons wherever they roam, swarming around them and living in the countless orifices along the …",
-    "rawText": " Adult Host Dragon Innumerable insects follow these lumbering, ravenous dragons wherever they roam, swarming around them and living in the countless orifices along the host dragon's body. The dragon is both a part of the swarm itself and a part of the swarm's ecosystem—the swarm feeds on their body, and the dragon feeds on the swarm in a grotesque, centuries-long cycle that somehow results in the host dragon growing larger and more powerful even if they feed on no other substance in their lifetime. Host dragons draw their power from the primal instincts of insects and, despite their intelligence, often behave like the insects they gather to them. Host dragons despise answering questions and violently defy all attempts others make to understand their nature. Adult Host Dragon Source Alien Core pg. 53 Perception +22; darkvision, scent (imprecise) 60 feet, tremorsense (imprecise) 90 feet Languages Common, Draconic Skills Acrobatics +18, Athletics +24, Intimidation +24, Nature +22, Stealth +20, Survival +22 Str +7 Dex +3 Con +5 Int +3 Wis +5 Cha +3 --- AC 30 Fort +22 Ref +18 Will +22 +2 status to all saves vs. mental HP 200 Immunities paralyzed, poison, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 25 Covered in Bugs Reaction Trigger The dragon critically fails a saving throw; Effect Swarming insects interfere with the effect, sacrificing themselves to protect their host's body and mind. The dragon attempts a DC 17 flat check. On a success, the dragon fails the saving throw instead of critically failing. --- Speed 30 feet, burrow 30 feet, climb 30 feet, fly 150 feet Melee Single Action jaws 24, 2d1013 piercing plus excruciating bites and Grab Melee Single Action claw 24, 2d413 slashing Melee Single Action tail 22, 2d813 bludgeoning plus Knockdown Melee Single Action jaws 24, 2d1013 piercing plus excruciating bites and Grab Melee Single Action claw 24, 2d413 slashing Melee Single Action tail 22, 2d813 bludgeoning plus Knockdown Host Dragon Lairs These dragons prefer homes that give comfort to the insects that live in their bodies—anywhere dark, underground, and far from danger. At unpredictable times in their lives, they permanently abandon their lairs, leaving millions of tiny husks behind and seeking shelter in a new region or on another unfortunate planet nearby. What drives this behavior is unknown. Host Dragon Spellcasters Host dragon spellcasters tend to cast the following spells. Young Host Dragon Primal Prepared Spells DC 23, attack +15; 3rd earthbind , life seal , wall of wind ; 2nd entangling flora , environmental endurance , speak with animals , water breathing ; 1st ant haul , detect poison , fear ; Cantrips (3rd) caustic blast , detect magic , seek the stars , stumble , tangle vine Adult Host Dragon Primal Prepared Spells DC 26, attack +18; as young host dragon, plus 5th carcinization , toxic cloud , wall of stone ; 4th unfettered movement ; Cantrips (5th) caustic blast , detect magic , seek the stars , stumble , tangle vine Ancient Host Dragon Primal Prepared Spells DC 34, attack +26; as adult host dragon, plus 7th energy aegis , regenerate , root of all pain ; 6th field of life ; Cantrips (7th) caustic blast , detect magic , seek the stars , stumble , tangle vine "
+    "rawText": " Adult Host Dragon Innumerable insects follow these lumbering, ravenous dragons wherever they roam, swarming around them and living in the countless orifices along the host dragon's body. The dragon is both a part of the swarm itself and a part of the swarm's ecosystem—the swarm feeds on their body, and the dragon feeds on the swarm in a grotesque, centuries-long cycle that somehow results in the host dragon growing larger and more powerful even if they feed on no other substance in their lifetime. Host dragons draw their power from the primal instincts of insects and, despite their intelligence, often behave like the insects they gather to them. Host dragons despise answering questions and violently defy all attempts others make to understand their nature. Adult Host Dragon Source Alien Core pg. 53 Perception +22; darkvision, scent (imprecise) 60 feet, tremorsense (imprecise) 90 feet Languages Common, Draconic Skills Acrobatics +18, Athletics +24, Intimidation +24, Nature +22, Stealth +20, Survival +22 Str +7 Dex +3 Con +5 Int +3 Wis +5 Cha +3 --- AC 30 Fort +22 Ref +18 Will +22 +2 status to all saves vs. mental HP 200 Immunities paralyzed, poison, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 30 Covered in Bugs Reaction Trigger The dragon critically fails a saving throw; Effect Swarming insects interfere with the effect, sacrificing themselves to protect their host's body and mind. The dragon attempts a DC 17 flat check. On a success, the dragon fails the saving throw instead of critically failing. --- Speed 30 feet, burrow 30 feet, climb 30 feet, fly 150 feet Melee Single Action jaws 24, 2d1013 piercing plus excruciating bites and Grab Melee Single Action claw 24, 2d413 slashing Melee Single Action tail 22, 2d813 bludgeoning plus Knockdown Melee Single Action jaws 24, 2d1013 piercing plus excruciating bites and Grab Melee Single Action claw 24, 2d413 slashing Melee Single Action tail 22, 2d813 bludgeoning plus Knockdown Host Dragon Lairs These dragons prefer homes that give comfort to the insects that live in their bodies—anywhere dark, underground, and far from danger. At unpredictable times in their lives, they permanently abandon their lairs, leaving millions of tiny husks behind and seeking shelter in a new region or on another unfortunate planet nearby. What drives this behavior is unknown. Host Dragon Spellcasters Host dragon spellcasters tend to cast the following spells. Young Host Dragon Primal Prepared Spells DC 23, attack +15; 3rd earthbind , life seal , wall of wind ; 2nd entangling flora , environmental endurance , speak with animals , water breathing ; 1st ant haul , detect poison , fear ; Cantrips (3rd) caustic blast , detect magic , seek the stars , stumble , tangle vine Adult Host Dragon Primal Prepared Spells DC 26, attack +18; as young host dragon, plus 5th carcinization , toxic cloud , wall of stone ; 4th unfettered movement ; Cantrips (5th) caustic blast , detect magic , seek the stars , stumble , tangle vine Ancient Host Dragon Primal Prepared Spells DC 34, attack +26; as adult host dragon, plus 7th energy aegis , regenerate , root of all pain ; 6th field of life ; Cantrips (7th) caustic blast , detect magic , seek the stars , stumble , tangle vine "
   },
   {
     "id": "aon-creatures--254-biotech-giant",
@@ -17006,7 +17239,7 @@
     "source": "Alien Core",
     "perception": 23,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "darkvision, tremorsense (imprecise) 30 feet"
     ],
     "languages": [
       "Common",
@@ -17089,7 +17322,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -17177,7 +17410,7 @@
     "source": "Alien Core",
     "perception": 22,
     "senses": [
-      "greater [darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "greater darkvision"
     ],
     "languages": [
       "Common",
@@ -17262,7 +17495,7 @@
     "source": "Alien Core",
     "perception": 24,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -17452,7 +17685,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Azlanti",
@@ -17523,6 +17756,10 @@
       {
         "name": "electromag grenade",
         "description": ""
+      },
+      {
+        "name": "Divine Prepared Spells",
+        "description": "DC 30, attack 22"
       }
     ],
     "description": "While all Aeon Guards swear an oath of allegiance  to the Aeon Throne, Sihedron Guard specialists  are conditioned from a young age to be utterly  …",
@@ -17541,7 +17778,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), techsense (precise) 60 feet"
+      "darkvision, techsense (precise) 60 feet"
     ],
     "languages": [
       "arc network, digital telepathy, <i>truespeech</i> (can't speak any language)"
@@ -17619,6 +17856,10 @@
       {
         "name": "tentacle burst",
         "description": ""
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 30, attack 22"
       }
     ],
     "description": "Whether they were created by the god Triune, the arc spectra Facilian, or by the Drift itself, wyspirias are a new evolution of spectra first …",
@@ -17637,7 +17878,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -17717,12 +17958,16 @@
       },
       {
         "name": "Akashic Interference",
-        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 28 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute."
+        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 28 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute. **Critical Success** For 1 round, when the creature attempts to Recall Knowledge, it gains a +3 status bonus to its "
       },
       {
         "name": "Deflecting Lasers",
         "actions": "reaction",
         "description": ") **Trigger** The dragon is critically hit by an attack; **Effect** The young Akashic dragon raises a web of deflecting lasers using the eyes embedded all over their body, gaining resistance 15 to all damage against the triggering attack and absorbing some of the blow's energy, recharging their Akashic Barrage. If the Akashic dragon has succeeded at a Recall Knowledge check against the creature in the last minute, they gain resistance 20 instead."
+      },
+      {
+        "name": "Occult Prepared Spells",
+        "description": "DC 26, attack +20; **3rd** _clairaudience_, _haste_, _hypercognition_, **2nd** _humanoid form_, _stupefy_, _translate_; **1st** _delete_, _disguise magic_, _sure strike_; **Cantrips (3rd)**_analyze target_, _daze_, _detect magic_, _read aura_, _shield_"
       }
     ],
     "description": "Though rarely encountered outside their crumbling, relic-filled lairs, Akashic dragons occasionally live in hubs of knowledge, such as bustling space …",
@@ -17740,7 +17985,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -17900,7 +18145,7 @@
     "source": "Alien Core",
     "perception": 24,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "darkvision, lifesense (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -17989,7 +18234,7 @@
     "source": "Alien Core",
     "perception": 25,
     "senses": [
-      "bloodsense ([imprecise](/rules/456-imprecise-senses)) 120 feet, [darkvision](/rules/459-darkvision-and-greater-darkvision), scent (imprecise) 120 feet"
+      "bloodsense (imprecise) 120 feet, darkvision, scent (imprecise) 120 feet"
     ],
     "languages": [],
     "skills": {
@@ -18070,7 +18315,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), emotion sense ([imprecise](/rules/456-imprecise-senses)) 90 feet"
+      "darkvision, emotion sense (imprecise) 90 feet"
     ],
     "languages": [],
     "skills": {
@@ -18162,7 +18407,7 @@
     "source": "Alien Core",
     "perception": 19,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "low-light vision, scent (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -18239,7 +18484,7 @@
     "source": "Alien Core",
     "perception": 22,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -18321,10 +18566,18 @@
       {
         "name": "Radioactive Aura",
         "description": ", disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 30 Fortitude save against extreme radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes."
+      },
+      {
+        "name": "Arcane Spontaneous Spells",
+        "description": "DC 33, attack 25"
+      },
+      {
+        "name": "Arcane Prepared Spells",
+        "description": "DC 28, attack +20; **4th** _confusion_, _fireball_, _translocate_, _vapor form_; **3rd** _blindness_, _haste_, _slow_; **2nd** _mist_, _see the unseen_, _sound body_; **1st** _command_, _grease_, _sleep_; **Cantrips (4th)** _analyze target_, _caustic blast_, _prestidigitation_, _measure_, _read aura_"
       }
     ],
     "description": "Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. …",
-    "rawText": " Adult Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Adult Abysium Dragon Source Alien Core pg. 47 Perception +22; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +22, Arcana +24, Athletics +27, Crafting +22, Deception +20, Intimidation +20, Stealth +20, Survival +25 Str +8 Dex +3 Con +6 Int +7 Wis +5 Cha +5 --- AC 32 Fort +25 Ref +22 Will +22 +1 status to all saves vs. magic HP 290 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 30 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 30 Fortitude save against extreme radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 40 feet, climb 40 feet, fly 140 feet Melee Single Action jaws 27, 3d811 piercing plus 2d6 fire Melee Single Action claw 27, 3d1011 slashing Melee Single Action tail 25, 3d1211 bludgeoning Ranged Single Action artillery laser 25, 2d1010 fire Arcane Spontaneous Spells DC 33, attack 25 - Cantrips (6th) Detect Magic, Ignition - 7th Fireball, Rocket Dash, Toxic Cloud, Unfettered Movement Melee Single Action jaws 27, 3d811 piercing plus 2d6 fire Melee Single Action claw 27, 3d1011 slashing Melee Single Action tail 25, 3d1211 bludgeoning Ranged Single Action artillery laser 25, 2d1010 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure, read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure, read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure, read aura "
+    "rawText": " Adult Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Adult Abysium Dragon Source Alien Core pg. 47 Perception +22; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +22, Arcana +24, Athletics +27, Crafting +22, Deception +20, Intimidation +20, Stealth +20, Survival +25 Str +8 Dex +3 Con +6 Int +7 Wis +5 Cha +5 --- AC 32 Fort +25 Ref +22 Will +22 +1 status to all saves vs. magic HP 290 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 30 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 30 Fortitude save against extreme radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 40 feet, climb 40 feet, fly 140 feet Melee Single Action jaws 27, 3d811 piercing plus 2d6 fire Melee Single Action claw 27, 3d1011 slashing Melee Single Action tail 25, 3d1211 bludgeoning Ranged Single Action artillery laser 25, 2d1010 fire Arcane Spontaneous Spells DC 33, attack 25 - Cantrips (6th) Detect Magic, Ignition - 7th Fireball, Rocket Dash, Toxic Cloud, Unfettered Movement Melee Single Action jaws 27, 3d811 piercing plus 2d6 fire Melee Single Action claw 27, 3d1011 slashing Melee Single Action tail 25, 3d1211 bludgeoning Ranged Single Action artillery laser 25, 2d1010 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure , read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure , read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure , read aura "
   },
   {
     "id": "aon-creatures--186-cloud-ray",
@@ -18337,7 +18590,7 @@
     "source": "Alien Core",
     "perception": 21,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision)"
+      "low-light vision"
     ],
     "languages": [],
     "skills": {
@@ -18401,7 +18654,7 @@
     "source": "Alien Core",
     "perception": 23,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision) 60 feet, [lifesense](/creatures/abilities/21-lifesense) 60 feet"
+      "darkvision 60 feet, lifesense 60 feet"
     ],
     "languages": [
       "Common"
@@ -18482,7 +18735,7 @@
     "source": "Alien Core",
     "perception": 23,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) 60 feet"
+      "darkvision, lifesense 60 feet"
     ],
     "languages": [
       "Common",
@@ -18556,6 +18809,10 @@
         "name": "Clear Mind",
         "actions": "reaction",
         "description": "counteract rank 7, counteract modifier +30"
+      },
+      {
+        "name": "Arcane Prepared Spells",
+        "description": "DC 37, attack 29"
       }
     ],
     "description": "Long ago, this elebrian performed the ritual to create an  electroencephalon  to avoid a slow, agonizing death in Eox's ruined atmosphere.",
@@ -18573,7 +18830,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "constant pulse radar 100 feet, [darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "constant pulse radar 100 feet, darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -18658,7 +18915,7 @@
     "source": "Alien Core",
     "perception": 23,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, tremorsense (imprecise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -18743,7 +19000,7 @@
     "source": "Alien Core",
     "perception": 25,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), linked senses 60 feet, x-ray vision ([precise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, linked senses 60 feet, x-ray vision (precise) 60 feet"
     ],
     "languages": [],
     "skills": {
@@ -18813,11 +19070,11 @@
     "specialAbilities": [
       {
         "name": "Linked Senses",
-        "description": "The vanguard-class soldier robot shares senses with other allied vanguard-class soldier robots within 60 feet. **X-Ray Vision** The vanguard-class soldier robot can see through most materials and walls within 60 feet. Its sight is blocked by 2 feet of wood or plastic, 1 foot of stone, 2 inches of metal, or any amount of lead or starmetal, and it can see only in black and white."
+        "description": "The vanguard-class soldier robot shares senses with other allied vanguard-class soldier robots within 60 feet. **X-Ray Vision** The vanguard-class soldier robot can see through most materials and walls within 60 feet. Its sight is blocked by 2 feet of wood or plastic, 1 foot of stone, 2 inches of metal, or any amount of lead or starmetal, and it can see only in black and white. **Items** integrated advanced painglaive (1 commercial battery), integrated advanced seeker rifle (60 projectiles)"
       },
       {
         "name": "X-Ray Vision",
-        "description": "The vanguard-class soldier robot can see through most materials and walls within 60 feet. Its sight is blocked by 2 feet of wood or plastic, 1 foot of stone, 2 inches of metal, or any amount of lead or starmetal, and it can see only in black and white."
+        "description": "The vanguard-class soldier robot can see through most materials and walls within 60 feet. Its sight is blocked by 2 feet of wood or plastic, 1 foot of stone, 2 inches of metal, or any amount of lead or starmetal, and it can see only in black and white. **Items** integrated advanced painglaive (1 commercial battery), integrated advanced seeker rifle (60 projectiles)"
       }
     ],
     "description": "Vanguard-class soldier robots are hulking machines of battle. They often have four clawed hands, digitigrade legs, a long tail, and a featureless, …",
@@ -18836,7 +19093,7 @@
     "source": "Alien Core",
     "perception": 28,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 30 feet, scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, lifesense (imprecise) 30 feet, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -18920,6 +19177,10 @@
         "name": "Reactive Strike",
         "actions": "reaction",
         "description": ""
+      },
+      {
+        "name": "Divine Prepared Spells",
+        "description": "DC 26, attack +18; **4th** _clear mind_, _heal_, _planar tether_; **3rd** _cleanse affliction_, _environmental endurance_, _heroism_; **2nd** _calm_, _see the unseen_, _status_, _translate_; **1st** _infuse vitality_, _sanctuary_, _spirit link_; **Cantrips (4th)** _detect magic_, _forbidding ward_, _guidance_, _reorient_, _stabilize_"
       }
     ],
     "description": "These majestic dragons embody the stellar forces that underly and balance all that exists in the universe. Cosmic dragons are wise, social, and …",
@@ -18937,7 +19198,7 @@
     "source": "Alien Core",
     "perception": 27,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), thoughtsense 120 feet"
+      "darkvision, thoughtsense 120 feet"
     ],
     "languages": [
       "Aklo",
@@ -19013,6 +19274,10 @@
       {
         "name": "Open Pustules",
         "description": "When the deh-nolo takes damage, pustules on their body burst, spraying foul poison. Each adjacent creature is exposed to dominion bile."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 34, attack 26"
       }
     ],
     "description": "Deh-nolos are the Dominion's foremost engineers, seamlessly and deviously merging technology and biological systems to create any device imaginable, …",
@@ -19030,7 +19295,7 @@
     "source": "Alien Core",
     "perception": 28,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), emotion sense ([imprecise](/rules/456-imprecise-senses)) 60 feet, sense through"
+      "darkvision, emotion sense (imprecise) 60 feet, sense through"
     ],
     "languages": [
       "Garaggakal",
@@ -19119,7 +19384,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -19185,11 +19450,19 @@
       },
       {
         "name": "Radiant Gaze",
-        "description": ", light, primal, visual) 60 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 34 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait."
+        "description": ", light, primal, visual) 60 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 34 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait. **Success** The creature is unaffected. **Failure** he creature is dazzled until the start of its next turn. **Critical Failure** The creature is blinded until the start of its next turn. **Supernova** (fire, light, visual) **Trig"
       },
       {
         "name": "Supernova",
         "description": ", light, visual) **Trigger** The heliad queen dies; **Effect** The heliad queen's body explodes into brilliant, luminous flame. Each creature in a 10-foot emanation takes 12d8 fire damage (DC 34 basic Reflex save). Creatures that critically fail are blinded for 1 minute."
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 34, attack 26"
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 34, attack 26"
       }
     ],
     "description": "Heliad queens live on the largest dwarf stars, mature stars, and supergiants. They take great pride in the luminosity of their stars, often bedecking …",
@@ -19208,7 +19481,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "darkvision, lifesense (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -19304,7 +19577,7 @@
     "source": "Alien Core",
     "perception": 24,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) (precise) 60 feet, _[see the unseen](/spells/253-see-the-unseen)_"
+      "darkvision, lifesense (precise) 60 feet, _see the unseen_"
     ],
     "languages": [
       "Chthonian",
@@ -19375,12 +19648,16 @@
     "specialAbilities": [
       {
         "name": "Sense Fate",
-        "description": ") A temporai always rolls a 20 for initiative."
+        "description": ") A temporai always rolls a 20 for initiative. **Items** superior cryopike (1 superior battery), superior laser rifle (2 superior batteries), superior nano-edge rapier, advanced second skin"
       },
       {
         "name": "Reactive Strike",
         "actions": "reaction",
         "description": ""
+      },
+      {
+        "name": "Divine Innate Spells",
+        "description": "DC 34, attack 26"
       }
     ],
     "description": "Temporais prevent people from cheating death by meddling with time. This duty puts them in opposition to precogs and other witchwarpers, as well as …",
@@ -19397,7 +19674,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common"
@@ -19461,7 +19738,7 @@
     "source": "Alien Core",
     "perception": 32,
     "senses": [
-      "constant pulse radar 100 feet, [darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "constant pulse radar 100 feet, darkvision"
     ],
     "languages": [
       "interstellar comms"
@@ -19548,7 +19825,7 @@
     "source": "Alien Core",
     "perception": 23,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [],
     "skills": {
@@ -19648,7 +19925,7 @@
     "source": "Alien Core",
     "perception": 29,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), sphere of influence"
+      "darkvision, sphere of influence"
     ],
     "languages": [
       "any"
@@ -19710,7 +19987,7 @@
       },
       {
         "name": "Code Injection",
-        "description": ", tech) 30 feet. Creatures and items with the tech trait that enter or begin their turn within the aura must attempt a DC 36 Will save. The malevolent AI can choose to exclude targets."
+        "description": ", tech) 30 feet. Creatures and items with the tech trait that enter or begin their turn within the aura must attempt a DC 36 Will save. The malevolent AI can choose to exclude targets. **Critical Success** No effect, and the target is temporarily immune to code injection for 1 hour. **Success** The target is unaffected. **Failure** The target becomes glitching 1 while in the aura and for 1 round after leaving the aura. **Critical Failure** As failure, but glitching 2 and 2 rounds. **Shell Comput"
       },
       {
         "name": "Shell Computer",
@@ -19743,7 +20020,7 @@
     "source": "Alien Core",
     "perception": 29,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), _[truesight](/spells/330-truesight)_"
+      "darkvision, _truesight_"
     ],
     "languages": [
       "Common",
@@ -19799,7 +20076,11 @@
     "specialAbilities": [
       {
         "name": "Lunar Phase",
-        "description": ") 60 feet. The moon giant can choose waxing or waning at the start of each of their turns. When the aura is waxing, a living creature that starts its turn in the aura gains the quickened condition and can use this extra action to only to Stride or Strike. When the aura is waning, a creature that isn't a moon giant that enters the aura must attempt a DC 33 Will save. This is an incapacitation effect. It's then temporarily immune to the effects of the waning aura for 24 hours."
+        "description": ") 60 feet. The moon giant can choose waxing or waning at the start of each of their turns. When the aura is waxing, a living creature that starts its turn in the aura gains the quickened condition and can use this extra action to only to Stride or Strike. When the aura is waning, a creature that isn't a moon giant that enters the aura must attempt a DC 33 Will save. This is an incapacitation effect. It's then temporarily immune to the effects of the waning aura for 24 hours. **Critical Success**"
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 36, attack 28"
       }
     ],
     "description": "Moon giants are among the largest humanoids, standing approximately 24 feet tall. Their weight varies greatly depending on the locality, as their …",
@@ -19816,7 +20097,7 @@
     "source": "Alien Core",
     "perception": 26,
     "senses": [
-      "[low-light vision](/rules/460-low-light-vision), tremorsense ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "low-light vision, tremorsense (imprecise) 30 feet"
     ],
     "languages": [],
     "skills": {
@@ -19884,7 +20165,7 @@
     "source": "Alien Core",
     "perception": 29,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet, [tremorsense](/creatures/abilities/40-tremorsense) ([imprecise](/rules/456-imprecise-senses)) 120 feet"
+      "darkvision, scent (imprecise) 60 feet, tremorsense (imprecise) 120 feet"
     ],
     "languages": [
       "Common",
@@ -19957,6 +20238,10 @@
         "name": "Covered in Bugs",
         "actions": "reaction",
         "description": "**Trigger** The dragon critically fails a saving throw; **Effect** Swarming insects interfere with the effect, sacrificing themselves to protect their host's body and mind. The dragon attempts a DC 17 flat check. On a success, the dragon fails the saving throw instead of critically failing."
+      },
+      {
+        "name": "Primal Prepared Spells",
+        "description": "DC 23, attack +15; **3rd** _earthbind_, _life seal_, _wall of wind_; **2nd** _entangling flora_, _environmental endurance_, _speak with animals_, _water breathing_; **1st** _ant haul_, _detect poison_, _fear_; **Cantrips (3rd)** _caustic blast_, _detect magic_, _seek the stars_, _stumble_, _tangle vine_"
       }
     ],
     "description": "Innumerable insects follow these lumbering, ravenous dragons wherever they roam, swarming around them and living in the countless orifices along the …",
@@ -19975,7 +20260,7 @@
     "source": "Alien Core",
     "perception": 30,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 100 feet"
+      "darkvision, lifesense (imprecise) 100 feet"
     ],
     "languages": [
       "Aklo",
@@ -20045,6 +20330,10 @@
       {
         "name": "Stench",
         "description": ""
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 37, attack 29"
       }
     ],
     "description": "Haeshi-shaas are relatively new members of the Dominion of the Black. These longlived creatures shift unpredictably between a liquid and a gaseous …",
@@ -20062,7 +20351,7 @@
     "source": "Alien Core",
     "perception": 28,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [low-light vision](/rules/460-low-light-vision)"
+      "darkvision, low-light vision"
     ],
     "languages": [
       "Starsong"
@@ -20127,6 +20416,10 @@
       {
         "name": "No Breath",
         "description": ""
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 35, attack 27"
       }
     ],
     "description": "Also known as space whales, omas project powerful magical electromagnetic fields that protect them from both vacuum and toxic atmospheres while …",
@@ -20229,7 +20522,7 @@
     "source": "Alien Core",
     "perception": 32,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Common",
@@ -20309,12 +20602,16 @@
       },
       {
         "name": "Akashic Interference",
-        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 38 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute."
+        "description": ", occult) 90 feet. The swirl of constant uploads and downloads near the Akashic dragon make attempts to Recall Knowledge unpredictable. A creature other than an akashic dragon that enters or begins its turn in the area must attempt a DC 38 Will save. Regardless of the result of the saving throw, the creature is temporarily immune to this dragon's Akashic interference for 1 minute. **Critical Success** For 1 round, when the creature attempts to Recall Knowledge, it gains a +3 status bonus to its "
       },
       {
         "name": "Deflecting Lasers",
         "actions": "reaction",
         "description": ") **Trigger** The dragon is critically hit by an attack; **Effect** The young Akashic dragon raises a web of deflecting lasers using the eyes embedded all over their body, gaining resistance 20 to all damage against the triggering attack and absorbing some of the blow's energy, recharging their Akashic Barrage. If the Akashic dragon has succeeded at a Recall Knowledge check against the creature in the last minute, they gain resistance 30 instead."
+      },
+      {
+        "name": "Occult Prepared Spells",
+        "description": "DC 26, attack +20; **3rd** _clairaudience_, _haste_, _hypercognition_, **2nd** _humanoid form_, _stupefy_, _translate_; **1st** _delete_, _disguise magic_, _sure strike_; **Cantrips (3rd)**_analyze target_, _daze_, _detect magic_, _read aura_, _shield_"
       }
     ],
     "description": "Though rarely encountered outside their crumbling, relic-filled lairs, Akashic dragons occasionally live in hubs of knowledge, such as bustling space …",
@@ -20397,7 +20694,7 @@
       },
       {
         "name": "Electromagnetic Blindness",
-        "description": "Diaspora worm sages that take electricity damage must attempt a DC 35 Fortitude save."
+        "description": "Diaspora worm sages that take electricity damage must attempt a DC 35 Fortitude save. **Critical Success** The worm is unaffected. **Success** The worm is dazzled for 1 round. **Failure** The worm is blinded for 1 round. **Critical Failure** The worm is blinded for 1 round, then dazzled for 1 round."
       }
     ],
     "description": "Diaspora worms that survive for centuries grow significantly in size, power, and intelligence. They mostly protect their ancestral home, preserving …",
@@ -20506,7 +20803,7 @@
     "source": "Alien Core",
     "perception": 29,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -20588,10 +20885,18 @@
       {
         "name": "Radioactive Aura",
         "description": ", disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 37 Fortitude save against incredible radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes."
+      },
+      {
+        "name": "Arcane Spontaneous Spells",
+        "description": "DC 40, attack 32"
+      },
+      {
+        "name": "Arcane Prepared Spells",
+        "description": "DC 28, attack +20; **4th** _confusion_, _fireball_, _translocate_, _vapor form_; **3rd** _blindness_, _haste_, _slow_; **2nd** _mist_, _see the unseen_, _sound body_; **1st** _command_, _grease_, _sleep_; **Cantrips (4th)** _analyze target_, _caustic blast_, _prestidigitation_, _measure_, _read aura_"
       }
     ],
     "description": "Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. …",
-    "rawText": " Ancient Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Ancient Abysium Dragon Source Alien Core pg. 47 Perception +29; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +30, Arcana +28, Athletics +32, Crafting +28, Deception +26, Intimidation +26, Stealth +27, Survival +28 Str +8 Dex +4 Con +8 Int +8 Wis +6 Cha +6 --- AC 40 Fort +31 Ref +29 Will +30 +1 status to all saves vs. magic HP 415 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 37 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 37 Fortitude save against incredible radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 50 feet, climb 50 feet, fly 200 feet Melee Single Action jaws 36, 3d815 piercing plus 3d6 fire Melee Single Action claw 36, 3d1015 slashing Melee Single Action tail 34, 3d1215 bludgeoning Ranged Single Action artillery laser 34, 2d1015 fire Arcane Spontaneous Spells DC 40, attack 32 - Cantrips (9th) Detect Magic, Ignition - 9th Atomic Blast, Fireball, Rocket Dash, Toxic Cloud, Unfettered Movement, Wall of Plasma - Constant (4th) Fire Shield Melee Single Action jaws 36, 3d815 piercing plus 3d6 fire Melee Single Action claw 36, 3d1015 slashing Melee Single Action tail 34, 3d1215 bludgeoning Ranged Single Action artillery laser 34, 2d1015 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure, read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure, read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure, read aura "
+    "rawText": " Ancient Abysium Dragon Drawing on radiation as both a force of destruction and a source of energy, abysium dragons are tied to the radioactive starmetal of the same name. These dragons grow deposits of pure abysium in their bodies, becoming more radioactive as they age, causing aggression, agitation, and even loneliness since not many creatures can long survive the company of an aging abysium dragon. Abysium dragons frequently turn to pursuits such as augmentation and weapon crafting (to take advantage of their innate power source) and the construction of robots (to keep them company). This work drives abysium dragons to seek out sturdy, radiation-resistant materials they can use for crafting, and they often spend years at a time scouring small moons and asteroids in search of precious materials. Ancient Abysium Dragon Source Alien Core pg. 47 Perception +29; darkvision, scent (imprecise) 60 feet Languages Common, Draconic Skills Acrobatics +30, Arcana +28, Athletics +32, Crafting +28, Deception +26, Intimidation +26, Stealth +27, Survival +28 Str +8 Dex +4 Con +8 Int +8 Wis +6 Cha +6 --- AC 40 Fort +31 Ref +29 Will +30 +1 status to all saves vs. magic HP 415 Immunities paralyzed, radiation, sleep Frightful Presence (aura, emotion, fear, mental) 90 feet, DC 37 Radioactive Aura (aura, disease) 90 feet. A creature that enters the radioactive aura must attempt a DC 37 Fortitude save against incredible radiation sickness. It's then temporarily immune to radioactive aura for 10 minutes. --- Speed 50 feet, climb 50 feet, fly 200 feet Melee Single Action jaws 36, 3d815 piercing plus 3d6 fire Melee Single Action claw 36, 3d1015 slashing Melee Single Action tail 34, 3d1215 bludgeoning Ranged Single Action artillery laser 34, 2d1015 fire Arcane Spontaneous Spells DC 40, attack 32 - Cantrips (9th) Detect Magic, Ignition - 9th Atomic Blast, Fireball, Rocket Dash, Toxic Cloud, Unfettered Movement, Wall of Plasma - Constant (4th) Fire Shield Melee Single Action jaws 36, 3d815 piercing plus 3d6 fire Melee Single Action claw 36, 3d1015 slashing Melee Single Action tail 34, 3d1215 bludgeoning Ranged Single Action artillery laser 34, 2d1015 fire Abysium Dragon Lairs Any place with intense radiation— whether an abandoned nuclear reactor, a starship with a nuclear engine in meltdown, or a radioactive moon—is an attractive lair for an abysium dragon. They might also visit asteroids with raw abysium deposits or tremendous amounts of precious metal, slowly gathering the material to return it to their lair. Abysium Dragon Spellcasters Abysium dragon spellcasters tend to cast the following spells. Young Abysium Dragon Arcane Prepared Spells DC 28, attack +20; 4th confusion , fireball , translocate , vapor form ; 3rd blindness , haste , slow ; 2nd mist , see the unseen , sound body ; 1st command , grease , sleep ; Cantrips (4th) analyze target , caustic blast , prestidigitation , measure , read aura Adult Abysium Dragon Arcane Prepared Spells DC 33, attack +25; as young abysium dragon, plus 6th fireball , slice reality , x-ray vision ; 5th control machine , overload systems ; Cantrips (6th) analyze target , caustic blast , prestidigitation , measure , read aura Ancient Abysium Dragon Arcane Prepared Spells DC 40, attack +32; as adult abysium dragon, plus 8th gravity field , earthquake , fireball ; 7th energy aegis , fireball , wall of steel ; Cantrips (8th) analyze target , caustic blast , prestidigitation , measure , read aura "
   },
   {
     "id": "aon-creatures--240-elindrian-queen",
@@ -20605,7 +20910,7 @@
     "source": "Alien Core",
     "perception": 32,
     "senses": [
-      "scent ([imprecise](/rules/456-imprecise-senses)) 30 feet"
+      "scent (imprecise) 30 feet"
     ],
     "languages": [
       "Elindrian",
@@ -20648,6 +20953,10 @@
       {
         "name": "Husk Mind",
         "description": ") Elindrians can communicate nearly instantaneously via a primal bond similar to a formian hive mind. While within telepathic range of at least one other elindrian with husk mind, an elindrian acolyte gains a +2 circumstance bonus to initiative rolls, Perception checks, and saving throws against mental effects. If one elindrian is aware of a combatant, all members of the husk mind within range are aware of it. The elindrian's husk mind is integrated with their scent; for purposes of detecting ot"
+      },
+      {
+        "name": "Primal Innate Spells",
+        "description": "DC 44, attack 36"
       }
     ],
     "description": "While no one has confirmed the existence of elindrian queens, the elindrians' few similarities to formians have led scholars to believe they must …",
@@ -20667,7 +20976,7 @@
     "source": "Alien Core",
     "perception": 32,
     "senses": [
-      "greater [darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "greater darkvision"
     ],
     "languages": [
       "Aklo",
@@ -20734,6 +21043,10 @@
       {
         "name": "Singularity Field",
         "description": ", primal) 60 feet. The area around a gwereiad queen inexorably draws things toward its center. Creatures entering or starting their turns inside the aura must succeed at a DC 40 Reflex save or be pulled 5 feet toward the gwereiad (10 feet on a critical failure)."
+      },
+      {
+        "name": "Primal Spontaneous Spells",
+        "description": "DC 40, attack 32"
       }
     ],
     "description": "The rarest of nymphs, gwereiad queens form within supermassive black holes, either from a weaker gwereiad's ascension or created spontaneously amid …",
@@ -20753,7 +21066,7 @@
     "source": "Alien Core",
     "perception": 30,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "Aklo",
@@ -20834,6 +21147,10 @@
         "name": "Revert",
         "actions": "reaction",
         "description": "As voidsage, but 100 temporary Hit Points."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 40, attack 32"
       }
     ],
     "description": "Omnipaths are military leaders who pilot god-killing starships or command fleets  of remote war machines. Omnipaths achieve their lofty positions …",
@@ -20853,7 +21170,7 @@
     "source": "Alien Core",
     "perception": 35,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), [lifesense](/creatures/abilities/21-lifesense) ([imprecise](/rules/456-imprecise-senses)) 30 feet (page 209), scent ([imprecise](/rules/456-imprecise-senses)) 60 feet"
+      "darkvision, lifesense (imprecise) 30 feet (page 209), scent (imprecise) 60 feet"
     ],
     "languages": [
       "Common",
@@ -20937,6 +21254,10 @@
         "name": "Reactive Strike",
         "actions": "reaction",
         "description": ""
+      },
+      {
+        "name": "Divine Prepared Spells",
+        "description": "DC 26, attack +18; **4th** _clear mind_, _heal_, _planar tether_; **3rd** _cleanse affliction_, _environmental endurance_, _heroism_; **2nd** _calm_, _see the unseen_, _status_, _translate_; **1st** _infuse vitality_, _sanctuary_, _spirit link_; **Cantrips (4th)** _detect magic_, _forbidding ward_, _guidance_, _reorient_, _stabilize_"
       }
     ],
     "description": "These majestic dragons embody the stellar forces that underly and balance all that exists in the universe. Cosmic dragons are wise, social, and …",
@@ -20955,7 +21276,7 @@
     "source": "Guilt of the Grave World",
     "perception": 35,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision)"
+      "darkvision"
     ],
     "languages": [
       "true linguist"
@@ -21016,16 +21337,20 @@
     "specialAbilities": [
       {
         "name": "Media Lore",
-        "description": "can use Media Lore to Recall Knowledge about any topic. **True Linguist Zo!** has enchanted himself with the ability to speak and understand all languages, giving him the permanent effects of the _truespeech_ spell."
+        "description": "can use Media Lore to Recall Knowledge about any topic. **True Linguist Zo!** has enchanted himself with the ability to speak and understand all languages, giving him the permanent effects of the _truespeech_ spell. **Items** custom paragon ivory chompers, custom paragon second skin (advanced energy shielding, holoskin, jetpack), Zo!'s microphone (advanced animated intelligence)"
       },
       {
         "name": "True Linguist",
-        "description": "has enchanted himself with the ability to speak and understand all languages, giving him the permanent effects of the _truespeech_ spell."
+        "description": "has enchanted himself with the ability to speak and understand all languages, giving him the permanent effects of the _truespeech_ spell. **Items** custom paragon ivory chompers, custom paragon second skin (advanced energy shielding, holoskin, jetpack), Zo!'s microphone (advanced animated intelligence)"
       },
       {
         "name": "Change the Channel",
         "actions": "reaction",
         "description": ") **Trigger** Zo! is targeted by a creature or weapon with the tech trait; **Effect** Zo! uses a universal remote implanted in his forefinger to take control of the incoming assault and redirect it toward a new target of Zo!'s choice, forcing the attacker to resolve their attack against this new target, if there's one within range. If there are no available targets, the attacker resolves their attack against Zo! but must roll their attack twice and use the worse result. Once a creature or weapon"
+      },
+      {
+        "name": "Arcane Spells Known",
+        "description": "DC 41, attack 33"
       }
     ],
     "description": "The person who would eventually become a galactic superstar, media mogul, and fearsome bone sage wasn't always accustomed to fame and fortune. Born …",
@@ -21117,7 +21442,7 @@
       },
       {
         "name": "Electromagnetic Blindness",
-        "description": "Dust worm augurs that take electricity damage must attempt a DC 43 Fortitude save."
+        "description": "Dust worm augurs that take electricity damage must attempt a DC 43 Fortitude save. **Critical Success** The worm is unaffected. **Success** The worm is dazzled for 1 round. **Failure** The worm is blinded for 1 round. **Critical Failure** The worm is blinded for 1 round, then dazzled for 1 round."
       }
     ],
     "description": "Ancient diaspora dust worms become paragons of worm colonization, conquering asteroids and painstakingly terraforming them to support worm society.",
@@ -21136,7 +21461,7 @@
     "source": "Alien Core",
     "perception": 34,
     "senses": [
-      "_[truesight](/spells/330-truesight)_"
+      "_truesight_"
     ],
     "languages": [
       "First One",
@@ -21206,6 +21531,10 @@
         "name": "Transposition",
         "actions": "reaction",
         "description": ", teleportation) **Trigger** A creature takes any move action within 15 feet of the oscriss; **Effect** The oscriss teleports into an unoccupied space within 30 feet."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 44, attack 38"
       }
     ],
     "description": "The menacing war machines known as the oscriss are found only in the ancient sites associated with the First Ones. Resembling two stacked pyramids …",
@@ -21223,7 +21552,7 @@
     "source": "Alien Core",
     "perception": 42,
     "senses": [
-      "[lifesense](/creatures/abilities/21-lifesense) (precise) 500 feet"
+      "lifesense (precise) 500 feet"
     ],
     "languages": [
       "Aklo"
@@ -21300,6 +21629,10 @@
         "name": "Reactive Strike",
         "actions": "reaction",
         "description": ""
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 45, attack 37"
       }
     ],
     "description": "As Paradox 17 is normally invisible, most recorded observations of it start with hearing a roar “like static from a dead signal.” All reports mention …",
@@ -21318,7 +21651,7 @@
     "source": "Alien Core",
     "perception": 39,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), tremorsense (imprecise) 200 feet"
+      "darkvision, tremorsense (imprecise) 200 feet"
     ],
     "languages": [
       "voice of linked minds"
@@ -21417,7 +21750,7 @@
     "source": "Alien Core",
     "perception": 46,
     "senses": [
-      "[darkvision](/rules/459-darkvision-and-greater-darkvision), truesight"
+      "darkvision, truesight"
     ],
     "languages": [
       "First One",
@@ -21494,6 +21827,10 @@
         "name": "Reactive Unmaking",
         "actions": "reaction",
         "description": "**Trigger** A creature moves within the illumantula's space or uses a manipulate action, move action, or ranged attack within 100 feet of the illumantula; **Effect** The illumantula attempts a ranged Strike against the triggering creature. If the attack is a critical hit and the trigger was a manipulate action, the illumantula disrupts that action. This Strike doesn't count toward the illumantula's multiple attack penalty, and its multiple attack penalty doesn't apply to this Strike."
+      },
+      {
+        "name": "Occult Innate Spells",
+        "description": "DC 53, attack 45"
       }
     ],
     "description": "Though it only recently appeared in the shattered red deserts of the planet Akiton, the so-called illumantula has already become the stuff of local …",
