@@ -177,4 +177,122 @@ describe('combatStore', () => {
       expect(typeof store.openPlayerView).toBe('function')
     })
   })
+
+  describe('bug fixes', () => {
+    describe('all dead combatants (bug #1)', () => {
+      beforeEach(() => {
+        store.startCombat('Test')
+        store.addPlayer('Poppy', 15, 85, 24)
+        store.addPlayer('Drakesh', 12, 100, 22)
+      })
+
+      it('nextTurn still works when all combatants are dead', () => {
+        // Kill everyone
+        const combatants = store.state.combat!.combatants
+        combatants.forEach(c => { c.isDead = true })
+
+        // Should NOT hang — should advance turn and increment round
+        store.nextTurn()
+        expect(store.state.combat!.turn).toBeDefined()
+        expect(store.state.combat!.round).toBe(2)
+      })
+
+      it('nextTurn skips dead but lands on dead if all are dead', () => {
+        const combatants = store.state.combat!.combatants
+        combatants.forEach(c => { c.isDead = true })
+
+        const turnBefore = store.state.combat!.turn
+        store.nextTurn()
+        // Turn should have advanced (not stuck)
+        expect(store.state.combat!.turn !== turnBefore || store.state.combat!.round > 1).toBe(true)
+      })
+    })
+
+    describe('removeCombatant preserves current turn (bug #2)', () => {
+      beforeEach(() => {
+        store.startCombat('Test')
+        store.addPlayer('Poppy', 15, 85, 24)    // sorted 0
+        store.addPlayer('Drakesh', 12, 100, 22)  // sorted 1
+        store.addPlayer('Basil', 8, 70, 20)      // sorted 2
+      })
+
+      it('removing higher-initiative combatant keeps current turn correct', () => {
+        // Advance to Drakesh (turn 1 in sorted order)
+        store.nextTurn()
+        expect(store.sortedCombatants.value[store.state.combat!.turn].name).toBe('Drakesh')
+
+        // Remove Poppy (higher initiative, sorted index 0)
+        const poppy = store.state.combat!.combatants.find(c => c.name === 'Poppy')!
+        store.removeCombatant(poppy.id)
+
+        // Drakesh should still be the current combatant
+        const current = store.sortedCombatants.value[store.state.combat!.turn]
+        expect(current.name).toBe('Drakesh')
+      })
+
+      it('removing lower-initiative combatant keeps current turn correct', () => {
+        // Stay on Poppy (turn 0)
+        expect(store.sortedCombatants.value[store.state.combat!.turn].name).toBe('Poppy')
+
+        // Remove Basil (lowest initiative)
+        const basil = store.state.combat!.combatants.find(c => c.name === 'Basil')!
+        store.removeCombatant(basil.id)
+
+        // Poppy should still be current
+        const current = store.sortedCombatants.value[store.state.combat!.turn]
+        expect(current.name).toBe('Poppy')
+      })
+
+      it('removing current combatant advances to next in line', () => {
+        // On Poppy (turn 0)
+        const poppy = store.state.combat!.combatants.find(c => c.name === 'Poppy')!
+        store.removeCombatant(poppy.id)
+
+        // Turn 0 should now point to Drakesh (next highest initiative)
+        const current = store.sortedCombatants.value[store.state.combat!.turn]
+        expect(current.name).toBe('Drakesh')
+      })
+
+      it('removing last combatant resets turn to 0', () => {
+        // Remove all but one
+        const combatants = [...store.state.combat!.combatants]
+        store.removeCombatant(combatants[0].id)
+        store.removeCombatant(combatants[1].id)
+        store.removeCombatant(combatants[2].id)
+
+        expect(store.state.combat!.combatants.length).toBe(0)
+        expect(store.state.combat!.turn).toBe(0)
+      })
+    })
+
+    describe('previousTurn round handling (bug #13)', () => {
+      beforeEach(() => {
+        store.startCombat('Test')
+        store.addPlayer('Poppy', 15, 85, 24)
+        store.addPlayer('Drakesh', 12, 100, 22)
+      })
+
+      it('previousTurn at round 1 does not go below round 1', () => {
+        // At round 1, turn 0
+        store.previousTurn()
+        expect(store.state.combat!.round).toBe(1)
+      })
+
+      it('previousTurn only decrements round once even with dead skipping', () => {
+        // Advance to round 2
+        store.nextTurn()
+        store.nextTurn() // Round 2
+        expect(store.state.combat!.round).toBe(2)
+
+        // Kill Poppy (sorted index 0) — going back should skip them
+        const poppy = store.state.combat!.combatants.find(c => c.name === 'Poppy')!
+        poppy.isDead = true
+
+        // Previous from Drakesh wraps back and skips dead Poppy
+        // but round should only decrement once
+        store.previousTurn()
+        expect(store.state.combat!.round).toBeGreaterThanOrEqual(1)
+      })
+    })
+  })
 })

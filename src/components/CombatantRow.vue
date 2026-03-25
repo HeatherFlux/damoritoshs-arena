@@ -6,7 +6,7 @@ import CreatureCard from './CreatureCard.vue'
 import ActionIcon from './ActionIcon.vue'
 import { calculateConditionEffects, getCondition } from '../data/conditions'
 import { formatComplexity, formatHazardType } from '../types/hazard'
-import { rollDamage } from '../utils/dice'
+import { rollDamage, cleanDamage } from '../utils/dice'
 import { IconSkull, IconHeart } from '@tabler/icons-vue'
 import IconD20 from './icons/IconD20.vue'
 
@@ -57,11 +57,11 @@ function getConditionTooltip(condName: string): string {
 
 // Hazard damage rolling
 function rollHazardDamage(hazardName: string, actionName: string, damage: string) {
-  rollDamage(damage, actionName, hazardName, false)
+  rollDamage(cleanDamage(damage), actionName, hazardName, false)
 }
 
 function rollHazardCritDamage(hazardName: string, actionName: string, damage: string) {
-  rollDamage(damage, actionName, hazardName, true)
+  rollDamage(cleanDamage(damage), actionName, hazardName, true)
 }
 
 // Quick damage/heal functions

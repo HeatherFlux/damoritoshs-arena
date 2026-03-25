@@ -94,7 +94,10 @@ function initChannel() {
 
       switch (type) {
         case 'effect':
-          addEffectWithCleanup(payload)
+          // Deduplicate: skip if effect already added (e.g., from local triggerEffect)
+          if (!state.activeEffects.some(e => e.id === payload.id)) {
+            addEffectWithCleanup(payload)
+          }
           break
         case 'node-state':
           if (state.computer) {
@@ -249,16 +252,8 @@ function setNodeNotes(nodeId: string, notes: string) {
 
 function triggerEffect(type: HackingEffectType, targetNodeId?: string) {
   const effect = createHackingEffect(type, targetNodeId || state.focusedNodeId || undefined)
-  state.activeEffects.push(effect)
+  addEffectWithCleanup(effect)
   broadcast('effect', effect)
-
-  // Auto-remove effect after duration
-  setTimeout(() => {
-    const index = state.activeEffects.findIndex(e => e.id === effect.id)
-    if (index !== -1) {
-      state.activeEffects.splice(index, 1)
-    }
-  }, effect.duration)
 }
 
 function setFocus(nodeId: string | null) {

@@ -494,21 +494,26 @@ function animate(time: number) {
   animationId = requestAnimationFrame(animate)
 }
 
+let resizeTimeout: ReturnType<typeof setTimeout> | null = null
+
 function resizeCanvas() {
-  if (!canvasRef.value) return
+  if (resizeTimeout) clearTimeout(resizeTimeout)
+  resizeTimeout = setTimeout(() => {
+    if (!canvasRef.value) return
 
-  if (props.fullscreen) {
-    canvasRef.value.width = window.innerWidth
-    canvasRef.value.height = window.innerHeight
-  } else {
-    const container = canvasRef.value.parentElement
-    if (container) {
-      canvasRef.value.width = container.clientWidth
-      canvasRef.value.height = container.clientHeight
+    if (props.fullscreen) {
+      canvasRef.value.width = window.innerWidth
+      canvasRef.value.height = window.innerHeight
+    } else {
+      const container = canvasRef.value.parentElement
+      if (container) {
+        canvasRef.value.width = container.clientWidth
+        canvasRef.value.height = container.clientHeight
+      }
     }
-  }
 
-  initParticles()
+    initParticles()
+  }, 100)
 }
 
 function handleClick(event: MouseEvent) {
@@ -533,10 +538,25 @@ function handleClick(event: MouseEvent) {
   store.setFocus(null)
 }
 
+function resizeCanvasImmediate() {
+  if (!canvasRef.value) return
+  if (props.fullscreen) {
+    canvasRef.value.width = window.innerWidth
+    canvasRef.value.height = window.innerHeight
+  } else {
+    const container = canvasRef.value.parentElement
+    if (container) {
+      canvasRef.value.width = container.clientWidth
+      canvasRef.value.height = container.clientHeight
+    }
+  }
+  initParticles()
+}
+
 onMounted(() => {
   if (canvasRef.value) {
     ctx = canvasRef.value.getContext('2d')
-    resizeCanvas()
+    resizeCanvasImmediate()
     animationId = requestAnimationFrame(animate)
     window.addEventListener('resize', resizeCanvas)
   }

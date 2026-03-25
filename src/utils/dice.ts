@@ -72,20 +72,32 @@ export function rollD20(
 }
 
 /**
+ * Clean up damage strings from PDF parsing artifacts.
+ * Shared between CreatureCard and CombatantRow.
+ */
+export function cleanDamage(damage: string): string {
+  return damage
+    .replace(/[A-Z][\u2014\u2013-][A-Z]/g, '') // Remove things like "T—Z"
+    .replace(/\n/g, ' ')                        // Remove newlines
+    .replace(/\s+/g, ' ')                       // Collapse whitespace
+    .trim()
+}
+
+/**
  * Parse a damage expression into one or more dice groups.
  * Handles formats like:
  *   "1d6+3 piercing plus 1d4 acid"
  *   "2d6+4 slashing"
  *   "1d8+2 fire plus 1d6 persistent fire"
  */
-interface DiceGroup {
+export interface DiceGroup {
   numDice: number
   dieSize: number
   modifier: number
   damageType: string
 }
 
-function parseDamageExpression(expression: string): DiceGroup[] {
+export function parseDamageExpression(expression: string): DiceGroup[] {
   const groups: DiceGroup[] = []
   const parts = expression.split(/\s+plus\s+/i)
 
@@ -113,7 +125,8 @@ export function rollDamage(
   expression: string,
   name: string,
   source: string = 'Unknown',
-  critical: boolean = false
+  critical: boolean = false,
+  bonusDamage: number = 0
 ): RollResult {
   const groups = parseDamageExpression(expression)
 
@@ -165,6 +178,13 @@ export function rollDamage(
 
     expressionParts.push(`${diceStr}${modStr}`)
     breakdownParts.push(`${diceStr} ${rollsStr}${modStr} = ${groupTotal}${group.damageType ? ' ' + group.damageType : ''}`)
+  }
+
+  // Apply flat bonus/penalty (e.g., from conditions like enfeebled)
+  if (bonusDamage !== 0) {
+    grandTotal = Math.max(0, grandTotal + bonusDamage)
+    totalModifier += bonusDamage
+    breakdownParts.push(`${bonusDamage >= 0 ? '+' : ''}${bonusDamage} condition`)
   }
 
   const result: RollResult = {

@@ -426,15 +426,32 @@ function removeCombatant(id: string) {
   if (!state.combat) return
 
   const index = state.combat.combatants.findIndex(c => c.id === id)
-  if (index !== -1) {
-    state.combat.combatants.splice(index, 1)
-    // Adjust turn if needed
-    if (state.combat.turn >= state.combat.combatants.length) {
+  if (index === -1) return
+
+  // Capture current combatant's ID before removal (using sorted view)
+  const sorted = sortedCombatants.value
+  const currentId = sorted[state.combat.turn]?.id
+
+  state.combat.combatants.splice(index, 1)
+
+  if (state.combat.combatants.length === 0) {
+    state.combat.turn = 0
+  } else if (id === currentId) {
+    // Removed the active combatant — keep turn index, next-in-line takes over
+    // Clamp to valid range in case we removed the last in sort order
+    const newSorted = [...state.combat.combatants].sort((a, b) => b.initiative - a.initiative)
+    if (state.combat.turn >= newSorted.length) {
       state.combat.turn = 0
     }
-    saveToStorage(state.combat)
-    broadcastCombatState()
+  } else {
+    // Removed someone else — find where the current combatant ended up
+    const newSorted = [...state.combat.combatants].sort((a, b) => b.initiative - a.initiative)
+    const newIndex = newSorted.findIndex(c => c.id === currentId)
+    state.combat.turn = newIndex !== -1 ? newIndex : 0
   }
+
+  saveToStorage(state.combat)
+  broadcastCombatState()
 }
 
 function setInitiative(id: string, initiative: number) {
@@ -474,20 +491,20 @@ function rollAllInitiative() {
 }
 
 function nextTurn() {
-  if (!state.combat || aliveCombatants.value.length === 0) return
+  if (!state.combat || state.combat.combatants.length === 0) return
 
   const sorted = sortedCombatants.value
   let nextIndex = (state.combat.turn + 1) % sorted.length
 
-  // Skip dead combatants
+  // Skip dead combatants (but allow landing on dead if all are dead)
   let attempts = 0
-  while (sorted[nextIndex]?.isDead && attempts < sorted.length) {
+  while (sorted[nextIndex]?.isDead && attempts < sorted.length - 1) {
     nextIndex = (nextIndex + 1) % sorted.length
     attempts++
   }
 
   // Check if we've wrapped around (new round)
-  if (nextIndex <= state.combat.turn || attempts >= sorted.length) {
+  if (nextIndex <= state.combat.turn || attempts >= sorted.length - 1) {
     state.combat.round++
   }
 
@@ -507,20 +524,27 @@ function previousTurn() {
 
   const sorted = sortedCombatants.value
   let prevIndex = state.combat.turn - 1
+  let wrappedBack = false
+
   if (prevIndex < 0) {
     prevIndex = sorted.length - 1
-    state.combat.round = Math.max(1, state.combat.round - 1)
+    wrappedBack = true
   }
 
-  // Skip dead combatants
+  // Skip dead combatants (but allow landing on dead if all are dead)
   let attempts = 0
-  while (sorted[prevIndex]?.isDead && attempts < sorted.length) {
+  while (sorted[prevIndex]?.isDead && attempts < sorted.length - 1) {
     prevIndex--
     if (prevIndex < 0) {
       prevIndex = sorted.length - 1
-      state.combat.round = Math.max(1, state.combat.round - 1)
+      wrappedBack = true
     }
     attempts++
+  }
+
+  // Only decrement round once, and never below 1
+  if (wrappedBack) {
+    state.combat.round = Math.max(1, state.combat.round - 1)
   }
 
   state.combat.turn = prevIndex

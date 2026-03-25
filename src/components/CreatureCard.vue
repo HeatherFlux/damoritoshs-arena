@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Creature } from '../types/creature'
-import { rollD20, rollDamage, formatModifier, getRecallKnowledgeDCs, getRecallKnowledgeSkill } from '../utils/dice'
+import { rollD20, rollDamage, formatModifier, getRecallKnowledgeDCs, getRecallKnowledgeSkill, cleanDamage, parseDamageExpression } from '../utils/dice'
 import { useSettingsStore } from '../stores/settingsStore'
 import ActionIcon from './ActionIcon.vue'
 
@@ -57,40 +57,34 @@ function rollAttack(attackName: string, bonus: number, damage: string) {
   // Auto-roll damage if enabled in settings
   if (settings.autoRollDamage) {
     setTimeout(() => {
-      rollDamage(cleanDamage(damage), attackName, props.creature.name, false)
+      rollDamage(cleanDamage(damage), attackName, props.creature.name, false, penalties.value.damage)
     }, 500)
   }
 }
 
 function rollDamageOnly(attackName: string, damage: string) {
-  rollDamage(cleanDamage(damage), attackName, props.creature.name, false)
+  rollDamage(cleanDamage(damage), attackName, props.creature.name, false, penalties.value.damage)
 }
 
 function rollCritDamage(attackName: string, damage: string) {
-  rollDamage(cleanDamage(damage), attackName, props.creature.name, true)
+  rollDamage(cleanDamage(damage), attackName, props.creature.name, true, penalties.value.damage)
 }
 
-// Clean up damage strings from PDF parsing artifacts
-function cleanDamage(damage: string): string {
-  return damage
-    .replace(/[A-Z][\u2014\u2013-][A-Z]/g, '') // Remove things like "T—Z"
-    .replace(/\n/g, ' ')                        // Remove newlines
-    .replace(/\s+/g, ' ')                       // Collapse whitespace
-    .trim()
-}
-
-// Parse damage for display
+// Parse damage for display — handles multi-group like "1d6+3 piercing plus 1d4 acid"
 const parseAttackDamage = computed(() => {
   return (damage: string) => {
     const clean = cleanDamage(damage)
-    const match = clean.match(/(\d+d\d+[+-]?\d*)\s*(.*)/)
-    if (match) {
-      return {
-        dice: match[1],
-        type: match[2] || ''
-      }
+    const groups = parseDamageExpression(clean)
+    if (groups.length === 0) return { dice: clean, type: '' }
+
+    const parts = groups.map(g => {
+      const mod = g.modifier !== 0 ? `${g.modifier >= 0 ? '+' : ''}${g.modifier}` : ''
+      return `${g.numDice}d${g.dieSize}${mod}${g.damageType ? ' ' + g.damageType : ''}`
+    })
+    return {
+      dice: parts.join(' + '),
+      type: '' // Type is now inline with each dice group
     }
-    return { dice: clean, type: '' }
   }
 })
 

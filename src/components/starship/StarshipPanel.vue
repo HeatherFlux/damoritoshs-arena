@@ -138,8 +138,8 @@ function damageThreat(index: number, amount: number) {
     threat.currentShields -= shieldDmg
     remaining -= shieldDmg
   }
-  if (remaining > 0 && threat.currentHP !== undefined) {
-    threat.currentHP = Math.max(0, threat.currentHP - remaining)
+  if (remaining > 0) {
+    threat.currentHP = Math.max(0, (threat.currentHP ?? threat.maxHP ?? 0) - remaining)
     if (threat.currentHP === 0) {
       threat.isDefeated = true
     }
