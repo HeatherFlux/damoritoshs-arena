@@ -72,8 +72,42 @@ export function rollD20(
 }
 
 /**
- * Roll damage dice (e.g., "2d6+4 fire")
- * @param critical - If true, doubles dice count and modifier (PF2e crit rules)
+ * Parse a damage expression into one or more dice groups.
+ * Handles formats like:
+ *   "1d6+3 piercing plus 1d4 acid"
+ *   "2d6+4 slashing"
+ *   "1d8+2 fire plus 1d6 persistent fire"
+ */
+interface DiceGroup {
+  numDice: number
+  dieSize: number
+  modifier: number
+  damageType: string
+}
+
+function parseDamageExpression(expression: string): DiceGroup[] {
+  const groups: DiceGroup[] = []
+  const parts = expression.split(/\s+plus\s+/i)
+
+  for (const part of parts) {
+    const clean = part.replace(/[^\dd+\-\s\w]/g, ' ').trim()
+    const match = clean.match(/(\d+)d(\d+)([+-]\d+)?(?:\s+(.+))?\s*/)
+    if (match) {
+      groups.push({
+        numDice: parseInt(match[1]),
+        dieSize: parseInt(match[2]),
+        modifier: match[3] ? parseInt(match[3]) : 0,
+        damageType: match[4]?.trim() || '',
+      })
+    }
+  }
+  return groups
+}
+
+/**
+ * Roll damage dice (e.g., "2d6+4 fire" or "1d6+3 piercing plus 1d4 acid")
+ * Rolls ALL dice groups in the expression.
+ * @param critical - If true, doubles all dice counts and modifiers (PF2e crit rules)
  */
 export function rollDamage(
   expression: string,
@@ -81,13 +115,9 @@ export function rollDamage(
   source: string = 'Unknown',
   critical: boolean = false
 ): RollResult {
-  // Parse expression like "2d6+4" or "1d8+2 fire" or "2d6+4 slashing"
-  // Clean up any weird parsing artifacts
-  const cleanExpr = expression.replace(/[^\dd+\-\s\w]/g, ' ').trim()
-  const match = cleanExpr.match(/(\d+)d(\d+)([+-]\d+)?(?:\s+(.+))?/)
+  const groups = parseDamageExpression(expression)
 
-  if (!match) {
-    // Fallback for unparseable expressions
+  if (groups.length === 0) {
     return {
       id: generateId(),
       timestamp: new Date(),
@@ -105,30 +135,37 @@ export function rollDamage(
     }
   }
 
-  // Base values from parsing
-  const baseNumDice = parseInt(match[1])
-  const dieSize = parseInt(match[2])
-  const baseModifier = match[3] ? parseInt(match[3]) : 0
-  const damageType = match[4]?.trim() || ''
+  let grandTotal = 0
+  let totalModifier = 0
+  const allRolls: number[] = []
+  const breakdownParts: string[] = []
+  const expressionParts: string[] = []
+  const primaryDamageType = groups[0].damageType
 
-  // Double dice and modifier for crits
-  const numDice = critical ? baseNumDice * 2 : baseNumDice
-  const modifier = critical ? baseModifier * 2 : baseModifier
+  for (const group of groups) {
+    const numDice = critical ? group.numDice * 2 : group.numDice
+    const modifier = critical ? group.modifier * 2 : group.modifier
 
-  const individualRolls: number[] = []
-  let diceTotal = 0
+    const rolls: number[] = []
+    let diceTotal = 0
+    for (let i = 0; i < numDice; i++) {
+      const r = Math.floor(Math.random() * group.dieSize) + 1
+      rolls.push(r)
+      diceTotal += r
+    }
 
-  for (let i = 0; i < numDice; i++) {
-    const roll = Math.floor(Math.random() * dieSize) + 1
-    individualRolls.push(roll)
-    diceTotal += roll
+    allRolls.push(...rolls)
+    totalModifier += modifier
+    const groupTotal = diceTotal + modifier
+    grandTotal += groupTotal
+
+    const diceStr = `${numDice}d${group.dieSize}`
+    const rollsStr = rolls.length > 1 ? `(${rolls.join('+')})` : `(${rolls[0]})`
+    const modStr = modifier !== 0 ? ` ${modifier >= 0 ? '+' : ''}${modifier}` : ''
+
+    expressionParts.push(`${diceStr}${modStr}`)
+    breakdownParts.push(`${diceStr} ${rollsStr}${modStr} = ${groupTotal}${group.damageType ? ' ' + group.damageType : ''}`)
   }
-
-  const total = diceTotal + modifier
-  const diceStr = `${numDice}d${dieSize}`
-  const rollsStr = individualRolls.length > 1
-    ? `(${individualRolls.join('+')})`
-    : `(${individualRolls[0]})`
 
   const result: RollResult = {
     id: generateId(),
@@ -136,16 +173,16 @@ export function rollDamage(
     type: 'damage',
     name: critical ? `${name} CRIT` : `${name} Damage`,
     source,
-    roll: diceTotal,
-    modifier,
-    total,
+    roll: grandTotal - totalModifier,
+    modifier: totalModifier,
+    total: grandTotal,
     isNat20: false,
     isNat1: false,
     isCriticalHit: critical,
-    diceExpression: `${diceStr}${modifier >= 0 ? '+' : ''}${modifier}`,
-    damageType,
-    individualRolls,
-    breakdown: `${diceStr} ${rollsStr} ${modifier !== 0 ? (modifier >= 0 ? '+' : '') + modifier : ''} = ${total}${damageType ? ' ' + damageType : ''}`,
+    diceExpression: expressionParts.join(' + '),
+    damageType: primaryDamageType,
+    individualRolls: allRolls,
+    breakdown: breakdownParts.join(' plus '),
   }
 
   addToHistory(result)
