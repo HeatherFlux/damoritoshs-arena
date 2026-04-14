@@ -23,8 +23,8 @@ describe('combatStore — extended', () => {
     it('applies weak HP and AC', () => {
       const creature = makeCreature({ hp: 45, ac: 18, level: 5 })
       const combatant = store.addCreature(creature, 'weak')
-      // Weak level 5: -20 HP, -2 AC
-      expect(combatant.maxHP).toBe(25)
+      // Weak level 5 (bracket 3-5): -15 HP, -2 AC
+      expect(combatant.maxHP).toBe(30)
       expect(combatant.ac).toBe(16)
     })
 
