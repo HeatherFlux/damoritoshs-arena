@@ -78,11 +78,11 @@
     "specialAbilities": [
       {
         "name": "Always Watching",
-        "description": "Anacite wingbots are always recording and uploading their feed through shortwave as long as they're within range of a transmitter. An anacite wingbot can project a hologram of the live footage they're recording or play back a video of anything they've recorded, which appears in the air nearby as the spell illusory scene. **Shortwave** The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the "
+        "description": "Anacite wingbots are always recording and uploading their feed through shortwave as long as they're within range of a transmitter. An anacite wingbot can project a hologram of the live footage they're recording or play back a video of anything they've recorded, which appears in the air nearby as the spell illusory scene."
       },
       {
         "name": "Shortwave",
-        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits. **Sunlight Dependency** Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely."
+        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits."
       },
       {
         "name": "Sunlight Dependency",
@@ -161,7 +161,7 @@
     "specialAbilities": [
       {
         "name": "Digital Telepathy",
-        "description": "A glitch gremlin can communicate telepathically with digital devices and with other creatures that can do so (such as other glitch gremlins). This allows the glitch gremlin to attempt Computers checks to access any computer within the telepathy's range. **Techsense** (detection, primal) The glitch gremlin can sense items and creatures with the tech trait within 100 feet."
+        "description": "A glitch gremlin can communicate telepathically with digital devices and with other creatures that can do so (such as other glitch gremlins). This allows the glitch gremlin to attempt Computers checks to access any computer within the telepathy's range."
       },
       {
         "name": "Techsense",
@@ -278,8 +278,7 @@
       "cha": -2
     },
     "items": [
-      "integrated commercial laser pistol (commercial battery)",
-      "matching rings"
+      "integrated commercial laser pistol (commercial battery)"
     ],
     "ac": 15,
     "saves": {
@@ -322,7 +321,7 @@
     "specialAbilities": [
       {
         "name": "Cybernetics",
-        "description": "The zombie's cybernetics can be disabled for 1 hour with a successful DC 15 check to Disable a Device. The cybernetics are disabled for 1 hour if it takes any electricity damage. A cybernetic zombie with disabled cybernetics is slowed 1 and can't use reactions (including Self Destruct). **Self Destruct** **Requirements** A cybernetic zombie must use this reaction when the trigger is met unless its cybernetics are disabled; **Trigger** The cybernetic zombie is reduced to 0 Hit Points; **Effect** "
+        "description": "The zombie's cybernetics can be disabled for 1 hour with a successful DC 15 check to Disable a Device. The cybernetics are disabled for 1 hour if it takes any electricity damage. A cybernetic zombie with disabled cybernetics is slowed 1 and can't use reactions (including Self Destruct)."
       },
       {
         "name": "Self Destruct",
@@ -331,7 +330,7 @@
       }
     ],
     "description": "",
-    "rawText": " Cybernetic Zombie Cybernetic Zombie Source Alien Core pg. 202 Perception +3; darkvision Languages Skills Athletics +5 Str +2 Dex +4 Con +3 Int -5 Wis +0 Cha -2 Items integrated commercial laser pistol (commercial battery), matching rings --- AC 15 Fort +5 Ref +6 Will +2 HP 40 (void healing) Immunities death effects, disease, mental, paralyzed, poison, unconscious Weaknesses electricity 10, slashing 10 Cybernetics The zombie's cybernetics can be disabled for 1 hour with a successful DC 15 check to Disable a Device. The cybernetics are disabled for 1 hour if it takes any electricity damage. A cybernetic zombie with disabled cybernetics is slowed 1 and can't use reactions (including Self Destruct). Self Destruct Reaction Requirements A cybernetic zombie must use this reaction when the trigger is met unless its cybernetics are disabled; Trigger The cybernetic zombie is reduced to 0 Hit Points; Effect The zombie's damaged cybernetics explode, dealing electricity damage in a 10-foot radius (DC 15 basic Reflex save). This ability destroys any technological items on the zombie. --- Speed 20 feet Melee Single Action fist 4, 1d62 bludgeoning Ranged Single Action laser pistol 6, 1d62 fire Melee Single Action fist 4, 1d62 bludgeoning Ranged Single Action laser pistol 6, 1d62 fire "
+    "rawText": " Cybernetic Zombie Cybernetic Zombie Source Alien Core pg. 202 Perception +3; darkvision Languages Skills Athletics +5 Str +2 Dex +4 Con +3 Int -5 Wis +0 Cha -2 Items integrated commercial laser pistol (commercial battery) --- AC 15 Fort +5 Ref +6 Will +2 HP 40 (void healing) Immunities death effects, disease, mental, paralyzed, poison, unconscious Weaknesses electricity 10, slashing 10 Cybernetics The zombie's cybernetics can be disabled for 1 hour with a successful DC 15 check to Disable a Device. The cybernetics are disabled for 1 hour if it takes any electricity damage. A cybernetic zombie with disabled cybernetics is slowed 1 and can't use reactions (including Self Destruct). Self Destruct Reaction Requirements A cybernetic zombie must use this reaction when the trigger is met unless its cybernetics are disabled; Trigger The cybernetic zombie is reduced to 0 Hit Points; Effect The zombie's damaged cybernetics explode, dealing electricity damage in a 10-foot radius (DC 15 basic Reflex save). This ability destroys any technological items on the zombie. --- Speed 20 feet Melee Single Action fist 4, 1d62 bludgeoning Ranged Single Action laser pistol 6, 1d62 fire Melee Single Action fist 4, 1d62 bludgeoning Ranged Single Action laser pistol 6, 1d62 fire "
   },
   {
     "id": "aon-creatures--201-diatha",
@@ -389,7 +388,7 @@
     "specialAbilities": [
       {
         "name": "Hydrocarbon Slick",
-        "description": ") If a diatha dies before it can detonate, its body rapidly decomposes into a slick of highly volatile hydrocarbons. Any effect that deals acid, electricity, or fire damage in an area that includes the square where the diatha died, or targets a creature in that square, causes a small explosion and consumes the slick. All creatures in the square and in a 5-foot emanation take 1d6 fire damage (DC 16 basic Reflex save). The slick evaporates after 10 minutes if it isn't ignited. **Detonate** (fire) "
+        "description": ") If a diatha dies before it can detonate, its body rapidly decomposes into a slick of highly volatile hydrocarbons. Any effect that deals acid, electricity, or fire damage in an area that includes the square where the diatha died, or targets a creature in that square, causes a small explosion and consumes the slick. All creatures in the square and in a 5-foot emanation take 1d6 fire damage (DC 16 basic Reflex save). The slick evaporates after 10 minutes if it isn't ignited."
       },
       {
         "name": "Detonate",
@@ -719,7 +718,7 @@
       }
     ],
     "description": "",
-    "rawText": " Phantasmal Minion Phantasmal Minion Source Player Core pg. 350 Winter 2025 Perception +0; darkvision Languages none (understands its creator) Skills Stealth +8 Str -4 Dex +2 Con +0 Int -5 Wis +0 Cha +0 Force Body A phantasmal minion's body is made of magical force. It can't use attack actions. Though it has no physical weight, it can move and use Interact actions to do things such as fetch objects, open unstuck or unlocked doors, hold chairs, and clean. It can't pass through solid objects. --- AC 13 Fort +0 Ref +4 Will +0 HP 4 Immunities disease, mental, non-magical attacks, paralysis, poison, precision, spirit, unconscious Resistances all damage 5 (except force or ghost killer ) --- Speed fly 30 feet\n"
+    "rawText": " Phantasmal Minion Phantasmal Minion Source Player Core pg. 350 Perception +0; darkvision Languages none (understands its creator) Skills Stealth +8 Str -4 Dex +2 Con +0 Int -5 Wis +0 Cha +0 Force Body A phantasmal minion's body is made of magical force. It can't use attack actions. Though it has no physical weight, it can move and use Interact actions to do things such as fetch objects, open unstuck or unlocked doors, hold chairs, and clean. It can't pass through solid objects. --- AC 13 Fort +0 Ref +4 Will +0 HP 4 Immunities disease, mental, non-magical attacks, paralysis, poison, precision, spirit, unconscious Resistances all damage 5 (except force or ghost killer ) --- Speed fly 30 feet\n"
   },
   {
     "id": "aon-creatures--117-repair-class-security-robot",
@@ -2092,7 +2091,7 @@
     "specialAbilities": [
       {
         "name": "Unreliable Tech",
-        "description": "Once an animated firearm is reduced to less than half its Hit Points, or immediately upon being damaged by a critical hit, it becomes permanently glitching 1 until its Hit Points are fully restored (such as by being Repaired). **Weapon Mode** In the hands of its creator, an animated firearm is a commercial laser pistol. The creator can Interact to release the firearm into an adjacent space to act on its own, or to retrieve it from an adjacent space and use it as a weapon."
+        "description": "Once an animated firearm is reduced to less than half its Hit Points, or immediately upon being damaged by a critical hit, it becomes permanently glitching 1 until its Hit Points are fully restored (such as by being Repaired)."
       },
       {
         "name": "Weapon Mode",
@@ -2248,11 +2247,11 @@
       },
       {
         "name": "Acid Blood",
-        "description": ") An adjacent creature that deals slashing or piercing damage to the athraxer is sprayed with acidic blood and takes 2 persistent acid damage (DC 14 basic Reflex save). **Colony Mind** (aura) 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a "
+        "description": ") An adjacent creature that deals slashing or piercing damage to the athraxer is sprayed with acidic blood and takes 2 persistent acid damage (DC 14 basic Reflex save)."
       },
       {
         "name": "Colony Mind",
-        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead. **Death Throes** **Trigger** The athraxer would die; **Effect** The athraxer first makes a claw Strike against a creature in reach, then dies."
+        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead."
       },
       {
         "name": "Death Throes",
@@ -2822,7 +2821,7 @@
     "specialAbilities": [
       {
         "name": "Confusion",
-        "description": "Due to their confused state, the faltering green orbs take a –2 circumstance penalty to Intelligence- based checks. **Mistvision** A sapient orb always ignores concealment caused by fog, smoke, and mist."
+        "description": "Due to their confused state, the faltering green orbs take a –2 circumstance penalty to Intelligence- based checks."
       },
       {
         "name": "Mistvision",
@@ -2973,7 +2972,7 @@
     "specialAbilities": [
       {
         "name": "Unsettling Appearance",
-        "description": ", primal, visual) 20 feet. A non-gremlin creature that enters the aura must succeed at a DC 17 Will save or become frightened 1 (or frightened 2 on a critical failure) and is then temporarily immune to unsettling appearance for 1 minute. If the gubbin used any action with the manipulate trait, an Interact action, or a claw Strike since the start of their last turn, creatures take a –4 status penalty to their saves against this effect. **Not Really There** (teleportation) **Trigger** A creature t"
+        "description": ", primal, visual) 20 feet. A non-gremlin creature that enters the aura must succeed at a DC 17 Will save or become frightened 1 (or frightened 2 on a critical failure) and is then temporarily immune to unsettling appearance for 1 minute. If the gubbin used any action with the manipulate trait, an Interact action, or a claw Strike since the start of their last turn, creatures take a –4 status penalty to their saves against this effect."
       },
       {
         "name": "Not Really There",
@@ -3197,7 +3196,7 @@
     "specialAbilities": [
       {
         "name": "Aligned Comm Unit",
-        "description": "The comm unit of a necrolinked wight can be disabled for 1 hour with a successful DC 15 check to Disable a Device or Disable a System. A necrolinked wight with a disabled comm unit is slowed 1, gains a +6 bonus to Perception, and can't Check its Feed. **Social Media Addiction** (divine) The necrolinked wight is driven by a desire to continue their cycles of spiteful hatred and media consumption on the infosphere. They spend their first action of each round to Check Feed. Eternally obsessed, a ne"
+        "description": "The comm unit of a necrolinked wight can be disabled for 1 hour with a successful DC 15 check to Disable a Device or Disable a System. A necrolinked wight with a disabled comm unit is slowed 1, gains a +6 bonus to Perception, and can't Check its Feed."
       },
       {
         "name": "Social Media Addiction",
@@ -3717,11 +3716,12 @@
     "specialAbilities": [
       {
         "name": "Quick Step",
+        "actions": "reaction",
         "description": "**Trigger** A creature within the paratrooper's reach leaves a square during a move action it's using; **Effect** The paratrooper Steps twice."
       }
     ],
     "description": "",
-    "rawText": " Veskarium Paratrooper Veskarium Paratrooper Source Guilt of the Grave World pg. 55 Perception +4; low-light vision Languages Common, Vesk Skills Acrobatics +6, Athletics +6, Intimidation +4, Warfare Lore +6 Str +2 Dex +3 Con +1 Int +0 Wis +1 Cha +2 Items tactical doshko, tactical flamethrower with 2 commercial petrol tanks, tactical Veskarium imperial plate armor --- AC 17 Fort +10 Ref +7 Will +4 HP 18 Quick Step Trigger A creature within the paratrooper's reach leaves a square during a move action it's using; Effect The paratrooper Steps twice. --- Speed 25 feet Melee Single Action doshko 7, 1d122 piercing Melee Single Action tail 7, 1d62 bludgeoning Ranged Two Actions flamethrower 9, 1d10 fire Melee Single Action doshko 7, 1d122 piercing Melee Single Action tail 7, 1d62 bludgeoning Ranged Two Actions flamethrower 9, 1d10 fire "
+    "rawText": " Veskarium Paratrooper Veskarium Paratrooper Source Guilt of the Grave World pg. 55 Perception +4; low-light vision Languages Common, Vesk Skills Acrobatics +6, Athletics +6, Intimidation +4, Warfare Lore +6 Str +2 Dex +3 Con +1 Int +0 Wis +1 Cha +2 Items tactical doshko, tactical flamethrower with 2 commercial petrol tanks, tactical Veskarium imperial plate armor --- AC 17 Fort +10 Ref +7 Will +4 HP 18 Quick Step Reaction Trigger A creature within the paratrooper's reach leaves a square during a move action it's using; Effect The paratrooper Steps twice. --- Speed 25 feet Melee Single Action doshko 7, 1d122 piercing Melee Single Action tail 7, 1d62 bludgeoning Ranged Two Actions flamethrower 9, 1d10 fire Melee Single Action doshko 7, 1d122 piercing Melee Single Action tail 7, 1d62 bludgeoning Ranged Two Actions flamethrower 9, 1d10 fire "
   },
   {
     "id": "aon-creatures--57-void-zombie",
@@ -3782,11 +3782,11 @@
     "specialAbilities": [
       {
         "name": "Immunities",
-        "description": "death effects, disease, paralyzed, poison, unconscious** **Weaknesses** salt water 5, slashing 2 **Salt Water Vulnerability** Salt water quickly attacks a larval akata's cells as a strong acid. If the void zombie is fully immersed in salt water, it takes 4d6 acid damage from the water immediately and at the end of each of its turns as long as it remains immersed. Its weakness to salt water applies to this damage. On any round in which the void zombie takes damage due to its salt water weakness, "
+        "description": "death effects, disease, paralyzed, poison, unconscious**"
       },
       {
         "name": "Weaknesses",
-        "description": "salt water 5, slashing 2 **Salt Water Vulnerability** Salt water quickly attacks a larval akata's cells as a strong acid. If the void zombie is fully immersed in salt water, it takes 4d6 acid damage from the water immediately and at the end of each of its turns as long as it remains immersed. Its weakness to salt water applies to this damage. On any round in which the void zombie takes damage due to its salt water weakness, the larval akata withdraws to hide within the host's body and renders th"
+        "description": "salt water 5, slashing 2"
       },
       {
         "name": "Salt Water Vulnerability",
@@ -4128,7 +4128,7 @@
     "specialAbilities": [
       {
         "name": "Shortwave",
-        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits. **Sunlight Dependency** Anacites are solar powered; they're perpetually glitching 1 while in areas of darkness and must recharge daily in direct sunlight or risk shutting down completely. **Items** integrated commercial streetsweeper (10 charges)"
+        "description": "The anacite can communicate using wireless shortwave signals. This functions as telepathy with other creatures who have shortwave and with creatures with both the construct and tech traits."
       },
       {
         "name": "Sunlight Dependency",
@@ -4569,7 +4569,7 @@
     "specialAbilities": [
       {
         "name": "Dutiful Moderator",
-        "description": "An online community moderated by an emvermod never experiences random bugs or downtime. Any checks to Access Infosphere, Craft virtual items, Earn Income, or Hack using the community as a tool receive a +2 circumstance bonus. If the emvermod is unfriendly, such checks take a –2 circumstance penalty instead. An emvermod must spend a week in an online space to become a moderator. **Modvision** An emvermod can sense items and creatures with active accounts on any community they moderate as an impre"
+        "description": "An online community moderated by an emvermod never experiences random bugs or downtime. Any checks to Access Infosphere, Craft virtual items, Earn Income, or Hack using the community as a tool receive a +2 circumstance bonus. If the emvermod is unfriendly, such checks take a –2 circumstance penalty instead. An emvermod must spend a week in an online space to become a moderator."
       },
       {
         "name": "Modvision",
@@ -5127,7 +5127,7 @@
     "specialAbilities": [
       {
         "name": "Radioactive Remains",
-        "description": ", radiation) 20 feet. A creature entering or starting its turn inside the aura is exposed to mild radiation. **Meltdown** (poison, radiation) **Trigger** The irradiated undead plant is reduced to 0 Hit Points by energy damage of any kind; **Effect** The energy acts as a catalyst for a nuclear reaction, causing the plant to explode and dealing 3d6 poison damage to all creatures in a 20-foot emanation with a DC 16 basic Reflex save."
+        "description": ", radiation) 20 feet. A creature entering or starting its turn inside the aura is exposed to mild radiation."
       },
       {
         "name": "Meltdown",
@@ -5420,7 +5420,7 @@
     "specialAbilities": [
       {
         "name": "Stardust",
-        "description": ") When an obrhinnshee dies, they burst into a 10-foot aura of blinding stardust. All non-fey in the area must succeed at a DC 16 Fortitude save or be dazzled for 1 minute and blinded for 1 round (dazzled for 1 hour and blinded for 1 minute on a critical failure). **Soul Warden** **Trigger** A willing fey or creature sworn to serve an Eldest dies within 100 feet of an obrhinnshee; **Effect** The creature's soul is drawn into the obrhinnshee's hammer to be carried home."
+        "description": ") When an obrhinnshee dies, they burst into a 10-foot aura of blinding stardust. All non-fey in the area must succeed at a DC 16 Fortitude save or be dazzled for 1 minute and blinded for 1 round (dazzled for 1 hour and blinded for 1 minute on a critical failure)."
       },
       {
         "name": "Soul Warden",
@@ -5658,7 +5658,6 @@
       "_detect metal_ (30 feet), low-light vision, scent (imprecise) 30 feet"
     ],
     "languages": [
-      "Eoxian",
       "Eoxian"
     ],
     "skills": {
@@ -5716,7 +5715,7 @@
       }
     ],
     "description": "",
-    "rawText": " Scrap Rat Visionary Scrap Rat Visionary Source Guilt of the Grave World pg. 25 Perception +8; detect metal (30 feet), low-light vision, scent (imprecise) 30 feet Languages Eoxian; Eoxian Skills Acrobatics +10, Athletics +5, Crafting +8, Stealth +10 Str +2 Dex +3 Con +1 Int -2 Wis +1 Cha -3 Dangerous Recycling Over the course of 1 minute of uninterrupted work, a scrap rat can assemble any level 0 commercial grenade using nothing but junk. It falls apart and becomes unusable junk after 10 minutes. --- AC 17 Fort +7 Ref +11 Will +5 HP 30 --- Speed 25 feet, climb 10 feet Melee Single Action scrappy tail 7, 1d62 slashing plus scoring Ranged Single Action scrap shot 12, 1d10 piercing Primal Innate Spells DC 18, attack 10 - Cantrips (2nd) fabricate scrap, omnitool - 1st junk armor, junk shards, path tech - 2nd junk grenade, vigilant junkbot - Constant (1st) detect metal Melee Single Action scrappy tail 7, 1d62 slashing plus scoring Ranged Single Action scrap shot 12, 1d10 piercing "
+    "rawText": " Scrap Rat Visionary Scrap Rat Visionary Source Guilt of the Grave World pg. 25 Perception +8; detect metal (30 feet), low-light vision, scent (imprecise) 30 feet Languages Eoxian Skills Acrobatics +10, Athletics +5, Crafting +8, Stealth +10 Str +2 Dex +3 Con +1 Int -2 Wis +1 Cha -3 Dangerous Recycling Over the course of 1 minute of uninterrupted work, a scrap rat can assemble any level 0 commercial grenade using nothing but junk. It falls apart and becomes unusable junk after 10 minutes. --- AC 17 Fort +7 Ref +11 Will +5 HP 30 --- Speed 25 feet, climb 10 feet Melee Single Action scrappy tail 7, 1d62 slashing plus scoring Ranged Single Action scrap shot 12, 1d10 piercing Primal Innate Spells DC 18, attack 10 - Cantrips (2nd) fabricate scrap, omnitool - 1st junk armor, junk shards, path tech - 2nd junk grenade, vigilant junkbot - Constant (1st) detect metal Melee Single Action scrappy tail 7, 1d62 slashing plus scoring Ranged Single Action scrap shot 12, 1d10 piercing "
   },
   {
     "id": "aon-creatures--118-snoop-class-infiltrator-robot",
@@ -5866,7 +5865,7 @@
       },
       {
         "name": "Colony Mind",
-        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead. **Comm Occlusion** (aura) 40 feet. All electronic and telepathic communication, except for that with the colony mind ability, ceases to function, and affected creat"
+        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead."
       },
       {
         "name": "Comm Occlusion",
@@ -6013,7 +6012,7 @@
     "specialAbilities": [
       {
         "name": "Input Overload Aura",
-        "description": ", aura, divine, sonic) 20 feet. Enemies in the aura take a –1 status penalty to AC and all saves against sonic effects or effects that alter written or stored data. A creature within this aura attempting to read a document must succeed at a DC 5 flat check or cannot read the document for the next 1d4+1 rounds. **Pedant Annoyance** Typodaemons paradoxically despise having their errors pointed out. If a creature Interacts to correct the grammar or syntax of something the typodaemon has written or "
+        "description": ", aura, divine, sonic) 20 feet. Enemies in the aura take a –1 status penalty to AC and all saves against sonic effects or effects that alter written or stored data. A creature within this aura attempting to read a document must succeed at a DC 5 flat check or cannot read the document for the next 1d4+1 rounds."
       },
       {
         "name": "Pedant Annoyance",
@@ -6022,6 +6021,75 @@
     ],
     "description": "These child-sized daemons represent the horrors of death through dictation errors, transcription woes, or incorrect copying and pasting of text. …",
     "rawText": " Typodaemon (Mistake Daemon) These child-sized daemons represent the horrors of death through dictation errors, transcription woes, or incorrect copying and pasting of text. Typodaemons make discreet adjustments to text, changing a word, adding a taunting emote, or adjusting punctuation to create entirely new meanings for written words. These changes lead to conflicts, and the typodaemon thrives on the strife and potential for death because of these simple errors. Typodaemon Source Alien Core pg. 34 Perception +8; darkvision Languages Daemonic Skills Computers +8, Deception +10, Religion +8, Stealth +7 Str +2 Dex +1 Con +3 Int +2 Wis +2 Cha +2 --- AC 17 Fort +9 Ref +7 Will +8 HP 36 Immunities death effects Resistances sonic 3 Weaknesses holy 3 Input Overload Aura (auditory, aura, divine, sonic) 20 feet. Enemies in the aura take a –1 status penalty to AC and all saves against sonic effects or effects that alter written or stored data. A creature within this aura attempting to read a document must succeed at a DC 5 flat check or cannot read the document for the next 1d4+1 rounds. Pedant Annoyance Typodaemons paradoxically despise having their errors pointed out. If a creature Interacts to correct the grammar or syntax of something the typodaemon has written or is writing, including with a spell such as implant data , the typodaemon becomes sickened 1. While sickened this way, the daemon must spend an action to justify its actions instead of retching, attempting a Will save instead to remove the condition. --- Speed 20 feet Melee Single Action claw 9, 1d82 slashing Ranged Single Action concentrated input 8, 1d84 sonic Divine Innate Spells DC 18 - Cantrips (1st) Implant Data, Measure, Scan Environment - 1st Delete (at will) - 2nd Instant Virus, Skim Data - 4th Speak with Computers Melee Single Action claw 9, 1d82 slashing Ranged Single Action concentrated input 8, 1d84 sonic "
+  },
+  {
+    "id": "aon-creatures--274-unspooled-vestige",
+    "name": "Unspooled Vestige",
+    "level": 2,
+    "traits": [
+      "Animal",
+      "Uncommon"
+    ],
+    "size": "large",
+    "source": "Starfinder Society Scenario #1-20: Magic Unleashed",
+    "perception": 7,
+    "senses": [],
+    "languages": [],
+    "skills": {
+      "athletics": 8,
+      "stealth": 7
+    },
+    "abilities": {
+      "str": 4,
+      "dex": 3,
+      "con": 1,
+      "int": -4,
+      "wis": 1,
+      "cha": -1
+    },
+    "items": [],
+    "ac": 17,
+    "saves": {
+      "fort": 7,
+      "ref": 11,
+      "will": 5
+    },
+    "hp": 38,
+    "immunities": [],
+    "resistances": [],
+    "weaknesses": [],
+    "speed": "25 feet",
+    "attacks": [
+      {
+        "name": "Claw",
+        "type": "melee",
+        "bonus": 11,
+        "damage": "1d6+4 slashing",
+        "traits": [],
+        "actions": 1
+      },
+      {
+        "name": "Filament",
+        "type": "ranged",
+        "bonus": 10,
+        "damage": "1d6",
+        "traits": [],
+        "actions": 1
+      }
+    ],
+    "specialAbilities": [
+      {
+        "name": "Draw Power",
+        "actions": "reaction",
+        "description": "**Trigger** The unspooled vestige is hit by a ranged weapon that uses charges and has at least 1 charge remaining in its battery; **Effect** The unspooled vestige pulls energy from the weapon, causing it to expend an additional charge."
+      },
+      {
+        "name": "Slip Out of Reality",
+        "description": "At the end of its turn, the unspooled vestige must attempt a DC 11 flat check. On a failure, it slips slightly out of reality. It takes 1d4 force damage, and becomes concealed until the start of its next turn."
+      }
+    ],
+    "description": "",
+    "rawText": " Unspooled Vestige Unspooled Vestige Source Starfinder Society Scenario #1-20: Magic Unleashed pg. 10 Perception +7 Languages Skills Athletics +8, Stealth +7 Str +4 Dex +3 Con +1 Int -4 Wis +1 Cha -1 --- AC 17 Fort +7 Ref +11 Will +5 HP 38 Draw Power Reaction Trigger The unspooled vestige is hit by a ranged weapon that uses charges and has at least 1 charge remaining in its battery; Effect The unspooled vestige pulls energy from the weapon, causing it to expend an additional charge. Slip Out of Reality At the end of its turn, the unspooled vestige must attempt a DC 11 flat check. On a failure, it slips slightly out of reality. It takes 1d4 force damage, and becomes concealed until the start of its next turn. --- Speed 25 feet Melee Single Action claw 11, 1d64 slashing Ranged Single Action filament 10, entanglement plus unspool Melee Single Action claw 11, 1d64 slashing Ranged Single Action filament 10, entanglement plus unspool "
   },
   {
     "id": "aon-creatures--69-zitteroc",
@@ -6299,7 +6367,7 @@
     "specialAbilities": [
       {
         "name": "Gravity Well",
-        "description": ") 20 feet. The corchaaz's body pulls nearby creatures toward it with dense gravitational forces. A creature that ends it turn within the aura must succeed at a DC 20 Reflex save or be pulled 10 feet toward the corchaaz (also landing prone on a critical failure). **Interstellar Raft** A corchaaz can combine its gravitational forces with other willing corchaazes into an interstellar raft as an exploration activity that takes 10 minutes. While part of an interstellar raft, the corchaazes must remai"
+        "description": ") 20 feet. The corchaaz's body pulls nearby creatures toward it with dense gravitational forces. A creature that ends it turn within the aura must succeed at a DC 20 Reflex save or be pulled 10 feet toward the corchaaz (also landing prone on a critical failure)."
       },
       {
         "name": "Interstellar Raft",
@@ -6518,7 +6586,7 @@
       },
       {
         "name": "Colony Mind",
-        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead. **Burrowing Reveal** (move) **Requirements** Initiative hasn't yet been rolled, and the emganat is burrowed; **Trigger** A creature enters the range of the emganat‘"
+        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead."
       },
       {
         "name": "Burrowing Reveal",
@@ -6629,7 +6697,7 @@
     "source": "Starfinder Society Scenario #1-15: Ruins of the World Soul",
     "perception": 9,
     "senses": [
-      "darkvision, scent (imprecise) 30 feet, whispers of Akiton (imprecise) 60 feet"
+      "darkvision, scent (imprecise) 30 feet, Whispers of Akiton (imprecise) 60 feet"
     ],
     "languages": [
       "Akitonian",
@@ -6679,6 +6747,10 @@
     ],
     "specialAbilities": [
       {
+        "name": "Whispers of Akiton",
+        "description": "Itaka can sense living creatures, objects and effects with the primal trait, and any objects and creatures in the area of primal effects, within range. She can also speak through primal effects, bypassing her selective silence."
+      },
+      {
         "name": "Selective Silence",
         "description": ", primal) 5 feet. Itaka, willing creatures in the area, and creatures grabbed or restrained restrained by Itaka or an affected ally make no sound (preventing speech and auditory actions)."
       },
@@ -6688,7 +6760,7 @@
       }
     ],
     "description": "",
-    "rawText": " Itaka The Ever-Craving Itaka The Ever-Craving Source Starfinder Society Scenario #1-15: Ruins of the World Soul pg. 6 Perception +9; darkvision, scent (imprecise) 30 feet, whispers of Akiton (imprecise) 60 feet Languages Akitonian, Draconic, Shobhad Skills Acrobatics +8, Athletics +10, Nature +7, Stealth +8 Str +5 Dex +1 Con +3 Int +0 Wis +2 Cha +1 Whispers of Akiton Itaka can sense living creatures, objects and effects with the primal trait, and any objects and creatures in the area of primal effects, within range. She can also speak through primal effects, bypassing her selective silence. --- AC 19 Fort +10 Ref +6 Will +7 HP 45 Immunities paralyzed, sleep Resistances cold 3 Selective Silence (aura, primal) 5 feet. Itaka, willing creatures in the area, and creatures grabbed or restrained restrained by Itaka or an affected ally make no sound (preventing speech and auditory actions). --- Speed 25 feet, climb 20 feet Melee Single Action jaws 12, 1d85 piercing plus Grab Primal Innate Spells DC 18, attack 10 - Cantrips (2nd) Frostbite, Ignition Melee Single Action jaws 12, 1d85 piercing plus Grab "
+    "rawText": " Itaka The Ever-Craving Itaka The Ever-Craving Source Starfinder Society Scenario #1-15: Ruins of the World Soul pg. 6 Perception +9; darkvision, scent (imprecise) 30 feet, Whispers of Akiton (imprecise) 60 feet Languages Akitonian, Draconic, Shobhad Skills Acrobatics +8, Athletics +10, Nature +7, Stealth +8 Str +5 Dex +1 Con +3 Int +0 Wis +2 Cha +1 Whispers of Akiton Itaka can sense living creatures, objects and effects with the primal trait, and any objects and creatures in the area of primal effects, within range. She can also speak through primal effects, bypassing her selective silence. --- AC 19 Fort +10 Ref +6 Will +7 HP 45 Immunities paralyzed, sleep Resistances cold 3 Selective Silence (aura, primal) 5 feet. Itaka, willing creatures in the area, and creatures grabbed or restrained restrained by Itaka or an affected ally make no sound (preventing speech and auditory actions). --- Speed 25 feet, climb 20 feet Melee Single Action jaws 12, 1d85 piercing plus Grab Primal Innate Spells DC 18, attack 10 - Cantrips (2nd) Frostbite, Ignition Melee Single Action jaws 12, 1d85 piercing plus Grab "
   },
   {
     "id": "aon-creatures--22-juvenile-glass-serpent",
@@ -6752,7 +6824,7 @@
     "specialAbilities": [
       {
         "name": "Hostile Invisibility",
-        "description": "The juvenile glass serpent is naturally invisible. When a glass serpent takes a hostile action of any kind, it becomes visible until the start of its next turn, as its body becomes momentarily tangible. A glass serpent that has swallowed a creature becomes visible for the next day as its meal is digested. If the swallowed creature escapes or is otherwise removed, the glass serpent immediately returns to being invisible. **Ambush** **Trigger** A creature passes within 20 feet of the juvenile glas"
+        "description": "The juvenile glass serpent is naturally invisible. When a glass serpent takes a hostile action of any kind, it becomes visible until the start of its next turn, as its body becomes momentarily tangible. A glass serpent that has swallowed a creature becomes visible for the next day as its meal is digested. If the swallowed creature escapes or is otherwise removed, the glass serpent immediately returns to being invisible."
       },
       {
         "name": "Ambush",
@@ -7092,7 +7164,7 @@
       {
         "name": "Ambush",
         "actions": "reaction",
-        "description": "**Trigger** A living creature passes within 10 feet of the reculobutapus and has not detected it; **Effect** The reculobutapus Strides directly toward the triggering creature and makes a jaws Strike against it. The target creature is off-guard to this attack. **Spiky Hairs** **Trigger** A creature within the reculobutapus's reach damages it with an unarmed or non-reach melee Strike; **Effect** Spiky hairs shoot out from the reculobutapus dealing 1d4+3 piercing damage to the creature."
+        "description": "**Trigger** A living creature passes within 10 feet of the reculobutapus and has not detected it; **Effect** The reculobutapus Strides directly toward the triggering creature and makes a jaws Strike against it. The target creature is off-guard to this attack."
       },
       {
         "name": "Spiky Hairs",
@@ -7236,7 +7308,7 @@
       },
       {
         "name": "Radio Silence",
-        "description": ", tech) 60 feet. Non-allied comm units and other computers don't function within the remote war machine's aura unless their operator succeeds at a Computers check against the war machine's Stealth DC as an Interact action. **Notch Position**"
+        "description": ", tech) 60 feet. Non-allied comm units and other computers don't function within the remote war machine's aura unless their operator succeeds at a Computers check against the war machine's Stealth DC as an Interact action."
       },
       {
         "name": "Notch Position",
@@ -7370,7 +7442,7 @@
     "specialAbilities": [
       {
         "name": "Biotech",
-        "description": "The biotech of a biotech zombie can be disabled for 1 hour by a creature that succeeds at a DC 18 Medicine or Life Science Lore check. Attempting to do so can typically be done only while within reach of the zombie and is a 2-action activity that has the manipulate trait. A biotech zombie with disabled biotech is slowed 1 and can't use any reactions. **Genetic Instability** A biotech zombie must use this reaction unless its biotech is disabled; **Trigger** The zombie is reduced to 0 Hit Points; "
+        "description": "The biotech of a biotech zombie can be disabled for 1 hour by a creature that succeeds at a DC 18 Medicine or Life Science Lore check. Attempting to do so can typically be done only while within reach of the zombie and is a 2-action activity that has the manipulate trait. A biotech zombie with disabled biotech is slowed 1 and can't use any reactions."
       },
       {
         "name": "Genetic Instability",
@@ -7750,7 +7822,7 @@
       },
       {
         "name": "Corrupting Influence",
-        "description": "Any time a living creature loses Hit Points due to Corrupting Blood, the wight scientist gains 3 temporary Hit Points. **Reciprocal Strike** Trigger The wight scientist is reduced to 0 Hit Points; Effect The wight scientist makes a melee or ranged Strike before being destroyed. Corrupting Influence does not apply to this Strike."
+        "description": "Any time a living creature loses Hit Points due to Corrupting Blood, the wight scientist gains 3 temporary Hit Points."
       },
       {
         "name": "Reciprocal Strike",
@@ -8051,7 +8123,7 @@
         "name": "Body check",
         "type": "melee",
         "bonus": 14,
-        "damage": "2d8+15 fire plus 1 persistent fire damage",
+        "damage": "2d8+4 bludgeoning",
         "traits": [],
         "actions": 1
       }
@@ -8063,7 +8135,7 @@
       }
     ],
     "description": "Animated suits of tech armor excel as loyal bodyguards, training dummies, or security.",
-    "rawText": " Animated Tech Armor Animated suits of tech armor excel as loyal bodyguards, training dummies, or security. Animated Tech Armor Source Alien Core pg. 18 Perception +10; darkvision Languages Skills Acrobatics +6, Stealth +8 Str +4 Dex +1 Con +4 Int -5 Wis +3 Cha +0 --- AC 21 Fort +14 Ref +8 Will +6 HP 41 Hardness 4 Immunities bleed, death effects, disease, doomed, drained, fatigued, healing, mental, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void Unreliable Tech Once an animated tech armor is reduced to less than half its Hit Points, or immediately upon being damaged by a critical hit, it becomes permanently glitching 1 until its Hit Points are fully restored (such as by being Repaired). --- Speed 20 feet Melee Single Action body check 14, 2d815 fire plus 1 persistent fire damage Melee Single Action body check 14, 2d815 fire plus 1 persistent fire damage "
+    "rawText": " Animated Tech Armor Animated suits of tech armor excel as loyal bodyguards, training dummies, or security. Animated Tech Armor Source Alien Core pg. 18 Perception +10; darkvision Languages Skills Acrobatics +6, Stealth +8 Str +4 Dex +1 Con +4 Int -5 Wis +3 Cha +0 --- AC 21 Fort +14 Ref +8 Will +6 HP 41 Hardness 4 Immunities bleed, death effects, disease, doomed, drained, fatigued, healing, mental, nonlethal attacks, paralyzed, poison, sickened, spirit, unconscious, vitality, void Unreliable Tech Once an animated tech armor is reduced to less than half its Hit Points, or immediately upon being damaged by a critical hit, it becomes permanently glitching 1 until its Hit Points are fully restored (such as by being Repaired). --- Speed 20 feet Melee Single Action body check 14, 2d84 bludgeoning Melee Single Action body check 14, 2d84 bludgeoning "
   },
   {
     "id": "aon-creatures--190-corpse-fleet-officer",
@@ -8643,11 +8715,11 @@
     "specialAbilities": [
       {
         "name": "Arc Network",
-        "description": "The excuba can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the excuba can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. **Slip Drive** An excuba has an internal biomechanical Drift engine, allowing them to"
+        "description": "The excuba can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the excuba can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect."
       },
       {
         "name": "Slip Drive",
-        "description": "An excuba has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an excuba gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. **Techsense** The excuba senses creatures and objects with the tech trait as a precise sense within the listed range."
+        "description": "An excuba has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an excuba gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead."
       },
       {
         "name": "Techsense",
@@ -8655,7 +8727,7 @@
       },
       {
         "name": "Autoencode",
-        "description": ", mental, occult, tech) An excuba's visual appearance is altered when the creature is perceived by creatures, items, and objects with the tech trait (such as robotic creatures, cameras, and sensors) unless they succeed at a Perception check against the excuba's Deception DC. Excubas in their swarm form appear to be formless shadows and are additionally concealed, while excubas in their humanoid forms register as familiar or unremarkable looking humanoids. **Data Vault** An excuba can store data "
+        "description": ", mental, occult, tech) An excuba's visual appearance is altered when the creature is perceived by creatures, items, and objects with the tech trait (such as robotic creatures, cameras, and sensors) unless they succeed at a Perception check against the excuba's Deception DC. Excubas in their swarm form appear to be formless shadows and are additionally concealed, while excubas in their humanoid forms register as familiar or unremarkable looking humanoids."
       },
       {
         "name": "Data Vault",
@@ -8883,7 +8955,7 @@
     "specialAbilities": [
       {
         "name": "Radioactive Remains",
-        "description": ", radiation) 20 feet. A creature entering or starting its turn inside the aura is exposed to severe radiation. **Meltdown** (poison, radiation) **Trigger** The irradiated undead flyer is reduced to 0 Hit Points by energy damage of any kind; **Effect** The energy acts as a catalyst for a nuclear reaction, causing the flyer to explode and dealing 5d6 poison damage to all creatures in a 20-foot emanation with a DC 19 basic Reflex save."
+        "description": ", radiation) 20 feet. A creature entering or starting its turn inside the aura is exposed to severe radiation."
       },
       {
         "name": "Meltdown",
@@ -9172,7 +9244,7 @@
     "specialAbilities": [
       {
         "name": "Nourishing Aura",
-        "description": ", divine) 100 feet. Presulea can sense the presence of any living creature inside their nourishing aura. This functions as an imprecise sense. Any spells with the healing or vitality trait are automatically heightened one rank (up to rank 4) if the caster is within the aura. Presulea treats a creature that casts such a spell as though they can always see it for 1 hour following the casting, ignoring the effects of any cover, concealment, invisibility, or similar effects. **Vital Siphon** **Frequ"
+        "description": ", divine) 100 feet. Presulea can sense the presence of any living creature inside their nourishing aura. This functions as an imprecise sense. Any spells with the healing or vitality trait are automatically heightened one rank (up to rank 4) if the caster is within the aura. Presulea treats a creature that casts such a spell as though they can always see it for 1 hour following the casting, ignoring the effects of any cover, concealment, invisibility, or similar effects."
       },
       {
         "name": "Vital Siphon",
@@ -9415,11 +9487,11 @@
       },
       {
         "name": "Asteroid-Dependent",
-        "description": "A sterieid is mystically bonded to a small asteroid, no more than 1 mile across. If they're away from their bonded asteroid for more than 24 hours, they become drained 1 and must succeed at a DC 21 Fortitude save each additional 24 hours or increase their drained value by 1. A sterieid can perform a 24-hour ritual to bond themself to a new asteroid. **Icy Nimbus** (aura, cold, primal) 10 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 2d"
+        "description": "A sterieid is mystically bonded to a small asteroid, no more than 1 mile across. If they're away from their bonded asteroid for more than 24 hours, they become drained 1 and must succeed at a DC 21 Fortitude save each additional 24 hours or increase their drained value by 1. A sterieid can perform a 24-hour ritual to bond themself to a new asteroid."
       },
       {
         "name": "Icy Nimbus",
-        "description": ", cold, primal) 10 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 2d6 cold damage (DC 21 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold. **Debris Field** **Trigger** The sterieid takes physical damage; **Effect** Shards of rocky debris fly off the sterieid's body, dealing 2d12 bludgeoning damage to all adjacent creatures (DC 21 basic R"
+        "description": ", cold, primal) 10 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 2d6 cold damage (DC 21 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold."
       },
       {
         "name": "Debris Field",
@@ -9573,7 +9645,7 @@
       {
         "name": "Rewind Wounds",
         "actions": "reaction",
-        "description": ") **Frequency** once per 10 minutes; Trigger Agent Z takes damage; **Effect** Agent Z rewinds time to when he was in a slightly different position, shrugging off some of the damage from the attack. Reroll the damage dealt and apply the lesser result. **Temporal Resistances** Agent Z originally came from another timeline and isn't entirely in sync with this reality. He gains a +1 circumstance bonus to saving throws against illusions and holograms, and if he critically fails such a save, the resul"
+        "description": ") **Frequency** once per 10 minutes; Trigger Agent Z takes damage; **Effect** Agent Z rewinds time to when he was in a slightly different position, shrugging off some of the damage from the attack. Reroll the damage dealt and apply the lesser result."
       },
       {
         "name": "Temporal Resistances",
@@ -9738,7 +9810,7 @@
       },
       {
         "name": "Mind-Shattering Demise",
-        "description": ") When the cerebinite dies, it explodes in a blast fueled by the memories stored in its crystalline body, affecting all creatures in a 30-foot emanation. Each creature in the area (including other cerebinites) must succeed at a DC 22 Will save or take 2d8 mental damage and become stunned 1 (or double damage and stunned 2 on a critical failure). **Crystalline Ambush** **Trigger** A non-mindless creature enters a space adjacent to a cerebinite; **Requirements** Initiative hasn't yet been rolled; *"
+        "description": ") When the cerebinite dies, it explodes in a blast fueled by the memories stored in its crystalline body, affecting all creatures in a 30-foot emanation. Each creature in the area (including other cerebinites) must succeed at a DC 22 Will save or take 2d8 mental damage and become stunned 1 (or double damage and stunned 2 on a critical failure)."
       },
       {
         "name": "Crystalline Ambush",
@@ -9921,7 +9993,7 @@
     "specialAbilities": [
       {
         "name": "Fan Club",
-        "description": "A dredgelit maintains a bond with up to six other willing creatures. Creatures in the fan club always know the general distance and direction toward other bonded creatures, any conditions affecting them, and if they're unconscious, dying, or dead. Creatures in the fan club can always communicate telepathically while on the same plane of existence. **Phantasmal Fans** (aura, visual) 20 feet. A rowdy spectral crowd always surrounds the dredgelit. The dredgelit has concealment against all creatures"
+        "description": "A dredgelit maintains a bond with up to six other willing creatures. Creatures in the fan club always know the general distance and direction toward other bonded creatures, any conditions affecting them, and if they're unconscious, dying, or dead. Creatures in the fan club can always communicate telepathically while on the same plane of existence."
       },
       {
         "name": "Phantasmal Fans",
@@ -10003,7 +10075,7 @@
       },
       {
         "name": "sleep",
-        "description": "Weaknesses cold 5, water 5 **Eruption** (fire) When the drifting bonfire is reduced to 0 HP, it erupts into a burst of lava, dealing 3d6 fire damage to each creature in a 10-foot emanation (DC 19 basic Reflex save)."
+        "description": "Weaknesses cold 5, water 5"
       },
       {
         "name": "Eruption",
@@ -10173,7 +10245,7 @@
     "specialAbilities": [
       {
         "name": "Emotion Sense",
-        "description": ", mental, occult) The garaggakal senses all creatures that are under emotion effects as an imprecise sense at the listed range. **Sense Through** The garaggakal's imprecise senses function through most materials and walls. The senses are blocked by energy fields (such as force fields and force effects) and sufficiently dense material: 10 feet of wood or plastic, 5 feet of stone, 1 foot of common metal, or 6 inches of lead or any starmetal."
+        "description": ", mental, occult) The garaggakal senses all creatures that are under emotion effects as an imprecise sense at the listed range."
       },
       {
         "name": "Sense Through",
@@ -10248,7 +10320,7 @@
     "specialAbilities": [
       {
         "name": "Ravenous Invisibility",
-        "description": "The glass serpent is naturally invisible. When a glass serpent takes a hostile action of any kind, it is hidden instead of undetected until the start of its next turn, as parts of its body become momentarily tangible. A glass serpent that has swallowed a creature becomes visible for the next day as its meal is being digested. If the swallowed creature escapes or is otherwise removed, the glass serpent immediately returns to being invisible. **Ambush** **Trigger** A creature passes within 20 feet"
+        "description": "The glass serpent is naturally invisible. When a glass serpent takes a hostile action of any kind, it is hidden instead of undetected until the start of its next turn, as parts of its body become momentarily tangible. A glass serpent that has swallowed a creature becomes visible for the next day as its meal is being digested. If the swallowed creature escapes or is otherwise removed, the glass serpent immediately returns to being invisible."
       },
       {
         "name": "Ambush",
@@ -10500,7 +10572,7 @@
       },
       {
         "name": "Lavaproof",
-        "description": "The ignurso is immune to environmental fire damage and fatigue from heat and lava. **Thermal Venting** (aura, fire) 20 feet. The ignurso is shrouded in a cloud of smoke and ash. Creatures within the aura are concealed, and creatures outside it are concealed to creatures within. The ignurso can deactivate or activate this aura as a single action, which has the concentrate trait. **Reactive Strike**"
+        "description": "The ignurso is immune to environmental fire damage and fatigue from heat and lava."
       },
       {
         "name": "Thermal Venting",
@@ -10665,11 +10737,11 @@
     "specialAbilities": [
       {
         "name": "Life Blindness",
-        "description": "A lifeleech ooze can only detect living and undead creatures. It has no other sensory abilities. When injured by vitality damage, a lifeleech ooze's senses are overwhelmed, and it automatically becomes blinded until the end of its next turn. **Share Space** A lifeleech ooze can share the space of up to four medium or smaller creatures without squeezing, so long as it has room to retain its original shape. **Strip Flesh** Any living creature that begins its turn sharing the same space as a lifele"
+        "description": "A lifeleech ooze can only detect living and undead creatures. It has no other sensory abilities. When injured by vitality damage, a lifeleech ooze's senses are overwhelmed, and it automatically becomes blinded until the end of its next turn."
       },
       {
         "name": "Share Space",
-        "description": "A lifeleech ooze can share the space of up to four medium or smaller creatures without squeezing, so long as it has room to retain its original shape. **Strip Flesh** Any living creature that begins its turn sharing the same space as a lifeleech ooze takes 3d6 void damage, with a DC 24 basic Fortitude save."
+        "description": "A lifeleech ooze can share the space of up to four medium or smaller creatures without squeezing, so long as it has room to retain its original shape."
       },
       {
         "name": "Strip Flesh",
@@ -11486,11 +11558,11 @@
       },
       {
         "name": "Colony Mind",
-        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead. **Shield Arm** A bastorox's battering arm can also be used as a shield (Hardness 5, 30 HP, BT 15). If the shield is destroyed, the bastorox takes a –2 circumstance "
+        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead."
       },
       {
         "name": "Shield Arm",
-        "description": "A bastorox's battering arm can also be used as a shield (Hardness 5, 30 HP, BT 15). If the shield is destroyed, the bastorox takes a –2 circumstance penalty to attack rolls made with its battering arm Strikes. A destroyed shield arm regenerates over the course of 24 hours. **Shield Block**"
+        "description": "A bastorox's battering arm can also be used as a shield (Hardness 5, 30 HP, BT 15). If the shield is destroyed, the bastorox takes a –2 circumstance penalty to attack rolls made with its battering arm Strikes. A destroyed shield arm regenerates over the course of 24 hours."
       },
       {
         "name": "Shield Block",
@@ -11932,7 +12004,7 @@
       },
       {
         "name": "Solar-Dependent",
-        "description": "A heliad is mystically bonded to a single protostar or small dwarf star. If they're away from their bonded star for more than 24 hours, they become drained 1 and must succeed at a DC 24 Fortitude save each additional 24 hours or increase their drained value by 1. A heliad can perform a 24-hour ritual to bondthemself to a new star. **Supernova** (fire, light, visual) **Trigger** The heliad dies; **Effect** The heliad's body explodes into brilliant, luminous flame. Each creature in a 10-foot emana"
+        "description": "A heliad is mystically bonded to a single protostar or small dwarf star. If they're away from their bonded star for more than 24 hours, they become drained 1 and must succeed at a DC 24 Fortitude save each additional 24 hours or increase their drained value by 1. A heliad can perform a 24-hour ritual to bondthemself to a new star."
       },
       {
         "name": "Supernova",
@@ -12239,7 +12311,7 @@
     "specialAbilities": [
       {
         "name": "Rejuvenation",
-        "description": ") When a mummy wasp swarm is destroyed, the hive's necromantic energies reanimate a new swarm over 1d6 days. A reforming mummy wasp swarm is destroyed permanently if its hive is consecrated or destroyed (30 HP) with vitality, water, or fire damage. **Mummy Storm** (aura, divine, emotion, fear, incapacitation, mental) Millions of enchanted paper shreds orbit the swarm in a 10-foot emanation. Creatures inside this aura gain greater cover from the attacks of creatures outside of it. Any living crea"
+        "description": ") When a mummy wasp swarm is destroyed, the hive's necromantic energies reanimate a new swarm over 1d6 days. A reforming mummy wasp swarm is destroyed permanently if its hive is consecrated or destroyed (30 HP) with vitality, water, or fire damage."
       },
       {
         "name": "Mummy Storm",
@@ -12390,7 +12462,7 @@
     "specialAbilities": [
       {
         "name": "Tinted Glow",
-        "description": "A plasmazer emits bright light of their color in a 30-foot radius and dim light in the next 30 feet. **Redirect Arc** **Trigger** The plasmazer takes electricity damage; **Effect** The plasmazer redirects the triggering effect to a creature within 30 feet. The creature attempts a DC 21 Reflex save. On failure, the creature takes an equal amount of electricity damage as the triggering effect."
+        "description": "A plasmazer emits bright light of their color in a 30-foot radius and dim light in the next 30 feet."
       },
       {
         "name": "Redirect Arc",
@@ -12855,7 +12927,7 @@
     "specialAbilities": [
       {
         "name": "Carapace",
-        "description": "The apari's carapace has Hardness 10, reducing any damage the apari takes by that amount. Once the apari is reduced to fewer than half its Hit Points, or immediately upon taking damage from a critical hit, the carapace breaks, removing the Hardness and reducing its AC to 20. An apari with a broken carapace gains resistance 5 to precision damage and weakness 5 to both area damage and splash damage. It also gains the following aura. **Swarming Bites** (aura) 10 feet. The constituents of an apari w"
+        "description": "The apari's carapace has Hardness 10, reducing any damage the apari takes by that amount. Once the apari is reduced to fewer than half its Hit Points, or immediately upon taking damage from a critical hit, the carapace breaks, removing the Hardness and reducing its AC to 20. An apari with a broken carapace gains resistance 5 to precision damage and weakness 5 to both area damage and splash damage. It also gains the following aura."
       },
       {
         "name": "Swarming Bites",
@@ -13022,7 +13094,7 @@
       },
       {
         "name": "Thermal Shadow",
-        "description": ", illusion) 10 feet. The war machine collects and reflects thermal energy to mask its presence. Any creatures targeting the war machine from outside the aura treats it as if it were concealed unless they possess scent or a non-visual–based sense. **Corpse Flower** **Trigger** The war machine would be reduced to 0 Hit Points; **Effect** The war machine self-destructs, dealing 8d6 electricity damage (DC 25 Basic Reflex save) to all creatures in a 60-foot radius. For 1 minute after this ability is "
+        "description": ", illusion) 10 feet. The war machine collects and reflects thermal energy to mask its presence. Any creatures targeting the war machine from outside the aura treats it as if it were concealed unless they possess scent or a non-visual–based sense."
       },
       {
         "name": "Corpse Flower",
@@ -13282,7 +13354,7 @@
     "specialAbilities": [
       {
         "name": "Necrograft",
-        "description": "A necrograft zombie's necrografts can be disabled for 1 hour by a creature that succeeds at a DC 22 Religion check. Attempting to do so can typically be done only while within reach of the zombie, and is a 2-action activity that has the manipulate trait. A necrograft zombie with disabled necrografts is slowed 1 and can't use any reactions. **Stench** (aura, olfactory) 10 feet, DC 22 **Rapid Decomposition** A necrograft zombie must use this reaction unless its necrograft is disabled **Trigger** T"
+        "description": "A necrograft zombie's necrografts can be disabled for 1 hour by a creature that succeeds at a DC 22 Religion check. Attempting to do so can typically be done only while within reach of the zombie, and is a 2-action activity that has the manipulate trait. A necrograft zombie with disabled necrografts is slowed 1 and can't use any reactions. **Stench** (aura, olfactory) 10 feet, DC 22"
       },
       {
         "name": "Stench",
@@ -13365,7 +13437,7 @@
     "specialAbilities": [
       {
         "name": "Electrocommunication",
-        "description": "Diaspora worms communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability. **Electromagnetic Sight** Diaspora worms sense their surroundings by reading electromagnetic fields, including disruptions caused by creatures or objects. This is a precise sense within the listed range. Intense fields, such as areas emitting radiation or auras of electricity, make creatures within them concealed to the diaspora worm."
+        "description": "Diaspora worms communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability."
       },
       {
         "name": "Electromagnetic Sight",
@@ -13921,7 +13993,7 @@
     "specialAbilities": [
       {
         "name": "Antigrav Interference",
-        "description": ", magical 120 feet) The void palm causes antigravitational technology to malfunction. Upon entering this aura, any items or objects with the tech trait that employ some form of antigrav tech, including antigrav harnesses as well as most hover vehicles and starships, become glitching 1. **Disorienting Patterns** (magical, manipulate, mental, visual) **Trigger** A creature with darkvision within 60 feet of the void palm begins its turn; **Requirements** The void palm is in darkness; **Effect** The"
+        "description": ", magical 120 feet) The void palm causes antigravitational technology to malfunction. Upon entering this aura, any items or objects with the tech trait that employ some form of antigrav tech, including antigrav harnesses as well as most hover vehicles and starships, become glitching 1."
       },
       {
         "name": "Disorienting Patterns",
@@ -14175,7 +14247,7 @@
       },
       {
         "name": "Profile Picture",
-        "description": ", illusion, visual) A civusdaemon appears as a strangely two-dimensional version of a creature of their choice. Creatures targeting the civusdaemon must succeed at a DC 5 flat check to do so, as if the civusdaemon were concealed. A creature who succeeds at this check automatically succeeds at further such flat checks for 1 round. **Well, Actually** **Frequency** once per day; **Trigger** An enemy critically hits the civusdaemon or the civusdaemon critically fails a save against an enemy's effect"
+        "description": ", illusion, visual) A civusdaemon appears as a strangely two-dimensional version of a creature of their choice. Creatures targeting the civusdaemon must succeed at a DC 5 flat check to do so, as if the civusdaemon were concealed. A creature who succeeds at this check automatically succeeds at further such flat checks for 1 round."
       },
       {
         "name": "Well, Actually",
@@ -14254,11 +14326,11 @@
       {
         "name": "Seep In",
         "actions": "reaction",
-        "description": "**Trigger** The coposirix takes damage; **Effect** The coposirix's body absorbs some of what damaged it until the end of its next turn, the material seeping into its constituent copi and changing its composition. The effects of this change depends on the nature of the damage. **Energy Damage** The coposirix's attacks deal an additional 2d6 damage of the same type as the energy damage dealt to it. **Physical Damage** The coposirix gains resistance 6 to physical damage. If the damage was dealt by "
+        "description": "**Trigger** The coposirix takes damage; **Effect** The coposirix's body absorbs some of what damaged it until the end of its next turn, the material seeping into its constituent copi and changing its composition. The effects of this change depends on the nature of the damage."
       },
       {
         "name": "Energy Damage",
-        "description": "The coposirix's attacks deal an additional 2d6 damage of the same type as the energy damage dealt to it. **Physical Damage** The coposirix gains resistance 6 to physical damage. If the damage was dealt by a weapon made of a special material, such as silver, the coposirix's battering sludge Strike counts as that same material for the duration of the effect."
+        "description": "The coposirix's attacks deal an additional 2d6 damage of the same type as the energy damage dealt to it."
       },
       {
         "name": "Physical Damage",
@@ -14338,11 +14410,11 @@
     "specialAbilities": [
       {
         "name": "Arm Cannon",
-        "description": "A daipex's powerful arms can be fused into one or more cannons. These arm cannons also can't be Disarmed or Released. The daipex takes a –4 circumstance penalty to any action that requires fine motor control. **Char Miasma** (aura, olfactory) 5 feet. The heat from a daipex's arm cannons burns the intestines fed into the grafted weapons as ammunition. A creature that enters or begins its turn in the aura must succeed at a DC 23 Fortitude save or be sickened 1. **Misfire Vulnerability** A daipex i"
+        "description": "A daipex's powerful arms can be fused into one or more cannons. These arm cannons also can't be Disarmed or Released. The daipex takes a –4 circumstance penalty to any action that requires fine motor control."
       },
       {
         "name": "Char Miasma",
-        "description": ", olfactory) 5 feet. The heat from a daipex's arm cannons burns the intestines fed into the grafted weapons as ammunition. A creature that enters or begins its turn in the aura must succeed at a DC 23 Fortitude save or be sickened 1. **Misfire Vulnerability** A daipex is full of unceasing rage and despises it when they can't deal damage. When a daipex critically fails a Strike or when a creature critically succeeds at its save against Hail of Bullets, the daipex takes 3d6 mental damage."
+        "description": ", olfactory) 5 feet. The heat from a daipex's arm cannons burns the intestines fed into the grafted weapons as ammunition. A creature that enters or begins its turn in the aura must succeed at a DC 23 Fortitude save or be sickened 1."
       },
       {
         "name": "Misfire Vulnerability",
@@ -14409,7 +14481,7 @@
     "specialAbilities": [
       {
         "name": "Sluggish Mind",
-        "description": ") Any creature that uses an emotion or mental effect on a Dreamer must succeed at a DC 24 Will save or become slowed 1 for the next 1d4 rounds as fragments of prophetic songs fill its mind. **Atavistic Rage** (emotion, fear, incapacitation, mental) **Trigger** The Dreamer is reduced to half or less than half their total Hit Points; **Effect** The injured Dreamer erupts into a terrifying state of psychic fury, requiring all non-Dreamers in a 30- foot emanation to attempt a DC 24 Will save. The Dr"
+        "description": ") Any creature that uses an emotion or mental effect on a Dreamer must succeed at a DC 24 Will save or become slowed 1 for the next 1d4 rounds as fragments of prophetic songs fill its mind."
       },
       {
         "name": "Atavistic Rage",
@@ -14501,7 +14573,7 @@
     "specialAbilities": [
       {
         "name": "Electrocommunication",
-        "description": "Dust worms communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability. **Electromagnetic Sight** Dust worms sense their surroundings by reading electromagnetic fields, including disruptions caused by creatures or objects. This is a precise sense within the listed range. Intense fields, such as areas emitting radiation or auras of electricity, make creatures within them concealed to the dust worm."
+        "description": "Dust worms communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability."
       },
       {
         "name": "Electromagnetic Sight",
@@ -14656,11 +14728,11 @@
     "specialAbilities": [
       {
         "name": "Arc Network",
-        "description": "The iridia can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the iridia can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. **Slip Drive** An iridia has an internal biomechanical Drift engine, allowing them to"
+        "description": "The iridia can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the iridia can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect."
       },
       {
         "name": "Slip Drive",
-        "description": "An iridia has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an iridia gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. **Techsense** The iridia senses creatures and objects with the tech trait as a precise sense within the listed range."
+        "description": "An iridia has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an iridia gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead."
       },
       {
         "name": "Techsense",
@@ -14668,7 +14740,7 @@
       },
       {
         "name": "Digital Telepathy",
-        "description": ", occult, tech) 100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. **Reactive Strike** **Shift Dimensionality** **Frequency** once per round; **Trigger** The iridia is targeted by a ranged Strike; **Effect** A rainbow of visual d"
+        "description": ", occult, tech) 100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura."
       },
       {
         "name": "Reactive Strike",
@@ -14749,7 +14821,7 @@
     "specialAbilities": [
       {
         "name": "Radioactive Remains",
-        "description": ", radiation) 30 feet. A creature entering or starting its turn inside the aura is exposed to extreme radiation. **Meltdown** (poison, radiation) **Trigger** The irradiated undead charger is reduced to 0 Hit Points by energy damage of any kind; **Effect** The energy acts as a catalyst for a nuclear reaction, causing the charger to explode and dealing 9d6 poison damage to all creatures in a 20-foot emanation with a DC 24 basic Reflex save."
+        "description": ", radiation) 30 feet. A creature entering or starting its turn inside the aura is exposed to extreme radiation."
       },
       {
         "name": "Meltdown",
@@ -14827,7 +14899,7 @@
     "specialAbilities": [
       {
         "name": "Pod Spawn",
-        "description": "If a Small or larger creature dies within a Pod Prison, the pod transforms into an adult moonflower with full Hit Points after 1d4 hours of growth. The newly formed moonflower has its own consciousness, but some aspect of its trunk or blossoms typically resemble the creature that died within. The dead creature's equipment remains inside the new moonflower and can be retrieved if the moonflower is slain. **Pod Prison** **Trigger** The moonflower has swallowed a creature; **Effect** The swallowed "
+        "description": "If a Small or larger creature dies within a Pod Prison, the pod transforms into an adult moonflower with full Hit Points after 1d4 hours of growth. The newly formed moonflower has its own consciousness, but some aspect of its trunk or blossoms typically resemble the creature that died within. The dead creature's equipment remains inside the new moonflower and can be retrieved if the moonflower is slain."
       },
       {
         "name": "Pod Prison",
@@ -14904,7 +14976,7 @@
     "specialAbilities": [
       {
         "name": "Electroreception",
-        "description": "While in space, the shipbreaker can sense electronic signals from starships in the same star system. While it can't necessarily interpret starship signals, it has a vague sense of the intent or purpose of any given starship signal, such as \"to scan,\" \"to communicate,\" or \"to warn of danger.\" **Techsense** A shipbreaker can detect creatures and items with the tech trait as an imprecise sense at the listed range. **Items** advanced batteries (3 to 3,000)"
+        "description": "While in space, the shipbreaker can sense electronic signals from starships in the same star system. While it can't necessarily interpret starship signals, it has a vague sense of the intent or purpose of any given starship signal, such as \"to scan,\" \"to communicate,\" or \"to warn of danger.\""
       },
       {
         "name": "Techsense",
@@ -14993,7 +15065,7 @@
       },
       {
         "name": "Nanite Network",
-        "description": ", disease) 5 feet. A voidsage exudes a cloud of nanites. A creature entering the aura or starting its turn in the aura is exposed to quantum nanites. **Revert** **Frequency** once per hour; **Trigger** The voidsage takes damage while projecting; **Effect** The voidsage stops projecting and gains 50 temporary Hit Points that last for 10 minutes."
+        "description": ", disease) 5 feet. A voidsage exudes a cloud of nanites. A creature entering the aura or starting its turn in the aura is exposed to quantum nanites."
       },
       {
         "name": "Revert",
@@ -15586,7 +15658,7 @@
     "specialAbilities": [
       {
         "name": "Burn Protocol",
-        "description": "The circuitry of an assassin robot self-destructs upon the robot's destruction, making tracing its owner extremely difficult. Add 10 to the DC of a Computers check to recover data from a destroyed assassin robot. **Accelerated Response** Trigger The target of the elimination-class assassin robot's Target Tracking attempts a Strike against the robot; **Effect** The robot reads its target's movements, gaining a +2 circumstance bonus to AC against the triggering Strike."
+        "description": "The circuitry of an assassin robot self-destructs upon the robot's destruction, making tracing its owner extremely difficult. Add 10 to the DC of a Computers check to recover data from a destroyed assassin robot."
       },
       {
         "name": "Accelerated Response",
@@ -16021,7 +16093,7 @@
     "specialAbilities": [
       {
         "name": "Perceive Unreality",
-        "description": "The solipsist treats all creatures, objects, and structures they're observing (except for Paradox 17) as quasi-illusory, allowing the solipsist to move through them as though the solipsist were incorporeal. They can also choose to use Will for any saving throw against any non-damaging effect. **Elude Consequences** (fortune, teleportation) **Trigger** The solipsist succeeds at a Will save, or an attack against them is a critical failure; **Effect** The solipsist teleports up to 25 feet in any di"
+        "description": "The solipsist treats all creatures, objects, and structures they're observing (except for Paradox 17) as quasi-illusory, allowing the solipsist to move through them as though the solipsist were incorporeal. They can also choose to use Will for any saving throw against any non-damaging effect."
       },
       {
         "name": "Elude Consequences",
@@ -16457,7 +16529,7 @@
       },
       {
         "name": "Black Hole-Dependent",
-        "description": "A gwereiad is mystically bonded to a single black hole. If they're away from their bonded black hole for more than 24 hours, they become drained 1 and must succeed at a DC 29 Fortitude save each additional 24 hours or increase their drained value by 1. A gwereiad can perform a 24-hour ritual to bond themself to a new black hole. **Singularity Field** (aura, primal) 30 feet. The area around a gwereiad inexorably draws things toward its center. Creatures entering or starting their turns inside the"
+        "description": "A gwereiad is mystically bonded to a single black hole. If they're away from their bonded black hole for more than 24 hours, they become drained 1 and must succeed at a DC 29 Fortitude save each additional 24 hours or increase their drained value by 1. A gwereiad can perform a 24-hour ritual to bond themself to a new black hole."
       },
       {
         "name": "Singularity Field",
@@ -16624,11 +16696,11 @@
       },
       {
         "name": "Astronomical Ties",
-        "description": "**Icy Nimbus** (aura, cold, primal) 20 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 3d6 cold damage (DC 29 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold. **Debris Field** **Trigger** The sterieid takes physical damage; **Effect** Shards of rocky debris fly off the sterieid's body, dealing 3d12 bludgeoning damage to all adjacent crea"
+        "description": "**Icy Nimbus** (aura, cold, primal) 20 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 3d6 cold damage (DC 29 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold."
       },
       {
         "name": "Icy Nimbus",
-        "description": ", cold, primal) 20 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 3d6 cold damage (DC 29 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold. **Debris Field** **Trigger** The sterieid takes physical damage; **Effect** Shards of rocky debris fly off the sterieid's body, dealing 3d12 bludgeoning damage to all adjacent creatures (DC 29 basic R"
+        "description": ", cold, primal) 20 feet. A sterieid's body radiates an icy chill. Creatures entering or starting their turns in the aura take 3d6 cold damage (DC 29 basic Fortitude save); a creature that critically fails its save is also clumsy 1 until the start of its next turn as it grows sluggish from the cold."
       },
       {
         "name": "Debris Field",
@@ -16859,7 +16931,7 @@
       },
       {
         "name": "Colony Mind",
-        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead. **Deflecting Blades** **Trigger** A creature adjacent to the thresher lord targets the thresher lord with a melee attack; **Effect** The thresher lord gains a +2 ci"
+        "description": ") 30 feet. All allies with colony mind within the listed range of each other are in constant telepathic communication and are aware of all threats any individual knows about. While within range of at least one ally with colony mind, when a creature rolls a success on a save against a mental effect, it gets a critical success instead."
       },
       {
         "name": "Deflecting Blades",
@@ -16944,11 +17016,11 @@
     "specialAbilities": [
       {
         "name": "Crushing Gravity",
-        "description": "A vorthuul is surrounded by the crushing gravitational forces of a black hole. A creature that enters or begins its turn in the aura takes 3d6 bludgeoning damage (DC 26 basic Fortitude save). **Event Horizon** A vorthuul naturally draws in light. The DC of the flat check to target a vorthuul concealed or hidden due to dim light or darkness is reduced by 2. A vorthuul takes a –2 circumstance penalty to AC and saving throws against light effects and to AC against attacks from weapons in the laser "
+        "description": "A vorthuul is surrounded by the crushing gravitational forces of a black hole. A creature that enters or begins its turn in the aura takes 3d6 bludgeoning damage (DC 26 basic Fortitude save)."
       },
       {
         "name": "Event Horizon",
-        "description": "A vorthuul naturally draws in light. The DC of the flat check to target a vorthuul concealed or hidden due to dim light or darkness is reduced by 2. A vorthuul takes a –2 circumstance penalty to AC and saving throws against light effects and to AC against attacks from weapons in the laser group. **Quantum Duality** Vorthuuls exist in two states: one in perfect tranquility, the other in perpetual agony. The vorthuul gains bonuses depending on the dominant state. They decide which is dominant as a"
+        "description": "A vorthuul naturally draws in light. The DC of the flat check to target a vorthuul concealed or hidden due to dim light or darkness is reduced by 2. A vorthuul takes a –2 circumstance penalty to AC and saving throws against light effects and to AC against attacks from weapons in the laser group."
       },
       {
         "name": "Quantum Duality",
@@ -17381,7 +17453,7 @@
       },
       {
         "name": "Thermal Shadow",
-        "description": ", illusion) 10 feet. The war machine collects and reflects thermal energy to mask its presence. Any creatures targeting the war machine from outside the aura treats it as if it were concealed unless they possess scent or a non-visual–based sense. **Corpse Flower** **Trigger** The war machine would be reduced to 0 Hit Points; **Effect** The war machine self-destructs, dealing 12d6 electricity damage (DC 30 Basic Reflex save) to all creatures in a 60-foot radius. For 1 minute after this ability is"
+        "description": ", illusion) 10 feet. The war machine collects and reflects thermal energy to mask its presence. Any creatures targeting the war machine from outside the aura treats it as if it were concealed unless they possess scent or a non-visual–based sense."
       },
       {
         "name": "Corpse Flower",
@@ -17746,7 +17818,7 @@
       {
         "name": "Punishment For Failure",
         "actions": "reaction",
-        "description": ") **Trigger** The Sihedron Guard specialist is reduced to 0 Hit Points and has used their Reward of Obedience reaction in the last year. A Sihedron Guard must use this ability when the trigger is met; **Effect** The Sihedron Guard specialist is utterly destroyed, leaving behind only equipment. Their soul can't be restored, and no magical means can contact their soul. **Reward of Obedience** (divine) Frequency once per year; **Trigger** The Sihedron Guard specialist is reduced to 0 Hit Points, bu"
+        "description": ") **Trigger** The Sihedron Guard specialist is reduced to 0 Hit Points and has used their Reward of Obedience reaction in the last year. A Sihedron Guard must use this ability when the trigger is met; **Effect** The Sihedron Guard specialist is utterly destroyed, leaving behind only equipment. Their soul can't be restored, and no magical means can contact their soul."
       },
       {
         "name": "Reward of Obedience",
@@ -17834,11 +17906,11 @@
     "specialAbilities": [
       {
         "name": "Arc Network",
-        "description": "The wyspiria can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the wyspiria can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect. **Slip Drive** An wyspiria has an internal biomechanical Drift engine, allowing t"
+        "description": "The wyspiria can communicate through items and creatures with the tech trait, projecting sound from and speaking through the item or creature's voice, speakers, or other audio output. In addition, the wyspiria can use any item or creature with the tech trait within their digital telepathy aura as the point of origin for their spells and abilities when calculating range, distance, line of effect, and area of effect."
       },
       {
         "name": "Slip Drive",
-        "description": "An wyspiria has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an wyspiria gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead. **Techsense** The wyspiria senses creatures and objects with the tech trait as a precise sense within the listed range."
+        "description": "An wyspiria has an internal biomechanical Drift engine, allowing them to function as a Drift engine for a starship or vehicle they pilot as a 1-minute activity. An excuba can enter or exit the drift themself as a 1-minute activity. When an wyspiria gets a critical failure on a Piloting check to Navigate or Plot a Course through the Drift, they get a failure instead."
       },
       {
         "name": "Techsense",
@@ -17846,7 +17918,7 @@
       },
       {
         "name": "Digital Telepathy",
-        "description": "100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura. **Reactive Strike**"
+        "description": "100 feet. An iridia can communicate telepathically with any item or creature with the tech trait within their aura, as well as with other technologically telepathic creatures (such as those with shortwave and similar abilities). This ability also allows the spectra to remotely attempt Computers checks within their aura."
       },
       {
         "name": "Reactive Strike",
@@ -18385,7 +18457,7 @@
       },
       {
         "name": "Calming Presence",
-        "description": ", emotion, mental) 20 feet. Shimmerstone sentinels exude an aura of calm. Each time a creature in the area attempts an offensive action, such as an attack or casting a spell, that creature must attempt a DC 29 Will save; on a failure, the action is disrupted. A creature that succeeds becomes temporarily immune to the shimmerstone sentinel's calming presence for 1 day. **Absorb Aggression** **Trigger** The shimmerstone sentinel is damaged by a creature that isn't immune to emotion effects and is "
+        "description": ", emotion, mental) 20 feet. Shimmerstone sentinels exude an aura of calm. Each time a creature in the area attempts an offensive action, such as an attack or casting a spell, that creature must attempt a DC 29 Will save; on a failure, the action is disrupted. A creature that succeeds becomes temporarily immune to the shimmerstone sentinel's calming presence for 1 day."
       },
       {
         "name": "Absorb Aggression",
@@ -18712,7 +18784,7 @@
     "specialAbilities": [
       {
         "name": "Dead Zone",
-        "description": ", occult, void) 30 feet. The area around a driftdead amalgam bristles with chaotic space torn from the Drift. The area is zero gravity. A creature that enters or begin its turn in the area take 4d6 void damage (DC 25 basic Fortitude save). **Torn from the Drift** While outside the Drift, the amalgam gains the incorporeal trait, becomes immune to precision damage, and gains resistance 10 to all damage (except force, _ghost killer_, or spirit; double resistance vs. non-magical)."
+        "description": ", occult, void) 30 feet. The area around a driftdead amalgam bristles with chaotic space torn from the Drift. The area is zero gravity. A creature that enters or begin its turn in the area take 4d6 void damage (DC 25 basic Fortitude save)."
       },
       {
         "name": "Torn from the Drift",
@@ -18803,7 +18875,7 @@
     "specialAbilities": [
       {
         "name": "Fatiguing Presence",
-        "description": ", mental) 30 feet, DC 33 **Clear Mind** counteract rank 7, counteract modifier +30"
+        "description": ", mental) 30 feet, DC 33"
       },
       {
         "name": "Clear Mind",
@@ -18884,7 +18956,7 @@
     "specialAbilities": [
       {
         "name": "Constant Pulse Radar",
-        "description": "The war machine can detect all creatures and objects within 100 feet of itself, treating hidden, invisible, and unobserved creatures as concealed. **Interstellar Comms** A remote war machine maintains a constant data link with its pilot, using its pilot's languages and skill modifiers for any unlisted skill. In addition, the pilot can speak through the data link using the remote war machine as a mouthpiece."
+        "description": "The war machine can detect all creatures and objects within 100 feet of itself, treating hidden, invisible, and unobserved creatures as concealed."
       },
       {
         "name": "Interstellar Comms",
@@ -19070,7 +19142,7 @@
     "specialAbilities": [
       {
         "name": "Linked Senses",
-        "description": "The vanguard-class soldier robot shares senses with other allied vanguard-class soldier robots within 60 feet. **X-Ray Vision** The vanguard-class soldier robot can see through most materials and walls within 60 feet. Its sight is blocked by 2 feet of wood or plastic, 1 foot of stone, 2 inches of metal, or any amount of lead or starmetal, and it can see only in black and white. **Items** integrated advanced painglaive (1 commercial battery), integrated advanced seeker rifle (60 projectiles)"
+        "description": "The vanguard-class soldier robot shares senses with other allied vanguard-class soldier robots within 60 feet."
       },
       {
         "name": "X-Ray Vision",
@@ -19265,11 +19337,11 @@
       },
       {
         "name": "Brain Loss",
-        "description": "If a deh-nolo takes 60 damage from a critical hit or takes 50 mental damage, they must succeed at a DC 34 save (Fortitude for critical damage or Will for mental damage) or one of their brain sacs is destroyed. **Brain Sacs** A deh-nolo snatcher has four brain sacs that they use to store harvested brains. A deh-nolo knows one additional language for each brain they have stored in a brain sac, chosen from the languages that the creature knew when its brain was harvested. A deh-nolo without all fou"
+        "description": "If a deh-nolo takes 60 damage from a critical hit or takes 50 mental damage, they must succeed at a DC 34 save (Fortitude for critical damage or Will for mental damage) or one of their brain sacs is destroyed."
       },
       {
         "name": "Brain Sacs",
-        "description": "A deh-nolo snatcher has four brain sacs that they use to store harvested brains. A deh-nolo knows one additional language for each brain they have stored in a brain sac, chosen from the languages that the creature knew when its brain was harvested. A deh-nolo without all four sacs full is stupefied with a value equal to the number of empty sacs. **Open Pustules** When the deh-nolo takes damage, pustules on their body burst, spraying foul poison. Each adjacent creature is exposed to dominion bile"
+        "description": "A deh-nolo snatcher has four brain sacs that they use to store harvested brains. A deh-nolo knows one additional language for each brain they have stored in a brain sac, chosen from the languages that the creature knew when its brain was harvested. A deh-nolo without all four sacs full is stupefied with a value equal to the number of empty sacs."
       },
       {
         "name": "Open Pustules",
@@ -19356,7 +19428,7 @@
     "specialAbilities": [
       {
         "name": "Emotion Sense",
-        "description": ", mental, occult) The garaggakal senses all creatures that are under emotion effects as an imprecise sense at the listed range. **Sense Through** The garaggakal's imprecise senses function through most materials and walls. The senses are blocked by energy fields (such as force fields and force effects) and sufficiently dense material: 10 feet of wood or plastic, 5 feet of stone, 1 foot of common metal, or 6 inches of lead or any starmetal."
+        "description": ", mental, occult) The garaggakal senses all creatures that are under emotion effects as an imprecise sense at the listed range."
       },
       {
         "name": "Sense Through",
@@ -19450,7 +19522,7 @@
       },
       {
         "name": "Radiant Gaze",
-        "description": ", light, primal, visual) 60 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 34 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait. **Success** The creature is unaffected. **Failure** he creature is dazzled until the start of its next turn. **Critical Failure** The creature is blinded until the start of its next turn. **Supernova** (fire, light, visual) **Trig"
+        "description": ", light, primal, visual) 60 feet. A heliad's eyes blaze like a sun. When a creature enters or starts its turn in the aura, it must attempt a DC 34 Fortitude save. The heliad can deactivate or activate this aura by using a single action, which has the concentrate trait. **Success** The creature is unaffected. **Failure** he creature is dazzled until the start of its next turn. **Critical Failure** The creature is blinded until the start of its next turn."
       },
       {
         "name": "Supernova",
@@ -19550,7 +19622,7 @@
     "specialAbilities": [
       {
         "name": "Abyssal Ink",
-        "description": ", poison) 20 feet. The othinni is constantly surrounded by a cloud of poisonous black ink. Any creature that enters the aura or begins its turn inside the aura must attempt a DC 32 Fortitude save or becomes sickened 2 for 1 minute (sickened 3 on a critical failure). **Infernal Origin** **Trigger** The othinni is targeted by a magical effect with the holy trait; **Effect** The othinni's infernal runes flare to life, attempting to counteract the effect (counteract rank 7, counteract modifier 26)."
+        "description": ", poison) 20 feet. The othinni is constantly surrounded by a cloud of poisonous black ink. Any creature that enters the aura or begins its turn inside the aura must attempt a DC 32 Fortitude save or becomes sickened 2 for 1 minute (sickened 3 on a critical failure)."
       },
       {
         "name": "Infernal Origin",
@@ -19785,7 +19857,7 @@
     "specialAbilities": [
       {
         "name": "Constant Pulse Radar",
-        "description": "The war machine can detect all creatures and objects within 100 feet of itself, treating hidden, invisible, and unobserved creatures as concealed. **Interstellar Comms** A remote war machine maintains a constant data link with its pilot, using its pilot's languages and skill modifiers for any unlisted skill. In addition, the pilot can speak through the data link using the remote war machine as a mouthpiece."
+        "description": "The war machine can detect all creatures and objects within 100 feet of itself, treating hidden, invisible, and unobserved creatures as concealed."
       },
       {
         "name": "Interstellar Comms",
@@ -19793,12 +19865,12 @@
       },
       {
         "name": "Radio Silence",
-        "description": ", tech) 60 feet. Non-allied comm units and other computers don't function within the remote war machine's aura unless their operator succeeds at a Computers check against the war machine's Stealth DC as an Interact action. **Corpse Flower** The war machine self-destructs, dealing 16d6 electricity damage (DC 36 Basic Reflex save) to all creatures in a 60-foot radius. For 1 minute after this ability is used, any creature that touches the war machine's remains is exposed to incredible radiation. **"
+        "description": ", tech) 60 feet. Non-allied comm units and other computers don't function within the remote war machine's aura unless their operator succeeds at a Computers check against the war machine's Stealth DC as an Interact action."
       },
       {
         "name": "Corpse Flower",
         "actions": "reaction",
-        "description": "The war machine self-destructs, dealing 16d6 electricity damage (DC 36 Basic Reflex save) to all creatures in a 60-foot radius. For 1 minute after this ability is used, any creature that touches the war machine's remains is exposed to incredible radiation. **Psionic Flare** (mental [reaction]) **Trigger** A creature within 60 feet of the war machine Casts a Spell; **Effect** The war machine fires a focused lightning beam targeting only the triggering creature. If the creature fails its save, the"
+        "description": "The war machine self-destructs, dealing 16d6 electricity damage (DC 36 Basic Reflex save) to all creatures in a 60-foot radius. For 1 minute after this ability is used, any creature that touches the war machine's remains is exposed to incredible radiation."
       },
       {
         "name": "Psionic Flare",
@@ -19979,7 +20051,7 @@
       },
       {
         "name": "Shortwave",
-        "description": ") A malevolent AI can communicate wirelessly with any creatures within their sphere of influence, as long as they have the shortwave ability or are a creature with the tech trait. They can attempt Computers checks to Hack and Thievery checks to Disable a Device on items with the tech trait within their range. **Sphere of Influence** (tech) A malevolent AI can sense and access all tech within their network, which usually encompasses a room, a vehicle or starship, an entire facility, or more (as d"
+        "description": ") A malevolent AI can communicate wirelessly with any creatures within their sphere of influence, as long as they have the shortwave ability or are a creature with the tech trait. They can attempt Computers checks to Hack and Thievery checks to Disable a Device on items with the tech trait within their range."
       },
       {
         "name": "Sphere of Influence",
@@ -19987,16 +20059,16 @@
       },
       {
         "name": "Code Injection",
-        "description": ", tech) 30 feet. Creatures and items with the tech trait that enter or begin their turn within the aura must attempt a DC 36 Will save. The malevolent AI can choose to exclude targets. **Critical Success** No effect, and the target is temporarily immune to code injection for 1 hour. **Success** The target is unaffected. **Failure** The target becomes glitching 1 while in the aura and for 1 round after leaving the aura. **Critical Failure** As failure, but glitching 2 and 2 rounds. **Shell Comput"
+        "description": ", tech) 30 feet. Creatures and items with the tech trait that enter or begin their turn within the aura must attempt a DC 36 Will save. The malevolent AI can choose to exclude targets. **Critical Success** No effect, and the target is temporarily immune to code injection for 1 hour. **Success** The target is unaffected. **Failure** The target becomes glitching 1 while in the aura and for 1 round after leaving the aura. **Critical Failure** As failure, but glitching 2 and 2 rounds."
       },
       {
         "name": "Shell Computer",
-        "description": ") The malevolent AI is specifically reinforced in a shell, granting the AI Hardness. This Hardness reduces any damage they take by an amount equal to their Hardness. The shell can be targeted by attacks separately from its host. Once the malevolent AI's shell is reduced to half their Hit Points, or immediately after being damaged by a critical hit, the shell becomes broken, removing the AI's Hardness and reducing their Armor Class to 33. **Countdown** **Trigger** The malevolent AI is reduced to "
+        "description": ") The malevolent AI is specifically reinforced in a shell, granting the AI Hardness. This Hardness reduces any damage they take by an amount equal to their Hardness. The shell can be targeted by attacks separately from its host. Once the malevolent AI's shell is reduced to half their Hit Points, or immediately after being damaged by a critical hit, the shell becomes broken, removing the AI's Hardness and reducing their Armor Class to 33."
       },
       {
         "name": "Countdown",
         "actions": "reaction",
-        "description": "**Trigger** The malevolent AI is reduced to 0 HP; **Effect** The AI gains access to the Self-Destruct reaction unless an adjacent creature succeeds at a DC 36 Computers, Engineering Lore, or Thievery check to Disable the Countdown. **Self-Destruct** **Trigger** A creature fails to Disable the Countdown; **Effect** The malevolent AI's shell explodes, dealing 8d6 piercing damage and 8d6 fire damage in a 40- foot emanation (DC 36 basic Reflex save)."
+        "description": "**Trigger** The malevolent AI is reduced to 0 HP; **Effect** The AI gains access to the Self-Destruct reaction unless an adjacent creature succeeds at a DC 36 Computers, Engineering Lore, or Thievery check to Disable the Countdown."
       },
       {
         "name": "Self-Destruct",
@@ -20686,7 +20758,7 @@
     "specialAbilities": [
       {
         "name": "Electrocommunication",
-        "description": "Diaspora worm sages communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability. **Electromagnetic Sight** Diaspora worm sages sense their surroundings by reading electromagnetic fields, including disruptions caused by creatures or objects. This is a precise sense within the listed range. Intense fields, such as areas emitting radiation or auras of electricity, make creatures within them concealed to the diaspora worm."
+        "description": "Diaspora worm sages communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability."
       },
       {
         "name": "Electromagnetic Sight",
@@ -21141,7 +21213,7 @@
       },
       {
         "name": "Nanite Network",
-        "description": ", tech) 30 feet. An omnipath exudes a cloud of nanites. Creatures in the aura take a –3 status penalty to saving throws against the omnipath's spells and its Merge Minds ability. **Revert** As voidsage, but 100 temporary Hit Points."
+        "description": ", tech) 30 feet. An omnipath exudes a cloud of nanites. Creatures in the aura take a –3 status penalty to saving throws against the omnipath's spells and its Merge Minds ability."
       },
       {
         "name": "Revert",
@@ -21337,7 +21409,7 @@
     "specialAbilities": [
       {
         "name": "Media Lore",
-        "description": "can use Media Lore to Recall Knowledge about any topic. **True Linguist Zo!** has enchanted himself with the ability to speak and understand all languages, giving him the permanent effects of the _truespeech_ spell. **Items** custom paragon ivory chompers, custom paragon second skin (advanced energy shielding, holoskin, jetpack), Zo!'s microphone (advanced animated intelligence)"
+        "description": "can use Media Lore to Recall Knowledge about any topic."
       },
       {
         "name": "True Linguist",
@@ -21434,7 +21506,7 @@
     "specialAbilities": [
       {
         "name": "Electrocommunication",
-        "description": "Dust worm augurs communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability. **Electromagnetic Sight** Dust worm augurs sense their surroundings by reading electromagnetic fields, including disruptions caused by creatures or objects. This is a precise sense within the listed range. Intense fields, such as areas emitting radiation or auras of electricity, make creatures within them concealed to the dust worm augur."
+        "description": "Dust worm augurs communicate by shaping and reading electromagnetic fields. This functions like telepathy with creatures that share this ability."
       },
       {
         "name": "Electromagnetic Sight",
@@ -21615,7 +21687,7 @@
       },
       {
         "name": "Natural Invisibility",
-        "description": "Paradox 17 is naturally invisible. It becomes visible only when using a hostile action. **Reject Reality** (aura, mental, visual) 100 feet. When a creature in the aura observes Paradox 17 for the first time each day, it must attempt a DC 42 Will save or Performance check. On a failure, reality rejects the creature for as long as it can observe Paradox 17. The affected creature becomes hidden from all other creatures (except Paradox 17) as though invisible itself. **Causational Moments** **Freque"
+        "description": "Paradox 17 is naturally invisible. It becomes visible only when using a hostile action."
       },
       {
         "name": "Reject Reality",
@@ -21723,7 +21795,7 @@
       },
       {
         "name": "Ancient Bond",
-        "description": "The Terror commands obedience from creatures on Castrovel, suggesting an ancient connection to the planet. Wild creatures native to Castrovel or its moon must succeed at a DC 45 Will saving throw when they first come within 200 feet of it on a given day; on a failure, they improve their attitude toward the Terror to friendly. Creatures that become friendly typically approach the Terror, resulting in a painful death by radiation sickness. **Radioactive Death** (primal, radiation) When the Terror "
+        "description": "The Terror commands obedience from creatures on Castrovel, suggesting an ancient connection to the planet. Wild creatures native to Castrovel or its moon must succeed at a DC 45 Will saving throw when they first come within 200 feet of it on a given day; on a failure, they improve their attitude toward the Terror to friendly. Creatures that become friendly typically approach the Terror, resulting in a painful death by radiation sickness."
       },
       {
         "name": "Radioactive Death",
@@ -21817,11 +21889,11 @@
     "specialAbilities": [
       {
         "name": "Mutable Form",
-        "description": "The illumantula is a grouping of tiny tech bits that project energy between themselves, though the illumantula functions as single creature. The illumantula's size gives its space while being fully dispersed, though it can take actions to change its size. The illumantula can occupy the same space as other creatures and must do so to use some of its actions. **Relativity Field** Creatures sharing a space with the illumantula can't use any actions or abilities with the fortune trait. A creature be"
+        "description": "The illumantula is a grouping of tiny tech bits that project energy between themselves, though the illumantula functions as single creature. The illumantula's size gives its space while being fully dispersed, though it can take actions to change its size. The illumantula can occupy the same space as other creatures and must do so to use some of its actions."
       },
       {
         "name": "Relativity Field",
-        "description": "Creatures sharing a space with the illumantula can't use any actions or abilities with the fortune trait. A creature beginning its turn within the illumantula's space can't use actions or ability with the fortune trait until the end of their turn. The illumantula has weakness 10 against any ability or action affected by the fortune trait that successfully damages it. **Reactive Unmaking** **Trigger** A creature moves within the illumantula's space or uses a manipulate action, move action, or ran"
+        "description": "Creatures sharing a space with the illumantula can't use any actions or abilities with the fortune trait. A creature beginning its turn within the illumantula's space can't use actions or ability with the fortune trait until the end of their turn. The illumantula has weakness 10 against any ability or action affected by the fortune trait that successfully damages it."
       },
       {
         "name": "Reactive Unmaking",

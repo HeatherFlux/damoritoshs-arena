@@ -227,10 +227,12 @@ function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, src) {
     const { name } = parseAbilityName(raw);
     return name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   });
-  // Lookahead pattern: stop at the next ability name, section header, or end
+  // Lookahead pattern: stop at the next ability name, section header, or end.
+  // AoN uses both newlines and <br /> to separate abilities.
+  const sep = '(?:\\r?\\n|<br\\s*\\/?>)';
   const nextAbilityBoundary = escapedNames.length > 1
-    ? `(?=\\r?\\n\\*\\*(?:${escapedNames.join('|')})\\*\\*|\\r?\\n\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)`
-    : '(?=\\r?\\n\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)';
+    ? `(?=${sep}\\*\\*(?:${escapedNames.join('|')})\\*\\*|${sep}\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)`
+    : `(?=${sep}\\*\\*(?:Melee|Ranged|Speed|Damage)\\*\\*|\\r?\\n---|\\r?\\n<hr|$)`;
 
   for (const rawName of abilityNames) {
     let { name: parsedName, actions: nameActions } = parseAbilityName(rawName);
@@ -290,7 +292,7 @@ function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, src) {
     'special', 'prerequisite', 'prerequisites', 'description',
   ]);
 
-  const abilityPattern = /\*\*([A-Z][A-Za-z\s'-]+?)\*\*\s*(?:<actions string="([^"]+)"[^>]*>)?\s*(?:\(([^)]+)\))?\s*([A-Z][^]*?)(?=\n\*\*[A-Z]|\n---|\n<hr|$)/gm;
+  const abilityPattern = /\*\*([A-Z][A-Za-z\s'-]+?)\*\*\s*(?:<actions string="([^"]+)"[^>]*>)?\s*(?:\(([^)]+)\))?\s*([A-Z][^]*?)(?=(?:\n|<br\s*\/?>)\*\*[A-Z]|\n---|\n<hr|$)/gm;
   let fallbackMatch;
   while ((fallbackMatch = abilityPattern.exec(markdown)) !== null) {
     const name = fallbackMatch[1].trim();
