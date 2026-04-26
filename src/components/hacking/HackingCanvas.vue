@@ -117,15 +117,16 @@ function initParticles() {
 function getConnections(): Array<{ from: AccessPoint; to: AccessPoint }> {
   if (!store.state.computer) return []
 
+  const visibleNodes = store.getVisibleAccessPoints()
   const connections: Array<{ from: AccessPoint; to: AccessPoint }> = []
   const seen = new Set<string>()
 
-  for (const node of store.state.computer.accessPoints) {
+  for (const node of visibleNodes) {
     for (const targetId of node.connectedTo) {
       const key = [node.id, targetId].sort().join('-')
       if (!seen.has(key)) {
         seen.add(key)
-        const target = store.state.computer.accessPoints.find(ap => ap.id === targetId)
+        const target = visibleNodes.find(ap => ap.id === targetId)
         if (target) {
           connections.push({ from: node, to: target })
         }
@@ -246,14 +247,21 @@ function drawParticles(_time: number) {
 function drawNodes(time: number) {
   if (!ctx || !store.state.computer) return
 
-  for (const node of store.state.computer.accessPoints) {
+  // In GM view, draw all nodes (hidden ones get visual distinction)
+  // In player view, only draw visible nodes
+  const nodesToDraw = store.state.isGMView
+    ? store.state.computer.accessPoints
+    : store.getVisibleAccessPoints()
+
+  for (const node of nodesToDraw) {
     const pos = toCanvasCoords(node.position)
     const color = getNodeColor(node.state)
     const isFocused = store.state.focusedNodeId === node.id
+    const isHidden = node.hidden && store.state.isGMView
+    const alphaMultiplier = isHidden ? 0.35 : 1
 
     let pulse = Math.sin(time * 0.003 + node.position.x * 10) * 0.5 + 0.5
     if (node.state === 'alarmed') {
-      // Slower pulse for alarmed - still noticeable but not frantic
       pulse = Math.sin(time * 0.004) * 0.5 + 0.5
     }
 
@@ -261,8 +269,8 @@ function drawNodes(time: number) {
     const radius = baseRadius + pulse * 5
 
     const gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, radius * 2)
-    gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${isFocused ? 0.4 : 0.2})`)
-    gradient.addColorStop(0.5, `rgba(${color.r}, ${color.g}, ${color.b}, ${isFocused ? 0.15 : 0.05})`)
+    gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${(isFocused ? 0.4 : 0.2) * alphaMultiplier})`)
+    gradient.addColorStop(0.5, `rgba(${color.r}, ${color.g}, ${color.b}, ${(isFocused ? 0.15 : 0.05) * alphaMultiplier})`)
     gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`)
 
     ctx.beginPath()
@@ -272,30 +280,44 @@ function drawNodes(time: number) {
 
     ctx.beginPath()
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.3 + pulse * 0.3})`
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(0.3 + pulse * 0.3) * alphaMultiplier})`
     ctx.fill()
-    ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.8 + pulse * 0.2})`
+
+    // Dashed stroke for hidden nodes in GM view
+    if (isHidden) {
+      ctx.setLineDash([6, 4])
+    }
+    ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(0.8 + pulse * 0.2) * alphaMultiplier})`
     ctx.lineWidth = isFocused ? 3 : 2
     ctx.stroke()
+    if (isHidden) {
+      ctx.setLineDash([])
+    }
 
     ctx.beginPath()
     ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alphaMultiplier})`
     ctx.fill()
 
     // Draw node label (name)
     const fontSize = props.fullscreen ? 12 : 11
     ctx.font = `${fontSize}px "JetBrains Mono", monospace`
-    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`
+    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.9 * alphaMultiplier})`
     ctx.textAlign = 'center'
     ctx.fillText(node.name, pos.x, pos.y + radius + 16)
 
-    // Draw state label below name
-    const stateLabel = getStateLabel(node)
-    const stateColor = getStateColor(node.state)
-    ctx.font = `bold ${fontSize - 1}px "JetBrains Mono", monospace`
-    ctx.fillStyle = `rgba(${stateColor.r}, ${stateColor.g}, ${stateColor.b}, 0.85)`
-    ctx.fillText(stateLabel, pos.x, pos.y + radius + 30)
+    // Draw state label below name (or HIDDEN label for hidden nodes)
+    if (isHidden) {
+      ctx.font = `bold ${fontSize - 1}px "JetBrains Mono", monospace`
+      ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.5)`
+      ctx.fillText('HIDDEN', pos.x, pos.y + radius + 30)
+    } else {
+      const stateLabel = getStateLabel(node)
+      const stateColor = getStateColor(node.state)
+      ctx.font = `bold ${fontSize - 1}px "JetBrains Mono", monospace`
+      ctx.fillStyle = `rgba(${stateColor.r}, ${stateColor.g}, ${stateColor.b}, 0.85)`
+      ctx.fillText(stateLabel, pos.x, pos.y + radius + 30)
+    }
   }
 }
 
@@ -333,6 +355,8 @@ function drawFocusRing(time: number) {
 
   const node = store.state.computer.accessPoints.find(ap => ap.id === store.state.focusedNodeId)
   if (!node) return
+  // Don't draw focus ring on hidden nodes in player view
+  if (node.hidden && !store.state.isGMView) return
 
   const pos = toCanvasCoords(node.position)
 
@@ -368,9 +392,10 @@ function drawEffects(time: number) {
 
     const color = getEffectColor(effect.type)
 
+    const visibleNodes = store.getVisibleAccessPoints()
     let pos = { x: canvasRef.value!.width / 2, y: canvasRef.value!.height / 2 }
     if (effect.targetNodeId) {
-      const node = store.state.computer.accessPoints.find(ap => ap.id === effect.targetNodeId)
+      const node = visibleNodes.find(ap => ap.id === effect.targetNodeId)
       if (node) {
         pos = toCanvasCoords(node.position)
       }
@@ -406,7 +431,7 @@ function drawEffects(time: number) {
       case 'lockout':
         const pulseIntensity = Math.sin(progress * Math.PI * 8) * 0.5 + 0.5
 
-        for (const node of store.state.computer!.accessPoints) {
+        for (const node of visibleNodes) {
           const nodePos = toCanvasCoords(node.position)
 
           ctx.beginPath()
@@ -525,7 +550,12 @@ function handleClick(event: MouseEvent) {
   const x = (event.clientX - rect.left) * scaleX
   const y = (event.clientY - rect.top) * scaleY
 
-  for (const node of store.state.computer.accessPoints) {
+  // GM can click all nodes (including hidden); players only visible
+  const clickableNodes = store.state.isGMView
+    ? store.state.computer.accessPoints
+    : store.getVisibleAccessPoints()
+
+  for (const node of clickableNodes) {
     const pos = toCanvasCoords(node.position)
     const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2)
 

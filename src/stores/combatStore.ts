@@ -101,6 +101,8 @@ function requestStateFromGM() {
 
 let wsTransport: ReturnType<typeof createSyncTransport> | null = null
 let combatSessionId: string = ''
+let stateRetryTimer: ReturnType<typeof setInterval> | null = null
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 const remoteSyncState = reactive({
   enabled: false,
   connectionState: 'disconnected' as ConnectionState,
@@ -123,6 +125,11 @@ function getCombatSessionId(): string {
 function handleRemoteCombatMessage(message: SyncMessage) {
   if (message.type === 'combat-state' && !isGMView) {
     playerViewData.value = message.payload as CombatPlayerData
+    // State received — stop retrying
+    if (stateRetryTimer) {
+      clearInterval(stateRetryTimer)
+      stateRetryTimer = null
+    }
   }
   // GM responds to remote state requests
   if (message.type === 'request-state' && isGMView) {
@@ -147,6 +154,15 @@ async function enableCombatRemoteSync(): Promise<boolean> {
     if (state.combat) {
       wsTransport.send({ type: 'combat-state', payload: buildPlayerData(state.combat) })
     }
+
+    // Periodic heartbeat — re-send state every 30s for late joiners and resilience
+    if (heartbeatTimer) clearInterval(heartbeatTimer)
+    heartbeatTimer = setInterval(() => {
+      if (wsTransport && remoteSyncState.enabled && state.combat) {
+        wsTransport.send({ type: 'combat-state', payload: buildPlayerData(state.combat) })
+      }
+    }, 30000)
+
     return true
   } catch (e) {
     console.error('[Combat] Failed to enable remote sync:', e)
@@ -170,8 +186,23 @@ async function joinCombatRemoteSession(sessionId: string): Promise<boolean> {
     await wsTransport.connect(sessionId, 'player')
     remoteSyncState.enabled = true
 
-    // Request current state from GM
+    // Request current state from GM, with retries
     wsTransport.send({ type: 'request-state', payload: null })
+    let retries = 0
+    const MAX_RETRIES = 3
+    stateRetryTimer = setInterval(() => {
+      retries++
+      if (retries >= MAX_RETRIES || playerViewData.value) {
+        if (stateRetryTimer) {
+          clearInterval(stateRetryTimer)
+          stateRetryTimer = null
+        }
+        return
+      }
+      if (wsTransport && remoteSyncState.enabled) {
+        wsTransport.send({ type: 'request-state', payload: null })
+      }
+    }, 3000)
     return true
   } catch (e) {
     console.error('[Combat] Failed to join remote session:', e)
@@ -185,6 +216,14 @@ function disableCombatRemoteSync() {
   if (wsTransport) {
     wsTransport.disconnect()
     wsTransport = null
+  }
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer)
+    heartbeatTimer = null
+  }
+  if (stateRetryTimer) {
+    clearInterval(stateRetryTimer)
+    stateRetryTimer = null
   }
   remoteSyncState.enabled = false
   remoteSyncState.connectionState = 'disconnected'
@@ -206,13 +245,15 @@ function getCombatSessionFromUrl(): string | null {
 }
 
 function broadcastCombatState() {
-  if (!channel) initChannel()
-  if (!channel) return
-
   const payload = buildPlayerData(state.combat)
-  channel.postMessage({ type: 'combat-state', payload })
 
-  // Also send over WebSocket if remote sync is enabled
+  // Send via BroadcastChannel (same-device tabs)
+  if (!channel) initChannel()
+  if (channel) {
+    channel.postMessage({ type: 'combat-state', payload })
+  }
+
+  // Send via WebSocket (cross-device) — independent of BroadcastChannel
   if (wsTransport && remoteSyncState.enabled && isGMView) {
     wsTransport.send({ type: 'combat-state', payload })
   }

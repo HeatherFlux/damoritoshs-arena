@@ -1,5 +1,5 @@
 import { reactive, watch } from 'vue'
-import type { Computer, NodeState, HackingEffect, HackingEffectType, SavedHackingEncounter } from '../types/hacking'
+import type { Computer, NodeState, HackingEffect, HackingEffectType, SavedHackingEncounter, AccessPoint } from '../types/hacking'
 import { createHackingEffect, createSampleComputer } from '../types/hacking'
 import { generateRandomComputer, type GeneratorOptions } from '../utils/hackingGenerator'
 import { getSyncTransport, isWebSocketSupported, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
@@ -269,6 +269,34 @@ function setAmbientIntensity(value: number) {
 function clearEffects() {
   state.activeEffects = []
   broadcast('clear-effects', null)
+}
+
+function toggleNodeHidden(nodeId: string) {
+  if (!state.computer) return
+  const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
+  if (node) {
+    node.hidden = !node.hidden
+    broadcast('computer', state.computer)
+    saveToLocalStorage()
+  }
+}
+
+function getVisibleAccessPoints(): AccessPoint[] {
+  if (!state.computer) return []
+  if (state.isGMView) return state.computer.accessPoints
+
+  const visibleIds = new Set(
+    state.computer.accessPoints
+      .filter(ap => !ap.hidden)
+      .map(ap => ap.id)
+  )
+
+  return state.computer.accessPoints
+    .filter(ap => !ap.hidden)
+    .map(ap => ({
+      ...ap,
+      connectedTo: ap.connectedTo.filter(id => visibleIds.has(id))
+    }))
 }
 
 function setGMView(isGM: boolean) {
@@ -647,6 +675,8 @@ export function useHackingStore() {
     setFocus,
     setAmbientIntensity,
     clearEffects,
+    toggleNodeHidden,
+    getVisibleAccessPoints,
     setGMView,
     togglePlayerView,
     // Import/Export

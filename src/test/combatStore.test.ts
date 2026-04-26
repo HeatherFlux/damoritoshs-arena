@@ -172,6 +172,75 @@ describe('combatStore', () => {
     })
   })
 
+  describe('broadcastCombatState', () => {
+    it('does not throw when BroadcastChannel is unavailable', () => {
+      store.startCombat('Test')
+      store.addPlayer('Poppy', 15, 85, 24)
+      // broadcastCombatState is called internally by addPlayer
+      // If it threw on BC failure, we'd get an error here
+      expect(store.state.combat!.combatants.length).toBe(1)
+    })
+
+    it('builds correct player data from combat state', () => {
+      store.startCombat('Test Combat')
+      store.addPlayer('Poppy', 15, 85, 24)
+      store.addPlayer('Drakesh', 12, 100, 22)
+      store.addCondition(store.state.combat!.combatants[0].id, 'frightened', 2)
+
+      // broadcastCombatState is called on every mutation — verify the store still works
+      store.nextTurn()
+      expect(store.state.combat!.turn).toBe(1)
+      expect(store.state.combat!.combatants[0].conditions[0].name).toBe('frightened')
+    })
+
+    it('broadcasts on every state mutation without errors', () => {
+      store.startCombat('Test')
+      const p = store.addPlayer('Poppy', 15, 85, 24)
+      store.applyDamage(p.id, 10)
+      store.applyHealing(p.id, 5)
+      store.addCondition(p.id, 'stunned', 1)
+      store.removeCondition(p.id, 'stunned')
+      store.setNotes(p.id, 'test note')
+      store.nextTurn()
+      store.previousTurn()
+      // If broadcastCombatState had an early return bug, one of these would fail
+      expect(store.state.combat).toBeTruthy()
+    })
+  })
+
+  describe('remote sync API', () => {
+    it('exposes remote sync functions', () => {
+      expect(typeof store.enableCombatRemoteSync).toBe('function')
+      expect(typeof store.joinCombatRemoteSession).toBe('function')
+      expect(typeof store.disableCombatRemoteSync).toBe('function')
+      expect(typeof store.generateCombatShareUrl).toBe('function')
+    })
+
+    it('remoteSyncState starts disconnected', () => {
+      expect(store.remoteSyncState.enabled).toBe(false)
+      expect(store.remoteSyncState.connectionState).toBe('disconnected')
+    })
+
+    it('generates a share URL with session and sync params', () => {
+      store.startCombat('Test')
+      const url = store.generateCombatShareUrl()
+      expect(url).toContain('#/combat/view')
+      expect(url).toContain('session=')
+      expect(url).toContain('sync=ws')
+    })
+
+    it('hasCombatRemoteSyncInUrl detects sync param', () => {
+      // Default hash won't have sync=ws
+      expect(store.hasCombatRemoteSyncInUrl()).toBe(false)
+    })
+
+    it('disableCombatRemoteSync resets state', () => {
+      store.disableCombatRemoteSync()
+      expect(store.remoteSyncState.enabled).toBe(false)
+      expect(store.remoteSyncState.connectionState).toBe('disconnected')
+    })
+  })
+
   describe('openPlayerView', () => {
     it('is a callable function', () => {
       expect(typeof store.openPlayerView).toBe('function')

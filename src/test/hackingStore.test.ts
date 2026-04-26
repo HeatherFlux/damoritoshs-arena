@@ -97,6 +97,82 @@ describe('hackingStore', () => {
     })
   })
 
+  describe('node visibility', () => {
+    beforeEach(() => {
+      store.createNewComputer('Test')
+      store.state.computer!.accessPoints = [
+        {
+          id: 'node-1',
+          name: 'Gateway',
+          type: 'physical',
+          state: 'locked',
+          position: { x: 0.2, y: 0.5 },
+          connectedTo: ['node-2', 'node-3'],
+        },
+        {
+          id: 'node-2',
+          name: 'Database',
+          type: 'remote',
+          state: 'locked',
+          position: { x: 0.5, y: 0.3 },
+          connectedTo: ['node-1'],
+          hidden: true,
+        },
+        {
+          id: 'node-3',
+          name: 'Admin Panel',
+          type: 'physical',
+          state: 'breached',
+          position: { x: 0.8, y: 0.5 },
+          connectedTo: ['node-1'],
+        },
+      ]
+    })
+
+    it('toggleNodeHidden flips the hidden flag', () => {
+      expect(store.state.computer!.accessPoints[0].hidden).toBeFalsy()
+      store.toggleNodeHidden('node-1')
+      expect(store.state.computer!.accessPoints[0].hidden).toBe(true)
+      store.toggleNodeHidden('node-1')
+      expect(store.state.computer!.accessPoints[0].hidden).toBe(false)
+    })
+
+    it('GM view returns all access points', () => {
+      store.state.isGMView = true
+      const visible = store.getVisibleAccessPoints()
+      expect(visible).toHaveLength(3)
+    })
+
+    it('player view filters hidden access points', () => {
+      store.state.isGMView = false
+      const visible = store.getVisibleAccessPoints()
+      expect(visible).toHaveLength(2)
+      expect(visible.find(ap => ap.id === 'node-2')).toBeUndefined()
+    })
+
+    it('player view prunes connectedTo references to hidden nodes', () => {
+      store.state.isGMView = false
+      const visible = store.getVisibleAccessPoints()
+      const gateway = visible.find(ap => ap.id === 'node-1')!
+      // node-2 is hidden, so connectedTo should only contain node-3
+      expect(gateway.connectedTo).toEqual(['node-3'])
+    })
+
+    it('returns empty array when no computer loaded', () => {
+      store.state.computer = null
+      const visible = store.getVisibleAccessPoints()
+      expect(visible).toEqual([])
+    })
+
+    it('player view with no hidden nodes returns all', () => {
+      store.state.isGMView = false
+      // Un-hide node-2
+      store.state.computer!.accessPoints[1].hidden = false
+      const visible = store.getVisibleAccessPoints()
+      expect(visible).toHaveLength(3)
+    })
+  })
+
   describe('save/load encounters', () => {
     it('saves current computer as encounter', () => {
       store.createNewComputer('Starbase Alpha')

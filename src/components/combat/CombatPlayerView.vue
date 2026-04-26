@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useCombatStore, type CombatPlayerData } from '../../stores/combatStore'
 
 const combatStore = useCombatStore()
 const remoteStatus = ref('')
+const isRemoteSession = ref(false)
 
 onMounted(async () => {
   combatStore.setGMView(false)
@@ -13,16 +14,42 @@ onMounted(async () => {
 
   // If URL has ?sync=ws, attempt cross-device WebSocket connection
   if (combatStore.hasCombatRemoteSyncInUrl()) {
+    isRemoteSession.value = true
     const sessionId = combatStore.getCombatSessionFromUrl()
     if (sessionId) {
       remoteStatus.value = 'Connecting to GM...'
       const success = await combatStore.joinCombatRemoteSession(sessionId)
-      remoteStatus.value = success ? 'Connected' : 'Connection failed — using local data'
-      if (success) {
-        // Clear status after a moment
-        setTimeout(() => { remoteStatus.value = '' }, 3000)
+      if (!success) {
+        remoteStatus.value = 'Connection failed — using local data'
       }
     }
+  }
+})
+
+// Reactively update status based on connection state
+watch(() => combatStore.remoteSyncState.connectionState, (state) => {
+  if (!isRemoteSession.value) return
+  switch (state) {
+    case 'connected':
+      remoteStatus.value = combatStore.playerViewData.value ? 'Connected' : 'Connected — waiting for state...'
+      break
+    case 'connecting':
+      remoteStatus.value = 'Reconnecting...'
+      break
+    case 'error':
+      remoteStatus.value = 'Connection lost'
+      break
+    case 'disconnected':
+      remoteStatus.value = 'Disconnected'
+      break
+  }
+})
+
+// Clear "waiting for state" once data arrives
+watch(() => combatStore.playerViewData.value, (val) => {
+  if (val && isRemoteSession.value && combatStore.remoteSyncState.connectionState === 'connected') {
+    remoteStatus.value = 'Connected'
+    setTimeout(() => { remoteStatus.value = '' }, 3000)
   }
 })
 

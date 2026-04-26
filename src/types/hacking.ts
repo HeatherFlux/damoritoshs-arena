@@ -44,6 +44,7 @@ export interface AccessPoint {
   state: NodeState
   position: Position
   connectedTo: string[]  // IDs of connected access points
+  hidden?: boolean        // Hidden from player view until GM reveals
 
   // Primary hacking DC for this node
   dc?: number

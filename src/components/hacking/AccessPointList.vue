@@ -49,6 +49,7 @@ function getNodeDC(node: AccessPoint): number | undefined {
         :class="{
           focused: store.state.focusedNodeId === node.id,
           expanded: expandedNode === node.id,
+          'is-hidden': node.hidden,
           [`state-${node.state}`]: true
         }"
       >
@@ -64,6 +65,7 @@ function getNodeDC(node: AccessPoint): number | undefined {
                 {{ expandedNode === node.id ? '▼' : '▶' }}
               </button>
               <span class="node-name">{{ node.name }}</span>
+              <span v-if="node.hidden" class="hidden-badge">HIDDEN</span>
             </div>
             <div class="node-meta">
               <span class="node-type">{{ node.type }}<span v-if="getNodeDC(node)"> | DC {{ getNodeDC(node) }}</span></span>
@@ -73,17 +75,35 @@ function getNodeDC(node: AccessPoint): number | undefined {
             </div>
           </div>
 
-          <select
-            class="state-select"
-            :class="`select-${node.state}`"
-            :value="node.state"
-            @click.stop
-            @change="handleStateChange(node.id, ($event.target as HTMLSelectElement).value as NodeState)"
-          >
-            <option v-for="state in nodeStates" :key="state" :value="state">
-              {{ state.charAt(0).toUpperCase() + state.slice(1) }}
-            </option>
-          </select>
+          <div class="node-controls">
+            <button
+              class="visibility-btn"
+              :class="{ 'is-hidden': node.hidden }"
+              :title="node.hidden ? 'Show to players' : 'Hide from players'"
+              @click.stop="store.toggleNodeHidden(node.id)"
+            >
+              <svg v-if="!node.hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+
+            <select
+              class="state-select"
+              :class="`select-${node.state}`"
+              :value="node.state"
+              @click.stop
+              @change="handleStateChange(node.id, ($event.target as HTMLSelectElement).value as NodeState)"
+            >
+              <option v-for="state in nodeStates" :key="state" :value="state">
+                {{ state.charAt(0).toUpperCase() + state.slice(1) }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <!-- Hack Skills (if more detailed than just DC) -->
@@ -188,6 +208,10 @@ function getNodeDC(node: AccessPoint): number | undefined {
   border-radius: var(--radius-sm);
   overflow: hidden;
   transition: all 0.15s ease;
+}
+
+.node-item.is-hidden {
+  opacity: 0.55;
 }
 
 .node-item.focused {
@@ -315,6 +339,55 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
 .node-successes {
   color: var(--color-accent);
+}
+
+.hidden-badge {
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 0.0625rem 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+@media (min-width: 1024px) {
+  .hidden-badge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.375rem;
+  }
+}
+
+.node-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.visibility-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.visibility-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background: var(--color-bg);
+}
+
+.visibility-btn.is-hidden {
+  color: var(--color-text-muted);
 }
 
 .state-select {
