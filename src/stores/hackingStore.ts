@@ -2,7 +2,7 @@ import { reactive, watch } from 'vue'
 import type { Computer, NodeState, HackingEffect, HackingEffectType, SavedHackingEncounter, AccessPoint } from '../types/hacking'
 import { createHackingEffect, createSampleComputer } from '../types/hacking'
 import { generateRandomComputer, type GeneratorOptions } from '../utils/hackingGenerator'
-import { getSyncTransport, isWebSocketSupported, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
+import { getSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 // Generate or retrieve session ID for channel isolation
 function getSessionId(): string {
@@ -559,6 +559,31 @@ function disableRemoteSync(): void {
   console.log('[Hacking] Remote sync disabled')
 }
 
+/**
+ * Unified player view launcher: enables remote sync if available, copies
+ * the share URL to clipboard, then opens the player view in a new tab.
+ */
+async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
+  let syncEnabled = state.isRemoteSyncEnabled
+
+  if (isSyncAvailable() && !syncEnabled) {
+    syncEnabled = await enableRemoteSync()
+  }
+
+  const url = generateShareUrl(syncEnabled)
+
+  let copied = false
+  try {
+    await navigator.clipboard.writeText(url)
+    copied = true
+  } catch (e) {
+    console.warn('[Hacking] Clipboard copy failed:', e)
+  }
+
+  window.open(url, '_blank', 'width=1920,height=1080')
+  return { success: copied, syncEnabled }
+}
+
 // LocalStorage persistence
 const STORAGE_KEY = 'sf2e-hacking-state'
 const ENCOUNTERS_KEY = 'sf2e-hacking-saved'
@@ -710,6 +735,8 @@ export function useHackingStore() {
     // Remote sync
     enableRemoteSync,
     joinRemoteSession,
-    disableRemoteSync
+    disableRemoteSync,
+    openPlayerView,
+    isSyncAvailable
   }
 }

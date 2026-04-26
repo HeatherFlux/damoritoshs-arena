@@ -17,7 +17,7 @@ import {
   createSceneFromSaved,
   createEmptySavedScene
 } from '../types/starship'
-import { createSyncTransport, isWebSocketSupported, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
+import { createSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 // Storage keys
 const STORAGE_KEY = 'sf2e-starship'
@@ -57,6 +57,8 @@ const state = reactive<StarshipState>({
 
 // WebSocket transport reference (independent instance, not the hacking singleton)
 let wsTransport: ReturnType<typeof createSyncTransport> | null = null
+let stateRetryTimer: ReturnType<typeof setInterval> | null = null
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 
 // BroadcastChannel for cross-tab sync
 let channel: BroadcastChannel | null = null
@@ -643,15 +645,28 @@ function handleRemoteMessage(message: SyncMessage) {
   const { type, payload } = message
   console.log('[Starship] Remote message:', type, 'isGM:', state.isGMView)
 
-  // Handle init message (full state sync on connect)
+  // Init from worker is hacking-specific — only honor it if a scene field is present
   if (type === 'init') {
-    if (state.isGMView) {
-      console.log('[Starship] GM ignoring init message - GM is source of truth')
-      return
+    if (state.isGMView) return
+    const p = payload as { scene?: StarshipScene | null }
+    if (p && 'scene' in p) {
+      state.activeScene = p.scene ?? null
     }
-    const p = payload as { scene: StarshipScene | null }
-    state.activeScene = p.scene
     return
+  }
+
+  // Player asks for current state — GM responds with full scene
+  if (type === 'request-state' && state.isGMView) {
+    if (state.activeScene && wsTransport && state.isRemoteSyncEnabled) {
+      wsTransport.send({ type: 'scene-update', payload: state.activeScene })
+    }
+    return
+  }
+
+  // Player received fresh scene state — stop retrying
+  if (type === 'scene-update' && !state.isGMView && stateRetryTimer) {
+    clearInterval(stateRetryTimer)
+    stateRetryTimer = null
   }
 
   // Same handling as BroadcastChannel messages
@@ -680,8 +695,16 @@ async function enableRemoteSync(): Promise<boolean> {
 
     // Send current scene state to any connected players
     if (state.activeScene) {
-      wsTransport.send({ type: 'init', payload: { scene: state.activeScene } })
+      wsTransport.send({ type: 'scene-update', payload: state.activeScene })
     }
+
+    // Heartbeat: re-send scene every 30s for late joiners and resilience
+    if (heartbeatTimer) clearInterval(heartbeatTimer)
+    heartbeatTimer = setInterval(() => {
+      if (wsTransport && state.isRemoteSyncEnabled && state.activeScene) {
+        wsTransport.send({ type: 'scene-update', payload: state.activeScene })
+      }
+    }, 30000)
 
     console.log('[Starship] Remote sync enabled as GM')
     return true
@@ -712,6 +735,25 @@ async function joinRemoteSession(sessionId: string): Promise<boolean> {
     await wsTransport.connect(sessionId, 'player')
     state.isRemoteSyncEnabled = true
 
+    // Ask GM for current scene, retry if no response
+    wsTransport.send({ type: 'request-state', payload: null })
+    let retries = 0
+    const MAX_RETRIES = 3
+    if (stateRetryTimer) clearInterval(stateRetryTimer)
+    stateRetryTimer = setInterval(() => {
+      retries++
+      if (retries >= MAX_RETRIES || state.activeScene) {
+        if (stateRetryTimer) {
+          clearInterval(stateRetryTimer)
+          stateRetryTimer = null
+        }
+        return
+      }
+      if (wsTransport && state.isRemoteSyncEnabled) {
+        wsTransport.send({ type: 'request-state', payload: null })
+      }
+    }, 3000)
+
     console.log('[Starship] Joined remote session as player')
     return true
   } catch (e) {
@@ -726,6 +768,14 @@ function disableRemoteSync(): void {
   if (wsTransport) {
     wsTransport.disconnect()
     wsTransport = null
+  }
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer)
+    heartbeatTimer = null
+  }
+  if (stateRetryTimer) {
+    clearInterval(stateRetryTimer)
+    stateRetryTimer = null
   }
   state.isRemoteSyncEnabled = false
   state.wsConnectionState = 'disconnected'
@@ -745,10 +795,30 @@ function generateShareUrl(): string {
   return `${baseUrl}#/starship/view?session=${state.sessionId}${syncParam}`
 }
 
-function openPlayerView() {
+/**
+ * Unified player view launcher: enables remote sync if available, copies
+ * the share URL to clipboard, then opens the player view in a new tab.
+ */
+async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
+  let syncEnabled = state.isRemoteSyncEnabled
+
+  if (isSyncAvailable() && !syncEnabled) {
+    syncEnabled = await enableRemoteSync()
+  }
+
   const url = generateShareUrl()
   console.log('[Starship] Opening player view:', url)
+
+  let copied = false
+  try {
+    await navigator.clipboard.writeText(url)
+    copied = true
+  } catch (e) {
+    console.warn('[Starship] Clipboard copy failed:', e)
+  }
+
   window.open(url, '_blank', 'width=1920,height=1080')
+  return { success: copied, syncEnabled }
 }
 
 // ============ Import/Export ============
@@ -910,6 +980,7 @@ export function useStarshipStore() {
     enableRemoteSync,
     joinRemoteSession,
     disableRemoteSync,
-    hasRemoteSyncInUrl
+    hasRemoteSyncInUrl,
+    isSyncAvailable
   }
 }

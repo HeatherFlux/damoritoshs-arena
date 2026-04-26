@@ -92,22 +92,13 @@ function getConditionDef(key: string) {
   return CONDITION_DEFS[key]
 }
 
-async function toggleRemoteSync() {
-  if (combatStore.remoteSyncState.enabled) {
-    combatStore.disableCombatRemoteSync()
-  } else {
-    const success = await combatStore.enableCombatRemoteSync()
-    if (success) {
-      const url = combatStore.generateCombatShareUrl()
-      try {
-        await navigator.clipboard.writeText(url)
-        alert('Sync enabled! Player view URL copied to clipboard.\n\nShare this with your players:\n' + url)
-      } catch {
-        alert('Sync enabled! Share this URL with players:\n\n' + url)
-      }
-    } else {
-      alert('Failed to connect to sync server.')
-    }
+const shareCopied = ref(false)
+
+async function launchPlayerView() {
+  const result = await combatStore.openPlayerView()
+  if (result.success) {
+    shareCopied.value = true
+    setTimeout(() => { shareCopied.value = false }, 2500)
   }
 }
 
@@ -211,17 +202,12 @@ function importAnother() {
           <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.rollAllInitiative()">
             Roll All Init
           </button>
-          <button class="btn-secondary btn-xs lg:btn-sm" @click="combatStore.openPlayerView()" title="Open player view in new window (same device)">
-            Player View
-          </button>
           <button
-            v-if="combatStore.isSyncAvailable()"
-            class="btn-xs lg:btn-sm"
-            :class="combatStore.remoteSyncState.enabled ? 'bg-success text-white' : 'btn-secondary'"
-            @click="toggleRemoteSync"
-            :title="combatStore.remoteSyncState.enabled ? 'Click to stop sharing. Session URL copied to clipboard.' : 'Share player view to other devices via sync server'"
+            class="btn-secondary btn-xs lg:btn-sm"
+            @click="launchPlayerView"
+            title="Opens player view, copies share link, and starts sync if available"
           >
-            {{ combatStore.remoteSyncState.enabled ? 'Syncing...' : 'Share' }}
+            {{ shareCopied ? 'Link Copied!' : 'Player View' }}
           </button>
           <button class="btn-danger btn-xs lg:btn-sm" @click="combatStore.endCombat()">
             End Combat

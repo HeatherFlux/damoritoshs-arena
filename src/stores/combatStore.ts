@@ -841,9 +841,38 @@ function ensureChannel() {
   initChannel()
 }
 
-function openPlayerView() {
+/**
+ * Unified player view launcher: enables remote sync if available, copies
+ * the share URL to clipboard, then opens the player view in a new tab.
+ */
+async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
+  let syncEnabled = remoteSyncState.enabled
+
+  // Auto-enable sync if available and not already on
+  if (isSyncAvailable() && !syncEnabled) {
+    syncEnabled = await enableCombatRemoteSync()
+  }
+
+  // Push current state so any local-tab listeners get it immediately
   broadcastCombatState()
-  window.open(`${window.location.pathname}#/combat/view`, '_blank')
+
+  // Build URL — sync param only if WS sync is actually enabled
+  const baseUrl = window.location.origin + window.location.pathname
+  const url = syncEnabled
+    ? generateCombatShareUrl()
+    : `${baseUrl}#/combat/view`
+
+  // Copy to clipboard (best-effort — ignore failures, e.g., no permission)
+  let copied = false
+  try {
+    await navigator.clipboard.writeText(url)
+    copied = true
+  } catch (e) {
+    console.warn('[Combat] Clipboard copy failed:', e)
+  }
+
+  window.open(url, '_blank')
+  return { success: copied, syncEnabled }
 }
 
 export const useCombatStore = () => ({

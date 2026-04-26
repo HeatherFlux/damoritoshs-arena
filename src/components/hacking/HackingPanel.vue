@@ -58,48 +58,19 @@ onUnmounted(() => {
   }
 })
 
-function openPlayerView() {
-  const url = store.generateShareUrl(false)
-  console.log('[HackingPanel] Opening local player view:', url)
-  window.open(url, '_blank', 'width=1920,height=1080')
-}
-
-async function startSessionLink() {
-  if (!syncAvailable.value) {
-    console.warn('[HackingPanel] Sync not available - no server configured')
-    alert('Remote sync is not available. Make sure the sync server is running.')
-    return
-  }
-
+async function openPlayerView() {
   syncLoading.value = true
   try {
-    if (!syncEnabled.value) {
-      console.log('[HackingPanel] Enabling remote sync...')
-      const success = await store.enableRemoteSync()
-      if (!success) {
-        console.error('[HackingPanel] Failed to enable remote sync')
-        alert('Failed to connect to sync server. Is it running?')
-        return
-      }
+    const result = await store.openPlayerView()
+    if (result.success) {
+      copySuccess.value = true
+      setTimeout(() => copySuccess.value = false, 2500)
     }
-
-    const url = store.generateShareUrl(true)
-    console.log('[HackingPanel] Session URL:', url)
-
-    await navigator.clipboard.writeText(url)
-    copySuccess.value = true
-    setTimeout(() => copySuccess.value = false, 3000)
   } catch (e) {
-    console.error('[HackingPanel] Failed to start session:', e)
-    alert('Failed to create session link')
+    console.error('[HackingPanel] Failed to launch player view:', e)
   } finally {
     syncLoading.value = false
   }
-}
-
-function stopSession() {
-  console.log('[HackingPanel] Stopping remote session')
-  store.disableRemoteSync()
 }
 
 function createNew() {
@@ -256,27 +227,18 @@ function formatDate(timestamp: number): string {
               <div class="control-row">
                 <button
                   class="btn btn-accent flex-1"
-                  title="Open a player-facing view in a new window for displaying on a second monitor"
-                  @click="openPlayerView"
-                >
-                  Player View
-                </button>
-              </div>
-              <div class="control-row">
-                <button
-                  v-if="!syncEnabled"
-                  class="btn btn-secondary flex-1"
                   :class="{ loading: syncLoading }"
                   :disabled="syncLoading"
-                  title="Copy a link to share with players so they can view the hacking encounter on their own device"
-                  @click="startSessionLink"
+                  title="Opens the player view, copies the share link, and starts sync if available"
+                  @click="openPlayerView"
                 >
-                  {{ copySuccess ? 'Copied!' : 'Session Link' }}
+                  {{ copySuccess ? 'Link Copied!' : 'Player View' }}
                 </button>
-                <div v-else class="session-status">
+              </div>
+              <div v-if="syncEnabled" class="control-row">
+                <div class="session-status">
                   <span class="sync-indicator" :class="'sync-' + syncState"></span>
                   <span class="session-label">LIVE</span>
-                  <button class="btn btn-danger btn-sm" @click="stopSession">×</button>
                 </div>
               </div>
             </div>
@@ -406,27 +368,18 @@ function formatDate(timestamp: number): string {
             <div class="control-row">
               <button
                 class="btn btn-accent flex-1"
-                title="Open a player-facing view in a new window for displaying on a second monitor"
-                @click="openPlayerView"
-              >
-                Player View
-              </button>
-            </div>
-            <div class="control-row">
-              <button
-                v-if="!syncEnabled"
-                class="btn btn-secondary flex-1"
                 :class="{ loading: syncLoading }"
                 :disabled="syncLoading"
-                title="Copy a link to share with players so they can view the hacking encounter on their own device"
-                @click="startSessionLink"
+                title="Opens the player view, copies the share link, and starts sync if available"
+                @click="openPlayerView"
               >
-                {{ copySuccess ? 'Copied!' : 'Session Link' }}
+                {{ copySuccess ? 'Link Copied!' : 'Player View' }}
               </button>
-              <div v-else class="session-status">
+            </div>
+            <div v-if="syncEnabled" class="control-row">
+              <div class="session-status">
                 <span class="sync-indicator" :class="'sync-' + syncState"></span>
                 <span class="session-label">LIVE</span>
-                <button class="btn btn-danger btn-sm" @click="stopSession">×</button>
               </div>
             </div>
           </div>

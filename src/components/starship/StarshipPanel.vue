@@ -280,24 +280,16 @@ function updatePartySize(size: number) {
 
 // ============ Player View ============
 
-function openPlayerView() {
-  store.openPlayerView()
-}
-
 const copySuccess = ref(false)
-async function copyShareLink() {
-  const url = store.generateShareUrl()
-  await navigator.clipboard.writeText(url)
-  copySuccess.value = true
-  setTimeout(() => copySuccess.value = false, 2000)
-}
-
-async function toggleRemoteSync() {
-  if (store.state.isRemoteSyncEnabled) {
-    store.disableRemoteSync()
-  } else {
-    syncEnabling.value = true
-    await store.enableRemoteSync()
+async function openPlayerView() {
+  syncEnabling.value = true
+  try {
+    const result = await store.openPlayerView()
+    if (result.success) {
+      copySuccess.value = true
+      setTimeout(() => copySuccess.value = false, 2500)
+    }
+  } finally {
     syncEnabling.value = false
   }
 }
@@ -679,16 +671,12 @@ defineExpose({
             </div>
             <div class="runner-actions">
               <button
-                class="btn btn-sm"
-                :class="store.state.isRemoteSyncEnabled ? 'btn-success' : 'btn-secondary'"
+                class="btn btn-accent btn-sm"
                 :disabled="syncEnabling"
-                @click="toggleRemoteSync"
+                title="Opens the player view, copies the share link, and starts sync if available"
+                @click="openPlayerView"
               >
-                {{ syncEnabling ? 'Connecting...' : store.state.isRemoteSyncEnabled ? 'Sync ON' : 'Remote Sync' }}
-              </button>
-              <button class="btn btn-accent btn-sm" @click="openPlayerView">Player View</button>
-              <button class="btn btn-secondary btn-sm" @click="copyShareLink">
-                {{ copySuccess ? 'Copied!' : 'Copy Link' }}
+                {{ syncEnabling ? 'Connecting...' : copySuccess ? 'Link Copied!' : 'Player View' }}
               </button>
               <button class="btn btn-danger btn-sm" @click="endScene">End Scene</button>
             </div>
