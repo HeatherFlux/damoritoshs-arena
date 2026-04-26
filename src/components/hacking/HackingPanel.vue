@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useHackingStore } from '../../stores/hackingStore'
+import type { NodeState } from '../../types/hacking'
 import { isSyncAvailable, getSyncServerUrl } from '../../utils/syncTransport'
 import HackingCanvas from './HackingCanvas.vue'
 import HackingEffectOverlay from './HackingEffectOverlay.vue'
@@ -30,6 +31,14 @@ const focusedNode = computed(() => {
 function getNodeDC(node: { dc?: number; hackSkills?: { dc: number }[] } | null): number | undefined {
   if (!node) return undefined
   return node.dc || node.hackSkills?.[0]?.dc
+}
+
+const nodeStates: NodeState[] = ['locked', 'active', 'breached', 'alarmed']
+
+function handleFocusedStateChange(newState: NodeState) {
+  if (store.state.focusedNodeId) {
+    store.setNodeState(store.state.focusedNodeId, newState)
+  }
 }
 
 // Remote sync state
@@ -301,9 +310,36 @@ function formatDate(timestamp: number): string {
               <span class="focused-label">Selected:</span>
               <span class="focused-name">{{ focusedNode.name }}</span>
             </div>
-            <div class="focused-dc" v-if="getNodeDC(focusedNode)">
-              <span class="dc-label">DC</span>
-              <span class="dc-value">{{ getNodeDC(focusedNode) }}</span>
+            <div class="focused-controls">
+              <button
+                class="focused-visibility-btn"
+                :class="{ 'is-hidden': focusedNode.hidden }"
+                :title="focusedNode.hidden ? 'Show to players' : 'Hide from players'"
+                @click="store.toggleNodeHidden(focusedNode!.id)"
+              >
+                <svg v-if="!focusedNode.hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+              <select
+                class="focused-state-select"
+                :class="`select-${focusedNode.state}`"
+                :value="focusedNode.state"
+                @change="handleFocusedStateChange(($event.target as HTMLSelectElement).value as NodeState)"
+              >
+                <option v-for="s in nodeStates" :key="s" :value="s">
+                  {{ s.charAt(0).toUpperCase() + s.slice(1) }}
+                </option>
+              </select>
+              <div class="focused-dc" v-if="getNodeDC(focusedNode)">
+                <span class="dc-label">DC</span>
+                <span class="dc-value">{{ getNodeDC(focusedNode) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -411,9 +447,36 @@ function formatDate(timestamp: number): string {
             <span class="focused-label">Selected:</span>
             <span class="focused-name">{{ focusedNode.name }}</span>
           </div>
-          <div class="focused-dc" v-if="getNodeDC(focusedNode)">
-            <span class="dc-label">DC</span>
-            <span class="dc-value">{{ getNodeDC(focusedNode) }}</span>
+          <div class="focused-controls">
+            <button
+              class="focused-visibility-btn"
+              :class="{ 'is-hidden': focusedNode.hidden }"
+              :title="focusedNode.hidden ? 'Show to players' : 'Hide from players'"
+              @click="store.toggleNodeHidden(focusedNode!.id)"
+            >
+              <svg v-if="!focusedNode.hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+            <select
+              class="focused-state-select"
+              :class="`select-${focusedNode.state}`"
+              :value="focusedNode.state"
+              @change="handleFocusedStateChange(($event.target as HTMLSelectElement).value as NodeState)"
+            >
+              <option v-for="s in nodeStates" :key="s" :value="s">
+                {{ s.charAt(0).toUpperCase() + s.slice(1) }}
+              </option>
+            </select>
+            <div class="focused-dc" v-if="getNodeDC(focusedNode)">
+              <span class="dc-label">DC</span>
+              <span class="dc-value">{{ getNodeDC(focusedNode) }}</span>
+            </div>
           </div>
         </div>
       </main>
@@ -648,6 +711,76 @@ function formatDate(timestamp: number): string {
   .focused-dc .dc-value {
     font-size: var(--text-base);
   }
+}
+
+.focused-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.focused-visibility-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.focused-visibility-btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-hover);
+}
+
+.focused-visibility-btn.is-hidden {
+  color: var(--color-text-muted);
+}
+
+.focused-state-select {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+@media (min-width: 1024px) {
+  .focused-state-select {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--text-xs);
+  }
+}
+
+.focused-state-select::-ms-expand {
+  display: none;
+}
+
+.focused-state-select.select-breached {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.focused-state-select.select-alarmed {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.focused-state-select.select-active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* Mobile collapsible sections */
