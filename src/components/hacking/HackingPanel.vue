@@ -67,6 +67,7 @@ onUnmounted(() => {
 })
 
 function stopSync() {
+  console.log('[HackingPanel] Stop button clicked')
   store.disableRemoteSync()
 }
 
@@ -392,7 +393,14 @@ function formatDate(timestamp: number): string {
               <div class="session-status">
                 <span class="sync-indicator" :class="'sync-' + syncState"></span>
                 <span class="session-label">LIVE</span>
-                <button class="btn btn-danger btn-sm" title="Stop sharing" @click="stopSync">■</button>
+                <button
+                  type="button"
+                  class="btn-danger btn-sm session-stop-btn"
+                  title="Stop sharing — disconnect player view sync"
+                  @click.stop="stopSync"
+                >
+                  ■ Stop
+                </button>
               </div>
             </div>
           </div>
@@ -1129,6 +1137,16 @@ function formatDate(timestamp: number): string {
   font-weight: 700;
   color: var(--color-success);
   letter-spacing: 0.05em;
+}
+
+.session-stop-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
 }
 
 .sync-indicator {

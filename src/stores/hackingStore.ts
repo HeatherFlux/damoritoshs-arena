@@ -2,7 +2,7 @@ import { reactive, watch } from 'vue'
 import type { Computer, NodeState, HackingEffect, HackingEffectType, SavedHackingEncounter, AccessPoint } from '../types/hacking'
 import { createHackingEffect, createSampleComputer } from '../types/hacking'
 import { generateRandomComputer, type GeneratorOptions } from '../utils/hackingGenerator'
-import { getSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
+import { getSyncTransport, resetSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMessage, type ConnectionState } from '../utils/syncTransport'
 
 // Generate or retrieve session ID for channel isolation
 function getSessionId(): string {
@@ -550,8 +550,11 @@ async function joinRemoteSession(sessionId: string): Promise<boolean> {
 
 // Disable remote sync
 function disableRemoteSync(): void {
+  console.log('[Hacking] disableRemoteSync called')
+  // Hacking uses a singleton transport — fully reset it so a future
+  // enableRemoteSync() gets a fresh instance with clean state.
   if (wsTransport) {
-    wsTransport.disconnect()
+    resetSyncTransport()
     wsTransport = null
   }
   state.isRemoteSyncEnabled = false
