@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { COMBAT_CONDITIONS, VALUED_CONDITIONS } from '../types/combat'
@@ -101,6 +101,24 @@ async function launchPlayerView() {
     setTimeout(() => { shareCopied.value = false }, 2500)
   }
 }
+
+function stopSync() {
+  combatStore.disableCombatRemoteSync()
+}
+
+// Clean up sync on browser close and on tab-switch unmount
+function handleBeforeUnload() {
+  combatStore.disableCombatRemoteSync()
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+  combatStore.disableCombatRemoteSync()
+})
 
 const hasCombat = computed(() => combatStore.state.combat !== null)
 
@@ -208,6 +226,14 @@ function importAnother() {
             title="Opens player view, copies share link, and starts sync if available"
           >
             {{ shareCopied ? 'Link Copied!' : 'Player View' }}
+          </button>
+          <button
+            v-if="combatStore.remoteSyncState.enabled"
+            class="btn-danger btn-xs lg:btn-sm"
+            @click="stopSync"
+            title="Stop sharing — disconnect player view sync"
+          >
+            ■ Stop
           </button>
           <button class="btn-danger btn-xs lg:btn-sm" @click="combatStore.endCombat()">
             End Combat

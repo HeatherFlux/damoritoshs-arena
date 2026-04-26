@@ -47,16 +47,28 @@ const syncAvailable = computed(() => isSyncAvailable())
 const syncEnabled = computed(() => store.state.isRemoteSyncEnabled)
 const syncState = computed(() => store.state.wsConnectionState)
 
+function handleBeforeUnload() {
+  if (store.state.isRemoteSyncEnabled) {
+    store.disableRemoteSync()
+  }
+}
+
 onMounted(() => {
   store.setGMView(true)
+  window.addEventListener('beforeunload', handleBeforeUnload)
   console.log('[HackingPanel] Mounted. Sync available:', syncAvailable.value, 'Server:', getSyncServerUrl())
 })
 
 onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
   if (store.state.isRemoteSyncEnabled) {
     store.disableRemoteSync()
   }
 })
+
+function stopSync() {
+  store.disableRemoteSync()
+}
 
 async function openPlayerView() {
   syncLoading.value = true
@@ -380,6 +392,7 @@ function formatDate(timestamp: number): string {
               <div class="session-status">
                 <span class="sync-indicator" :class="'sync-' + syncState"></span>
                 <span class="session-label">LIVE</span>
+                <button class="btn btn-danger btn-sm" title="Stop sharing" @click="stopSync">■</button>
               </div>
             </div>
           </div>

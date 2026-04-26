@@ -62,9 +62,22 @@ onMounted(() => {
   }
 })
 
+function handleBeforeUnload() {
+  store.disableRemoteSync()
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload)
+})
+
 onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
   store.disableRemoteSync()
 })
+
+function stopSync() {
+  store.disableRemoteSync()
+}
 
 // ============ Scene Setup ============
 
@@ -677,6 +690,14 @@ defineExpose({
                 @click="openPlayerView"
               >
                 {{ syncEnabling ? 'Connecting...' : copySuccess ? 'Link Copied!' : 'Player View' }}
+              </button>
+              <button
+                v-if="store.state.isRemoteSyncEnabled"
+                class="btn btn-danger btn-sm"
+                title="Stop sharing — disconnect player view sync"
+                @click="stopSync"
+              >
+                ■ Stop
               </button>
               <button class="btn btn-danger btn-sm" @click="endScene">End Scene</button>
             </div>
