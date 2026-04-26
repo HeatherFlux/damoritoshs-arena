@@ -107,6 +107,14 @@ function initChannel() {
             }
           }
           break
+        case 'node-hidden':
+          if (state.computer) {
+            const node = state.computer.accessPoints.find(ap => ap.id === payload.nodeId)
+            if (node) {
+              node.hidden = payload.hidden
+            }
+          }
+          break
         case 'focus':
           state.focusedNodeId = payload.nodeId
           break
@@ -168,6 +176,14 @@ function handleRemoteMessage(message: SyncMessage) {
       if (state.computer) {
         const node = state.computer.accessPoints.find(ap => ap.id === np.nodeId)
         if (node) node.state = np.state
+      }
+      break
+    }
+    case 'node-hidden': {
+      const np = payload as { nodeId: string; hidden: boolean }
+      if (state.computer) {
+        const node = state.computer.accessPoints.find(ap => ap.id === np.nodeId)
+        if (node) node.hidden = np.hidden
       }
       break
     }
@@ -276,7 +292,7 @@ function toggleNodeHidden(nodeId: string) {
   const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
   if (node) {
     node.hidden = !node.hidden
-    broadcast('computer', state.computer)
+    broadcast('node-hidden', { nodeId, hidden: !!node.hidden })
     saveToLocalStorage()
   }
 }
