@@ -58,7 +58,7 @@ function parseActions(actionStr) {
  * markdown link, e.g. `**[Shield Block](/url)**` → `**Shield Block**`. Without
  * this, per-ability regexes that look for `**Name**` literal miss those entries.
  */
-function normalizeBoldedLinks(markdown) {
+export function normalizeBoldedLinks(markdown) {
   return markdown.replace(
     /\*\*\[([^\]]+)\]\([^)]+\)\*\*/g,
     '**$1**'
@@ -98,9 +98,11 @@ const STOCK_ABILITIES = {
   },
 };
 
-function lookupStockAbility(name) {
+export function lookupStockAbility(name) {
   return STOCK_ABILITIES[name.toLowerCase().trim()] || null;
 }
+
+export { STOCK_ABILITIES };
 
 function extractTraits(traitStr) {
   const traits = [];
@@ -127,7 +129,7 @@ function extractTraits(traitStr) {
   return traits;
 }
 
-function parseAttacksFromMarkdown(markdown) {
+export function parseAttacksFromMarkdown(markdown) {
   const attacks = [];
   if (!markdown) return attacks;
 
@@ -286,7 +288,7 @@ function filterAbilityNames(names) {
   });
 }
 
-function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, attacks = []) {
+export function parseAbilitiesFromMarkdown(markdown, abilityNames, creatureName, attacks = []) {
   const abilities = [];
   if (!markdown) return abilities;
 
@@ -491,7 +493,11 @@ function adaptAoNCreature(hit) {
   };
 }
 
-// Main
+// Main — only run when this file is invoked directly, not when imported by tests
+const isMainScript = import.meta.url === `file://${process.argv[1]}`
+  || (process.argv[1] || '').endsWith('fetch-aon.mjs');
+
+if (isMainScript) {
 const raw = JSON.parse(readFileSync('/tmp/aon_creatures_raw.json', 'utf-8'));
 const hits = raw.hits?.hits || [];
 
@@ -532,3 +538,4 @@ creatures.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 
 writeFileSync('./src/data/creatures.json', JSON.stringify(creatures, null, 2));
 console.log('Saved', creatures.length, 'creatures to src/data/creatures.json');
+}
