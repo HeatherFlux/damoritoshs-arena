@@ -7,6 +7,7 @@ import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
+import { buildSessionBundle, serializeBundle, defaultBundleFilename } from '../utils/sessionBundleExporter'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
 const encounterStore = useEncounterStore()
@@ -31,6 +32,29 @@ function openSchemaViewer(schemaId: string) {
 
 function openBundleImporter() {
   showBundleImporter.value = true
+}
+
+function exportSessionBundle() {
+  try {
+    const partyName = partyStore.activeParty.value?.name
+    const baseName = defaultBundleFilename(partyName)
+    const bundle = buildSessionBundle(
+      { encounterStore, partyStore, hackingStore, starshipStore },
+      { name: baseName }
+    )
+    const { content, mimeType, extension } = serializeBundle(bundle, 'yaml')
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${baseName}.${extension}`
+    a.click()
+    URL.revokeObjectURL(url)
+    setImportResult('session-bundle', 'success', 'Exported')
+  } catch (e) {
+    console.error('Failed to export session bundle:', e)
+    setImportResult('session-bundle', 'error', 'Export failed')
+  }
 }
 
 const themeList = Object.entries(themes) as [ThemeId, typeof themes[ThemeId]][]
@@ -476,6 +500,13 @@ function handleFileSelect(event: Event, row: DataRow) {
                   <span class="data-row-count">YAML/JSON</span>
                 </div>
                 <div class="data-row-actions">
+                  <span
+                    v-if="getImportStatus('session-bundle').status !== 'idle'"
+                    class="text-xs mr-1"
+                    :class="getImportStatus('session-bundle').status === 'success' ? 'text-green-400' : 'text-red-400'"
+                  >
+                    {{ getImportStatus('session-bundle').message }}
+                  </span>
                   <button
                     type="button"
                     class="data-btn"
@@ -483,6 +514,14 @@ function handleFileSelect(event: Event, row: DataRow) {
                     @click="openSchemaViewer('session-bundle')"
                   >
                     { }
+                  </button>
+                  <button
+                    type="button"
+                    class="data-btn"
+                    title="Export bundle (YAML) — everything you've prepped: encounters, party, custom creatures/hazards, hacking, starship"
+                    @click="exportSessionBundle"
+                  >
+                    Export
                   </button>
                   <button
                     type="button"
