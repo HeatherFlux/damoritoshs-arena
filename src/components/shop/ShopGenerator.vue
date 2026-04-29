@@ -55,6 +55,12 @@ function doReroll() {
   doGenerate()
 }
 
+function doSave() {
+  // If we already loaded a saved shop, treat the button as a no-op to prevent duplicate saves.
+  if (store.state.activeShopId) return
+  store.saveCurrentShop()
+}
+
 async function doCopy() {
   if (!store.state.currentShop) return
   const text = store.shopToText(store.state.currentShop)
@@ -97,8 +103,16 @@ async function copyShopkeeper() {
   }
 }
 
-// Auto-generate on mount
-doGenerate()
+// Auto-generate on mount only if no shop is currently loaded.
+// Preserves a loaded saved-shop across tab switches.
+if (!store.state.currentShop) {
+  doGenerate()
+} else {
+  // Sync the form fields with the loaded shop's settings so reroll/regen are sensible
+  partyLevel.value = store.state.partyLevel
+  shopType.value = store.state.shopType
+  settlement.value = store.state.settlement
+}
 </script>
 
 <template>
@@ -155,6 +169,13 @@ doGenerate()
           @click="doReroll"
         >
           Re-roll
+        </button>
+        <button
+          class="btn btn-secondary"
+          :disabled="!store.state.currentShop"
+          @click="doSave"
+        >
+          {{ store.state.activeShopId ? 'Saved' : 'Save Shop' }}
         </button>
         <button
           class="btn btn-secondary"

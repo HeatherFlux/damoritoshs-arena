@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import itemsData from '../data/items.json'
 import type {
   ShopItem,
@@ -6,9 +6,37 @@ import type {
   SettlementSize,
   SettlementConfig,
   GeneratedShop,
+  SavedShop,
 } from '../types/shop'
 import type { GeneratedNPC } from '../types/npc'
 import { generateShopkeeper, npcToText } from '../utils/npcGenerator'
+
+const STORAGE_KEY = 'sf2e-shops'
+
+function generateShopId(): string {
+  return `shop-${Math.random().toString(36).substring(2, 10)}`
+}
+
+function loadShopsFromStorage(): SavedShop[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved) as SavedShop[]
+      if (Array.isArray(parsed)) return parsed
+    }
+  } catch (e) {
+    console.error('Failed to load saved shops:', e)
+  }
+  return []
+}
+
+function saveShopsToStorage(shops: SavedShop[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(shops))
+  } catch (e) {
+    console.error('Failed to save shops:', e)
+  }
+}
 
 // ===== SHOP NAME GENERATION =====
 const SHOP_PREFIXES: Record<ShopType, string[]> = {
@@ -138,7 +166,18 @@ const state = reactive({
   customName: '',
   // Sub-tab
   activeView: 'generator' as 'generator' | 'search',
+  // Persisted saved shops
+  savedShops: loadShopsFromStorage() as SavedShop[],
+  // Tracks which saved shop is currently loaded into currentShop (if any)
+  activeShopId: null as string | null,
 })
+
+// Auto-save savedShops to localStorage on any change
+watch(
+  () => state.savedShops,
+  (shops) => saveShopsToStorage(shops),
+  { deep: true }
+)
 
 const searchResults = computed(() => {
   const query = state.searchQuery.trim().toLowerCase()
@@ -207,6 +246,7 @@ function generateShop(): GeneratedShop {
   }
 
   state.currentShop = shop
+  state.activeShopId = null
   generateNewShopkeeper()
   return shop
 }
@@ -234,6 +274,85 @@ function shopToText(shop: GeneratedShop): string {
   return text
 }
 
+// ===== SAVED SHOPS =====
+
+function saveCurrentShop(name?: string): SavedShop | null {
+  if (!state.currentShop) return null
+
+  // Deep clone so editing the active shop later doesn't mutate the saved snapshot
+  const cloned: SavedShop = {
+    id: generateShopId(),
+    name: (name?.trim() || state.currentShop.name).slice(0, 100),
+    shop: JSON.parse(JSON.stringify(state.currentShop)),
+    shopkeeper: state.currentShopkeeper
+      ? JSON.parse(JSON.stringify(state.currentShopkeeper))
+      : null,
+    savedAt: Date.now(),
+  }
+
+  state.savedShops.push(cloned)
+  state.activeShopId = cloned.id
+  return cloned
+}
+
+function loadShop(shopId: string): SavedShop | null {
+  const saved = state.savedShops.find(s => s.id === shopId)
+  if (!saved) return null
+
+  // Deep clone on load too so edits to currentShop don't bleed into the saved entry
+  state.currentShop = JSON.parse(JSON.stringify(saved.shop))
+  state.currentShopkeeper = saved.shopkeeper ? JSON.parse(JSON.stringify(saved.shopkeeper)) : null
+  state.activeShopId = saved.id
+  return saved
+}
+
+function deleteShop(shopId: string) {
+  const idx = state.savedShops.findIndex(s => s.id === shopId)
+  if (idx !== -1) {
+    state.savedShops.splice(idx, 1)
+    if (state.activeShopId === shopId) {
+      state.activeShopId = null
+    }
+  }
+}
+
+function renameShop(shopId: string, name: string) {
+  const saved = state.savedShops.find(s => s.id === shopId)
+  if (saved) {
+    saved.name = name.trim().slice(0, 100) || saved.name
+  }
+}
+
+function clearAllShops() {
+  state.savedShops.splice(0, state.savedShops.length)
+  state.activeShopId = null
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+function exportShops(): string {
+  return JSON.stringify(state.savedShops, null, 2)
+}
+
+function importShops(json: string): number {
+  const parsed = JSON.parse(json)
+  if (!Array.isArray(parsed)) throw new Error('Invalid format: expected SavedShop[]')
+
+  let imported = 0
+  for (const entry of parsed as SavedShop[]) {
+    if (!entry || typeof entry !== 'object' || !entry.shop || !entry.shop.inventory) {
+      continue
+    }
+    // Avoid id collisions; assign a fresh id on every import
+    state.savedShops.push({
+      ...entry,
+      id: generateShopId(),
+      savedAt: entry.savedAt ?? Date.now(),
+    })
+    imported++
+  }
+  return imported
+}
+
 export function useShopStore() {
   return {
     state,
@@ -242,5 +361,13 @@ export function useShopStore() {
     generateShop,
     generateNewShopkeeper,
     shopToText,
+    // Saved shops
+    saveCurrentShop,
+    loadShop,
+    deleteShop,
+    renameShop,
+    clearAllShops,
+    exportShops,
+    importShops,
   }
 }

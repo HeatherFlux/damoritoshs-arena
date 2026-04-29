@@ -3,6 +3,7 @@ import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
+import { useShopStore } from '../stores/shopStore'
 import {
   buildSessionBundle,
   serializeBundle,
@@ -16,6 +17,7 @@ import {
 import type { Creature } from '../types/creature'
 import type { SavedHackingEncounter } from '../types/hacking'
 import type { SavedScene } from '../types/starship'
+import type { SavedShop } from '../types/shop'
 import { createEmptySavedScene, createDefaultStarship } from '../types/starship'
 
 function makeCreature(overrides: Partial<Creature> = {}): Creature {
@@ -90,11 +92,65 @@ function makeSavedScene(overrides: Partial<SavedScene> = {}): SavedScene {
   }
 }
 
+function makeSavedShop(overrides: Partial<SavedShop> = {}): SavedShop {
+  return {
+    id: 'shop-1',
+    name: 'Test Bazaar',
+    savedAt: Date.now(),
+    shop: {
+      name: 'Test Bazaar',
+      shopType: 'general',
+      settlement: 'City',
+      partyLevel: 5,
+      levelRange: 'Lvl 0-7',
+      itemCount: 1,
+      inventory: {
+        equipment: [
+          {
+            id: 'item-1',
+            name: 'Hacking Kit',
+            level: 1,
+            price: 35,
+            priceRaw: '35 cr',
+            category: 'equipment',
+            traits: [],
+            rarity: 'common',
+            bulk: 'L',
+            source: 'Test',
+            summary: 'A basic hacking kit',
+            url: null,
+            damage: null,
+            range: null,
+            hands: null,
+            group: null,
+            weaponCategory: null,
+            weaponType: null,
+            ac: null,
+            dexCap: null,
+            checkPenalty: null,
+            speedPenalty: null,
+            armorCategory: null,
+            hardness: null,
+            hp: null,
+            itemCategory: 'tool',
+            itemSubcategory: null,
+            grade: 'base',
+            baseName: 'Hacking Kit',
+          },
+        ],
+      },
+    },
+    shopkeeper: null,
+    ...overrides,
+  }
+}
+
 function clearAll(
   encounterStore: ReturnType<typeof useEncounterStore>,
   partyStore: ReturnType<typeof usePartyStore>,
   hackingStore: ReturnType<typeof useHackingStore>,
   starshipStore: ReturnType<typeof useStarshipStore>,
+  shopStore: ReturnType<typeof useShopStore>,
 ) {
   while (partyStore.state.parties.length > 0) {
     partyStore.deleteParty(partyStore.state.parties[0].id)
@@ -104,6 +160,7 @@ function clearAll(
   encounterStore.clearCustomHazards()
   hackingStore.state.savedEncounters.splice(0, hackingStore.state.savedEncounters.length)
   starshipStore.state.savedScenes.splice(0, starshipStore.state.savedScenes.length)
+  shopStore.clearAllShops()
 }
 
 describe('sessionBundleExporter', () => {
@@ -111,19 +168,21 @@ describe('sessionBundleExporter', () => {
   let partyStore: ReturnType<typeof usePartyStore>
   let hackingStore: ReturnType<typeof useHackingStore>
   let starshipStore: ReturnType<typeof useStarshipStore>
+  let shopStore: ReturnType<typeof useShopStore>
 
   beforeEach(() => {
     encounterStore = useEncounterStore()
     partyStore = usePartyStore()
     hackingStore = useHackingStore()
     starshipStore = useStarshipStore()
-    clearAll(encounterStore, partyStore, hackingStore, starshipStore)
+    shopStore = useShopStore()
+    clearAll(encounterStore, partyStore, hackingStore, starshipStore, shopStore)
   })
 
   describe('buildSessionBundle', () => {
     it('produces a minimal bundle when stores are empty', () => {
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'Empty' }
       )
       expect(bundle.name).toBe('Empty')
@@ -140,7 +199,7 @@ describe('sessionBundleExporter', () => {
       partyStore.addPlayer({ name: 'Bob', maxHP: 40, ac: 17, level: 5, class: 'Mystic' })
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -161,7 +220,7 @@ describe('sessionBundleExporter', () => {
       })
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -177,7 +236,7 @@ describe('sessionBundleExporter', () => {
       encounterStore.addCustomCreature(makeCreature({ id: 'custom-test-2', name: 'Other' }))
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -195,7 +254,7 @@ describe('sessionBundleExporter', () => {
       encounterStore.addCreatureToEncounter(creature, 'elite')
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -214,7 +273,7 @@ describe('sessionBundleExporter', () => {
       hackingStore.state.savedEncounters.push(makeHackingEncounter({ name: 'Server Heist' }))
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -227,7 +286,7 @@ describe('sessionBundleExporter', () => {
       starshipStore.state.savedScenes.push(makeSavedScene({ name: 'Asteroid Run' }))
 
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'S' }
       )
 
@@ -235,12 +294,30 @@ describe('sessionBundleExporter', () => {
       expect(bundle.starship![0].name).toBe('Asteroid Run')
       expect(bundle.starship![0].starship?.name).toBe('The Damoritosh')
     })
+
+    it('exports saved shops as full snapshots, not just generation params', () => {
+      shopStore.state.savedShops.push(makeSavedShop({ name: 'The Pact Worlds Bazaar' }))
+
+      const bundle = buildSessionBundle(
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
+        { name: 'S' }
+      )
+
+      expect(bundle.shops).toHaveLength(1)
+      expect(bundle.shops![0].name).toBe('The Pact Worlds Bazaar')
+      // The full inventory should be included so import doesn't have to re-roll
+      expect(bundle.shops![0].shop?.inventory.equipment?.[0].name).toBe('Hacking Kit')
+      expect(bundle.shops![0].shop?.itemCount).toBe(1)
+      // Legacy params-only fields should NOT be present on a fresh export
+      expect(bundle.shops![0].shopType).toBeUndefined()
+      expect(bundle.shops![0].partyLevel).toBeUndefined()
+    })
   })
 
   describe('serializeBundle', () => {
     it('produces parseable YAML by default', () => {
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'YAML Test', description: 'desc' }
       )
       const { content, mimeType, extension } = serializeBundle(bundle, 'yaml')
@@ -253,7 +330,7 @@ describe('sessionBundleExporter', () => {
 
     it('produces parseable JSON', () => {
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'JSON Test' }
       )
       const { content, mimeType, extension } = serializeBundle(bundle, 'json')
@@ -273,6 +350,71 @@ describe('sessionBundleExporter', () => {
     it('slugifies the active party name', () => {
       const name = defaultBundleFilename("Damoritosh's Crew")
       expect(name).toMatch(/^damoritosh-s-crew-\d{4}-\d{2}-\d{2}$/)
+    })
+  })
+
+  describe('shop import compat', () => {
+    it('drops legacy params-only shop entries with a warning', () => {
+      const bundle = parseSessionBundle(JSON.stringify({
+        name: 'Old Bundle',
+        shops: [
+          { name: 'Legacy Shop', shopType: 'general', settlement: 'city', partyLevel: 5 },
+        ],
+      }))
+
+      const importStores: ImportStores = {
+        encounterStore: {
+          state: encounterStore.state,
+          importCustomCreatures: encounterStore.importCustomCreatures,
+          importCustomHazards: encounterStore.importCustomHazards,
+          importEncounters: encounterStore.importEncounters,
+        },
+        hackingStore: { state: hackingStore.state },
+        starshipStore: { importScenes: starshipStore.importScenes },
+        partyStore: { importParties: partyStore.importParties },
+        shopStore: { state: shopStore.state },
+      }
+
+      const result = importSessionBundle(bundle, importStores)
+
+      expect(result.shops).toBe(0)
+      expect(shopStore.state.savedShops).toHaveLength(0)
+      expect(result.warnings.some(w => w.section === 'shops' && w.message.includes('legacy'))).toBe(true)
+    })
+
+    it('imports shops with full snapshots into savedShops', () => {
+      const snapshot = makeSavedShop({ name: 'Imported Bazaar' })
+      const bundle = parseSessionBundle(JSON.stringify({
+        name: 'New Bundle',
+        shops: [
+          {
+            name: snapshot.name,
+            shop: snapshot.shop,
+            shopkeeper: snapshot.shopkeeper,
+            savedAt: snapshot.savedAt,
+          },
+        ],
+      }))
+
+      const importStores: ImportStores = {
+        encounterStore: {
+          state: encounterStore.state,
+          importCustomCreatures: encounterStore.importCustomCreatures,
+          importCustomHazards: encounterStore.importCustomHazards,
+          importEncounters: encounterStore.importEncounters,
+        },
+        hackingStore: { state: hackingStore.state },
+        starshipStore: { importScenes: starshipStore.importScenes },
+        partyStore: { importParties: partyStore.importParties },
+        shopStore: { state: shopStore.state },
+      }
+
+      const result = importSessionBundle(bundle, importStores)
+
+      expect(result.shops).toBe(1)
+      expect(shopStore.state.savedShops).toHaveLength(1)
+      expect(shopStore.state.savedShops[0].name).toBe('Imported Bazaar')
+      expect(shopStore.state.savedShops[0].shop.inventory.equipment?.[0].name).toBe('Hacking Kit')
     })
   })
 
@@ -299,20 +441,26 @@ describe('sessionBundleExporter', () => {
         name: 'Asteroid Run',
       }))
 
+      shopStore.state.savedShops.push(makeSavedShop({
+        id: 'shop-rt',
+        name: 'Round Trip Bazaar',
+      }))
+
       // Export → YAML → re-parse
       const bundle = buildSessionBundle(
-        { encounterStore, partyStore, hackingStore, starshipStore },
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
         { name: 'Round Trip' }
       )
       const yamlText = serializeBundle(bundle, 'yaml').content
       const reparsed = parseSessionBundle(yamlText)
 
       // Wipe stores
-      clearAll(encounterStore, partyStore, hackingStore, starshipStore)
+      clearAll(encounterStore, partyStore, hackingStore, starshipStore, shopStore)
       expect(partyStore.state.parties).toHaveLength(0)
       expect(encounterStore.state.encounters).toHaveLength(0)
       expect(hackingStore.state.savedEncounters).toHaveLength(0)
       expect(starshipStore.state.savedScenes).toHaveLength(0)
+      expect(shopStore.state.savedShops).toHaveLength(0)
 
       // Re-import
       const importStores: ImportStores = {
@@ -332,8 +480,7 @@ describe('sessionBundleExporter', () => {
           importParties: partyStore.importParties,
         },
         shopStore: {
-          state: { partyLevel: 1, shopType: 'general', settlement: 'city', customName: '' },
-          generateShop: () => ({}),
+          state: shopStore.state,
         },
       }
       const result = importSessionBundle(reparsed, importStores)
@@ -357,6 +504,10 @@ describe('sessionBundleExporter', () => {
 
       expect(result.starshipScenes).toBe(1)
       expect(starshipStore.state.savedScenes[0].name).toBe('Asteroid Run')
+
+      expect(result.shops).toBe(1)
+      expect(shopStore.state.savedShops[0].name).toBe('Round Trip Bazaar')
+      expect(shopStore.state.savedShops[0].shop.inventory.equipment?.[0].name).toBe('Hacking Kit')
     })
   })
 })

@@ -17,6 +17,7 @@ import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter } from '../types/hacking'
 import type { SavedScene } from '../types/starship'
 import type { Party } from '../types/party'
+import type { SavedShop } from '../types/shop'
 import type {
   SessionBundle,
   BundleParty,
@@ -27,6 +28,7 @@ import type {
   BundleHacking,
   BundleStarship,
   BundleStarshipThreat,
+  BundleShop,
 } from './sessionBundleImporter'
 
 // ============ Stores Interface ============
@@ -45,6 +47,9 @@ export interface ExportStores {
   }
   starshipStore: {
     state: { savedScenes: SavedScene[] }
+  }
+  shopStore: {
+    state: { savedShops: SavedShop[] }
   }
 }
 
@@ -110,7 +115,22 @@ export function buildSessionBundle(
     bundle.starship = scenes.map(mapStarshipScene)
   }
 
+  // ---- Shops (full snapshots, not just generation params) ----
+  const shops = stores.shopStore.state.savedShops
+  if (shops.length > 0) {
+    bundle.shops = shops.map(mapShop)
+  }
+
   return bundle
+}
+
+function mapShop(saved: SavedShop): BundleShop {
+  return {
+    name: saved.name,
+    shop: saved.shop,
+    shopkeeper: saved.shopkeeper,
+    savedAt: saved.savedAt,
+  }
 }
 
 // ============ Serialize ============

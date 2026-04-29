@@ -1,3 +1,5 @@
+import type { GeneratedNPC } from './npc'
+
 export interface ShopItem {
   id: string
   name: string
@@ -87,4 +89,15 @@ export interface ShopGeneratorOptions {
   shopType: ShopType
   settlement: SettlementSize
   customName?: string | null
+}
+
+// A persisted shop snapshot, including the rolled inventory and shopkeeper.
+// Distinct from GeneratedShop so a saved shop survives identification and
+// can be loaded back without re-rolling random items.
+export interface SavedShop {
+  id: string
+  name: string
+  shop: GeneratedShop
+  shopkeeper: GeneratedNPC | null
+  savedAt: number
 }

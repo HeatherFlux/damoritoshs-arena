@@ -48,6 +48,12 @@
       "exampleUrl": "/schemas/examples/starship-scenes.example.json"
     },
     {
+      "id": "shops",
+      "name": "Shops",
+      "description": "Saved shop snapshots with rolled inventory and shopkeeper",
+      "schemaUrl": "/schemas/shops.schema.json"
+    },
+    {
       "id": "session-bundle",
       "name": "Session Bundle",
       "description": "Unified YAML/JSON bundle containing all data for a game session",

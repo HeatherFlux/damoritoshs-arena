@@ -11,7 +11,7 @@ import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter, Computer, AccessPoint } from '../types/hacking'
 import type { SavedScene, StarshipThreat } from '../types/starship'
 import { createDefaultStarship, createDefaultThreat, createEmptySavedScene } from '../types/starship'
-import type { ShopType, SettlementSize } from '../types/shop'
+import type { ShopType, SettlementSize, SavedShop } from '../types/shop'
 
 // ============ Types ============
 
@@ -102,8 +102,22 @@ export interface BundleStarship {
   roleDescriptions?: Record<string, string>
 }
 
+/**
+ * A bundled shop entry. Two shapes are accepted:
+ *
+ *  1. Snapshot (preferred): includes a full `shop` object with rolled inventory
+ *     and an optional `shopkeeper`. Round-trips cleanly via shopStore.savedShops.
+ *  2. Legacy params-only: `{ name, shopType, settlement, partyLevel }`. The
+ *     importer drops these with a warning since they would re-roll different
+ *     items than the GM prepped.
+ */
 export interface BundleShop {
   name: string
+  // Snapshot fields
+  shop?: SavedShop['shop']
+  shopkeeper?: SavedShop['shopkeeper']
+  savedAt?: number
+  // Legacy generation-params fields (dropped on import)
   shopType?: ShopType
   settlement?: SettlementSize
   partyLevel?: number
@@ -261,12 +275,8 @@ export interface ImportStores {
   }
   shopStore: {
     state: {
-      partyLevel: number
-      shopType: ShopType
-      settlement: SettlementSize
-      customName: string
+      savedShops: SavedShop[]
     }
-    generateShop: () => object
   }
 }
 
@@ -572,20 +582,33 @@ export function importSessionBundle(
     }
   }
 
-  // 7. Import shops (generate inventory using shop store)
+  // 7. Import shops as saved snapshots
   if (bundle.shops && bundle.shops.length > 0) {
     for (const shop of bundle.shops) {
       try {
-        stores.shopStore.state.partyLevel = shop.partyLevel ?? bundle.partyLevel ?? 5
-        stores.shopStore.state.shopType = shop.shopType ?? 'general'
-        stores.shopStore.state.settlement = shop.settlement ?? 'city'
-        stores.shopStore.state.customName = shop.name
-        stores.shopStore.generateShop()
+        if (!shop.shop || !shop.shop.inventory) {
+          // Legacy params-only entry — re-rolling would produce different items
+          // than the GM prepped, so drop with a clear warning.
+          result.warnings.push({
+            section: 'shops',
+            message: `Shop "${shop.name}" is in the legacy params-only format and was skipped. Re-export the bundle from a newer version of the app to include the rolled inventory.`,
+          })
+          continue
+        }
+
+        const saved: SavedShop = {
+          id: `bundle-${generateId()}`,
+          name: shop.name,
+          shop: shop.shop,
+          shopkeeper: shop.shopkeeper ?? null,
+          savedAt: shop.savedAt ?? Date.now(),
+        }
+        stores.shopStore.state.savedShops.push(saved)
         result.shops++
       } catch (e) {
         result.warnings.push({
           section: 'shops',
-          message: `Failed to generate shop "${shop.name}": ${(e as Error).message}`,
+          message: `Failed to import shop "${shop.name}": ${(e as Error).message}`,
         })
       }
     }

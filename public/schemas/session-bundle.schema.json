@@ -190,23 +190,38 @@
     },
     "shops": {
       "type": "array",
-      "description": "Shop configurations to generate inventory for",
+      "description": "Saved shop snapshots, including rolled inventory and shopkeeper. Items persist as full objects so the same inventory comes back on import (no re-rolling). The legacy params-only shape ({name, shopType, settlement, partyLevel}) is still accepted for backward compatibility but will be skipped with a warning by the importer.",
       "items": {
         "type": "object",
         "required": ["name"],
         "properties": {
           "name": { "type": "string" },
+          "shop": {
+            "type": "object",
+            "description": "Full GeneratedShop snapshot — see /schemas/shops.schema.json for the complete shape (inventory, shopkeeper, levelRange, itemCount).",
+            "additionalProperties": true
+          },
+          "shopkeeper": {
+            "oneOf": [
+              { "type": "null" },
+              { "type": "object", "additionalProperties": true }
+            ]
+          },
+          "savedAt": { "type": "number" },
           "shopType": {
             "type": "string",
             "enum": ["general", "weapons", "armor", "tech", "medical", "grenades", "magic", "blackmarket"],
-            "default": "general"
+            "description": "Legacy: dropped on import. Present in old bundles only."
           },
           "settlement": {
             "type": "string",
             "enum": ["outpost", "village", "city", "metropolis", "megacity"],
-            "default": "city"
+            "description": "Legacy: dropped on import. Present in old bundles only."
           },
-          "partyLevel": { "type": "integer" }
+          "partyLevel": {
+            "type": "integer",
+            "description": "Legacy: dropped on import. Present in old bundles only."
+          }
         }
       }
     }

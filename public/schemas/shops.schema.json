@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/shops.schema.json",
+  "title": "Saved Shops",
+  "description": "Array of saved shop snapshots, including rolled inventory and shopkeeper NPC. Items are persisted as full objects so a saved shop survives import without re-rolling random inventory.",
+  "x-import-info": {
+    "storeMethod": "shopStore.importShops(json)",
+    "notes": "Each entry must contain a 'shop' object with an 'inventory' map. Imported shops are assigned fresh IDs to avoid collisions.",
+    "exampleFile": "/schemas/examples/shops.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/SavedShop"
+  },
+  "definitions": {
+    "SavedShop": {
+      "type": "object",
+      "required": ["id", "name", "shop", "savedAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "savedAt": { "type": "number" },
+        "shop": { "$ref": "#/definitions/GeneratedShop" },
+        "shopkeeper": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/Shopkeeper" }
+          ]
+        }
+      }
+    },
+    "GeneratedShop": {
+      "type": "object",
+      "required": ["name", "shopType", "settlement", "partyLevel", "levelRange", "itemCount", "inventory"],
+      "properties": {
+        "name": { "type": "string" },
+        "shopType": {
+          "type": "string",
+          "enum": ["general", "weapons", "armor", "tech", "medical", "grenades", "magic", "blackmarket"]
+        },
+        "settlement": { "type": "string", "description": "Human-readable settlement label, e.g. 'City' or 'Megacity / Space Station'" },
+        "partyLevel": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "levelRange": { "type": "string", "description": "e.g. 'Lvl 0-7'" },
+        "itemCount": { "type": "integer", "minimum": 0 },
+        "inventory": {
+          "type": "object",
+          "description": "Map keyed by category ('weapon', 'armor', 'shield', 'equipment') to ShopItem arrays.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ShopItem" }
+          }
+        }
+      }
+    },
+    "ShopItem": {
+      "type": "object",
+      "required": ["id", "name", "level", "category", "rarity", "grade", "baseName"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "integer" },
+        "price": { "type": ["integer", "null"] },
+        "priceRaw": { "type": ["string", "null"] },
+        "category": { "type": "string", "enum": ["weapon", "armor", "shield", "equipment"] },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "rarity": { "type": "string" },
+        "bulk": { "type": "string" },
+        "source": { "type": "string" },
+        "summary": { "type": "string" },
+        "url": { "type": ["string", "null"] },
+        "damage": { "type": ["string", "null"] },
+        "range": { "type": ["string", "null"] },
+        "hands": { "type": ["string", "null"] },
+        "group": { "type": ["string", "null"] },
+        "weaponCategory": { "type": ["string", "null"] },
+        "weaponType": { "type": ["string", "null"] },
+        "ac": { "type": ["integer", "null"] },
+        "dexCap": { "type": ["integer", "null"] },
+        "checkPenalty": { "type": ["string", "null"] },
+        "speedPenalty": { "type": ["string", "null"] },
+        "armorCategory": { "type": ["string", "null"] },
+        "hardness": { "type": ["integer", "null"] },
+        "hp": { "type": ["string", "null"] },
+        "itemCategory": { "type": ["string", "null"] },
+        "itemSubcategory": { "type": ["string", "null"] },
+        "grade": { "type": "string" },
+        "baseName": { "type": "string" }
+      }
+    },
+    "Shopkeeper": {
+      "type": "object",
+      "description": "Generated NPC tied to a shop. Shape mirrors GeneratedNPC.",
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string" },
+        "ancestry": { "type": "string" },
+        "personality": { "type": "string" },
+        "mannerism": { "type": "string" },
+        "appearance": { "type": "string" },
+        "background": { "type": "string" },
+        "secret": { "type": "string" }
+      }
+    }
+  }
+}

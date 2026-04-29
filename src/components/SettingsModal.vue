@@ -5,6 +5,7 @@ import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
+import { useShopStore } from '../stores/shopStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
 import { buildSessionBundle, serializeBundle, defaultBundleFilename } from '../utils/sessionBundleExporter'
@@ -15,6 +16,7 @@ const { getCreatureStats, importCustomCreatures, exportCustomCreatures, clearCus
 const partyStore = usePartyStore()
 const hackingStore = useHackingStore()
 const starshipStore = useStarshipStore()
+const shopStore = useShopStore()
 
 defineEmits<{
   (e: 'close'): void
@@ -39,7 +41,7 @@ function exportSessionBundle() {
     const partyName = partyStore.activeParty.value?.name
     const baseName = defaultBundleFilename(partyName)
     const bundle = buildSessionBundle(
-      { encounterStore, partyStore, hackingStore, starshipStore },
+      { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
       { name: baseName }
     )
     const { content, mimeType, extension } = serializeBundle(bundle, 'yaml')
@@ -124,6 +126,7 @@ const partyCount = computed(() => partyStore.state.parties.length)
 const encounterCount = computed(() => encounterStore.state.encounters.length)
 const hackingCount = computed(() => hackingStore.state.savedEncounters.length)
 const starshipCount = computed(() => starshipStore.state.savedScenes.length)
+const shopCount = computed(() => shopStore.state.savedShops.length)
 
 // Data row definitions
 interface DataRow {
@@ -240,6 +243,26 @@ const dataRows = computed<DataRow[]>(() => [
     },
     onExport: () => downloadJson(starshipStore.exportScenes(), 'starship-scenes.json'),
     exportFilename: 'starship-scenes.json',
+  },
+  {
+    key: 'shops',
+    label: 'Shops',
+    count: `${shopCount.value}`,
+    schemaId: 'shops',
+    schemaFile: 'shops.schema.json',
+    canExport: shopCount.value > 0,
+    canClear: shopCount.value > 0,
+    onImport: (json: string) => {
+      const n = shopStore.importShops(json)
+      setImportResult('shops', 'success', `+${n}`)
+    },
+    onExport: () => downloadJson(shopStore.exportShops(), 'shops.json'),
+    onClear: () => {
+      if (confirm('Clear all saved shops?')) {
+        shopStore.clearAllShops()
+      }
+    },
+    exportFilename: 'shops.json',
   },
 ])
 
