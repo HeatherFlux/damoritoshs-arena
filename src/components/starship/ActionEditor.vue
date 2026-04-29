@@ -18,15 +18,19 @@ const editState = reactive<StarshipAction>({
   ...JSON.parse(JSON.stringify(props.action))
 })
 
-// Sync changes back
+// Sync local edits back to the parent.
+// We intentionally do NOT deep-watch props.action: the parent reassigns
+// starshipActions[index] on every emit, which would trigger an
+// Object.assign back into editState (replacing nested arrays/objects with
+// fresh references) and ping-pong forever, freezing the tab. Instead, only
+// re-init when the editor is reused for a different action (id change).
 watch(editState, () => {
   emit('update', JSON.parse(JSON.stringify(editState)))
 }, { deep: true })
 
-// Watch for external prop changes
-watch(() => props.action, (newAction) => {
-  Object.assign(editState, JSON.parse(JSON.stringify(newAction)))
-}, { deep: true })
+watch(() => props.action.id, () => {
+  Object.assign(editState, JSON.parse(JSON.stringify(props.action)))
+})
 
 const actionCosts: { value: 1 | 2 | 3; label: string }[] = [
   { value: 1, label: '1 Action' },

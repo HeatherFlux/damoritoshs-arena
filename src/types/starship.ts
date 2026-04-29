@@ -353,28 +353,31 @@ export function createDefaultThreat(): StarshipThreat {
 
 // Create a new scene from saved template
 export function createSceneFromSaved(saved: SavedScene): StarshipScene {
+  // Deep clone first, then layer runtime fields on top. The previous
+  // implementation only spread one level deep, so e.g.
+  // scene.starshipActions[0].outcomes was the same object as
+  // saved.starshipActions[0].outcomes — runtime edits during play would
+  // bleed into the saved template.
+  const clone = JSON.parse(JSON.stringify(saved)) as SavedScene
   return {
-    ...saved,
+    ...clone,
     id: crypto.randomUUID(),
-    // Deep copy mutable state, reset current values to max
+    // Reset current values to max
     starship: {
-      ...saved.starship,
-      currentHP: saved.starship.maxHP,
-      currentShields: saved.starship.maxShields
+      ...clone.starship,
+      currentHP: clone.starship.maxHP,
+      currentShields: clone.starship.maxShields
     },
-    threats: saved.threats.map(t => ({
+    threats: clone.threats.map(t => ({
       ...t,
       currentHP: t.maxHP,
       currentShields: t.maxShields,
       isDefeated: false,
       routineActionsUsed: []
     })),
-    roles: [...saved.roles],
-    availableRoles: [...saved.availableRoles],
-    starshipActions: [...saved.starshipActions],
-    partySize: saved.partySize ?? 4,
-    additionalObjectives: [...(saved.additionalObjectives ?? [])],
-    roleDescriptions: { ...(saved.roleDescriptions ?? {}) },
+    partySize: clone.partySize ?? 4,
+    additionalObjectives: clone.additionalObjectives ?? [],
+    roleDescriptions: clone.roleDescriptions ?? {},
     // Initialize runtime state
     currentRound: 1,
     currentVP: 0,

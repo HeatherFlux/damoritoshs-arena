@@ -169,11 +169,16 @@ function handleSyncMessage(message: StarshipSyncMessage) {
 // ============ Scene Management ============
 
 function saveScene(scene?: Partial<SavedScene>): SavedScene {
-  const newScene: SavedScene = {
+  // Deep clone the input so the saved entry is fully decoupled from the
+  // caller's reference. Without this, editing activeSetup after a save
+  // would silently mutate state.savedScenes[idx] (shared nested arrays
+  // and objects: threats, starshipActions, outcomes, bonuses…).
+  const merged = {
     ...createEmptySavedScene(),
     ...scene,
     savedAt: Date.now()
   }
+  const newScene: SavedScene = JSON.parse(JSON.stringify(merged))
 
   // Check if updating existing
   const existingIdx = state.savedScenes.findIndex(s => s.id === newScene.id)
@@ -232,6 +237,9 @@ function updateStarship(updates: Partial<Starship>) {
 
 function damageStarship(damage: number) {
   if (!state.activeScene) return
+  // Guard against negative/zero damage. Healing must go through healStarship
+  // / setShields so it can be clamped against max.
+  if (damage <= 0) return
 
   const ship = state.activeScene.starship
   let remaining = damage
@@ -320,16 +328,32 @@ function updateThreat(threatId: string, updates: Partial<StarshipThreat>) {
 
 function damageThreat(threatId: string, damage: number) {
   if (!state.activeScene) return
+  // Guard against negative/zero damage. Threat heals should go through
+  // updateThreat with explicit clamping at the call site.
+  if (damage <= 0) return
 
   const threat = state.activeScene.threats.find(t => t.id === threatId)
-  if (threat && threat.currentHP !== undefined) {
-    threat.currentHP = Math.max(0, threat.currentHP - damage)
+  if (!threat || threat.currentHP === undefined) return
+
+  let remaining = damage
+
+  // Apply to shields first (mirrors damageStarship)
+  if (threat.currentShields !== undefined && threat.currentShields > 0) {
+    const shieldDmg = Math.min(threat.currentShields, remaining)
+    threat.currentShields -= shieldDmg
+    remaining -= shieldDmg
+  }
+
+  // Apply remaining to HP
+  if (remaining > 0) {
+    threat.currentHP = Math.max(0, threat.currentHP - remaining)
     if (threat.currentHP === 0) {
       threat.isDefeated = true
     }
-    broadcast('threat-update', threat)
-    saveToLocalStorage()
   }
+
+  broadcast('threat-update', threat)
+  saveToLocalStorage()
 }
 
 function removeThreat(threatId: string) {
@@ -366,7 +390,9 @@ function setRound(round: number) {
 function addVP(amount: number) {
   if (!state.activeScene) return
 
-  state.activeScene.currentVP += amount
+  // Clamp at zero — addVP(-N) used to silently push currentVP negative,
+  // which the VP card would then render as e.g. "-3 / 5 VP".
+  state.activeScene.currentVP = Math.max(0, state.activeScene.currentVP + amount)
   broadcast('vp-change', state.activeScene.currentVP)
   saveToLocalStorage()
 }
