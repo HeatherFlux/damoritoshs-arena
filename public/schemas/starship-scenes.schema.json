@@ -44,7 +44,8 @@
         },
         "availableRoles": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string" },
+          "description": "Role ids PCs can occupy. Standard set per GM Core p.231: 'captain', 'engineer', 'gunner', 'magic_officer', 'pilot', 'science_officer'. Repeats are allowed (e.g. ['gunner', 'gunner'] for two gunner slots). Custom 'niche' roles (per GM Core p.231 — e.g. a cook or corporate liaison) are also accepted: use any snake_case id. Unknown ids render as title-cased role pills (e.g. 'cook' → 'Cook') with a default gray color, and the runner falls back to a flat d20 for their initiative roll. Tag your custom role's actions with that same id in starshipActions[].role to wire them up."
         },
         "starshipActions": {
           "type": "array",

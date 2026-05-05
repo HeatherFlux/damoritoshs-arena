@@ -58,6 +58,10 @@
           }
         },
         "connectedTo": { "type": "array", "items": { "type": "string" } },
+        "hidden": {
+          "type": "boolean",
+          "description": "When true, the access point is hidden from the player view (HackingPlayerView) until the GM reveals it. Useful for sub-systems the players shouldn't know about until they've explored the network. Defaults to false."
+        },
         "dc": { "type": "integer" },
         "successesRequired": { "type": "integer", "minimum": 1 },
         "hackSkills": {

@@ -113,6 +113,10 @@ starship:
       - "Recover the cargo manifest from the freighter wreckage (Computers DC 24)"
       - "Identify the Corpse Fleet captain (Recall Knowledge — Society or Religion DC 22)"
 
+    # The standard six roles per GM Core p.231, plus one custom niche
+    # role ("comms_officer") to demonstrate that the runner accepts any
+    # snake_case id. Unknown ids render as title-cased pills (so
+    # 'comms_officer' → 'Comms Officer') with a default color.
     availableRoles:
       - "captain"
       - "engineer"
@@ -120,6 +124,7 @@ starship:
       - "magic_officer"
       - "pilot"
       - "science_officer"
+      - "comms_officer"      # ← custom niche role
 
     roleDescriptions:
       captain: "Direct the crew. Inspire allies, demoralize enemies."
@@ -128,6 +133,7 @@ starship:
       magic_officer: "Channel the magic core. Mystically jam enemy sensors."
       pilot: "Navigate the asteroid belt. Race the Bonesinger, dodge incoming fire."
       science_officer: "Scan for cover, identify weakpoints, and counter the Bonesinger's Disruptive Scan."
+      comms_officer: "Hail nearby Pathfinder Society vessels. Coordinate rescue, broadcast distress."
 
     # PC starship — links to the campaign template above so damage carries
     # forward between sessions.
@@ -240,6 +246,22 @@ starship:
           success: "All crew gain +1 to their next check."
           failure: "No effect."
           criticalFailure: "A gunner panics — has -1 next round."
+
+      # Custom-role action tagged for our niche "comms_officer" role.
+      # The runner groups it under "Comms Officer" in the Crew Actions
+      # reference list because the role id isn't one of the standard six.
+      - id: "act-broadcast-distress"
+        name: "Broadcast Distress Signal"
+        actionCost: 2
+        role: "comms_officer"
+        skills: ["Diplomacy", "Society"]
+        dc: 22
+        description: "Diplomacy or Society DC 22. Punch through the Bonesinger's jamming and call for Pathfinder Society aid."
+        outcomes:
+          criticalSuccess: "PSS reinforcements respond in 1d4 rounds; gain 2 Victory Points."
+          success: "Aid acknowledged but at least 4 rounds out; gain 1 Victory Point."
+          failure: "Signal lost in the jamming."
+          criticalFailure: "Signal beacon scrambled — no aid will arrive this scene."
 
     # Threats — each one's stats are click-to-roll in the runner.
     threats:

@@ -162,7 +162,7 @@
           "availableRoles": {
             "type": "array",
             "items": { "type": "string" },
-            "description": "Role ids PCs can occupy (per GM Core p.231). Standard set: captain, engineer, gunner, magic_officer, pilot, science_officer. Repeats are allowed (e.g. ['gunner', 'gunner'] for two gunner slots)."
+            "description": "Role ids PCs can occupy. Standard set per GM Core p.231: captain, engineer, gunner, magic_officer, pilot, science_officer. Repeats allowed (e.g. ['gunner', 'gunner']). Custom 'niche' roles (GM Core p.231) are supported — use any snake_case id (e.g. 'cook', 'corporate_liaison'). Unknown ids render as title-cased pills with a default gray. Tag the role's actions in starshipActions[].role with the same id."
           },
           "roles": {
             "type": "array",
