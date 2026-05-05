@@ -703,6 +703,19 @@ watch(
   { deep: true }
 )
 
+// Persist saved encounters on any mutation. The store's typed mutators
+// (saveEncounter, deleteEncounter, importEncounters) already call
+// saveEncountersToStorage() manually, but external code paths that
+// push directly into state.savedEncounters — e.g. sessionBundleImporter
+// dropping in hacking sessions — bypass those mutators. Without this
+// watch, bundle-imported encounters survived the current page load but
+// disappeared on refresh because localStorage was never updated.
+watch(
+  () => state.savedEncounters,
+  () => saveEncountersToStorage(),
+  { deep: true }
+)
+
 // Export store
 export function useHackingStore() {
   init()

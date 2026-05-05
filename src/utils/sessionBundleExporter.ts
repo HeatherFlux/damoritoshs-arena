@@ -15,7 +15,7 @@ import yaml from 'js-yaml'
 import type { Creature, Encounter, EncounterCreature } from '../types/creature'
 import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter } from '../types/hacking'
-import type { SavedScene } from '../types/starship'
+import type { SavedScene, SavedStarship } from '../types/starship'
 import type { Party } from '../types/party'
 import type { SavedShop } from '../types/shop'
 import type {
@@ -46,7 +46,7 @@ export interface ExportStores {
     state: { savedEncounters: SavedHackingEncounter[] }
   }
   starshipStore: {
-    state: { savedScenes: SavedScene[] }
+    state: { savedScenes: SavedScene[]; savedStarships?: SavedStarship[] }
   }
   shopStore: {
     state: { savedShops: SavedShop[] }
@@ -113,6 +113,12 @@ export function buildSessionBundle(
   const scenes = stores.starshipStore.state.savedScenes
   if (scenes.length > 0) {
     bundle.starship = scenes.map(mapStarshipScene)
+  }
+
+  // ---- Starship templates (reusable PC ship configs) ----
+  const templates = stores.starshipStore.state.savedStarships ?? []
+  if (templates.length > 0) {
+    bundle.starshipTemplates = templates.map(t => JSON.parse(JSON.stringify(t)))
   }
 
   // ---- Shops (full snapshots, not just generation params) ----

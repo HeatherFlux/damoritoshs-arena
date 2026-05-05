@@ -133,7 +133,32 @@ export interface SessionBundle {
   encounters?: BundleEncounter[]
   hacking?: BundleHacking[]
   starship?: BundleStarship[]
+  /** Reusable PC ship templates — see starship-templates.schema.json */
+  starshipTemplates?: BundleStarshipTemplate[]
   shops?: BundleShop[]
+}
+
+export interface BundleStarshipTemplate {
+  id?: string
+  name: string
+  description?: string
+  isCampaignShip?: boolean
+  starship: {
+    id?: string
+    name?: string
+    level?: number
+    ac?: number
+    fortitude?: number
+    reflex?: number
+    maxHP?: number
+    currentHP?: number
+    maxShields?: number
+    currentShields?: number
+    shieldRegen?: number
+    bonuses?: Record<string, number>
+    templateId?: string
+  }
+  savedAt?: number
 }
 
 export interface ImportWarning {
@@ -151,6 +176,7 @@ export interface ImportResult {
   encounters: number
   hackingSessions: number
   starshipScenes: number
+  starshipTemplates: number
   shops: number
   warnings: ImportWarning[]
 }
@@ -269,6 +295,9 @@ export interface ImportStores {
   }
   starshipStore: {
     importScenes: (json: string) => void
+    /** Optional — present in starshipStore. Required to round-trip
+     * starship templates from session bundles. */
+    importStarshipTemplates?: (json: string) => void
   }
   partyStore: {
     importParties: (json: string, mode?: 'merge' | 'replace') => { success: boolean; imported: number; error?: string }
@@ -302,6 +331,7 @@ export function importSessionBundle(
     encounters: 0,
     hackingSessions: 0,
     starshipScenes: 0,
+    starshipTemplates: 0,
     shops: 0,
     warnings: [],
   }
@@ -582,6 +612,53 @@ export function importSessionBundle(
     }
   }
 
+  // 6b. Import starship templates (reusable PC ship configs)
+  if (bundle.starshipTemplates && bundle.starshipTemplates.length > 0) {
+    if (!stores.starshipStore.importStarshipTemplates) {
+      result.warnings.push({
+        section: 'starship',
+        message: 'Bundle contains starshipTemplates but the store does not expose importStarshipTemplates — skipping. Update the app.',
+      })
+    } else {
+      try {
+        // Normalise each template into the SavedStarship shape the store
+        // expects. Missing optional fields get sensible defaults.
+        const normalised = bundle.starshipTemplates.map(t => {
+          const ship = t.starship ?? {}
+          return {
+            id: t.id ?? crypto.randomUUID(),
+            name: t.name,
+            description: t.description,
+            isCampaignShip: t.isCampaignShip ?? false,
+            savedAt: t.savedAt ?? Date.now(),
+            starship: {
+              id: ship.id ?? crypto.randomUUID(),
+              name: ship.name ?? t.name,
+              level: ship.level ?? bundle.partyLevel ?? 1,
+              ac: ship.ac ?? 15,
+              fortitude: ship.fortitude ?? 10,
+              reflex: ship.reflex ?? 10,
+              maxHP: ship.maxHP ?? 30,
+              currentHP: ship.currentHP ?? ship.maxHP ?? 30,
+              maxShields: ship.maxShields ?? 5,
+              currentShields: ship.currentShields ?? ship.maxShields ?? 5,
+              shieldRegen: ship.shieldRegen ?? 1,
+              bonuses: ship.bonuses ?? {},
+              templateId: ship.templateId ?? t.id,
+            },
+          }
+        })
+        stores.starshipStore.importStarshipTemplates(JSON.stringify(normalised))
+        result.starshipTemplates = normalised.length
+      } catch (e) {
+        result.warnings.push({
+          section: 'starship',
+          message: `Failed to import starship templates: ${(e as Error).message}`,
+        })
+      }
+    }
+  }
+
   // 7. Import shops as saved snapshots
   if (bundle.shops && bundle.shops.length > 0) {
     for (const shop of bundle.shops) {
@@ -616,7 +693,7 @@ export function importSessionBundle(
 
   result.success = result.warnings.filter(w => !w.message.includes('skipped')).length === 0 ||
     (result.creatures + result.hazards + result.parties + result.encounters +
-     result.hackingSessions + result.starshipScenes + result.shops) > 0
+     result.hackingSessions + result.starshipScenes + result.starshipTemplates + result.shops) > 0
 
   return result
 }

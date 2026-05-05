@@ -211,5 +211,37 @@ describe('hackingStore', () => {
       const result = store.saveEncounter()
       expect(result).toBeNull()
     })
+
+    // Regression: the session bundle importer pushes directly into
+    // state.savedEncounters (bypassing the typed mutators), so without
+    // a watcher persisting on every change, bundle-imported encounters
+    // disappeared on refresh because localStorage was never updated.
+    it('persists savedEncounters to localStorage on direct mutation', async () => {
+      const fakeEncounter = {
+        id: 'bundle-import-1',
+        name: 'Imported From Bundle',
+        savedAt: 1700000000000,
+        computer: {
+          id: 'imp-1',
+          name: 'Imported Computer',
+          level: 5,
+          type: 'tech' as const,
+          accessPoints: [],
+        },
+      }
+
+      // Direct push — mirrors sessionBundleImporter behavior.
+      store.state.savedEncounters.push(fakeEncounter)
+
+      // Wait for the deep watcher to flush.
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const raw = localStorage.getItem('sf2e-hacking-saved')
+      expect(raw).toBeTruthy()
+      const parsed = JSON.parse(raw!)
+      expect(parsed).toHaveLength(1)
+      expect(parsed[0].name).toBe('Imported From Bundle')
+    })
   })
 })
