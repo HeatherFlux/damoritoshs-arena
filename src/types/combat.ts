@@ -38,6 +38,8 @@ export interface Combatant {
   isPlayer: boolean
   isActive: boolean
   isDead: boolean
+  /** When true, this combatant is filtered out of the player view feed (CombatPlayerData). GM-side display is unaffected. */
+  hiddenFromPlayers?: boolean
   notes: string
   // Reference to creature data if it's a monster
   creature?: Creature
@@ -68,9 +70,14 @@ export interface Combat {
 // Elite/Weak stat adjustments
 export function getAdjustedHP(baseHP: number, adjustment: CreatureAdjustment, level: number): number {
   if (adjustment === 'normal') return baseHP
-  // Elite: +10 HP for levels 1 and below, +15 for 2-4, +20 for 5-19, +30 for 20+
-  // Weak: reverse
-  const hpAdjust = level <= 1 ? 10 : level <= 4 ? 15 : level <= 19 ? 20 : 30
+  // Per PF2e Bestiary (Elite/Weak Adjustments table):
+  //   Levels 1-2:  ±10 HP
+  //   Levels 3-5:  ±15 HP
+  //   Levels 6-20: ±20 HP
+  //   Levels 21+:  ±30 HP
+  // Bug history: brackets used to be 1 / 2-4 / 5-19 / 20+, off by one across
+  // the board. A weak level-5 creature lost 20 HP instead of 15.
+  const hpAdjust = level <= 2 ? 10 : level <= 5 ? 15 : level <= 20 ? 20 : 30
   return adjustment === 'elite' ? baseHP + hpAdjust : Math.max(1, baseHP - hpAdjust)
 }
 

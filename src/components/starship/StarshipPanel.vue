@@ -8,14 +8,14 @@ import { createDefaultThreat, createEmptySavedScene } from '../../types/starship
 import ActionEditor from './ActionEditor.vue'
 import VictoryConditionEditor from './VictoryConditionEditor.vue'
 import ThreatCard from './ThreatCard.vue'
+import SceneRunner from './SceneRunner.vue'
 
 const store = useStarshipStore()
 
 // Scene state — derived from store (persists across tab switches)
+// The runtime ship/round state lives inside <SceneRunner /> now; this
+// component only owns setup-mode state.
 const isSceneRunning = computed(() => store.state.activeScene !== null)
-const currentRound = computed(() => store.state.activeScene?.currentRound ?? 1)
-const shipCurrentHP = computed(() => store.state.activeScene?.starship.currentHP ?? 0)
-const shipCurrentShields = computed(() => store.state.activeScene?.starship.currentShields ?? 0)
 
 // Scene-first setup: activeSetup holds the loaded/editable scene data
 const activeSetup = ref<SavedScene | null>(null)
@@ -28,12 +28,6 @@ watch(selectedExample, (id) => {
   previewScene.value = id ? OFFICIAL_SCENES.find(s => s.id === id) || null : null
 })
 
-// Damage input state (UI-only)
-const shipDamageInput = ref(0)
-const threatDamageInputs = ref<Record<string, number>>({})
-
-// Sync UI state
-const syncEnabling = ref(false)
 
 onMounted(() => {
   store.setGMView(true)
@@ -51,9 +45,9 @@ onMounted(() => {
       customCondition: scene.customCondition,
       starship: { ...scene.starship, bonuses: { ...scene.starship.bonuses } },
       threats: scene.threats.map(t => ({ ...t })),
-      roles: [...scene.roles],
-      availableRoles: [...scene.availableRoles],
-      starshipActions: [...scene.starshipActions],
+      roles: [...(scene.roles ?? [])],
+      availableRoles: [...(scene.availableRoles ?? [])],
+      starshipActions: [...(scene.starshipActions ?? [])],
       partySize: scene.partySize,
       additionalObjectives: [...(scene.additionalObjectives ?? [])],
       roleDescriptions: { ...(scene.roleDescriptions ?? {}) },
@@ -74,10 +68,6 @@ onUnmounted(() => {
   window.removeEventListener('beforeunload', handleBeforeUnload)
   store.disableRemoteSync()
 })
-
-function stopSync() {
-  store.disableRemoteSync()
-}
 
 // ============ Scene Setup ============
 
@@ -105,23 +95,6 @@ function startScene() {
   store.startScene(setup)
 }
 
-function endScene() {
-  store.endScene()
-  activeSetup.value = null
-}
-
-function nextRound() {
-  store.advanceRound()
-}
-
-function damageShip(amount: number) {
-  store.damageStarship(amount)
-}
-
-function healShip(amount: number) {
-  store.healStarship(amount)
-}
-
 // ============ Threat Management (setup) ============
 
 function addThreat() {
@@ -137,47 +110,6 @@ function updateThreatFromCard(index: number, updates: Partial<StarshipThreat>) {
 function removeThreat(index: number) {
   if (!activeSetup.value) return
   activeSetup.value.threats.splice(index, 1)
-}
-
-function damageThreat(index: number, amount: number) {
-  const scene = store.state.activeScene
-  if (!scene) return
-  const threat = scene.threats[index]
-  if (!threat) return
-
-  let remaining = amount
-  if (threat.currentShields !== undefined && threat.currentShields > 0) {
-    const shieldDmg = Math.min(threat.currentShields, remaining)
-    threat.currentShields -= shieldDmg
-    remaining -= shieldDmg
-  }
-  if (remaining > 0) {
-    threat.currentHP = Math.max(0, (threat.currentHP ?? threat.maxHP ?? 0) - remaining)
-    if (threat.currentHP === 0) {
-      threat.isDefeated = true
-    }
-  }
-  // Threat is already in store.state.activeScene.threats — broadcast the update
-  store.updateThreat(threat.id, {
-    currentHP: threat.currentHP,
-    currentShields: threat.currentShields,
-    isDefeated: threat.isDefeated
-  })
-}
-
-function applyShipDamage() {
-  if (shipDamageInput.value > 0) {
-    damageShip(shipDamageInput.value)
-    shipDamageInput.value = 0
-  }
-}
-
-function applyThreatDamage(index: number, threatId: string) {
-  const amount = threatDamageInputs.value[threatId] || 0
-  if (amount > 0) {
-    damageThreat(index, amount)
-    threatDamageInputs.value[threatId] = 0
-  }
 }
 
 // ============ Role Management (setup) ============
@@ -291,22 +223,6 @@ function updatePartySize(size: number) {
   activeSetup.value.partySize = Math.max(1, Math.min(8, Math.floor(size)))
 }
 
-// ============ Player View ============
-
-const copySuccess = ref(false)
-async function openPlayerView() {
-  syncEnabling.value = true
-  try {
-    const result = await store.openPlayerView()
-    if (result.success) {
-      copySuccess.value = true
-      setTimeout(() => copySuccess.value = false, 2500)
-    }
-  } finally {
-    syncEnabling.value = false
-  }
-}
-
 // ============ Setup Warnings ============
 
 const setupWarnings = computed(() => {
@@ -332,6 +248,11 @@ const setupWarnings = computed(() => {
 
 // ============ Save / Load for Sidebar ============
 
+const isEditingExistingScene = computed(() => {
+  if (!activeSetup.value) return false
+  return store.state.savedScenes.some(s => s.id === activeSetup.value!.id)
+})
+
 function saveCurrentSetup() {
   if (!activeSetup.value) return
   activeSetup.value.savedAt = Date.now()
@@ -339,8 +260,102 @@ function saveCurrentSetup() {
   store.state.editingSceneId = activeSetup.value.id
 }
 
+function saveAsNewScene() {
+  if (!activeSetup.value) return
+  // Clone the current setup with a fresh id and " (Copy)" suffix so the
+  // user can safely diverge from the original saved scene.
+  const clone: SavedScene = {
+    ...JSON.parse(JSON.stringify(activeSetup.value)),
+    id: crypto.randomUUID(),
+    name: `${activeSetup.value.name || 'Untitled'} (Copy)`,
+    savedAt: Date.now(),
+  }
+  const saved = store.saveScene(clone)
+  // Switch the editing pointer to the new copy so subsequent "Save Changes"
+  // updates the copy, not the original.
+  activeSetup.value = JSON.parse(JSON.stringify(saved))
+  store.state.editingSceneId = saved.id
+}
+
+function discardEdits() {
+  // Reload the saved version, dropping unsaved edits.
+  if (!activeSetup.value) return
+  const original = store.state.savedScenes.find(s => s.id === activeSetup.value!.id)
+  if (original) {
+    activeSetup.value = JSON.parse(JSON.stringify(original))
+  } else {
+    activeSetup.value = null
+    store.state.editingSceneId = null
+  }
+}
+
 function loadSceneFromSidebar(scene: SavedScene) {
   activeSetup.value = JSON.parse(JSON.stringify(scene))
+}
+
+// ============ Starship Template Controls ============
+
+const showSaveTemplateDialog = ref(false)
+const templateDialogName = ref('')
+const templateDialogDescription = ref('')
+const templateDialogCampaign = ref(false)
+
+function onTemplateSelect(templateId: string) {
+  if (!activeSetup.value) return
+  if (!templateId) {
+    // User chose the placeholder — leave the current ship untouched.
+    return
+  }
+  const ship = store.loadStarshipTemplate(templateId)
+  if (ship) {
+    activeSetup.value.starship = ship
+  }
+}
+
+function unlinkTemplate() {
+  if (!activeSetup.value) return
+  activeSetup.value.starship.templateId = undefined
+}
+
+function openSaveTemplateDialog() {
+  if (!activeSetup.value) return
+  const linkedId = activeSetup.value.starship.templateId
+  const linked = linkedId
+    ? store.state.savedStarships.find(t => t.id === linkedId)
+    : null
+  templateDialogName.value = linked?.name ?? activeSetup.value.starship.name ?? ''
+  templateDialogDescription.value = linked?.description ?? ''
+  templateDialogCampaign.value = linked?.isCampaignShip ?? false
+  showSaveTemplateDialog.value = true
+}
+
+function confirmSaveTemplate() {
+  if (!activeSetup.value) return
+  const name = templateDialogName.value.trim()
+  if (!name) return
+  // If the ship is already linked to a template, update that one in place;
+  // otherwise crypto.randomUUID inside the store creates a new entry.
+  const linkedId = activeSetup.value.starship.templateId
+  const saved = store.saveStarshipTemplate({
+    id: linkedId,
+    name,
+    description: templateDialogDescription.value || undefined,
+    isCampaignShip: templateDialogCampaign.value,
+    starship: activeSetup.value.starship,
+  })
+  // Make sure the live setup picks up the (possibly newly assigned) template id.
+  activeSetup.value.starship.templateId = saved.id
+  showSaveTemplateDialog.value = false
+}
+
+function deleteCurrentTemplate() {
+  if (!activeSetup.value?.starship.templateId) return
+  const id = activeSetup.value.starship.templateId
+  if (!confirm('Delete this saved ship template? The current scene keeps its ship config — only the saved template is removed.')) return
+  store.deleteStarshipTemplate(id)
+  // Detach the live ship so the dropdown shows "— Load saved ship —" again.
+  activeSetup.value.starship.templateId = undefined
+  showSaveTemplateDialog.value = false
 }
 
 // Watch editingSceneId changes (from sidebar clicks)
@@ -361,17 +376,14 @@ defineExpose({
 
 <template>
   <div class="starship-panel">
-    <!-- Header -->
-    <header class="panel-header">
-      <div class="header-title">
-        <span class="title-icon">[*]</span>
-        <span>STARSHIP SCENES</span>
-        <span v-if="isSceneRunning" class="live-dot"></span>
-      </div>
-    </header>
+    <!-- (Old "[*] STARSHIP SCENES" panel header removed — redundant with
+         the page tab nav and stealing vertical space the runner needs.) -->
 
     <!-- SCENE CONTENT -->
-    <div class="tab-content">
+    <!-- During play we hand the whole content area to <SceneRunner /> so it
+         can run its own viewport-filling 3-column grid. The setup view still
+         scrolls vertically as before. -->
+    <div class="tab-content" :class="{ 'tab-content-running': isSceneRunning }">
       <!-- Not running: Setup -->
       <template v-if="!isSceneRunning">
         <div class="scene-setup">
@@ -444,6 +456,15 @@ defineExpose({
 
           <!-- Loaded Setup -->
           <template v-if="activeSetup">
+            <!-- Editing indicator (only when an existing scene is loaded) -->
+            <div v-if="isEditingExistingScene" class="editing-banner">
+              <span class="editing-label">Editing</span>
+              <span class="editing-name">{{ activeSetup.name || 'Untitled scene' }}</span>
+              <button class="btn-link" @click="discardEdits" title="Discard changes and start fresh">
+                Cancel edits
+              </button>
+            </div>
+
             <!-- Scene Info (editable) -->
             <section class="setup-section">
               <h3 class="section-title">Scene Details</h3>
@@ -488,7 +509,47 @@ defineExpose({
 
             <!-- Ship Stats (inline editable) -->
             <section class="setup-section">
-              <h3 class="section-title">{{ activeSetup.starship.name }}</h3>
+              <input
+                type="text"
+                class="section-title-input"
+                v-model="activeSetup.starship.name"
+                placeholder="Starship name"
+                aria-label="Starship name"
+              />
+
+              <!-- Ship template controls (load saved / save current) -->
+              <div class="template-controls">
+                <select
+                  class="input template-select"
+                  :value="activeSetup.starship.templateId ?? ''"
+                  @change="onTemplateSelect(($event.target as HTMLSelectElement).value)"
+                  :title="activeSetup.starship.templateId ? 'Currently linked to this saved ship' : 'Load a saved ship template'"
+                >
+                  <option value="">— Load saved ship —</option>
+                  <option
+                    v-for="t in store.state.savedStarships"
+                    :key="t.id"
+                    :value="t.id"
+                  >
+                    {{ t.name }}<template v-if="t.isCampaignShip"> (campaign)</template>
+                  </option>
+                </select>
+                <button
+                  class="btn btn-secondary btn-sm"
+                  @click="openSaveTemplateDialog"
+                  title="Save this ship configuration for reuse"
+                >
+                  {{ activeSetup.starship.templateId ? 'Update Template' : 'Save as Template' }}
+                </button>
+                <button
+                  v-if="activeSetup.starship.templateId"
+                  class="btn-link"
+                  @click="unlinkTemplate"
+                  title="Detach this scene's ship from the saved template"
+                >
+                  Unlink
+                </button>
+              </div>
               <div class="ship-stats">
                 <div class="stat">
                   <span class="stat-label">AC</span>
@@ -661,7 +722,15 @@ defineExpose({
 
             <!-- Start / Save Buttons -->
             <div class="start-row">
-              <button class="btn btn-secondary btn-lg" @click="saveCurrentSetup">
+              <template v-if="isEditingExistingScene">
+                <button class="btn btn-secondary btn-lg" @click="saveAsNewScene">
+                  Save as New
+                </button>
+                <button class="btn btn-secondary btn-lg" @click="saveCurrentSetup">
+                  Save Changes
+                </button>
+              </template>
+              <button v-else class="btn btn-secondary btn-lg" @click="saveCurrentSetup">
                 Save as Custom Scene
               </button>
               <button class="btn btn-primary btn-lg" @click="startScene">
@@ -672,135 +741,63 @@ defineExpose({
         </div>
       </template>
 
-      <!-- Running: Scene Runner -->
+      <!-- Running: Scene Runner — fully delegated to <SceneRunner /> so all
+           the at-a-glance polish (ship bonuses, scene actions, threat
+           attacks, quick roll, edit mode) actually renders. The inline
+           runner that used to live here was dead-but-rendered duplicate
+           code, and silently bypassed every change made to SceneRunner. -->
       <template v-else>
-        <div class="scene-runner">
-          <!-- Top bar -->
-          <div class="runner-header">
-            <div class="round-display">
-              <span class="round-label">Round</span>
-              <span class="round-number">{{ currentRound }}</span>
-              <button class="btn btn-sm" @click="nextRound">Next Round</button>
-            </div>
-            <div class="runner-actions">
-              <button
-                class="btn btn-accent btn-sm"
-                :disabled="syncEnabling"
-                title="Opens the player view, copies the share link, and starts sync if available"
-                @click="openPlayerView"
-              >
-                {{ syncEnabling ? 'Connecting...' : copySuccess ? 'Link Copied!' : 'Player View' }}
-              </button>
-              <button
-                v-if="store.state.isRemoteSyncEnabled"
-                class="btn btn-danger btn-sm"
-                title="Stop sharing — disconnect player view sync"
-                @click="stopSync"
-              >
-                ■ Stop
-              </button>
-              <button class="btn btn-danger btn-sm" @click="endScene">End Scene</button>
-            </div>
-          </div>
-
-          <!-- Ship Status -->
-          <section v-if="store.state.activeScene" class="ship-status panel">
-            <h3 class="ship-status-name">{{ store.state.activeScene.starship.name }}</h3>
-
-            <div class="hp-bars">
-              <div class="hp-bar-group">
-                <div class="hp-label">
-                  <span>Shields</span>
-                  <span>{{ shipCurrentShields }} / {{ store.state.activeScene.starship.maxShields }}</span>
-                </div>
-                <div class="hp-bar">
-                  <div
-                    class="hp-fill shields"
-                    :style="{ width: (shipCurrentShields / store.state.activeScene.starship.maxShields * 100) + '%' }"
-                  ></div>
-                </div>
-              </div>
-              <div class="hp-bar-group">
-                <div class="hp-label">
-                  <span>Hull</span>
-                  <span>{{ shipCurrentHP }} / {{ store.state.activeScene.starship.maxHP }}</span>
-                </div>
-                <div class="hp-bar">
-                  <div
-                    class="hp-fill hull"
-                    :style="{ width: (shipCurrentHP / store.state.activeScene.starship.maxHP * 100) + '%' }"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="damage-controls">
-              <input
-                type="number"
-                v-model.number="shipDamageInput"
-                class="input input-sm damage-input"
-                placeholder="Damage"
-                min="0"
-                @keyup.enter="applyShipDamage"
-              />
-              <button class="btn btn-danger btn-sm" @click="applyShipDamage">Damage</button>
-              <button class="btn btn-success btn-sm" @click="healShip(shipDamageInput); shipDamageInput = 0">Heal</button>
-            </div>
-          </section>
-
-          <!-- Threats -->
-          <section v-if="store.state.activeScene && store.state.activeScene.threats.length > 0" class="threats-section">
-            <h3 class="section-title">Threats</h3>
-            <div class="threats-grid">
-              <div
-                v-for="(threat, idx) in store.state.activeScene.threats"
-                :key="threat.id"
-                class="threat-runner-card panel"
-                :class="{ defeated: threat.isDefeated }"
-              >
-                <div class="threat-name">{{ threat.name }}</div>
-
-                <!-- Shields bar (if has shields) -->
-                <div v-if="threat.maxShields && threat.maxShields > 0" class="threat-stat-row">
-                  <span class="stat-label">Shields</span>
-                  <span class="stat-numbers">{{ threat.currentShields }} / {{ threat.maxShields }}</span>
-                </div>
-                <div v-if="threat.maxShields && threat.maxShields > 0" class="hp-bar hp-bar-sm">
-                  <div
-                    class="hp-fill shields"
-                    :style="{ width: ((threat.currentShields || 0) / (threat.maxShields || 1) * 100) + '%' }"
-                  ></div>
-                </div>
-
-                <!-- HP bar -->
-                <div class="threat-stat-row">
-                  <span class="stat-label">HP</span>
-                  <span class="stat-numbers">{{ threat.currentHP }} / {{ threat.maxHP }}</span>
-                </div>
-                <div class="hp-bar hp-bar-sm">
-                  <div
-                    class="hp-fill threat"
-                    :style="{ width: ((threat.currentHP || 0) / (threat.maxHP || 1) * 100) + '%' }"
-                  ></div>
-                </div>
-
-                <div class="threat-controls">
-                  <input
-                    type="number"
-                    :value="threatDamageInputs[threat.id] || 0"
-                    @input="threatDamageInputs[threat.id] = parseInt(($event.target as HTMLInputElement).value) || 0"
-                    class="input input-xs damage-input"
-                    placeholder="Dmg"
-                    min="0"
-                    @keyup.enter="applyThreatDamage(idx, threat.id)"
-                  />
-                  <button class="btn btn-danger btn-xs" @click="applyThreatDamage(idx, threat.id)">Damage</button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+        <SceneRunner />
       </template>
+    </div>
+
+    <!-- Save Starship Template Dialog -->
+    <div
+      v-if="showSaveTemplateDialog"
+      class="template-modal-overlay"
+      @click.self="showSaveTemplateDialog = false"
+    >
+      <div class="template-modal">
+        <h3>{{ activeSetup?.starship.templateId ? 'Update Saved Ship' : 'Save Ship as Template' }}</h3>
+        <label class="form-field">
+          <span>Name</span>
+          <input
+            v-model="templateDialogName"
+            class="input"
+            placeholder="e.g. The Brassbound, party ship"
+            @keydown.enter="confirmSaveTemplate"
+          />
+        </label>
+        <label class="form-field">
+          <span>Description (optional)</span>
+          <textarea
+            v-model="templateDialogDescription"
+            class="input textarea"
+            rows="2"
+            placeholder="Notes about this ship"
+          ></textarea>
+        </label>
+        <label class="checkbox-field">
+          <input type="checkbox" v-model="templateDialogCampaign" />
+          <span>
+            <strong>Campaign ship</strong>
+            <span class="checkbox-hint">Carry HP/Shield damage forward when a linked scene ends.</span>
+          </span>
+        </label>
+        <div class="modal-actions">
+          <button
+            v-if="activeSetup?.starship.templateId"
+            class="btn-link delete-link"
+            @click="deleteCurrentTemplate"
+          >
+            Delete Template
+          </button>
+          <button class="btn btn-secondary" @click="showSaveTemplateDialog = false">Cancel</button>
+          <button class="btn btn-primary" :disabled="!templateDialogName.trim()" @click="confirmSaveTemplate">
+            {{ activeSetup?.starship.templateId ? 'Update' : 'Save Template' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -856,6 +853,14 @@ defineExpose({
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
+  min-height: 0;
+}
+
+/* When a scene is running we hand the layout to SceneRunner — no parent
+   scroll or padding. The runner itself uses an internally-scrolling grid. */
+.tab-content-running {
+  overflow: hidden;
+  padding: 0;
 }
 
 /* SCENE SETUP */
@@ -886,6 +891,162 @@ defineExpose({
 
 .section-header .section-title {
   margin-bottom: 0;
+}
+
+/* Inline-editable section title used for the PC starship name. Visually
+   reads as a heading until focused, when it shows a subtle border. */
+.section-title-input {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.375rem;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.section-title-input:hover {
+  background: var(--color-elevated, rgba(255, 255, 255, 0.04));
+}
+
+.section-title-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: var(--color-elevated, rgba(255, 255, 255, 0.04));
+}
+
+.section-title-input::placeholder {
+  color: var(--color-dim);
+  opacity: 0.6;
+}
+
+/* Banner shown when editing a previously-saved scene, so the GM can tell
+   they're modifying an existing entry vs creating a new one. */
+.editing-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+.editing-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.editing-name {
+  flex: 1;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-link:hover {
+  color: var(--color-danger);
+}
+
+/* Ship template controls — load saved / save current row above ship stats */
+.template-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.template-select {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Save template modal — minimal dialog so the GM can name + flag a campaign ship */
+.template-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.template-modal {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.template-modal h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.checkbox-field input[type="checkbox"] {
+  margin-top: 0.25rem;
+}
+
+.checkbox-hint {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+  font-weight: 400;
+  margin-top: 0.125rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.modal-actions .delete-link {
+  margin-right: auto;
+  color: var(--color-danger);
 }
 
 /* EXAMPLE SELECTOR */

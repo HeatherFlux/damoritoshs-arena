@@ -232,6 +232,85 @@ describe('starshipStore', () => {
 
       expect(store.state.activeScene!.currentVP).toBeGreaterThanOrEqual(0)
     })
+
+    // VP tracker UX bug: the +/- buttons used to be hidden unless the scene's
+    // victoryCondition was 'victory_points'. addVP itself doesn't gate on
+    // condition, so the store-side behavior should hold for any scene type
+    // (escape, survival, custom — all of which can use VPs as a side meter).
+    it('addVP works regardless of victoryCondition', () => {
+      const saved = createEmptySavedScene()
+      saved.victoryCondition = 'defeat'
+      store.startScene(saved)
+
+      store.addVP(3)
+      expect(store.state.activeScene!.currentVP).toBe(3)
+
+      store.addVP(-1)
+      expect(store.state.activeScene!.currentVP).toBe(2)
+    })
+  })
+
+  // Threat shield regen: the bug report said "threat shields don't
+  // regenerate". The logic is correct — regenerateShields() iterates threats
+  // and tops them up by shieldRegen each round — so this is a regression
+  // guard so the behavior doesn't break when we revisit the runner UI.
+  describe('threat shield regeneration', () => {
+    it('regenerates threat shields up to maxShields', () => {
+      const saved = createEmptySavedScene()
+      saved.threats = [makeThreat({ maxShields: 10, shieldRegen: 3 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+      // startScene resets currentShields to maxShields, so damage first.
+      store.damageThreat(id, 6) // shields 10 -> 4
+
+      store.regenerateShields()
+
+      const t = store.state.activeScene!.threats.find(x => x.id === id)!
+      expect(t.currentShields).toBe(7)
+    })
+
+    it('caps regen at maxShields', () => {
+      const saved = createEmptySavedScene()
+      saved.threats = [makeThreat({ maxShields: 10, shieldRegen: 5 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+      store.damageThreat(id, 2) // shields 10 -> 8
+
+      store.regenerateShields()
+
+      expect(store.state.activeScene!.threats[0].currentShields).toBe(10)
+    })
+
+    it('skips defeated threats', () => {
+      const saved = createEmptySavedScene()
+      saved.threats = [makeThreat({ maxShields: 10, maxHP: 10, shieldRegen: 5 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+      // Damage past shields and HP to mark it defeated.
+      store.damageThreat(id, 999)
+      expect(store.state.activeScene!.threats[0].isDefeated).toBe(true)
+
+      store.regenerateShields()
+
+      expect(store.state.activeScene!.threats[0].currentShields).toBe(0)
+    })
+
+    it('advanceRound triggers regen for both PC ship and threats', () => {
+      const saved = createEmptySavedScene()
+      saved.starship.maxShields = 20
+      saved.starship.shieldRegen = 4
+      saved.threats = [makeThreat({ maxShields: 10, shieldRegen: 3 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+      // Bring both below max so regen has somewhere to go.
+      store.damageStarship(15) // PC shields 20 -> 5
+      store.damageThreat(id, 8) // threat shields 10 -> 2
+
+      store.advanceRound()
+
+      expect(store.state.activeScene!.starship.currentShields).toBe(9)
+      expect(store.state.activeScene!.threats[0].currentShields).toBe(5)
+    })
   })
 
   // Reference-sharing regressions: shallow spreads in saveScene and
@@ -303,6 +382,201 @@ describe('starshipStore', () => {
       expect(saved.starshipActions[0].outcomes.success).toBe('')
       // Saved template never had an actionLog field at all.
       expect((saved as unknown as { actionLog?: unknown }).actionLog).toBeUndefined()
+    })
+  })
+
+  // Reusable starship template library — save a ship config once and load
+  // it into any scene, with optional campaign continuity carrying damage
+  // forward between encounters.
+  describe('starship template library', () => {
+    function makeShip(overrides: Partial<{
+      id: string; name: string; level: number; ac: number; fortitude: number;
+      reflex: number; maxHP: number; currentHP: number; maxShields: number;
+      currentShields: number; shieldRegen: number; bonuses: Record<string, number>
+    }> = {}) {
+      return {
+        id: 's1',
+        name: 'The Brassbound',
+        level: 5,
+        ac: 22,
+        fortitude: 12,
+        reflex: 14,
+        maxHP: 80,
+        currentHP: 80,
+        maxShields: 20,
+        currentShields: 20,
+        shieldRegen: 5,
+        bonuses: { Piloting: 2 },
+        ...overrides,
+      }
+    }
+
+    beforeEach(() => {
+      // Wipe any persisted templates from a previous test.
+      store.state.savedStarships = []
+    })
+
+    it('saves a new template with a fresh id', () => {
+      const saved = store.saveStarshipTemplate({
+        name: 'Brassbound',
+        starship: makeShip(),
+      })
+      expect(saved.id).toBeTruthy()
+      expect(saved.name).toBe('Brassbound')
+      expect(saved.starship.templateId).toBe(saved.id)
+      expect(store.state.savedStarships).toHaveLength(1)
+    })
+
+    it('updates an existing template when id is provided', () => {
+      const first = store.saveStarshipTemplate({ name: 'A', starship: makeShip() })
+      const second = store.saveStarshipTemplate({
+        id: first.id,
+        name: 'B',
+        starship: makeShip({ ac: 24 }),
+      })
+      expect(store.state.savedStarships).toHaveLength(1)
+      expect(second.id).toBe(first.id)
+      expect(second.name).toBe('B')
+      expect(second.starship.ac).toBe(24)
+    })
+
+    it('loadStarshipTemplate returns full HP/Shields for non-campaign ships', () => {
+      const saved = store.saveStarshipTemplate({
+        name: 'Loaner',
+        starship: makeShip({ currentHP: 12, currentShields: 3 }),
+        // isCampaignShip defaults to false
+      })
+      const loaded = store.loadStarshipTemplate(saved.id)!
+      expect(loaded.currentHP).toBe(loaded.maxHP)
+      expect(loaded.currentShields).toBe(loaded.maxShields)
+      expect(loaded.templateId).toBe(saved.id)
+    })
+
+    it('loadStarshipTemplate preserves persisted HP/Shields for campaign ships', () => {
+      const saved = store.saveStarshipTemplate({
+        name: 'Campaign Ship',
+        starship: makeShip({ currentHP: 12, currentShields: 3 }),
+        isCampaignShip: true,
+      })
+      const loaded = store.loadStarshipTemplate(saved.id)!
+      expect(loaded.currentHP).toBe(12)
+      expect(loaded.currentShields).toBe(3)
+    })
+
+    it('deletes a template', () => {
+      const a = store.saveStarshipTemplate({ name: 'A', starship: makeShip() })
+      const b = store.saveStarshipTemplate({ name: 'B', starship: makeShip({ id: 's2' }) })
+      store.deleteStarshipTemplate(a.id)
+      expect(store.state.savedStarships).toHaveLength(1)
+      expect(store.state.savedStarships[0].id).toBe(b.id)
+    })
+
+    it('renameStarshipTemplate updates the name without rebuilding', () => {
+      const saved = store.saveStarshipTemplate({ name: 'Old', starship: makeShip() })
+      store.renameStarshipTemplate(saved.id, 'New')
+      expect(store.state.savedStarships[0].name).toBe('New')
+    })
+
+    it('exports and imports templates round-trip', () => {
+      store.saveStarshipTemplate({ name: 'A', starship: makeShip() })
+      store.saveStarshipTemplate({ name: 'B', starship: makeShip({ id: 's2' }) })
+      const json = store.exportStarshipTemplates()
+      store.state.savedStarships = []
+      store.importStarshipTemplates(json)
+      expect(store.state.savedStarships).toHaveLength(2)
+      const names = store.state.savedStarships.map(s => s.name).sort()
+      expect(names).toEqual(['A', 'B'])
+    })
+  })
+
+  // Campaign continuity: when a scene's ship is linked to a campaign-flagged
+  // template, post-scene HP/Shields persist back so the next encounter starts
+  // from the post-damage state.
+  describe('campaign continuity', () => {
+    beforeEach(() => {
+      store.state.savedStarships = []
+    })
+
+    it('persists ship damage to a campaign template on endScene', () => {
+      const template = store.saveStarshipTemplate({
+        name: 'Voyager',
+        starship: {
+          id: 's1', name: 'Voyager', level: 5,
+          ac: 22, fortitude: 12, reflex: 14,
+          maxHP: 80, currentHP: 80,
+          maxShields: 20, currentShields: 20,
+          shieldRegen: 5, bonuses: {},
+        },
+        isCampaignShip: true,
+      })
+
+      const saved = createEmptySavedScene()
+      saved.starship = store.loadStarshipTemplate(template.id)!
+      store.startScene(saved)
+      // Take a beating mid-scene.
+      store.damageStarship(35) // shields 20→0, HP 80→65
+      store.endScene()
+
+      const persisted = store.state.savedStarships.find(t => t.id === template.id)!
+      expect(persisted.starship.currentHP).toBe(65)
+      expect(persisted.starship.currentShields).toBe(0)
+      // Max values must not be touched.
+      expect(persisted.starship.maxHP).toBe(80)
+      expect(persisted.starship.maxShields).toBe(20)
+    })
+
+    it('does not persist damage for non-campaign templates', () => {
+      const template = store.saveStarshipTemplate({
+        name: 'Loaner',
+        starship: {
+          id: 's1', name: 'Loaner', level: 5,
+          ac: 22, fortitude: 12, reflex: 14,
+          maxHP: 80, currentHP: 80,
+          maxShields: 20, currentShields: 20,
+          shieldRegen: 5, bonuses: {},
+        },
+        isCampaignShip: false,
+      })
+
+      const saved = createEmptySavedScene()
+      saved.starship = store.loadStarshipTemplate(template.id)!
+      store.startScene(saved)
+      store.damageStarship(40)
+      store.endScene()
+
+      const persisted = store.state.savedStarships.find(t => t.id === template.id)!
+      expect(persisted.starship.currentHP).toBe(80)
+      expect(persisted.starship.currentShields).toBe(20)
+    })
+
+    it('campaign ship resumes damage at next startScene', () => {
+      const template = store.saveStarshipTemplate({
+        name: 'Voyager',
+        starship: {
+          id: 's1', name: 'Voyager', level: 5,
+          ac: 22, fortitude: 12, reflex: 14,
+          maxHP: 80, currentHP: 80,
+          maxShields: 20, currentShields: 20,
+          shieldRegen: 5, bonuses: {},
+        },
+        isCampaignShip: true,
+      })
+
+      // First scene: take damage and end.
+      const scene1 = createEmptySavedScene()
+      scene1.starship = store.loadStarshipTemplate(template.id)!
+      store.startScene(scene1)
+      store.damageStarship(35)
+      store.endScene()
+
+      // Second scene: load fresh from the same template; HP/Shields should
+      // start at the post-scene-1 state, not full.
+      const scene2 = createEmptySavedScene()
+      scene2.starship = store.loadStarshipTemplate(template.id)!
+      store.startScene(scene2)
+
+      expect(store.state.activeScene!.starship.currentHP).toBe(65)
+      expect(store.state.activeScene!.starship.currentShields).toBe(0)
     })
   })
 })

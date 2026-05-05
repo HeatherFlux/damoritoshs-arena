@@ -128,6 +128,28 @@ export interface Starship {
   currentHP: number
   // Starship-specific bonuses (e.g., 'Piloting': +2)
   bonuses: Record<string, number>
+  // ID of the SavedStarship template this ship was loaded from. Used for
+  // campaign continuity — when set and the linked template has
+  // `isCampaignShip` enabled, post-scene HP/Shields persist back to the
+  // template on endScene.
+  templateId?: string
+}
+
+/**
+ * A reusable starship configuration that can be loaded into any scene.
+ * Lives outside scenes so the same ship doesn't have to be re-entered
+ * for each encounter.
+ */
+export interface SavedStarship {
+  id: string
+  name: string
+  description?: string
+  starship: Starship
+  /** When true, the ship's currentHP/currentShields persist back to this
+   * template when a linked scene ends — so a campaign vessel carries
+   * damage forward from one encounter to the next. */
+  isCampaignShip?: boolean
+  savedAt: number
 }
 
 // Tactical role for threats (how the GM should run them)
@@ -272,6 +294,8 @@ export interface ActionLogEntry {
 // Store state structure
 export interface StarshipState {
   savedScenes: SavedScene[]
+  /** Reusable starship templates that can be loaded into any scene. */
+  savedStarships: SavedStarship[]
   activeScene: StarshipScene | null
   // Current starship being edited (for builder)
   editingStarship: Starship | null

@@ -14,9 +14,9 @@ describe('combatStore — extended', () => {
     it('applies elite HP and AC', () => {
       const creature = makeCreature({ hp: 45, ac: 18, level: 5 })
       const combatant = store.addCreature(creature, 'elite')
-      // Elite level 5: +20 HP, +2 AC
-      expect(combatant.maxHP).toBe(65)
-      expect(combatant.currentHP).toBe(65)
+      // Elite level 5 (bracket 3-5): +15 HP, +2 AC
+      expect(combatant.maxHP).toBe(60)
+      expect(combatant.currentHP).toBe(60)
       expect(combatant.ac).toBe(20)
     })
 

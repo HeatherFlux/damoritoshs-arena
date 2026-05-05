@@ -7,7 +7,7 @@ import ActionIcon from './ActionIcon.vue'
 import { calculateConditionEffects, getCondition } from '../data/conditions'
 import { formatComplexity, formatHazardType } from '../types/hazard'
 import { rollDamage, cleanDamage } from '../utils/dice'
-import { IconSkull, IconHeart } from '@tabler/icons-vue'
+import { IconSkull, IconHeart, IconEye, IconEyeOff } from '@tabler/icons-vue'
 import IconD20 from './icons/IconD20.vue'
 
 const props = defineProps<{
@@ -133,6 +133,7 @@ const hasExpandableDetails = computed(() => {
             <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-white">E</span>
             <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">W</span>
             <span v-if="combatant.isHazard" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-hazard text-white">H</span>
+            <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="12" class="text-warning" title="Hidden from player view" />
             <span class="truncate">{{ combatant.name }}</span>
             <span v-if="hasExpandableDetails" class="text-[0.625rem] text-muted">{{ showStatblock ? '▼' : '▶' }}</span>
           </span>
@@ -144,6 +145,14 @@ const hasExpandableDetails = computed(() => {
           {{ effectiveAC }}
         </div>
         <div class="flex gap-1">
+          <button
+            class="btn-icon btn-sm"
+            :class="combatant.hiddenFromPlayers ? 'bg-warning text-black' : 'btn-secondary'"
+            @click="combatStore.toggleHiddenFromPlayers(combatant.id)"
+            :title="combatant.hiddenFromPlayers ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
+          >
+            <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="14" /><IconEye v-else :size="14" />
+          </button>
           <button
             class="btn-icon btn-sm"
             :class="combatant.isDead ? 'bg-success text-white' : 'btn-secondary'"
@@ -228,6 +237,7 @@ const hasExpandableDetails = computed(() => {
           <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-white">E</span>
           <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">W</span>
           <span v-if="combatant.isHazard" class="text-xs text-hazard">⚠</span>
+          <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="14" class="text-warning" title="Hidden from player view" />
           {{ combatant.name }}
           <span v-if="hasExpandableDetails" class="text-[0.625rem] text-muted ml-1 transition-colors duration-150 hover:text-accent">{{ showStatblock ? '▼' : '▶' }}</span>
         </span>
@@ -305,6 +315,14 @@ const hasExpandableDetails = computed(() => {
 
       <!-- Actions -->
       <div class="flex gap-1 justify-end">
+        <button
+          class="btn-icon btn-sm"
+          :class="combatant.hiddenFromPlayers ? 'bg-warning text-black' : 'btn-secondary'"
+          @click="combatStore.toggleHiddenFromPlayers(combatant.id)"
+          :title="combatant.hiddenFromPlayers ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
+        >
+          <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="14" /><IconEye v-else :size="14" />
+        </button>
         <button
           class="btn-icon btn-sm"
           :class="combatant.isDead ? 'bg-success text-white' : 'btn-secondary'"

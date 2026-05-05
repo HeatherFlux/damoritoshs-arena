@@ -3,6 +3,7 @@ import type {
   StarshipState,
   StarshipScene,
   SavedScene,
+  SavedStarship,
   Starship,
   StarshipThreat,
   RoleAssignment,
@@ -21,6 +22,7 @@ import { createSyncTransport, isWebSocketSupported, isSyncAvailable, type SyncMe
 
 // Storage keys
 const STORAGE_KEY = 'sf2e-starship'
+const STARSHIP_TEMPLATES_KEY = 'sf2e-starship-templates'
 
 // Generate or retrieve session ID for channel isolation
 function getSessionId(): string {
@@ -43,6 +45,7 @@ function getSessionId(): string {
 // Create reactive state
 const state = reactive<StarshipState>({
   savedScenes: [],
+  savedStarships: [],
   activeScene: null,
   editingStarship: null,
   sessionId: '',
@@ -209,14 +212,168 @@ function deleteScene(sceneId: string) {
   }
 }
 
+// ============ Starship Template Management ============
+
+/**
+ * Save the given starship config as a reusable template. If a template with
+ * the same id already exists, it's updated in place. Otherwise a new entry
+ * is created with a fresh UUID. Returns the persisted template.
+ *
+ * The starship snapshot is deep-cloned so further edits to the source
+ * Starship object don't quietly mutate the saved template (mirrors the
+ * pattern in saveScene to avoid the same shared-reference class of bugs).
+ */
+function saveStarshipTemplate(input: {
+  name: string
+  starship: Starship
+  description?: string
+  isCampaignShip?: boolean
+  id?: string
+}): SavedStarship {
+  const id = input.id ?? crypto.randomUUID()
+  const template: SavedStarship = {
+    id,
+    name: input.name.trim() || input.starship.name || 'Unnamed Ship',
+    description: input.description,
+    isCampaignShip: input.isCampaignShip ?? false,
+    starship: JSON.parse(JSON.stringify({ ...input.starship, templateId: id })),
+    savedAt: Date.now(),
+  }
+
+  const existingIdx = state.savedStarships.findIndex(s => s.id === id)
+  if (existingIdx !== -1) {
+    state.savedStarships[existingIdx] = template
+  } else {
+    state.savedStarships.push(template)
+  }
+  saveStarshipsToLocalStorage()
+  return template
+}
+
+/**
+ * Load a saved starship template into a fresh Starship config that can be
+ * dropped into a scene's starship slot. The returned ship's templateId is
+ * preserved so endScene knows where to write campaign-state back to.
+ */
+function loadStarshipTemplate(templateId: string): Starship | null {
+  const template = state.savedStarships.find(s => s.id === templateId)
+  if (!template) return null
+  const ship: Starship = JSON.parse(JSON.stringify(template.starship))
+  ship.templateId = template.id
+  if (!template.isCampaignShip) {
+    // Non-campaign templates start each scene at full strength. Campaign
+    // ships preserve persisted currentHP/currentShields (set on endScene)
+    // so damage carries forward between encounters.
+    ship.currentHP = ship.maxHP
+    ship.currentShields = ship.maxShields
+  }
+  return ship
+}
+
+function deleteStarshipTemplate(templateId: string) {
+  const idx = state.savedStarships.findIndex(s => s.id === templateId)
+  if (idx !== -1) {
+    state.savedStarships.splice(idx, 1)
+    saveStarshipsToLocalStorage()
+  }
+}
+
+function renameStarshipTemplate(templateId: string, name: string) {
+  const t = state.savedStarships.find(s => s.id === templateId)
+  if (!t) return
+  t.name = name.trim() || t.name
+  t.savedAt = Date.now()
+  saveStarshipsToLocalStorage()
+}
+
+function setStarshipTemplateCampaignFlag(templateId: string, isCampaignShip: boolean) {
+  const t = state.savedStarships.find(s => s.id === templateId)
+  if (!t) return
+  t.isCampaignShip = isCampaignShip
+  saveStarshipsToLocalStorage()
+}
+
+function exportStarshipTemplates(): string {
+  return JSON.stringify(state.savedStarships, null, 2)
+}
+
+function importStarshipTemplates(json: string) {
+  const parsed = JSON.parse(json) as SavedStarship[]
+  if (!Array.isArray(parsed)) throw new Error('Expected an array of starship templates')
+  for (const template of parsed) {
+    const existingIdx = state.savedStarships.findIndex(s => s.id === template.id)
+    if (existingIdx !== -1) {
+      state.savedStarships[existingIdx] = template
+    } else {
+      state.savedStarships.push(template)
+    }
+  }
+  saveStarshipsToLocalStorage()
+}
+
 function startScene(saved: SavedScene): StarshipScene {
-  state.activeScene = createSceneFromSaved(saved)
+  const scene = createSceneFromSaved(saved)
+  // Campaign continuity: createSceneFromSaved resets currentHP/Shields to
+  // max on every start. For ships linked to a saved campaign template we
+  // override that reset and pull the persisted post-scene state instead,
+  // so damage from a previous encounter actually carries forward.
+  const linkedId = scene.starship.templateId
+  if (linkedId) {
+    const template = state.savedStarships.find(t => t.id === linkedId)
+    if (template?.isCampaignShip) {
+      scene.starship.currentHP = template.starship.currentHP ?? scene.starship.maxHP
+      scene.starship.currentShields = template.starship.currentShields ?? scene.starship.maxShields
+    }
+  }
+  state.activeScene = scene
   broadcast('scene-update', state.activeScene)
   saveToLocalStorage()
   return state.activeScene
 }
 
+/**
+ * Persist whatever's currently in state.activeScene to localStorage and
+ * broadcast a fresh scene-update to player views. Used by in-scene
+ * editors (e.g. tweaking VP target / scene name during play) that mutate
+ * the activeScene directly without going through a typed mutator.
+ */
+function persistActiveScene() {
+  if (!state.activeScene) return
+  broadcast('scene-update', state.activeScene)
+  saveToLocalStorage()
+}
+
 function endScene() {
+  // Campaign continuity: if the running scene's ship is linked to a template
+  // marked isCampaignShip, persist the current HP/Shields back to the
+  // template so the next scene starts from the post-encounter state. This
+  // is opt-in per template so a one-shot ship doesn't accidentally carry
+  // damage forward between unrelated scenes.
+  const ship = state.activeScene?.starship
+  const linkedId = ship?.templateId
+  if (ship && linkedId) {
+    const template = state.savedStarships.find(t => t.id === linkedId)
+    if (template?.isCampaignShip) {
+      // Persist live state. Keep maxHP/maxShields untouched — only
+      // currentHP/currentShields and (defensively) anything the GM may
+      // have edited mid-scene like AC, saves, or bonuses.
+      template.starship = {
+        ...template.starship,
+        ac: ship.ac,
+        fortitude: ship.fortitude,
+        reflex: ship.reflex,
+        maxHP: ship.maxHP,
+        maxShields: ship.maxShields,
+        shieldRegen: ship.shieldRegen,
+        currentHP: ship.currentHP,
+        currentShields: ship.currentShields,
+        bonuses: { ...ship.bonuses },
+        templateId: linkedId,
+      }
+      template.savedAt = Date.now()
+      saveStarshipsToLocalStorage()
+    }
+  }
   state.activeScene = null
   broadcast('scene-update', null)
   saveToLocalStorage()
@@ -471,6 +628,14 @@ function nextTurn() {
   if (!state.activeScene || !state.activeScene.initiativeRolled) return
 
   const order = state.activeScene.initiativeOrder
+  // Guard: if initiative was "rolled" but the order is empty (GM clicked
+  // Skip Initiative), nextTurn would fall into the wrap-around path on
+  // every call — `(0+1) % 0 === NaN` and `NaN <= 0` is false, but the
+  // `order.every(...)` is vacuously true on an empty array, so each
+  // click would silently advance the round. Refuse to do anything;
+  // the GM should use Next Round explicitly.
+  if (order.length === 0) return
+
   const currentIdx = state.activeScene.currentTurnIndex
 
   // Mark current as acted
@@ -897,6 +1062,21 @@ function loadFromLocalStorage() {
   }
 }
 
+function saveStarshipsToLocalStorage() {
+  localStorage.setItem(STARSHIP_TEMPLATES_KEY, JSON.stringify(state.savedStarships))
+}
+
+function loadStarshipsFromLocalStorage() {
+  const saved = localStorage.getItem(STARSHIP_TEMPLATES_KEY)
+  if (!saved) return
+  try {
+    const parsed = JSON.parse(saved)
+    if (Array.isArray(parsed)) state.savedStarships = parsed
+  } catch (e) {
+    console.warn('[Starship] Failed to load saved starship templates:', e)
+  }
+}
+
 // ============ View Management ============
 
 function setGMView(isGM: boolean) {
@@ -924,6 +1104,7 @@ function init() {
 
   initChannel()
   loadFromLocalStorage()
+  loadStarshipsFromLocalStorage()
 
   console.log('[Starship] ======== INIT COMPLETE ========')
 }
@@ -959,6 +1140,15 @@ export function useStarshipStore() {
     deleteScene,
     startScene,
     endScene,
+    persistActiveScene,
+    // Starship template library
+    saveStarshipTemplate,
+    loadStarshipTemplate,
+    deleteStarshipTemplate,
+    renameStarshipTemplate,
+    setStarshipTemplateCampaignFlag,
+    exportStarshipTemplates,
+    importStarshipTemplates,
     // Starship management
     updateStarship,
     damageStarship,

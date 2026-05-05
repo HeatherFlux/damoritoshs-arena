@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import type { StarshipScene } from '../../types/starship'
 import { getRoleById, getRoleName } from '../../data/starshipRoles'
 import { useStarshipStore } from '../../stores/starshipStore'
+import { usePartyStore } from '../../stores/partyStore'
 
 const props = defineProps<{
   scene: StarshipScene
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useStarshipStore()
+const partyStore = usePartyStore()
 
 // Track PC initiative selections
 interface PCSelection {
@@ -53,12 +55,16 @@ const allRolled = computed(() => {
   return pcSelections.value.every(pc => pc.roll !== null && pc.roll > 0)
 })
 
-// Initialize from scene roles
+// Initialize from scene roles, then fall back to the active party
+// (configured on the encounters tab) so the GM doesn't have to retype
+// every player's name. Initiative is part of cinematic starship scenes
+// per GM Core: each PC rolls based on the skill tied to the role they
+// occupy this round.
 onMounted(() => {
-  // Create PC selections from assigned roles
   const roleAssignments = props.scene.roles || []
 
   if (roleAssignments.length > 0) {
+    // Scene already has assigned role/player pairs from setup mode.
     pcSelections.value = roleAssignments.map(assignment => {
       const role = getRoleById(assignment.roleId)
       return {
@@ -68,8 +74,18 @@ onMounted(() => {
         roll: null
       }
     })
+  } else if (partyStore.activeParty.value?.players?.length) {
+    // Pre-fill from the active party. Default each PC to the pilot role
+    // (the most universally-applicable role in cinematic scenes); the GM
+    // changes the role per PC in the modal before rolling.
+    pcSelections.value = partyStore.activeParty.value.players.map(player => ({
+      playerName: player.name,
+      roleId: 'pilot',
+      roleSkill: 'Piloting',
+      roll: null,
+    }))
   } else {
-    // If no roles assigned, create empty slots
+    // No party configured yet — single placeholder row the GM can edit.
     pcSelections.value = [
       { playerName: 'Player 1', roleId: 'pilot', roleSkill: 'Piloting', roll: null }
     ]

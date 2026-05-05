@@ -61,7 +61,14 @@ function formatTime(date: Date): string {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-surface rounded-lg overflow-hidden">
+  <!-- This component is always mounted inside a CollapsibleSidebar that
+       already provides a bg-surface chrome. The previous root had its
+       own `bg-surface rounded-lg overflow-hidden`, creating a "boxed in
+       a box" look (visible especially when the sidebar's empty-state
+       padding ringed an inner rounded card). EncounterList sits flush
+       inside the sidebar with no inner wrapper — matching that here so
+       all sidebars feel identical. -->
+  <div class="flex flex-col h-full">
     <div class="flex justify-between items-center px-4 py-3 border-b border-border bg-elevated">
       <h3 class="text-sm font-semibold">Roll History</h3>
       <button

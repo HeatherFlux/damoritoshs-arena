@@ -690,15 +690,18 @@ export function calculateConditionEffects(
       result.will += effects.allChecksPerValue * value
     }
 
-    // Dex-based (clumsy)
+    // Dex-based skill checks (clumsy: Acrobatics, Stealth, Thievery)
+    // Note: AC/Reflex are applied via acPerValue/reflexPerValue on the condition
+    // itself, so we only touch skillChecks here to avoid double-counting.
     if (effects.dexChecksPerValue) {
-      result.ac += effects.dexChecksPerValue * value
-      result.reflex += effects.dexChecksPerValue * value
+      result.skillChecks += effects.dexChecksPerValue * value
     }
 
-    // Con-based (drained)
+    // Con-based skill checks (drained: Athletics if Str, but mostly fortitude)
+    // Fortitude is applied via fortitudePerValue on the condition itself; this
+    // handler is reserved for any future con-based skill granularity.
     if (effects.conChecksPerValue) {
-      result.fortitude += effects.conChecksPerValue * value
+      // intentionally empty — fortitude already covered by fortitudePerValue
     }
 
     // Wis-based (stupefied affects perception and will)

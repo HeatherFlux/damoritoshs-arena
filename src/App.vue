@@ -416,7 +416,17 @@ function handleStarshipSaveCurrent() {
             @export="handleStarshipExport"
           />
         </CollapsibleSidebar>
-        <StarshipPanel ref="starshipPanelRef" />
+        <!-- Wrap the panel in a flex:1 section like the combat tab does.
+             Without this, StarshipPanel doesn't grow to fill the space
+             between the two sidebars, so the right rail floats away
+             from the viewport edge and its collapse toggle lands in
+             the wrong spot. Mirror combat's pattern exactly. -->
+        <section class="flex-1 overflow-hidden">
+          <StarshipPanel ref="starshipPanelRef" />
+        </section>
+        <CollapsibleSidebar side="right" storageKey="starshipRight">
+          <RollHistory />
+        </CollapsibleSidebar>
       </template>
 
       <!-- Custom Creature/Hazard Builder Tab -->

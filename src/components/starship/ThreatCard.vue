@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { StarshipThreat, ThreatType, ThreatRoutine, TacticalRole } from '../../types/starship'
+import type { StarshipThreat, ThreatType, ThreatRoutine, ThreatRoutineAction, TacticalRole } from '../../types/starship'
+import { rollD20, rollDamage } from '../../utils/dice'
+import { useStarshipStore } from '../../stores/starshipStore'
 import ThreatRoutineDisplay from './ThreatRoutineDisplay.vue'
 import ThreatRoutineEditor from './ThreatRoutineEditor.vue'
 
@@ -18,8 +20,24 @@ const emit = defineEmits<{
   (e: 'toggle-defeated'): void
 }>()
 
-// Track expanded state for routine display
-const showRoutine = ref(false)
+// Routine details render inline always — no collapse. The card's size
+// stays predictable per-render and the GM sees the full stat block at a
+// glance without an extra click. (Quick-attack rows are still promoted
+// at the top for one-tap rolls.)
+
+// Local damage input for the Apply Damage form
+const damageInput = ref<number | null>(null)
+
+function applyDamage() {
+  const amt = damageInput.value
+  if (!amt || amt <= 0) return
+  emit('damage', amt)
+  damageInput.value = null
+}
+
+// Track expanded state for special abilities (separate from the regular
+// abilities tag list which is always visible).
+const showSpecialAbilities = ref(false)
 
 // Track whether routine editor is open in editing mode
 const showRoutineEditor = ref(false)
@@ -86,6 +104,97 @@ const hpColor = computed(() => {
   if (pct > 25) return 'var(--color-warning)'
   return 'var(--color-danger)'
 })
+
+const shieldPercent = computed(() => {
+  const max = props.threat.maxShields ?? 0
+  const cur = props.threat.currentShields ?? 0
+  if (!max) return 0
+  return Math.max(0, Math.min(100, Math.round((cur / max) * 100)))
+})
+
+const hasDefenseInfo = computed(() => {
+  return props.threat.fortitude != null
+    || props.threat.reflex != null
+    || props.threat.initiativeSkill != null
+    || props.threat.initiativeBonus != null
+})
+
+const hasImmuneRWInfo = computed(() => {
+  return Boolean(
+    props.threat.immunities?.length
+    || (props.threat.resistances && Object.keys(props.threat.resistances).length)
+    || (props.threat.weaknesses && Object.keys(props.threat.weaknesses).length)
+  )
+})
+
+function formatMod(n: number): string {
+  return n >= 0 ? `+${n}` : `${n}`
+}
+
+function rollDefense(label: string, bonus: number) {
+  const roll = rollD20(bonus, label, props.threat.name)
+  store.logAction(
+    props.threat.id,
+    props.threat.name,
+    label,
+    roll.isNat20 ? 'critical_success' : roll.isNat1 ? 'critical_failure' : 'success',
+    roll.breakdown,
+  )
+}
+
+// Promote routine attacks and skill-check actions so the GM can roll them
+// straight from the threat card. Skill checks without a fixed DC are still
+// rollable — the threat rolls its skill, the GM compares vs the targeted
+// PC defense (e.g. Will DC) which varies per PC.
+const quickActions = computed((): ThreatRoutineAction[] => {
+  const actions = props.threat.routine?.actions ?? []
+  return actions.filter(a => a.type === 'attack' || a.type === 'skill_check')
+})
+
+const store = useStarshipStore()
+
+/**
+ * Roll a single threat action straight from the card. Mirrors the logic in
+ * ThreatRoutineDisplay.executeAction but doesn't consume the action budget
+ * — the GM may want to roll an attack as a free demonstration without
+ * spending one of the threat's per-turn actions. The "Show Routine"
+ * collapsible still tracks budgeted use.
+ */
+function rollQuickAction(action: ThreatRoutineAction) {
+  const actorId = props.threat.id
+  const actorName = props.threat.name
+
+  if (action.type === 'attack' && action.attackBonus != null) {
+    const attackRoll = rollD20(action.attackBonus, action.name, actorName)
+    let outcome: 'critical_success' | 'success' | 'failure' | 'critical_failure' = 'success'
+    if (attackRoll.isNat20) outcome = 'critical_success'
+    else if (attackRoll.isNat1) outcome = 'critical_failure'
+
+    let breakdown = `${attackRoll.breakdown} vs target AC`
+    if (action.damage) {
+      const dmg = rollDamage(action.damage, action.name, actorName, outcome === 'critical_success')
+      breakdown += ` | ${dmg.breakdown}`
+    }
+    store.logAction(actorId, actorName, action.name, outcome, breakdown)
+    return
+  }
+
+  if (action.type === 'skill_check') {
+    // Pull the threat's skill modifier from its skills map (e.g. action.skill
+    // === 'Arcana' and threat.skills?.Arcana === 14 → roll d20+14). Falls
+    // back to flat d20 if the threat doesn't list the skill explicitly.
+    // DC may be omitted when the action rolls vs a PC defense (Will DC,
+    // Reflex DC, etc.) — the GM compares the result vs the PC's static DC.
+    const skillKey = action.skill ?? ''
+    const bonus = (props.threat.skills?.[skillKey] as number | undefined) ?? 0
+    const roll = rollD20(bonus, action.name, actorName)
+    const target = action.vsDefense ? `vs ${action.vsDefense}` : ''
+    const dc = action.dc != null ? `DC ${action.dc}` : ''
+    const breakdown = `${roll.breakdown} ${target} ${dc}`.replace(/\s+/g, ' ').trim()
+    store.logAction(actorId, actorName, action.name, 'success', breakdown)
+    return
+  }
+}
 
 function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipThreat[K]) {
   emit('update', { [field]: value })
@@ -307,12 +416,133 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
             :style="{ width: hpPercent + '%', background: hpColor }"
           ></div>
         </div>
-        <div class="hp-controls">
-          <button class="hp-btn damage" @click="emit('damage', 5)">-5</button>
+        <div class="hp-text-row">
           <span class="hp-text">
             {{ threat.currentHP }} / {{ threat.maxHP }} HP
           </span>
-          <button class="hp-btn heal" @click="emit('heal', 5)">+5</button>
+        </div>
+      </div>
+
+      <!-- Shields (regen happens automatically each round via the
+           starshipStore; per-round value shown for GM visibility) -->
+      <div v-if="threat.maxShields && threat.maxShields > 0" class="shield-section">
+        <div class="shield-header">
+          <span class="shield-label">Shields</span>
+          <span class="shield-text">
+            {{ threat.currentShields ?? 0 }} / {{ threat.maxShields }}
+            <span v-if="threat.shieldRegen" class="shield-regen">+{{ threat.shieldRegen }}/rd</span>
+          </span>
+        </div>
+        <div class="shield-bar-container">
+          <div
+            class="shield-bar"
+            :style="{ width: shieldPercent + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Apply Damage form — only renders when the threat has HP. Per
+           GM Core p.230, some threats (asteroid fields, magical effects,
+           anything intangible or too vast to attack) intentionally lack
+           HP and shouldn't have an attack target. -->
+      <div v-if="threat.maxHP" class="threat-damage-section">
+        <span class="damage-label">Apply Damage</span>
+        <div class="damage-input-row">
+          <input
+            type="number"
+            class="damage-input"
+            v-model.number="damageInput"
+            min="0"
+            placeholder="0"
+            @keyup.enter="applyDamage"
+          />
+          <button class="btn btn-danger btn-sm" @click="applyDamage">Damage</button>
+        </div>
+      </div>
+
+      <!-- Defenses + Initiative chip row — click to roll -->
+      <div v-if="hasDefenseInfo" class="threat-defenses">
+        <span
+          v-if="threat.fortitude != null"
+          class="defense-chip rollable"
+          :title="`Roll Fortitude save +${threat.fortitude}`"
+          @click="rollDefense('Fortitude', threat.fortitude)"
+        >
+          <span class="defense-chip-label">Fort</span>
+          <span class="defense-chip-value">{{ formatMod(threat.fortitude) }}</span>
+        </span>
+        <span
+          v-if="threat.reflex != null"
+          class="defense-chip rollable"
+          :title="`Roll Reflex save +${threat.reflex}`"
+          @click="rollDefense('Reflex', threat.reflex)"
+        >
+          <span class="defense-chip-label">Ref</span>
+          <span class="defense-chip-value">{{ formatMod(threat.reflex) }}</span>
+        </span>
+        <span
+          v-if="threat.initiativeSkill || threat.initiativeBonus != null"
+          class="defense-chip rollable"
+          :title="`Roll initiative ${threat.initiativeSkill || 'Perception'} +${threat.initiativeBonus ?? 0}`"
+          @click="rollDefense(threat.initiativeSkill || 'Perception', threat.initiativeBonus ?? 0)"
+        >
+          <span class="defense-chip-label">Init</span>
+          <span class="defense-chip-value">
+            {{ threat.initiativeSkill || 'Perception' }}
+            {{ formatMod(threat.initiativeBonus ?? 0) }}
+          </span>
+        </span>
+      </div>
+
+      <!-- Quick attacks / DC checks — GM can roll straight from the card -->
+      <div v-if="quickActions.length > 0" class="quick-actions">
+        <div class="quick-actions-label">Attacks &amp; Checks</div>
+        <button
+          v-for="action in quickActions"
+          :key="action.id"
+          class="quick-action-row"
+          :class="`quick-action-${action.type}`"
+          @click="rollQuickAction(action)"
+          :title="action.description"
+        >
+          <span class="qa-type-tag">{{ action.type === 'attack' ? 'ATK' : 'CHK' }}</span>
+          <span class="qa-name">{{ action.name }}</span>
+          <!-- Attack bonus / skill bonus chip (whichever applies) -->
+          <span v-if="action.attackBonus != null" class="qa-bonus">+{{ action.attackBonus }}</span>
+          <span
+            v-else-if="action.type === 'skill_check' && action.skill && (threat.skills?.[action.skill] != null)"
+            class="qa-bonus"
+          >+{{ threat.skills[action.skill] }} {{ action.skill }}</span>
+          <!-- Damage or DC info -->
+          <span v-if="action.damage" class="qa-damage">
+            {{ action.damage }}<span v-if="action.damageType" class="qa-damage-type"> {{ action.damageType }}</span>
+          </span>
+          <span v-else-if="action.dc != null" class="qa-dc">
+            DC {{ action.dc }}<span v-if="action.vsDefense" class="qa-vs"> {{ action.vsDefense }}</span>
+          </span>
+          <span v-else-if="action.vsDefense" class="qa-dc">
+            vs {{ action.vsDefense }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Immunities / Resistances / Weaknesses -->
+      <div v-if="hasImmuneRWInfo" class="threat-irw">
+        <div v-if="threat.immunities?.length" class="irw-row">
+          <span class="irw-label">Immune</span>
+          <span v-for="imm in threat.immunities" :key="imm" class="irw-tag immune">{{ imm }}</span>
+        </div>
+        <div v-if="threat.resistances && Object.keys(threat.resistances).length" class="irw-row">
+          <span class="irw-label">Resist</span>
+          <span v-for="(amt, type) in threat.resistances" :key="type" class="irw-tag resist">
+            {{ type }} {{ amt }}
+          </span>
+        </div>
+        <div v-if="threat.weaknesses && Object.keys(threat.weaknesses).length" class="irw-row">
+          <span class="irw-label">Weak</span>
+          <span v-for="(amt, type) in threat.weaknesses" :key="type" class="irw-tag weak">
+            {{ type }} {{ amt }}
+          </span>
         </div>
       </div>
 
@@ -332,20 +562,30 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         </span>
       </div>
 
-      <!-- Routine Toggle -->
+      <!-- Special Abilities (collapsible — same pattern as routine) -->
       <button
-        v-if="threat.routine"
+        v-if="threat.specialAbilities?.length"
         class="routine-toggle-btn"
-        :class="{ expanded: showRoutine }"
-        @click="showRoutine = !showRoutine"
+        :class="{ expanded: showSpecialAbilities }"
+        @click="showSpecialAbilities = !showSpecialAbilities"
       >
-        {{ showRoutine ? 'Hide Routine' : 'Show Routine' }}
-        <span class="toggle-icon">{{ showRoutine ? '▼' : '▶' }}</span>
+        {{ showSpecialAbilities ? 'Hide' : 'Show' }} Special Abilities ({{ threat.specialAbilities.length }})
+        <span class="toggle-icon">{{ showSpecialAbilities ? '▼' : '▶' }}</span>
       </button>
+      <div v-if="showSpecialAbilities && threat.specialAbilities?.length" class="special-abilities-section">
+        <div v-for="sa in threat.specialAbilities" :key="sa.name" class="special-ability">
+          <div class="special-ability-name">{{ sa.name }}</div>
+          <div class="special-ability-desc">{{ sa.description }}</div>
+        </div>
+      </div>
 
-      <!-- Routine Display (expandable) -->
+      <!-- Routine Display — always inline. Earlier versions had a
+           Show/Hide toggle but expanding it caused the threat card (and
+           the surrounding column) to resize, so it now always renders at
+           the same height. The promoted attack rows above stay as the
+           one-tap roll surface; this section is the narrative + budget. -->
       <ThreatRoutineDisplay
-        v-if="showRoutine && threat.routine"
+        v-if="threat.routine"
         :threat="threat"
         class="routine-section"
       />
@@ -412,6 +652,11 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text);
+  /* Keep names readable in narrow columns — wrap on words, not letters,
+     and don't break parenthesized aliases mid-word. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 .threat-meta {
@@ -429,6 +674,7 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .ac-label {
@@ -590,6 +836,307 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8125rem;
   color: var(--color-text);
+}
+
+.hp-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Shield section — mirrors hp-section but with cyan/info coloring */
+.shield-section {
+  margin: 0.5rem 0;
+}
+
+.shield-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.shield-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+}
+
+.shield-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+}
+
+.shield-regen {
+  margin-left: 0.5rem;
+  font-size: 0.625rem;
+  color: var(--color-text-dim);
+}
+
+.shield-bar-container {
+  height: 4px;
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.shield-bar {
+  height: 100%;
+  background: var(--color-primary);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--color-primary) 60%, transparent);
+  transition: width 0.2s ease;
+}
+
+.shield-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Defenses + Initiative chip row */
+.threat-defenses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0.5rem 0;
+}
+
+.defense-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+}
+
+.defense-chip-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+}
+
+.defense-chip-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Immunities / Resistances / Weaknesses */
+.threat-irw {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.irw-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.irw-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+  min-width: 3rem;
+}
+
+.irw-tag {
+  padding: 0.0625rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.625rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  text-transform: capitalize;
+}
+
+.irw-tag.immune {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--color-info, #818cf8);
+}
+
+.irw-tag.resist {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: var(--color-success, #4ade80);
+}
+
+.irw-tag.weak {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--color-danger, #f87171);
+}
+
+/* HP/Shield text rows — display only, no nudge buttons. */
+.hp-text-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+/* Threat damage form — mirrors the PC ship's Apply Damage. The number
+   input + Damage button is the canonical way to deal damage; +5/-5
+   nudge buttons are not part of the rules. */
+.threat-damage-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.threat-damage-section .damage-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-dim);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.threat-damage-section .damage-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+}
+
+.threat-damage-section .damage-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem 0.375rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Quick-action rows — promoted attack/skill-check entries pulled from the
+   routine so the GM can roll without expanding "Show Routine" first. */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.quick-actions-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-dim);
+  font-weight: 600;
+}
+
+.quick-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.quick-action-row:hover {
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-elevated));
+  border-color: var(--color-danger);
+}
+
+.quick-action-skill_check:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-elevated));
+  border-color: var(--color-primary);
+}
+
+.qa-type-tag {
+  padding: 0.0625rem 0.375rem;
+  background: var(--color-danger);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.quick-action-skill_check .qa-type-tag {
+  background: var(--color-primary);
+}
+
+.qa-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.qa-bonus {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-bg);
+  padding: 0.0625rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+.qa-damage,
+.qa-dc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  color: var(--color-warning, #f59e0b);
+}
+
+.qa-damage-type {
+  color: var(--color-text-dim);
+  font-style: italic;
+}
+
+.qa-vs {
+  color: var(--color-text-dim);
+}
+
+/* Special abilities collapsible block */
+.special-abilities-section {
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.special-ability-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.special-ability-desc {
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+  line-height: 1.4;
 }
 
 /* Description & Abilities */

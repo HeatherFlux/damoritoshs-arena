@@ -124,13 +124,25 @@ const contentWidth = computed(() => {
   height: 100%;
 }
 
-.sidebar-left {
+/* Both sides use the same `row` flex direction; the right sidebar
+   reorders its children via CSS `order` so the toggle tab ends up to
+   the LEFT of the panel without relying on `row-reverse`. row-reverse
+   has fragile interactions with flex-shrink/zero-width children that
+   were causing the right-side toggle to drift to the wrong edge when
+   the panel collapsed (some browsers correctly shrank the wrapper to
+   the tab's intrinsic width, others left it at full width with the
+   tab stuck on the inside edge). */
+.sidebar-left,
+.sidebar-right {
   flex-direction: row;
 }
 
-.sidebar-right {
-  flex-direction: row-reverse;
-}
+/* Right sidebar: render the tab first, then the panel. With explicit
+   `order` numbers we don't depend on row-reverse to flip the visual
+   order, so the wrapper's intrinsic width is just `tab + panel` even
+   when the panel collapses to 0. */
+.sidebar-right .sidebar-tab { order: 1; }
+.sidebar-right .sidebar-panel { order: 2; }
 
 .sidebar-panel {
   flex-shrink: 0;

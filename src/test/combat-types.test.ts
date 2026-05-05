@@ -11,6 +11,11 @@ describe('getAdjustedHP', () => {
     expect(getAdjustedHP(45, 'normal', 5)).toBe(45)
   })
 
+  // PF2e Bestiary brackets:
+  //   Levels 1-2:  ±10 HP
+  //   Levels 3-5:  ±15 HP
+  //   Levels 6-20: ±20 HP
+  //   Levels 21+:  ±30 HP
   it('adds 10 HP for elite at level 1', () => {
     expect(getAdjustedHP(20, 'elite', 1)).toBe(30)
   })
@@ -19,26 +24,32 @@ describe('getAdjustedHP', () => {
     expect(getAdjustedHP(10, 'elite', 0)).toBe(20)
   })
 
-  it('adds 15 HP for elite at level 2-4', () => {
-    expect(getAdjustedHP(30, 'elite', 2)).toBe(45)
-    expect(getAdjustedHP(30, 'elite', 4)).toBe(45)
+  it('adds 10 HP for elite at level 2', () => {
+    expect(getAdjustedHP(20, 'elite', 2)).toBe(30)
   })
 
-  it('adds 20 HP for elite at level 5-19', () => {
-    expect(getAdjustedHP(50, 'elite', 5)).toBe(70)
-    expect(getAdjustedHP(50, 'elite', 19)).toBe(70)
+  it('adds 15 HP for elite at level 3-5', () => {
+    expect(getAdjustedHP(30, 'elite', 3)).toBe(45)
+    expect(getAdjustedHP(30, 'elite', 5)).toBe(45)
   })
 
-  it('adds 30 HP for elite at level 20+', () => {
-    expect(getAdjustedHP(200, 'elite', 20)).toBe(230)
+  it('adds 20 HP for elite at level 6-20', () => {
+    expect(getAdjustedHP(50, 'elite', 6)).toBe(70)
+    expect(getAdjustedHP(50, 'elite', 20)).toBe(70)
+  })
+
+  it('adds 30 HP for elite at level 21+', () => {
+    expect(getAdjustedHP(200, 'elite', 21)).toBe(230)
   })
 
   it('subtracts HP for weak adjustment', () => {
-    expect(getAdjustedHP(50, 'weak', 5)).toBe(30) // 50 - 20
+    // Level 5 falls in the 3-5 bracket → -15.
+    expect(getAdjustedHP(50, 'weak', 5)).toBe(35)
   })
 
   it('enforces minimum 1 HP for weak', () => {
-    expect(getAdjustedHP(5, 'weak', 5)).toBe(1) // 5 - 20 → clamped to 1
+    // 5 - 15 = -10 → clamped to 1.
+    expect(getAdjustedHP(5, 'weak', 5)).toBe(1)
   })
 })
 

@@ -48,6 +48,13 @@
       "exampleUrl": "/schemas/examples/starship-scenes.example.json"
     },
     {
+      "id": "starship-templates",
+      "name": "Starship Templates",
+      "description": "Reusable PC starship configurations — load once, drop into any scene",
+      "schemaUrl": "/schemas/starship-templates.schema.json",
+      "exampleUrl": "/schemas/examples/starship-templates.example.json"
+    },
+    {
       "id": "shops",
       "name": "Shops",
       "description": "Saved shop snapshots with rolled inventory and shopkeeper",

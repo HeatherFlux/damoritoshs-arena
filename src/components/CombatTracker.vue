@@ -78,6 +78,8 @@ const conditionSearchInput = ref<HTMLInputElement | null>(null)
 watch(showConditionPicker, (val) => {
   if (val) {
     conditionSearch.value = ''
+    customConditionName.value = ''
+    customConditionValue.value = null
     nextTick(() => conditionSearchInput.value?.focus())
   }
 })
@@ -90,6 +92,23 @@ function addConditionToCombatant(combatantId: string, conditionKey: string) {
 
 function getConditionDef(key: string) {
   return CONDITION_DEFS[key]
+}
+
+const customConditionName = ref('')
+const customConditionValue = ref<number | null>(null)
+
+function addCustomConditionToCombatant() {
+  const id = showConditionPicker.value
+  if (!id) return
+  // Lowercased to match the existing built-in condition keys ('frightened',
+  // 'clumsy', etc.) so duplicates dedupe via addCondition's name comparison.
+  // The display uses CSS `capitalize` so "aim" still renders as "Aim".
+  const name = customConditionName.value.trim().toLowerCase()
+  if (!name) return
+  combatStore.addCondition(id, name, customConditionValue.value ?? undefined)
+  customConditionName.value = ''
+  customConditionValue.value = null
+  showConditionPicker.value = null
 }
 
 const shareCopied = ref(false)
@@ -340,6 +359,37 @@ function importAnother() {
           <div v-if="filteredConditions.length === 0" class="text-center py-4 text-dim text-sm">
             No conditions match "{{ conditionSearch }}"
           </div>
+        </div>
+        <!-- Custom condition (for ad-hoc statuses like "aim", "marked", "concentrating") -->
+        <div class="mt-3 pt-3 border-t border-border">
+          <div class="text-[0.6875rem] text-dim mb-1.5 uppercase tracking-wider">Custom condition</div>
+          <div class="flex gap-2">
+            <input
+              v-model="customConditionName"
+              type="text"
+              class="flex-1 px-3 py-2 bg-elevated border border-border rounded-md text-text text-sm focus:outline-none focus:border-accent"
+              placeholder="e.g. aim, marked, concentrating"
+              @keydown.enter="addCustomConditionToCombatant"
+            />
+            <input
+              v-model.number="customConditionValue"
+              type="number"
+              min="1"
+              max="10"
+              class="w-16 px-2 py-2 bg-elevated border border-border rounded-md text-text text-sm focus:outline-none focus:border-accent"
+              placeholder="val"
+              title="Optional numeric value"
+              @keydown.enter="addCustomConditionToCombatant"
+            />
+            <button
+              class="btn-primary"
+              :disabled="!customConditionName.trim()"
+              @click="addCustomConditionToCombatant"
+            >
+              Add
+            </button>
+          </div>
+          <div class="text-[0.625rem] text-dim mt-1">Tracking only — no automatic stat penalties.</div>
         </div>
         <button class="btn-secondary mt-3" @click="showConditionPicker = null">Cancel</button>
       </div>

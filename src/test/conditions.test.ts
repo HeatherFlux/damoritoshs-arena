@@ -192,4 +192,26 @@ describe('calculateConditionEffects', () => {
     expect(result.perception).toBe(-2)
     expect(result.will).toBe(-2)
   })
+
+  it('clumsy does not double-count AC or Reflex (regression)', () => {
+    // Bug: clumsy 1 was applying -2 to AC and Reflex because both
+    // acPerValue/reflexPerValue AND dexChecksPerValue were being summed
+    // into the same fields. Should be -1 each per value.
+    const v1 = calculateConditionEffects([{ name: 'clumsy', value: 1 }])
+    expect(v1.ac).toBe(-1)
+    expect(v1.reflex).toBe(-1)
+    expect(v1.skillChecks).toBe(-1)
+
+    const v3 = calculateConditionEffects([{ name: 'clumsy', value: 3 }])
+    expect(v3.ac).toBe(-3)
+    expect(v3.reflex).toBe(-3)
+    expect(v3.skillChecks).toBe(-3)
+  })
+
+  it('drained does not double-count Fortitude (regression)', () => {
+    // Same family of bug as clumsy: fortitudePerValue + conChecksPerValue
+    // both wrote into result.fortitude.
+    const v2 = calculateConditionEffects([{ name: 'drained', value: 2 }])
+    expect(v2.fortitude).toBe(-2)
+  })
 })

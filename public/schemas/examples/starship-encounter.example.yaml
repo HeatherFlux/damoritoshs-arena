@@ -1,0 +1,323 @@
+# =====================================================================
+# CINEMATIC STARSHIP SCENE — TEST BUNDLE
+# =====================================================================
+# Paste this into Settings ▸ Data Schemas ▸ Import Session Bundle to load
+# a full playable encounter that exercises every click-to-roll surface in
+# the runner: ship skill bonuses, defenses, threat attacks/checks/saves,
+# routine actions, immunities/weaknesses/resistances, and the inline
+# Victory Points / Threats progress chip.
+#
+# Scenario: A Corpse Fleet cruiser (the Bonesinger) is bearing down on
+# the party's Pathfinder Society explorer. The PCs need to either
+# escape (5 Victory Points) or cripple the cruiser before its 3rd volley.
+# =====================================================================
+
+name: "Cinematic Starship Test — Corpse Fleet Pursuit"
+description: >-
+  A test scene wired up so every clickable stat actually rolls and logs.
+  Includes a campaign-ship template, seven crew actions across all six
+  roles, and one threat with a full attack + skill-check routine, plus
+  immunities, weaknesses, and a special ability.
+
+partyLevel: 5
+
+# ---------------------------------------------------------------------
+# PARTY — pre-fills the Initiative Roll modal in the starship runner.
+# ---------------------------------------------------------------------
+party:
+  name: "Test Crew"
+  players:
+    - name: "Peebles"
+      level: 5
+      class: "Operative"
+      ancestry: "Anadi"
+      maxHP: 70
+      ac: 22
+      perception: 12
+      fortitude: 8
+      reflex: 14
+      will: 10
+    - name: "Poppy"
+      level: 5
+      class: "Cleric of Villith"
+      ancestry: "Lashunta"
+      maxHP: 70
+      ac: 21
+      perception: 12
+      fortitude: 13
+      reflex: 9
+      will: 14
+    - name: "FunGus"
+      level: 5
+      class: "Ranger"
+      ancestry: "Leshy"
+      maxHP: 75
+      ac: 23
+      perception: 14
+      fortitude: 11
+      reflex: 13
+      will: 11
+    - name: "Drakesh"
+      level: 5
+      class: "Soldier"
+      ancestry: "Half-Dragon"
+      maxHP: 88
+      ac: 23
+      perception: 10
+      fortitude: 14
+      reflex: 9
+      will: 10
+
+# ---------------------------------------------------------------------
+# REUSABLE SHIP TEMPLATE — appears in the "Load saved ship" dropdown
+# when building a scene. isCampaignShip persists post-scene damage.
+# ---------------------------------------------------------------------
+starshipTemplates:
+  - id: "tpl-pathfinder-explorer"
+    name: "Pathfinder Society Explorer"
+    description: "Standard PSS explorer-class hull. Mid armor, decent shields."
+    isCampaignShip: true
+    savedAt: 1760000000000
+    starship:
+      id: "tpl-pathfinder-explorer-ship"
+      name: "PSS Wayfinder"
+      level: 5
+      ac: 22
+      fortitude: 12
+      reflex: 14
+      maxHP: 65
+      currentHP: 65
+      maxShields: 18
+      currentShields: 18
+      shieldRegen: 6
+      bonuses:
+        Piloting: 2
+        Computers: 1
+
+# ---------------------------------------------------------------------
+# THE SCENE ITSELF
+# ---------------------------------------------------------------------
+starship:
+  - name: "Corpse Fleet Pursuit"
+    level: 5
+    description: >-
+      An undead cruiser — the Bonesinger — has the party's explorer on
+      its scopes. The PCs can either escape into the asteroid belt
+      (5 Victory Points) or cripple the cruiser. The Bonesinger uses a
+      magical Disruptive Scan to lock in firing solutions, then
+      unleashes its antimatter beam.
+    victoryCondition: "victory_points"
+    vpRequired: 5
+    partySize: 4
+    additionalObjectives:
+      - "Recover the cargo manifest from the freighter wreckage (Computers DC 24)"
+      - "Identify the Corpse Fleet captain (Recall Knowledge — Society or Religion DC 22)"
+
+    availableRoles:
+      - "captain"
+      - "engineer"
+      - "gunner"
+      - "magic_officer"
+      - "pilot"
+      - "science_officer"
+
+    roleDescriptions:
+      captain: "Direct the crew. Inspire allies, demoralize enemies."
+      engineer: "Patch hull damage. Reroute power to shields, weapons, or engines."
+      gunner: "Operate the dorsal kinetic cannon and ventral missile rack."
+      magic_officer: "Channel the magic core. Mystically jam enemy sensors."
+      pilot: "Navigate the asteroid belt. Race the Bonesinger, dodge incoming fire."
+      science_officer: "Scan for cover, identify weakpoints, and counter the Bonesinger's Disruptive Scan."
+
+    # PC starship — links to the campaign template above so damage carries
+    # forward between sessions.
+    starship:
+      id: "scene-ship-instance"
+      name: "PSS Wayfinder"
+      level: 5
+      ac: 22
+      fortitude: 12
+      reflex: 14
+      maxHP: 65
+      currentHP: 65
+      maxShields: 18
+      currentShields: 18
+      shieldRegen: 6
+      bonuses:
+        Piloting: 2
+        Computers: 1
+      templateId: "tpl-pathfinder-explorer"
+
+    # Crew actions, grouped by role. Damage chips are click-to-roll.
+    starshipActions:
+      - id: "act-fire-cannon"
+        name: "Fire Dorsal Cannon"
+        actionCost: 2
+        role: "gunner"
+        skills: []
+        isAttack: true
+        damage: "3d8+9"
+        traits: ["range 800 ft", "kinetic"]
+        description: "Strike with the explorer's dorsal kinetic cannon."
+        outcomes:
+          criticalSuccess: "Deal double damage and shake the Bonesinger's targeting (gain 1 Victory Point)."
+          success: "Deal damage."
+          failure: "Miss."
+          criticalFailure: "Miss; the cannon overheats and is unavailable next round."
+
+      - id: "act-launch-missiles"
+        name: "Launch Missile Salvo"
+        actionCost: 3
+        role: "gunner"
+        skills: []
+        isAttack: true
+        damage: "4d6+7"
+        damageType: "force"
+        traits: ["splash", "magitech"]
+        description: "Empty the ventral missile rack at the Bonesinger."
+        outcomes:
+          criticalSuccess: "Deal double damage; gain 2 Victory Points."
+          success: "Deal damage; gain 1 Victory Point."
+          failure: "Miss; the missiles drift harmlessly."
+          criticalFailure: "The salvo detonates early — take 2d6 damage from feedback."
+
+      - id: "act-evasive"
+        name: "Evasive Maneuvers"
+        actionCost: 2
+        role: "pilot"
+        skills: ["Piloting", "Acrobatics"]
+        description: "Weave through the asteroid field and break the Bonesinger's lock."
+        outcomes:
+          criticalSuccess: "Gain 2 Victory Points; the Bonesinger's next attack takes -2 to hit."
+          success: "Gain 1 Victory Point."
+          failure: "No effect."
+          criticalFailure: "Clip an asteroid — take 2d8 damage."
+
+      - id: "act-patch-job"
+        name: "Patch Job"
+        actionCost: 2
+        role: "engineer"
+        skills: ["Crafting", "Athletics"]
+        description: "Field-repair hull damage."
+        outcomes:
+          criticalSuccess: "Regain 2d8 HP and lose any persistent damage."
+          success: "Regain 1d8 HP."
+          failure: "No effect."
+          criticalFailure: "Spark an electrical fire — take 1d6 damage."
+
+      - id: "act-counter-scan"
+        name: "Counter-Scan"
+        actionCost: 2
+        role: "science_officer"
+        skills: ["Computers"]
+        description: "Identify and disrupt the Bonesinger's targeting magic."
+        outcomes:
+          criticalSuccess: "Bonesinger's next routine action automatically fails; gain 1 Victory Point."
+          success: "Bonesinger's next attack takes -4 to hit."
+          failure: "No effect."
+          criticalFailure: "The Bonesinger's countermeasures lock our sensors — pilot has -2 next round."
+
+      - id: "act-arcane-jam"
+        name: "Arcane Sensor Jam"
+        actionCost: 2
+        role: "magic_officer"
+        skills: ["Arcana", "Occultism"]
+        description: "Project an arcane jamming field around the explorer."
+        outcomes:
+          criticalSuccess: "Bonesinger is blinded for 1 round; gain 1 Victory Point."
+          success: "Bonesinger has -2 to attack rolls until end of next round."
+          failure: "No effect."
+          criticalFailure: "Backlash — magic officer takes 1d8 mental damage."
+
+      - id: "act-rally-crew"
+        name: "Rally the Crew"
+        actionCost: 2
+        role: "captain"
+        skills: ["Diplomacy", "Intimidation"]
+        description: "Inspire the crew with a stirring speech (or a bracing threat)."
+        outcomes:
+          criticalSuccess: "All crew gain +2 to their next check; gain 1 Victory Point."
+          success: "All crew gain +1 to their next check."
+          failure: "No effect."
+          criticalFailure: "A gunner panics — has -1 next round."
+
+    # Threats — each one's stats are click-to-roll in the runner.
+    threats:
+      - id: "threat-bonesinger"
+        name: "Bonesinger (Corpse Fleet Cruiser)"
+        type: "enemy_ship"
+        level: 5
+        maxHP: 95
+        currentHP: 95
+        maxShields: 12
+        currentShields: 12
+        shieldRegen: 4
+        ac: 23
+        fortitude: 14
+        reflex: 8
+        initiativeSkill: "Arcana"
+        initiativeBonus: 14
+        skills:
+          Arcana: 14
+          Piloting: 12
+        tacticalRole: "standard"
+        description: >-
+          A Corpse Fleet cruiser, hull pitted by centuries in the Drift.
+          Crewed by skeletal officers bound to its arcane core.
+        immunities: ["mental"]
+        weaknesses:
+          sonic: 5
+        resistances:
+          cold: 5
+        specialAbilities:
+          - name: "Necrotic Aura"
+            description: "Living crew within 60 ft of the Bonesinger take a -1 status penalty to all checks while engaged."
+            trigger: "Aura — passive while not destroyed."
+        routine:
+          actionsPerTurn: 3
+          description: "Disruptive Scan to lock targets, then Antimatter Beam volley."
+          actions:
+            - id: "rt-scan"
+              name: "Disruptive Scan"
+              actionCost: 1
+              type: "skill_check"
+              description: "Magical scan that locks firing solutions onto the explorer's weak points."
+              skill: "Arcana"
+              vsDefense: "Will DC"
+              dc: 22
+              effectOnSuccess: "Bonesinger's next Antimatter Beam this round gains +2 to hit and ignores 5 shield."
+              effectOnFailure: "No effect this round."
+            - id: "rt-beam"
+              name: "Antimatter Beam"
+              actionCost: 2
+              type: "attack"
+              description: "Heavy beam that punches through shields."
+              attackBonus: 14
+              damage: "3d10+8"
+              damageType: "fire"
+              traits: ["magitech", "range 1200 ft"]
+
+# ---------------------------------------------------------------------
+# QUICK MANUAL TEST CHECKLIST after import
+# ---------------------------------------------------------------------
+# 1. Starship tab → click "Corpse Fleet Pursuit" in Saved Scenes →
+#    Edit fields appear; click Start Scene.
+# 2. Header should show "Victory Points − 0 + +2" (the inline VP chip).
+# 3. PSS Wayfinder card shows clickable chips: "Piloting +2", "Computers +1",
+#    plus AC 22, Fort +12, Ref +14 — click each to roll d20+bonus.
+# 4. Bonesinger threat card shows:
+#    - Click attack +14 → rolls d20+14 (logs to Roll History)
+#    - Click 3d10+8 → rolls damage
+#    - Click Disruptive Scan / DC 22 → rolls d20+14 (Bonesinger's
+#      Arcana bonus from threat.skills.Arcana) vs the PC's Will DC.
+#    - Fort +14 / Ref +8 / Init Arcana +14 chips all rollable
+#    - Mental immunity badge, sonic 5 weakness badge
+# 5. Apply Damage form on the threat card: type 30 → Damage button.
+#    Shields drop from 12 to 0, HP drops to 77.
+# 6. Click "Roll Initiative" → modal pre-fills with the four party PCs.
+# 7. Skip Initiative → Next Round advances the round counter and
+#    regenerates shields (+6 PC ship, +4 threat).
+# 8. Crew Actions reference list (left column) should show all seven
+#    actions grouped by role.
+# 9. Open Settings → confirm the saved ship template "Pathfinder Society
+#    Explorer" is in the dropdown when creating a new scene.

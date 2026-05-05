@@ -136,7 +136,7 @@
     },
     "starship": {
       "type": "array",
-      "description": "Starship scene templates",
+      "description": "Cinematic starship scene templates. The shape mirrors SavedScene from starship-scenes.schema.json — see that file for the full field reference. Important fields the runner exercises: starship.bonuses (clickable skill chips), starship.templateId (link to a saved ship template), threats[].routine (per-turn actions with rollable attackBonus / damage / dc), threats[].immunities/weaknesses/resistances, threats[].specialAbilities, starshipActions[] grouped by role.",
       "items": {
         "type": "object",
         "required": ["name"],
@@ -144,47 +144,70 @@
           "name": { "type": "string" },
           "level": { "type": "integer" },
           "description": { "type": "string" },
-          "victoryCondition": { "type": "string", "enum": ["defeat", "victory_points", "survival", "escape", "custom"] },
-          "vpRequired": { "type": "integer" },
-          "survivalRounds": { "type": "integer" },
-          "customCondition": { "type": "string" },
-          "starship": {
-            "type": "object",
-            "description": "PC starship stats",
-            "properties": {
-              "name": { "type": "string" },
-              "ac": { "type": "integer" },
-              "fortitude": { "type": "integer" },
-              "reflex": { "type": "integer" },
-              "maxHP": { "type": "integer" },
-              "maxShields": { "type": "integer" },
-              "shieldRegen": { "type": "integer" }
-            }
+          "victoryCondition": {
+            "type": "string",
+            "enum": ["defeat", "victory_points", "survival", "escape", "custom"],
+            "description": "Drives the inline progress chip in the scene header. defeat → 'Threats N / M active'; victory_points → '+/-/+2' counter with vpRequired target; survival → 'Survive N / M rds'; escape → 'in progress'; custom → renders customCondition text."
           },
-          "threats": {
+          "vpRequired": { "type": "integer", "description": "Required for victory_points scenes." },
+          "survivalRounds": { "type": "integer", "description": "Required for survival scenes." },
+          "customCondition": { "type": "string", "description": "Required for custom scenes — short label rendered in the header." },
+          "partySize": { "type": "integer", "description": "Default 4 (per GM Core baseline)." },
+          "additionalObjectives": { "type": "array", "items": { "type": "string" } },
+          "roleDescriptions": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "description": "Flavour text per role for the GM to read aloud."
+          },
+          "availableRoles": {
             "type": "array",
+            "items": { "type": "string" },
+            "description": "Role ids PCs can occupy (per GM Core p.231). Standard set: captain, engineer, gunner, magic_officer, pilot, science_officer. Repeats are allowed (e.g. ['gunner', 'gunner'] for two gunner slots)."
+          },
+          "roles": {
+            "type": "array",
+            "description": "Pre-assigned role/PC pairings for this scene. The InitiativeRollModal uses these to prefill rows; falls back to the active party from partyStore if empty.",
             "items": {
               "type": "object",
-              "required": ["name", "type", "level"],
+              "required": ["roleId", "playerName"],
               "properties": {
-                "name": { "type": "string" },
-                "type": { "type": "string", "enum": ["enemy_ship", "hazard", "environmental"] },
-                "level": { "type": "integer" },
-                "maxHP": { "type": "integer" },
-                "ac": { "type": "integer" },
-                "maxShields": { "type": "integer" },
-                "shieldRegen": { "type": "integer" },
-                "fortitude": { "type": "integer" },
-                "reflex": { "type": "integer" },
-                "description": { "type": "string" },
-                "routine": { "type": "object" }
+                "roleId": { "type": "string" },
+                "playerName": { "type": "string" },
+                "playerId": { "type": "string" }
               }
             }
           },
+          "starship": {
+            "type": "object",
+            "description": "PC starship stats. See starship-scenes.schema.json#/definitions/Starship for the full shape. Skill bonuses (e.g. {'Piloting': 2}) render as click-to-roll chips on the ship card.",
+            "additionalProperties": true
+          },
+          "threats": {
+            "type": "array",
+            "description": "Enemy ships, hazards, environmental dangers. See starship-scenes.schema.json#/definitions/StarshipThreat for the full shape. The runner promotes routine attack/skill_check actions to a top-level 'Attacks & Checks' row on each card with click-to-roll bonuses, damage, and DCs.",
+            "items": { "type": "object", "additionalProperties": true }
+          },
           "starshipActions": {
             "type": "array",
-            "items": { "type": "object" }
+            "description": "Crew actions available to PCs. See starship-scenes.schema.json#/definitions/StarshipAction. Grouped by role in the Crew Actions reference list.",
+            "items": { "type": "object", "additionalProperties": true }
           }
+        }
+      }
+    },
+    "starshipTemplates": {
+      "type": "array",
+      "description": "Reusable PC starship templates — see starship-templates.schema.json. Loading a template into a scene sets scene.starship.templateId so the GM can save the configuration once and reuse it across encounters. Templates marked isCampaignShip persist post-scene HP/Shields back so damage carries forward.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "starship"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "isCampaignShip": { "type": "boolean" },
+          "starship": { "type": "object", "additionalProperties": true },
+          "savedAt": { "type": "number" }
         }
       }
     },

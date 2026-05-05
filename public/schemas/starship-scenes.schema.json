@@ -58,24 +58,34 @@
     },
     "Starship": {
       "type": "object",
+      "description": "PC starship stat block. AC, Fort, Ref, and shield bonuses (e.g. 'Piloting': 2) are all clickable in the runner — clicking them rolls d20+bonus and logs to roll history.",
       "required": ["id", "name", "level", "ac", "fortitude", "reflex", "maxShields", "currentShields", "shieldRegen", "maxHP", "currentHP"],
       "properties": {
         "id": { "type": "string" },
-        "name": { "type": "string" },
+        "name": { "type": "string", "description": "Editable in setup mode and live during play." },
         "level": { "type": "integer" },
         "ac": { "type": "integer" },
-        "fortitude": { "type": "integer" },
-        "reflex": { "type": "integer" },
+        "fortitude": { "type": "integer", "description": "Fortitude save modifier — clickable to roll." },
+        "reflex": { "type": "integer", "description": "Reflex save modifier — clickable to roll." },
         "maxShields": { "type": "integer" },
         "currentShields": { "type": "integer" },
-        "shieldRegen": { "type": "integer" },
+        "shieldRegen": { "type": "integer", "description": "Shields regenerated at the start of each round (auto-applied via Next Round)." },
         "maxHP": { "type": "integer" },
         "currentHP": { "type": "integer" },
-        "bonuses": { "type": "object", "additionalProperties": { "type": "number" } }
+        "bonuses": {
+          "type": "object",
+          "description": "Starship Bonuses per GM Core p.229 — item bonus to crew skill checks (e.g. {'Piloting': 2, 'Computers': 1}). Each chip is click-to-roll in the runner.",
+          "additionalProperties": { "type": "number" }
+        },
+        "templateId": {
+          "type": "string",
+          "description": "Optional — links this ship instance to a reusable SavedStarship template. When set and the template has isCampaignShip=true, end-of-scene HP/Shields persist back to the template for campaign continuity."
+        }
       }
     },
     "StarshipThreat": {
       "type": "object",
+      "description": "Enemy ship, hazard, or environmental threat. All numeric stats (Fort, Ref, Init, attack bonuses, DCs) are clickable in the runner — clicking rolls a d20+bonus or rolls damage and logs the result. Routine actions promote to top-level Attacks & Checks rows for one-tap rolling.",
       "required": ["id", "name", "type", "level", "isDefeated"],
       "properties": {
         "id": { "type": "string" },
@@ -86,31 +96,97 @@
         "currentHP": { "type": "integer" },
         "maxShields": { "type": "integer" },
         "currentShields": { "type": "integer" },
-        "shieldRegen": { "type": "integer" },
+        "shieldRegen": { "type": "integer", "description": "Threat shields regenerate at start of each round, same as the PC ship." },
         "ac": { "type": "integer" },
         "description": { "type": "string" },
-        "fortitude": { "type": "integer" },
-        "reflex": { "type": "integer" },
-        "initiativeSkill": { "type": "string" },
-        "initiativeBonus": { "type": "integer" },
-        "tacticalRole": { "type": "string", "enum": ["standard", "complication", "indiscriminate"] },
+        "fortitude": { "type": "integer", "description": "Click-to-roll Fortitude save in the runner." },
+        "reflex": { "type": "integer", "description": "Click-to-roll Reflex save in the runner." },
+        "initiativeSkill": { "type": "string", "description": "e.g. 'Piloting', 'Arcana'. The skill rolled for initiative." },
+        "initiativeBonus": { "type": "integer", "description": "Modifier applied to the d20 initiative roll. Clickable to re-roll." },
+        "skills": {
+          "type": "object",
+          "description": "Skill modifiers the threat has (e.g. {'Piloting': 12, 'Stealth': 8}). Used for any check the GM calls for outside the routine.",
+          "additionalProperties": { "type": "number" }
+        },
+        "tacticalRole": {
+          "type": "string",
+          "enum": ["standard", "complication", "indiscriminate"],
+          "description": "GM tag for how to run this threat. 'complication' = penalizes crew unless addressed; 'indiscriminate' = hits everyone equally; 'standard' = targets the party ship directly."
+        },
         "routine": {
           "type": "object",
+          "description": "What the threat does each turn. Per GM Core, threats use preset routines instead of crew actions.",
           "required": ["actionsPerTurn", "description", "actions"],
           "properties": {
-            "actionsPerTurn": { "type": "integer" },
-            "description": { "type": "string" },
+            "actionsPerTurn": { "type": "integer", "description": "Total action cost the threat spends per turn (3 max for most enemies)." },
+            "description": { "type": "string", "description": "Narrative summary of the threat's tactic, e.g. 'Scans then fires antimatter beam.'" },
             "actions": {
               "type": "array",
               "items": { "$ref": "#/definitions/ThreatRoutineAction" }
+            },
+            "variations": {
+              "type": "array",
+              "description": "Optional alternate routines (per GM Core) triggered by specific scene conditions.",
+              "items": {
+                "type": "object",
+                "required": ["trigger", "actions"],
+                "properties": {
+                  "trigger": { "type": "string" },
+                  "actions": { "type": "array", "items": { "$ref": "#/definitions/ThreatRoutineAction" } }
+                }
+              }
             }
           }
+        },
+        "specialAbilities": {
+          "type": "array",
+          "description": "Abilities outside the routine (per GM Core p.230 — e.g. auras, reactions). Rendered as a section on the threat card.",
+          "items": {
+            "type": "object",
+            "required": ["name", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "trigger": { "type": "string", "description": "Optional — when the ability fires (e.g. 'When taking persistent damage')." }
+            }
+          }
+        },
+        "abilities": {
+          "type": "array",
+          "description": "Legacy: simple text-only ability tags. Prefer specialAbilities for new content.",
+          "items": { "type": "string" }
+        },
+        "immunities": {
+          "type": "array",
+          "description": "Damage types or conditions the threat is immune to (e.g. ['mental', 'fire']).",
+          "items": { "type": "string" }
+        },
+        "resistances": {
+          "type": "object",
+          "description": "Damage type → flat resistance value (e.g. {'physical': 5}).",
+          "additionalProperties": { "type": "number" }
+        },
+        "weaknesses": {
+          "type": "object",
+          "description": "Damage type → flat weakness value (e.g. {'sonic': 5}).",
+          "additionalProperties": { "type": "number" }
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Active conditions on the threat (runtime).",
+          "items": { "type": "string" }
+        },
+        "routineActionsUsed": {
+          "type": "array",
+          "description": "Runtime: action ids used this round (for budget tracking in the routine display).",
+          "items": { "type": "string" }
         },
         "isDefeated": { "type": "boolean" }
       }
     },
     "ThreatRoutineAction": {
       "type": "object",
+      "description": "One action in a threat's routine. Attack rows render with click-to-roll attack bonus and click-to-roll damage badges; skill_check rows render with click-to-roll DC. Clicks no longer mark the action as 'used' — they just roll dice and log to history.",
       "required": ["id", "name", "actionCost", "type", "description"],
       "properties": {
         "id": { "type": "string" },
@@ -118,22 +194,39 @@
         "actionCost": { "type": "integer", "enum": [1, 2, 3] },
         "type": { "type": "string", "enum": ["attack", "skill_check", "ability", "movement"] },
         "description": { "type": "string" },
-        "attackBonus": { "type": "integer" },
-        "damage": { "type": "string" },
-        "damageType": { "type": "string" },
-        "traits": { "type": "array", "items": { "type": "string" } }
+        "attackBonus": { "type": "integer", "description": "Required for type=attack to render the rollable +X chip." },
+        "damage": { "type": "string", "description": "Damage expression (e.g. '2d10+5'). Rendered as a click-to-roll damage chip." },
+        "damageType": { "type": "string", "description": "e.g. 'fire', 'piercing'." },
+        "traits": { "type": "array", "items": { "type": "string" }, "description": "Weapon/action traits (e.g. ['range 120 ft', 'magical'])." },
+        "skill": { "type": "string", "description": "Used for type=skill_check — the threat's skill rolled (e.g. 'Arcana')." },
+        "vsDefense": {
+          "type": "string",
+          "enum": ["AC", "Fortitude DC", "Reflex DC", "Will DC"],
+          "description": "Which target defense the action rolls against."
+        },
+        "dc": { "type": "integer", "description": "Static DC for skill_check / ability actions. Click-to-roll in the routine card." },
+        "effectOnSuccess": { "type": "string" },
+        "effectOnCriticalSuccess": { "type": "string" },
+        "effectOnFailure": { "type": "string" },
+        "effectOnCriticalFailure": { "type": "string" },
+        "conditionalDamage": { "type": "string", "description": "Bonus damage applied under specific conditions (described in conditionalEffect)." },
+        "conditionalEffect": { "type": "string" }
       }
     },
     "StarshipAction": {
       "type": "object",
+      "description": "Crew action available to PCs. Tagged by role (or 'any'). Renders in the Crew Actions reference list — damage chip is click-to-roll; skill check rolls happen via the threat's defense the action targets, or the ship's bonus chips.",
       "required": ["id", "name", "actionCost", "role", "skills", "description", "outcomes"],
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "actionCost": { "type": "integer", "enum": [1, 2, 3] },
-        "role": { "type": "string" },
-        "skills": { "type": "array", "items": { "type": "string" } },
-        "dc": { "type": "integer" },
+        "role": {
+          "type": "string",
+          "description": "Allowed role(s). Values: 'any' OR a role id, OR pipe-separated role ids (e.g. 'pilot|gunner', 'magic_officer|science_officer'). Standard roles: captain, engineer, gunner, magic_officer, pilot, science_officer."
+        },
+        "skills": { "type": "array", "items": { "type": "string" }, "description": "Skills the rolling PC can use (e.g. ['Piloting', 'Acrobatics'])." },
+        "dc": { "type": "integer", "description": "Static DC. If omitted, falls back to the scene's level-based DC." },
         "description": { "type": "string" },
         "outcomes": {
           "type": "object",
@@ -145,8 +238,9 @@
             "criticalFailure": { "type": "string" }
           }
         },
-        "isAttack": { "type": "boolean" },
-        "damage": { "type": "string" },
+        "isAttack": { "type": "boolean", "description": "True for gunner Strikes — adds the ATK badge in the runner." },
+        "proficiency": { "type": "string", "enum": ["simple", "martial"], "description": "Required weapon proficiency for attack actions." },
+        "damage": { "type": "string", "description": "Damage dice. Renders as a click-to-roll chip." },
         "traits": { "type": "array", "items": { "type": "string" } }
       }
     }

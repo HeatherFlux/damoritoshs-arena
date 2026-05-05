@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/starship-templates.schema.json",
+  "title": "Starship Templates",
+  "description": "Reusable PC starship configurations. Saved once and loaded into any cinematic starship scene. When isCampaignShip is true, post-scene HP/Shield damage persists back to the template so the same vessel carries damage forward between encounters.",
+  "x-import-info": {
+    "storeMethod": "starshipStore.importStarshipTemplates(json)",
+    "localStorageKey": "sf2e-starship-templates",
+    "notes": "Templates with matching IDs are replaced on import. Loading a template into a scene sets scene.starship.templateId so the link is preserved through saveScene/startScene/endScene.",
+    "exampleFile": "/schemas/examples/starship-templates.example.json"
+  },
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "starship", "savedAt"],
+    "properties": {
+      "id": { "type": "string" },
+      "name": { "type": "string", "description": "Display name in the dropdown (e.g. 'The Brassbound — party ship')." },
+      "description": { "type": "string", "description": "Optional GM notes." },
+      "starship": {
+        "type": "object",
+        "description": "Full Starship object — see starship-scenes.schema.json#/definitions/Starship",
+        "required": ["id", "name", "level", "ac", "fortitude", "reflex", "maxShields", "currentShields", "shieldRegen", "maxHP", "currentHP"]
+      },
+      "isCampaignShip": {
+        "type": "boolean",
+        "description": "When true, end-of-scene HP/Shield values persist back to this template. Loading the template again uses the persisted values, so damage carries forward across encounters. Default false (one-shot ship)."
+      },
+      "savedAt": { "type": "number", "description": "Unix ms timestamp of the last save." }
+    }
+  }
+}

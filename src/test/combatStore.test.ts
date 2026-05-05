@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useCombatStore } from '../stores/combatStore'
+import { useCombatStore, buildPlayerData } from '../stores/combatStore'
 
 describe('combatStore', () => {
   let store: ReturnType<typeof useCombatStore>
@@ -362,6 +362,76 @@ describe('combatStore', () => {
         store.previousTurn()
         expect(store.state.combat!.round).toBeGreaterThanOrEqual(1)
       })
+    })
+  })
+
+  describe('custom conditions', () => {
+    beforeEach(() => {
+      store.startCombat('Custom Test')
+      store.addPlayer('Poppy', 15, 80, 22)
+    })
+
+    it('accepts non-standard condition names without breaking the store', () => {
+      const poppy = store.state.combat!.combatants[0]
+      store.addCondition(poppy.id, 'aim', 1)
+      expect(poppy.conditions).toHaveLength(1)
+      expect(poppy.conditions[0]).toMatchObject({ name: 'aim', value: 1 })
+    })
+
+    it('round-trips custom conditions through buildPlayerData', () => {
+      const poppy = store.state.combat!.combatants[0]
+      store.addCondition(poppy.id, 'marked')
+      const data = buildPlayerData(store.state.combat)
+      expect(data.combatants[0].conditions).toEqual([{ name: 'marked', value: undefined }])
+    })
+
+    it('dedupes custom conditions by name (subsequent add updates value)', () => {
+      const poppy = store.state.combat!.combatants[0]
+      store.addCondition(poppy.id, 'aim', 1)
+      store.addCondition(poppy.id, 'aim', 2)
+      expect(poppy.conditions).toHaveLength(1)
+      expect(poppy.conditions[0].value).toBe(2)
+    })
+  })
+
+  describe('hiddenFromPlayers', () => {
+    beforeEach(() => {
+      store.startCombat('Hidden Test')
+      store.addPlayer('Alces', 18, 80, 22)
+      store.addPlayer('Drakesh', 12, 95, 20)
+      store.addPlayer('Mystery NPC', 15, 60, 19)
+    })
+
+    it('toggles the hiddenFromPlayers flag', () => {
+      const npc = store.state.combat!.combatants.find(c => c.name === 'Mystery NPC')!
+      expect(npc.hiddenFromPlayers).toBeFalsy()
+      store.toggleHiddenFromPlayers(npc.id)
+      expect(npc.hiddenFromPlayers).toBe(true)
+      store.toggleHiddenFromPlayers(npc.id)
+      expect(npc.hiddenFromPlayers).toBe(false)
+    })
+
+    it('filters hidden combatants from the player view feed', () => {
+      const npc = store.state.combat!.combatants.find(c => c.name === 'Mystery NPC')!
+      store.toggleHiddenFromPlayers(npc.id)
+      const data = buildPlayerData(store.state.combat)
+      const names = data.combatants.map(c => c.name)
+      expect(names).not.toContain('Mystery NPC')
+      expect(names).toContain('Alces')
+      expect(names).toContain('Drakesh')
+    })
+
+    it('preserves the player-view turn pointer when current combatant is hidden', () => {
+      // Sorted by init desc: Alces(18), Mystery(15), Drakesh(12)
+      // Current turn = index 1 (Mystery NPC)
+      store.setTurn(1)
+      const npc = store.state.combat!.combatants.find(c => c.name === 'Mystery NPC')!
+      store.toggleHiddenFromPlayers(npc.id)
+      // After hiding Mystery: visible sorted = [Alces, Drakesh]
+      // Player view turn falls through to next visible (Drakesh, visible index 1)
+      const data = buildPlayerData(store.state.combat)
+      expect(data.combatants.map(c => c.name)).toEqual(['Alces', 'Drakesh'])
+      expect(data.turn).toBe(1)
     })
   })
 })

@@ -38,69 +38,60 @@ const actionRolls = reactive<Record<string, {
   outcome?: ActionLogEntry['result']
 }>>({})
 
-function isUsed(actionId: string): boolean {
-  return actionsUsed.value.includes(actionId)
+/**
+ * Roll just the attack d20 (combat-tab pattern: click the bonus to roll).
+ * Damage is rolled separately by clicking the damage chip.
+ */
+function rollAttackOnly(action: ThreatRoutineAction) {
+  if (action.attackBonus == null) return
+  const attackRoll = rollD20(action.attackBonus, action.name, props.threat.name)
+  let outcome: ActionLogEntry['result'] = 'success'
+  if (attackRoll.isNat20) outcome = 'critical_success'
+  else if (attackRoll.isNat1) outcome = 'critical_failure'
+  actionRolls[action.id] = { attackRoll, outcome }
+  store.logAction(props.threat.id, props.threat.name, action.name, outcome, attackRoll.breakdown)
+  emit('execute-action', action)
 }
 
-function canUseAction(action: ThreatRoutineAction): boolean {
-  if (isUsed(action.id)) return false
-  return action.actionCost <= actionsRemaining.value
+/**
+ * Roll just the damage. `crit` doubles the dice for critical hit damage —
+ * defaults to false; the GM passes true when they know it crit.
+ */
+function rollDamageOnly(action: ThreatRoutineAction, crit: boolean) {
+  if (!action.damage) return
+  const damageRoll = rollDamage(action.damage, action.name, props.threat.name, crit)
+  // Preserve any prior attack roll on this action so both show inline.
+  const prior = actionRolls[action.id] ?? {}
+  actionRolls[action.id] = { ...prior, damageRoll }
+  store.logAction(
+    props.threat.id,
+    props.threat.name,
+    `${action.name} damage`,
+    'success',
+    damageRoll.breakdown,
+  )
+  emit('execute-action', action)
 }
 
-function executeAction(action: ThreatRoutineAction) {
-  store.useRoutineAction(props.threat.id, action.id)
-
-  // Roll attack if it's an attack action
-  if (action.type === 'attack' && action.attackBonus != null) {
-    const attackRoll = rollD20(action.attackBonus, action.name, props.threat.name)
-
-    // Determine outcome (attacks need a target AC — we'll log it as success/failure based on nat results only,
-    // since GM determines if it hits. We just show the roll.)
-    let outcome: ActionLogEntry['result'] = 'success'
-    if (attackRoll.isNat20) {
-      outcome = 'critical_success'
-    } else if (attackRoll.isNat1) {
-      outcome = 'critical_failure'
-    }
-
-    let damageRoll: RollResult | undefined
-    if (action.damage) {
-      damageRoll = rollDamage(
-        action.damage,
-        action.name,
-        props.threat.name,
-        outcome === 'critical_success'
-      )
-    }
-
-    actionRolls[action.id] = { attackRoll, damageRoll, outcome }
-
-    // Log with roll breakdown
-    let description = attackRoll.breakdown
-    if (damageRoll) {
-      description += ` | Damage: ${damageRoll.breakdown}`
-    }
-
-    store.logAction(
-      props.threat.id,
-      props.threat.name,
-      action.name,
-      outcome,
-      description
-    )
-  } else {
-    // Non-attack action — log as success (GM narrates the outcome)
-    actionRolls[action.id] = { outcome: 'success' }
-
-    store.logAction(
-      props.threat.id,
-      props.threat.name,
-      action.name,
-      'success',
-      action.description
-    )
-  }
-
+/**
+ * Roll the threat's skill check. Pulls the modifier from threat.skills
+ * (e.g. action.skill === 'Arcana' and threat.skills?.Arcana === 14
+ * rolls d20+14). Falls back to flat d20 if the skill isn't listed.
+ */
+function rollSkillCheck(action: ThreatRoutineAction) {
+  const skillKey = action.skill ?? ''
+  const bonus = (props.threat.skills?.[skillKey] as number | undefined) ?? 0
+  const roll = rollD20(bonus, action.name, props.threat.name)
+  const target = action.vsDefense ? `vs ${action.vsDefense}` : ''
+  const dc = action.dc != null ? ` DC ${action.dc}` : ''
+  actionRolls[action.id] = { attackRoll: roll, outcome: 'success' }
+  store.logAction(
+    props.threat.id,
+    props.threat.name,
+    action.name,
+    roll.isNat20 ? 'critical_success' : roll.isNat1 ? 'critical_failure' : 'success',
+    `${roll.breakdown} ${target}${dc}`.trim(),
+  )
   emit('execute-action', action)
 }
 
@@ -143,27 +134,35 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
         v-for="action in routine.actions"
         :key="action.id"
         class="action-card"
-        :class="{
-          used: isUsed(action.id),
-          disabled: !canUseAction(action)
-        }"
       >
         <div class="action-header">
           <span class="action-type-icon">{{ getTypeIcon(action.type) }}</span>
           <span class="action-name">{{ action.name }}</span>
           <ActionIcon :action="action.actionCost" />
-          <span v-if="isUsed(action.id)" class="used-badge">Used</span>
         </div>
 
         <p class="action-description">{{ action.description }}</p>
 
         <!-- Attack details -->
+        <!-- Inline rollable stats — combat-tab pattern. Click the bonus
+             to roll d20+bonus, click the damage to roll damage. No
+             separate "Roll" button. -->
         <div v-if="action.type === 'attack'" class="action-stats attack-stats">
-          <span class="stat-item">
+          <span
+            v-if="action.attackBonus != null"
+            class="stat-item rollable"
+            :title="`Roll attack +${action.attackBonus}`"
+            @click="rollAttackOnly(action)"
+          >
             <span class="stat-label">Attack</span>
             <span class="stat-value">+{{ action.attackBonus }}</span>
           </span>
-          <span class="stat-item">
+          <span
+            v-if="action.damage"
+            class="stat-item rollable"
+            :title="`Roll damage ${action.damage}`"
+            @click="rollDamageOnly(action, false)"
+          >
             <span class="stat-label">Damage</span>
             <span class="stat-value">{{ action.damage }} {{ action.damageType }}</span>
           </span>
@@ -174,7 +173,9 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
           </span>
         </div>
 
-        <!-- Skill check details -->
+        <!-- Skill check details — clickable DC for the GM to roll the
+             threat's check (uses skill bonus 0 since we don't always
+             have it; the result is just the d20 + a known bonus). -->
         <div v-if="action.type === 'skill_check'" class="action-stats check-stats">
           <span class="stat-item">
             <span class="stat-label">Skill</span>
@@ -184,19 +185,34 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
             <span class="stat-label">vs</span>
             <span class="stat-value">{{ action.vsDefense }}</span>
           </span>
-          <span v-if="action.dc" class="stat-item">
+          <span
+            v-if="action.dc"
+            class="stat-item rollable"
+            :title="`Note: target rolls vs DC ${action.dc}`"
+            @click="rollSkillCheck(action)"
+          >
             <span class="stat-label">DC</span>
             <span class="stat-value">{{ action.dc }}</span>
           </span>
         </div>
 
-        <!-- Ability with DC/damage -->
+        <!-- Ability with DC/damage — DC and damage both clickable -->
         <div v-if="action.type === 'ability' && (action.dc || action.damage)" class="action-stats ability-stats">
-          <span v-if="action.dc" class="stat-item">
+          <span
+            v-if="action.dc"
+            class="stat-item rollable"
+            :title="`Roll ability check (DC ${action.dc} for target)`"
+            @click="rollSkillCheck(action)"
+          >
             <span class="stat-label">{{ action.vsDefense || 'DC' }}</span>
             <span class="stat-value">{{ action.dc }}</span>
           </span>
-          <span v-if="action.damage" class="stat-item">
+          <span
+            v-if="action.damage"
+            class="stat-item rollable"
+            :title="`Roll damage ${action.damage}`"
+            @click="rollDamageOnly(action, false)"
+          >
             <span class="stat-label">Damage</span>
             <span class="stat-value">{{ action.damage }} {{ action.damageType }}</span>
           </span>
@@ -250,19 +266,12 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
             </span>
           </div>
           <div v-if="!actionRolls[action.id].attackRoll" class="inline-roll">
-            <span class="inline-executed-badge">Executed</span>
+            <span class="inline-executed-badge">Rolled</span>
           </div>
         </div>
 
-        <button
-          v-if="!isUsed(action.id)"
-          class="execute-btn"
-          :class="{ disabled: !canUseAction(action) }"
-          :disabled="!canUseAction(action)"
-          @click="executeAction(action)"
-        >
-          Execute{{ action.type === 'attack' ? ' & Roll' : '' }}
-        </button>
+        <!-- (Big "Roll" button removed — clicking the inline stats
+             above rolls them individually, like combat tab attacks.) -->
       </div>
     </div>
 
@@ -349,14 +358,9 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
   transition: all 0.15s ease;
 }
 
-.action-card.used {
-  opacity: 0.5;
-  background: var(--color-bg);
-}
-
-.action-card.disabled:not(.used) {
-  opacity: 0.7;
-}
+/* (Removed .used / .disabled fades — clicking Roll no longer marks the
+   action as consumed, so the card stays at full opacity and stays
+   re-clickable.) */
 
 .action-header {
   display: flex;

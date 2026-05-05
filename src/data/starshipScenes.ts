@@ -21,7 +21,7 @@ function patchJob(craftingDC: number, athleticsDC: number): StarshipAction {
     description: `Crafting DC ${craftingDC} or Athletics DC ${athleticsDC}. Repair hull damage.`,
     outcomes: {
       criticalSuccess: 'The starship regains 2d8 Hit Points and loses any persistent damage conditions.',
-      success: 'The starship regains 2d8 Hit Points.',
+      success: 'The starship regains 1d8 Hit Points.',
       failure: 'The damage is too severe for quick repairs.',
       criticalFailure: 'The repair attempt causes a small explosion. The starship takes 1d6 damage.'
     }
@@ -312,10 +312,10 @@ const SWARM_INVADERS_ROUTINE: ThreatRoutine = {
       actionCost: 2,
       type: 'ability',
       damage: '5d8',
-      damageType: 'acid',
+      damageType: 'acid and slashing',
       vsDefense: 'Fortitude DC',
       dc: 28,
-      description: '5d8 acid/slashing damage (DC 28 Fort). Instant death for crowd members.',
+      description: '5d8 acid and slashing damage (DC 28 Fort). Instant death for crowd members.',
       effectOnCriticalSuccess: 'No damage, crowd evacuated from area.',
       effectOnSuccess: 'Half damage.',
       effectOnFailure: 'Full damage.',
@@ -333,7 +333,7 @@ export const OFFICIAL_SCENES: SavedScene[] = [
     id: 'aon-asteroid-field-chase',
     name: 'Asteroid Field Chase',
     level: 1,
-    description: 'A Corpse Fleet cruiser emerges from behind an asteroid and fires on the PCs\' starship! Source: Guilt of the Grave World.',
+    description: 'A Corpse Fleet cruiser emerges from behind an asteroid and fires on the PCs\' starship! Source: Guilt of the Grave World. The RC-HPR (Rock Hopper) has the Captain Concierge AI: grants +1 bonus to one occupied role per round, or performs an unoccupied role at +7.',
     victoryCondition: 'victory_points',
     vpRequired: 5,
     customCondition: 'Defeat the Amaranth (reduce HP to 0) OR earn 5+ Escape Points.',
@@ -368,7 +368,7 @@ export const OFFICIAL_SCENES: SavedScene[] = [
         maxHP: 50, currentHP: 50, maxShields: 5, currentShields: 5, shieldRegen: 5,
         ac: 18, fortitude: 12, reflex: 6,
         initiativeSkill: 'Arcana', initiativeBonus: 14, skills: { Arcana: 14, Piloting: 12 },
-        description: 'A Corpse Fleet cruiser. Scans with disruptive magical energy, then fires antimatter beam.',
+        description: 'A Corpse Fleet cruiser. Uses Disruptive Scan to lock targets, then fires its antimatter beam.',
         routine: AMARANTH_L1_ROUTINE,
         isDefeated: false, routineActionsUsed: []
       },
@@ -377,7 +377,6 @@ export const OFFICIAL_SCENES: SavedScene[] = [
         initiativeSkill: 'Stealth', initiativeBonus: 5,
         description: 'All starships take 1d6 bludgeoning damage each round (DC 15 basic Reflex).',
         routine: LIGHT_ASTEROID_ROUTINE,
-        specialAbilities: [{ name: 'Captain Concierge', description: 'The Rock Hopper\'s AI grants +1 bonus to one occupied role per round, or performs an unoccupied role at +7.' }],
         isDefeated: false, routineActionsUsed: []
       }
     ],
@@ -389,7 +388,7 @@ export const OFFICIAL_SCENES: SavedScene[] = [
     id: 'aon-asteroid-ambush',
     name: 'Asteroid Ambush',
     level: 2,
-    description: 'The PCs are scanning a light asteroid field for resources when a stealthy Corpse Fleet raider attacks! Source: GM Core.',
+    description: 'The PCs are scanning a light asteroid field for resources when a stealthy Corpse Fleet raider attacks! Source: GM Core. The RC-HPR (Rock Hopper) has the Captain Concierge AI: grants +1 bonus to one occupied role per round, or performs an unoccupied role at +7.',
     victoryCondition: 'victory_points',
     vpRequired: 5,
     customCondition: 'Defeat the Corpse Fleet raider (reduce HP to 0) OR earn 5+ Escape Points.',
@@ -606,7 +605,6 @@ export const OFFICIAL_SCENES: SavedScene[] = [
       initiativeSkill: 'Arcana', initiativeBonus: 14, skills: { Arcana: 14, Piloting: 12 },
       description: 'The Amaranth returns. Disrupts with magical energy, then fires its antimatter beam.',
       routine: AMARANTH_L4_ROUTINE,
-      specialAbilities: [{ name: 'Captain Concierge', description: 'Ship AI grants +1 bonus to one occupied role per round, or performs an unoccupied role at +7.' }],
       isDefeated: false, routineActionsUsed: []
     }],
     roles: [], savedAt: Date.now()

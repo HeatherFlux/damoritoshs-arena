@@ -50,13 +50,36 @@ function initChannel() {
  * Build sanitized player data from a Combat object (no HP/AC exposed).
  * Used both for broadcasting and for localStorage fallback.
  */
-function buildPlayerData(combat: Combat | null): CombatPlayerData {
+export function buildPlayerData(combat: Combat | null): CombatPlayerData {
   if (!combat) {
     return { combatants: [], round: 0, turn: 0, combatName: '', isActive: false }
   }
-  const sorted = [...combat.combatants].sort((a, b) => b.initiative - a.initiative)
+  // Compute the GM-side sorted view first so we can map turn-index → ID, then
+  // strip hidden combatants. This way the player view's "current turn" still
+  // points at the right visible combatant when hidden ones are filtered out.
+  const fullSorted = [...combat.combatants].sort((a, b) => b.initiative - a.initiative)
+  const currentId = fullSorted[combat.turn]?.id
+  const visible = fullSorted.filter(c => !c.hiddenFromPlayers)
+  let visibleTurn = visible.findIndex(c => c.id === currentId)
+  // If the current combatant is hidden, advance to the next visible one (with
+  // wraparound) so the player view's arrow lands on whoever they should be
+  // watching next, instead of always falling back to index 0.
+  if (visibleTurn === -1 && visible.length > 0) {
+    const total = fullSorted.length
+    for (let step = 1; step <= total; step++) {
+      const probe = fullSorted[(combat.turn + step) % total]
+      const idx = visible.findIndex(c => c.id === probe.id)
+      if (idx !== -1) {
+        visibleTurn = idx
+        break
+      }
+    }
+    if (visibleTurn === -1) visibleTurn = 0
+  } else if (visibleTurn === -1) {
+    visibleTurn = 0
+  }
   return {
-    combatants: sorted.map(c => ({
+    combatants: visible.map(c => ({
       name: c.name,
       conditions: c.conditions.map(cond => ({ name: cond.name, value: cond.value })),
       isDead: c.isDead,
@@ -64,7 +87,7 @@ function buildPlayerData(combat: Combat | null): CombatPlayerData {
       isActive: c.isActive,
     })),
     round: combat.round,
-    turn: combat.turn,
+    turn: visibleTurn,
     combatName: combat.name,
     isActive: combat.isActive,
   }
@@ -751,6 +774,17 @@ function toggleDead(id: string) {
   }
 }
 
+function toggleHiddenFromPlayers(id: string) {
+  if (!state.combat) return
+
+  const combatant = state.combat.combatants.find(c => c.id === id)
+  if (combatant) {
+    combatant.hiddenFromPlayers = !combatant.hiddenFromPlayers
+    saveToStorage(state.combat)
+    broadcastCombatState()
+  }
+}
+
 function updateCombatantName(id: string, name: string) {
   if (!state.combat) return
 
@@ -906,6 +940,7 @@ export const useCombatStore = () => ({
   updateConditionValue,
   setNotes,
   toggleDead,
+  toggleHiddenFromPlayers,
   updateCombatantName,
   importPlayerFromPathbuilder,
   setGMView,
