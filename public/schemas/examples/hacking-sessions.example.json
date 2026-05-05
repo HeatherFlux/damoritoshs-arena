@@ -7,13 +7,14 @@
       "name": "AZL-SEC Node",
       "level": 8,
       "type": "tech",
-      "description": "The station's primary security terminal controls door locks, camera feeds, and alarm systems.",
+      "description": "The station's primary security terminal. Controls door locks, camera feeds, and alarm systems. Three subsystems: a primary console (visible from any approach), a wireless relay tucked in the rafters, and a hidden black-budget log the GM only reveals once a PC succeeds at the wireless DC 28 hack.",
       "successDescription": "You gain access to security camera feeds and can unlock doors remotely for the next hour.",
       "criticalSuccessDescription": "You also disable the station's alarm system and gain a +2 circumstance bonus to Stealth checks for the duration.",
+      "failureDescription": "The session times out and you're logged off. Future attempts on the same console take a -2 circumstance penalty for 10 minutes.",
       "accessPoints": [
         {
           "id": "ap-console",
-          "name": "Primary Console",
+          "name": "Primary Console (Front Desk)",
           "type": "physical",
           "state": "locked",
           "position": { "x": 0.3, "y": 0.4 },
@@ -32,6 +33,15 @@
                 { "skill": "Crafting", "dc": 26 }
               ],
               "dcReduction": 2
+            },
+            {
+              "id": "v-social-engineering",
+              "name": "Bribe the night guard",
+              "skills": [
+                { "skill": "Diplomacy", "dc": 22 },
+                { "skill": "Intimidation", "dc": 24 }
+              ],
+              "dcReduction": 1
             }
           ],
           "countermeasures": [
@@ -45,21 +55,66 @@
                 { "skill": "Computers", "dc": 28 }
               ],
               "description": "The terminal locks out the user for 10 minutes. An alarm sounds alerting nearby guards."
+            },
+            {
+              "id": "cm-trace",
+              "name": "Active Trace",
+              "failureThreshold": 3,
+              "noticeDC": 26,
+              "noticeSkills": ["Computers", "Perception"],
+              "disableSkills": [
+                { "skill": "Computers", "dc": 30 },
+                { "skill": "Stealth", "dc": 28 }
+              ],
+              "description": "Each round the trace continues, the security system narrows the hacker's location. After 3 rounds, station guards know exactly where the PCs are.",
+              "isPersistent": true
             }
-          ]
+          ],
+          "notes": "GM: a security guard is stationed 30 ft away. They notice on a successful Perception DC 22 (modified by ambient noise — busy market = +5)."
         },
         {
           "id": "ap-wireless",
-          "name": "Wireless Relay",
+          "name": "Wireless Relay (Rafters)",
           "type": "remote",
           "state": "locked",
-          "position": { "x": 0.7, "y": 0.5 },
-          "connectedTo": ["ap-console"],
+          "position": { "x": 0.7, "y": 0.2 },
+          "connectedTo": ["ap-console", "ap-blackbudget"],
           "dc": 28,
           "successesRequired": 2,
           "hackSkills": [
             { "skill": "Computers", "dc": 28, "proficiency": "expert" }
-          ]
+          ],
+          "notes": "GM: spotting the relay requires a Perception DC 24 from the floor. Athletics DC 18 to climb up; Acrobatics DC 22 to do it quietly."
+        },
+        {
+          "id": "ap-blackbudget",
+          "name": "Black Budget Log",
+          "type": "magical",
+          "state": "locked",
+          "position": { "x": 0.85, "y": 0.6 },
+          "connectedTo": ["ap-wireless"],
+          "hidden": true,
+          "dc": 32,
+          "successesRequired": 3,
+          "hackSkills": [
+            { "skill": "Computers", "dc": 32, "proficiency": "master" },
+            { "skill": "Occultism", "dc": 30, "proficiency": "expert" }
+          ],
+          "countermeasures": [
+            {
+              "id": "cm-mind-spike",
+              "name": "Mind Spike Hex",
+              "failureThreshold": 1,
+              "noticeDC": 28,
+              "noticeSkills": ["Occultism", "Arcana"],
+              "disableSkills": [
+                { "skill": "Occultism", "dc": 30 }
+              ],
+              "description": "On the first failure, a magical feedback hex deals 4d6 mental damage to the hacker (basic Will save DC 28). Critical failure also stuns 1.",
+              "isPersistent": false
+            }
+          ],
+          "notes": "GM: this subsystem stays hidden (and absent from player view) until a PC successfully hacks the Wireless Relay. Then reveal it manually via the eye toggle on the GM canvas."
         }
       ]
     },
