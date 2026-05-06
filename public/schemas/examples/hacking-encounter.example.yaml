@@ -1,0 +1,185 @@
+# =====================================================================
+# HACKING ENCOUNTER — EXAMPLE WITH VISIBILITY GUIDE
+# =====================================================================
+# Paste into Settings ▸ Data Schemas ▸ Import Session Bundle (wrapped
+# in a session bundle) or use as a reference when building hacking
+# encounters in the Hacking tab.
+#
+# =====================================================================
+# 🚨 PLAYER VISIBILITY GUIDE — READ BEFORE AUTHORING REVEAL ARCS
+# =====================================================================
+# The hacking module has a Player View (shareable URL, often projected).
+# It renders a fullscreen canvas with the visible access points laid
+# out as a network graph. Players see VERY LITTLE — but the bits they
+# do see render verbatim, so don't put spoilers in those fields.
+#
+# PLAYER-VISIBLE:
+#   • computer.name              ← header at the top of the player view
+#   • accessPoints[].name        ← drawn next to each visible node
+#   • accessPoints[].state       ← locked / active / breached / alarmed
+#   • accessPoints[].position    ← node placement on the canvas
+#   • accessPoints[].connectedTo ← only edges between visible nodes
+#                                  are drawn
+#
+# GM-ONLY (safe for plot beats, full reveal text, real DCs/skills):
+#   • computer.description, successDescription, criticalSuccessDescription,
+#     failureDescription, level, type
+#   • accessPoints[].dc / successesRequired
+#   • accessPoints[].hackSkills[]
+#   • accessPoints[].vulnerabilities[] (all fields)
+#   • accessPoints[].countermeasures[] (all fields, including names
+#     and descriptions — these display only on the GM canvas)
+#   • accessPoints[].notes
+#   • accessPoints[].hidden — when true, the node is not drawn at all
+#     in the player view. The GM toggles it visible at the right moment.
+#
+# AUTHORING RULES:
+#   1. Use evocative but non-spoilery names for visible nodes. "The
+#      Voice's Anchor" is fine if the daemon is already named in fiction;
+#      "Daemon's Anchor" before the reveal is a leak.
+#   2. Set hidden: true on subsystems whose presence would tip the twist
+#      (a hidden Black Budget Log, a chorus subprocess, etc.).
+#   3. Vulnerability and countermeasure descriptions are GM-only — safe
+#      to be specific and revealing.
+#   4. notes is for GM session prep: Perception DCs to spot the node,
+#      ambient modifiers, when to reveal hidden subsystems, etc.
+# =====================================================================
+
+- id: "hack-station-security"
+  name: "Station Security Terminal"
+  savedAt: 1709251200000
+  computer:
+    id: "comp-azl-sec"
+    name: "AZL-SEC Node"               # ← player-visible
+    level: 8                            # GM-only
+    type: "tech"                        # GM-only
+
+    # GM-only — describe the encounter for prep, including any
+    # antagonist identity or reveal beats.
+    description: >-
+      The station's primary security terminal. Three subsystems: a
+      visible Primary Console at the front desk, a Wireless Relay in
+      the rafters (Perception DC 24 to spot from the floor), and a
+      hidden Black Budget Log the GM only reveals once a PC succeeds
+      at the wireless DC 28 hack.
+
+    # GM-only — overall encounter outcomes, narrated by the GM.
+    successDescription: "Camera feeds and remote door unlock for 1 hour."
+    criticalSuccessDescription: "Also disables alarm; +2 Stealth for 1 hour."
+    failureDescription: "Session times out; -2 to retries on this console for 10 min."
+
+    accessPoints:
+      # ------------------------------------------------------------
+      # VISIBLE node — players see this on the canvas.
+      # ------------------------------------------------------------
+      - id: "ap-console"
+        name: "Primary Console (Front Desk)"  # ← player-visible
+        type: "physical"                       # ← player-visible (state badge)
+        state: "locked"                        # ← player-visible
+        position: { x: 0.3, y: 0.4 }           # ← player-visible (node placement)
+        connectedTo: ["ap-wireless"]           # ← player-visible if both ends visible
+
+        # GM-only — DCs, skills, hackSkills are not drawn in player view
+        dc: 26
+        successesRequired: 1
+        hackSkills:
+          - { skill: "Computers", dc: 26, proficiency: "trained" }
+
+        # GM-only — vulnerability NAMES and DC reductions never render to players
+        vulnerabilities:
+          - id: "v-badge"
+            name: "Clone a security badge"
+            skills:
+              - { skill: "Thievery", dc: 24 }
+              - { skill: "Crafting", dc: 26 }
+            dcReduction: 2
+          - id: "v-social"
+            name: "Bribe the night guard"
+            skills:
+              - { skill: "Diplomacy", dc: 22 }
+              - { skill: "Intimidation", dc: 24 }
+            dcReduction: 1
+
+        # GM-only — countermeasures only fire visually (effect overlay)
+        # when triggered; their names/descriptions render only on the
+        # GM canvas. Safe to be specific.
+        countermeasures:
+          - id: "cm-lockout"
+            name: "System Lockout"
+            failureThreshold: 2
+            noticeDC: 22
+            noticeSkills: ["Computers", "Perception"]
+            disableSkills:
+              - { skill: "Computers", dc: 28 }
+            description: "Terminal locks user for 10 min. Alarm sounds."
+
+          - id: "cm-trace"
+            name: "Active Trace"
+            failureThreshold: 3
+            noticeDC: 26
+            noticeSkills: ["Computers", "Perception"]
+            disableSkills:
+              - { skill: "Computers", dc: 30 }
+              - { skill: "Stealth", dc: 28 }
+            description: >-
+              Each round, station security narrows the hacker's
+              location. After 3 rounds, guards know exactly where they
+              are.
+            isPersistent: true
+
+        # GM-only session notes
+        notes: >-
+          GM: a security guard is stationed 30 ft away. Perception DC 22
+          to notice (modified by ambient noise — busy market = +5).
+
+      # ------------------------------------------------------------
+      # VISIBLE node, but in a place players need to find first.
+      # ------------------------------------------------------------
+      - id: "ap-wireless"
+        name: "Wireless Relay (Rafters)"   # ← player-visible
+        type: "remote"
+        state: "locked"
+        position: { x: 0.7, y: 0.2 }
+        connectedTo: ["ap-console", "ap-blackbudget"]
+        dc: 28
+        successesRequired: 2
+        hackSkills:
+          - { skill: "Computers", dc: 28, proficiency: "expert" }
+        notes: >-
+          GM: spotting the relay requires Perception DC 24 from the
+          floor. Athletics DC 18 to climb up; Acrobatics DC 22 to
+          do it quietly.
+
+      # ------------------------------------------------------------
+      # HIDDEN node — players don't see this on the canvas at all
+      # until the GM toggles hidden=false (eye icon on the GM canvas).
+      # ------------------------------------------------------------
+      - id: "ap-blackbudget"
+        name: "Black Budget Log"             # ← player-visible IF revealed
+        type: "magical"
+        state: "locked"
+        position: { x: 0.85, y: 0.6 }
+        connectedTo: ["ap-wireless"]
+        hidden: true                          # ← starts hidden from player view
+        dc: 32
+        successesRequired: 3
+        hackSkills:
+          - { skill: "Computers", dc: 32, proficiency: "master" }
+          - { skill: "Occultism", dc: 30, proficiency: "expert" }
+        countermeasures:
+          - id: "cm-mind-spike"
+            name: "Mind Spike Hex"
+            failureThreshold: 1
+            noticeDC: 28
+            noticeSkills: ["Occultism", "Arcana"]
+            disableSkills:
+              - { skill: "Occultism", dc: 30 }
+            description: >-
+              On the first failure, magical feedback deals 4d6 mental
+              damage (basic Will save DC 28). Critical failure also
+              stuns 1.
+            isPersistent: false
+        notes: >-
+          GM: this subsystem stays hidden (and absent from the player
+          canvas) until a PC successfully hacks the Wireless Relay.
+          Then toggle the eye icon on this node to reveal it.

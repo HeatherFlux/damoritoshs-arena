@@ -10,6 +10,46 @@
 # Scenario: A Corpse Fleet cruiser (the Bonesinger) is bearing down on
 # the party's Pathfinder Society explorer. The PCs need to either
 # escape (5 Victory Points) or cripple the cruiser before its 3rd volley.
+#
+# =====================================================================
+# 🚨 PLAYER VISIBILITY GUIDE — READ BEFORE AUTHORING REVEAL ARCS
+# =====================================================================
+# The runner has a Player View (shareable URL or projected on a TV).
+# Some fields render to that view as-is — anything you put there is
+# seen by the table verbatim. If your scene includes a reveal, twist,
+# or unrevealed antagonist, KEEP THOSE OUT of player-visible fields.
+#
+# PLAYER-VISIBLE (treat as if read aloud at the table):
+#   • starship.name and all visible HP/Shield/AC/Fort/Ref values
+#   • currentRound
+#   • additionalObjectives[]   ← every string verbatim
+#   • availableRoles[]         ← role names (custom ids ok, title-cased)
+#   • roleDescriptions[*]      ← per-role flavor on the player card
+#   • starshipActions[*].name
+#   • starshipActions[*].description
+#   • starshipActions[*].outcomes.{criticalSuccess, success, failure,
+#     criticalFailure}          ← all four render under Crit / Pass /
+#                                 Fail / Fumble headers on the player
+#                                 card. NEVER reference unrevealed
+#                                 antagonists or plot beats here.
+#
+# GM-ONLY (safe for GM-side context, plot beats, true identities):
+#   • description (scene-level brief)
+#   • victoryCondition / vpRequired / survivalRounds / customCondition
+#   • currentVP                  (the inline VP chip is GM-side only)
+#   • starship.bonuses           (skill chips on the GM ship card)
+#   • threats[*]                 ENTIRE ARRAY — players don't see
+#                                threats. Threat names CAN be the
+#                                antagonist's true name; threat
+#                                description, routine, specialAbilities,
+#                                immunities/weaknesses/resistances are
+#                                ALL GM-only. (Note: threat data is
+#                                visible on the GM screen — if that
+#                                screen is ever shared, hide it.)
+#
+# RULE OF THUMB: if the antagonist's identity is meant to be a reveal,
+# use a codename in starship.name and outcome text ("The Voice" not
+# "Civusdaemon"), and put the true identity in the scene description.
 # =====================================================================
 
 name: "Cinematic Starship Test — Corpse Fleet Pursuit"

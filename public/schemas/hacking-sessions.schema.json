@@ -3,6 +3,34 @@
   "$id": "https://damoritoshs-arena.pages.dev/schemas/hacking-sessions.schema.json",
   "title": "Hacking Sessions",
   "description": "Array of saved SF2e hacking encounters with computer stat blocks",
+  "x-player-visibility": {
+    "_summary": "The hacking module has a separate Player View (a fullscreen canvas the GM can share or project). Players see the computer name and the visible (non-hidden) access points on the network graph — but no DCs, skills, vulnerabilities, countermeasures, or notes. DO NOT PUT SPOILERS IN PLAYER-VISIBLE FIELDS.",
+    "PLAYER_VISIBLE": [
+      "computer.name   ← shown in the player view header",
+      "accessPoints[].name   ← rendered next to each visible node on the canvas",
+      "accessPoints[].state   ← locked / active / breached / alarmed badge",
+      "accessPoints[].position   ← where the node sits on the canvas",
+      "accessPoints[].connectedTo   ← only edges between visible nodes are drawn"
+    ],
+    "GM_ONLY": [
+      "computer.description / successDescription / criticalSuccessDescription / failureDescription",
+      "computer.level / type",
+      "accessPoints[].dc",
+      "accessPoints[].successesRequired",
+      "accessPoints[].hackSkills[]",
+      "accessPoints[].vulnerabilities[]   ← every field, including names and skills",
+      "accessPoints[].countermeasures[]   ← every field, including descriptions",
+      "accessPoints[].notes   ← GM session notes",
+      "accessPoints[].hidden   ← hidden nodes are not drawn at all in the player view"
+    ],
+    "AUTHORING_RULES": [
+      "1. Node and computer names are visible — use evocative but non-spoilery names. 'The Voice's Anchor' is fine if the daemon is already named; 'Daemon's Anchor' before the reveal is a leak.",
+      "2. Set hidden: true on access points whose presence would tip the surprise (a back-room 'Black Budget Log', a hidden chorus subprocess, etc.). The GM toggles it visible at the right moment.",
+      "3. Vulnerability and countermeasure names/descriptions are GM-only — safe to be detailed and revealing.",
+      "4. notes is for GM session prep — Perception DCs to spot a node, ambient noise modifiers, when to reveal hidden subsystems, etc.",
+      "5. The computer's success/failure descriptions are GM-only — they describe the overall encounter outcome, not what individual nodes do. Safe to put plot reveals there if needed."
+    ]
+  },
   "x-import-info": {
     "storeMethod": "hackingStore.state.savedEncounters (merge directly)",
     "notes": "Each saved encounter wraps a Computer object. The computer defines access points, vulnerabilities, and countermeasures per SF2e rules.",

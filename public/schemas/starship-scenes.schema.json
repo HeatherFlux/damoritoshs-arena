@@ -3,6 +3,47 @@
   "$id": "https://damoritoshs-arena.pages.dev/schemas/starship-scenes.schema.json",
   "title": "Starship Scenes",
   "description": "Array of saved SF2e cinematic starship scene templates",
+  "x-player-visibility": {
+    "_summary": "The runner has a separate Player View (shareable URL, often projected on a TV at the table). Some fields render to the player view as-is — DO NOT PUT SPOILERS IN THOSE FIELDS.",
+    "PLAYER_VISIBLE": [
+      "starship.name",
+      "starship.currentHP / starship.maxHP",
+      "starship.currentShields / starship.maxShields",
+      "starship.ac",
+      "starship.fortitude",
+      "starship.reflex",
+      "currentRound",
+      "additionalObjectives[]   ← every string is visible to players verbatim",
+      "availableRoles[]   ← role ids; the runner renders them as title-cased pills",
+      "roleDescriptions[*]   ← visible verbatim",
+      "starshipActions[*].name",
+      "starshipActions[*].description",
+      "starshipActions[*].actionCost",
+      "starshipActions[*].outcomes.{criticalSuccess, success, failure, criticalFailure}   ← all four outcome strings render fully on the player card. ANY narrative spoiler placed here will be seen by the table."
+    ],
+    "GM_ONLY": [
+      "description (scene-level GM brief)",
+      "victoryCondition / vpRequired / survivalRounds / customCondition",
+      "currentVP",
+      "starship.bonuses (skill bonuses on the PC ship)",
+      "starship.templateId",
+      "threats[*]   ← entire threat data is GM-only; player view does not render threats",
+      "threats[*].routine and all routine actions (DCs, attack bonuses, damage, etc.)",
+      "threats[*].specialAbilities[]",
+      "threats[*].immunities / resistances / weaknesses",
+      "threats[*].notes / threats[*].description",
+      "roles[] (pre-assigned PC↔role pairings)",
+      "starshipActions[*].dc / damage / isAttack / proficiency / traits / skills"
+    ],
+    "AUTHORING_RULES": [
+      "1. Use a codename in starship.name and starshipActions outcome strings if the antagonist's identity is meant to be a reveal. Example: 'The Voice on the Channel' rather than 'Civusdaemon'. Tag the true identity in the scene-level description (GM-only).",
+      "2. roleDescriptions are read at the table — keep them flavorful, not story-spoilery.",
+      "3. additionalObjectives are visible — phrase them as the players' immediate goals, not the GM's reveal beats.",
+      "4. Outcome text in starshipActions is fully visible. NEVER reference unrevealed antagonists, twists, plot reveals, or GM-only mechanics in those strings.",
+      "5. Threats are entirely GM-only, so threat names CAN be the antagonist's true name without leaking. (But the runner shows threat data on the GM screen — if that screen is ever shared, treat threats as visible too.)",
+      "6. Story and reveal beats belong in a separate GM prep doc, not in the YAML."
+    ]
+  },
   "x-import-info": {
     "storeMethod": "starshipStore.importScenes(json)",
     "notes": "Scenes with matching IDs will be replaced on import. Each scene includes starship stats, threats with routines, role assignments, and victory conditions.",
@@ -18,13 +59,13 @@
       "required": ["id", "name", "level", "description", "victoryCondition", "starship", "threats", "roles", "availableRoles", "starshipActions", "savedAt"],
       "properties": {
         "id": { "type": "string" },
-        "name": { "type": "string" },
-        "level": { "type": "integer", "minimum": 1, "maximum": 20 },
-        "description": { "type": "string" },
-        "victoryCondition": { "type": "string", "enum": ["defeat", "victory_points", "survival", "escape", "custom"] },
-        "vpRequired": { "type": "integer" },
-        "survivalRounds": { "type": "integer" },
-        "customCondition": { "type": "string" },
+        "name": { "type": "string", "description": "[GM-ONLY] Scene name shown in the GM's saved-scenes sidebar. Players see the running scene by ship name, not scene name." },
+        "level": { "type": "integer", "minimum": 1, "maximum": 20, "description": "[GM-ONLY] Used for DC/XP scaling; not rendered to players." },
+        "description": { "type": "string", "description": "[GM-ONLY] Scene-level prep notes for the GM. Safe to include the antagonist's true identity, reveal timeline, plot beats, etc. — players never see this string." },
+        "victoryCondition": { "type": "string", "enum": ["defeat", "victory_points", "survival", "escape", "custom"], "description": "[GM-ONLY] Hidden from player view." },
+        "vpRequired": { "type": "integer", "description": "[GM-ONLY] Hidden from player view; the inline VP chip is GM-side only." },
+        "survivalRounds": { "type": "integer", "description": "[GM-ONLY]" },
+        "customCondition": { "type": "string", "description": "[GM-ONLY] The custom-condition text only renders on the GM screen." },
         "starship": { "$ref": "#/definitions/Starship" },
         "threats": {
           "type": "array",
@@ -45,16 +86,24 @@
         "availableRoles": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Role ids PCs can occupy. Standard set per GM Core p.231: 'captain', 'engineer', 'gunner', 'magic_officer', 'pilot', 'science_officer'. Repeats are allowed (e.g. ['gunner', 'gunner'] for two gunner slots). Custom 'niche' roles (per GM Core p.231 — e.g. a cook or corporate liaison) are also accepted: use any snake_case id. Unknown ids render as title-cased role pills (e.g. 'cook' → 'Cook') with a default gray color, and the runner falls back to a flat d20 for their initiative roll. Tag your custom role's actions with that same id in starshipActions[].role to wire them up."
+          "description": "[PLAYER-VISIBLE] Role ids PCs can occupy. Standard set per GM Core p.231: 'captain', 'engineer', 'gunner', 'magic_officer', 'pilot', 'science_officer'. Repeats are allowed (e.g. ['gunner', 'gunner'] for two gunner slots). Custom 'niche' roles (per GM Core p.231 — e.g. a cook or corporate liaison) are also accepted: use any snake_case id. Unknown ids render as title-cased role pills (e.g. 'cook' → 'Cook') with a default gray color, and the runner falls back to a flat d20 for their initiative roll. Tag your custom role's actions with that same id in starshipActions[].role to wire them up."
         },
         "starshipActions": {
           "type": "array",
           "items": { "$ref": "#/definitions/StarshipAction" }
         },
-        "partySize": { "type": "integer" },
-        "additionalObjectives": { "type": "array", "items": { "type": "string" } },
-        "roleDescriptions": { "type": "object", "additionalProperties": { "type": "string" } },
-        "savedAt": { "type": "number" }
+        "partySize": { "type": "integer", "description": "[GM-ONLY]" },
+        "additionalObjectives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "[PLAYER-VISIBLE] Each string renders verbatim on the player view's Objectives section. Phrase these as the players' in-fiction immediate goals (e.g. 'Recover the cargo manifest from the wreckage'), NOT as GM-only reveal beats or spoilers."
+        },
+        "roleDescriptions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "[PLAYER-VISIBLE] Per-role flavor text rendered on each role card in the player view. Treat these as GM-spoken table flavor — keep them descriptive of the role, not predictive of the plot."
+        },
+        "savedAt": { "type": "number", "description": "[GM-ONLY] Unix ms timestamp." }
       }
     },
     "Starship": {
@@ -216,26 +265,27 @@
     },
     "StarshipAction": {
       "type": "object",
-      "description": "Crew action available to PCs. Tagged by role (or 'any'). Renders in the Crew Actions reference list — damage chip is click-to-roll; skill check rolls happen via the threat's defense the action targets, or the ship's bonus chips.",
+      "description": "Crew action available to PCs. Tagged by role (or 'any'). [PLAYER-VISIBLE] — every action renders in full on the player view's role cards, including all four outcome strings. Treat all string fields here as visible to the table. Damage chip is click-to-roll on the GM side; skill check rolls happen via the threat's defense the action targets, or the ship's bonus chips.",
       "required": ["id", "name", "actionCost", "role", "skills", "description", "outcomes"],
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "actionCost": { "type": "integer", "enum": [1, 2, 3] },
+        "id": { "type": "string", "description": "[GM-ONLY] Internal id." },
+        "name": { "type": "string", "description": "[PLAYER-VISIBLE] Action name shown on the player's role card. Must match what the player sees on any printed cards/tables. Avoid spoilery references." },
+        "actionCost": { "type": "integer", "enum": [1, 2, 3], "description": "[PLAYER-VISIBLE]" },
         "role": {
           "type": "string",
-          "description": "Allowed role(s). Values: 'any' OR a role id, OR pipe-separated role ids (e.g. 'pilot|gunner', 'magic_officer|science_officer'). Standard roles: captain, engineer, gunner, magic_officer, pilot, science_officer."
+          "description": "[GM-ONLY internal routing] Allowed role(s). Values: 'any' OR a role id, OR pipe-separated role ids (e.g. 'pilot|gunner', 'magic_officer|science_officer'). Standard roles: captain, engineer, gunner, magic_officer, pilot, science_officer. The runner uses this to group actions on the right role card; players see the result, not the value."
         },
-        "skills": { "type": "array", "items": { "type": "string" }, "description": "Skills the rolling PC can use (e.g. ['Piloting', 'Acrobatics'])." },
-        "dc": { "type": "integer", "description": "Static DC. If omitted, falls back to the scene's level-based DC." },
-        "description": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" }, "description": "[GM-ONLY] Skills the rolling PC can use (e.g. ['Piloting', 'Acrobatics']). Hidden from the player view (which already knows the role)." },
+        "dc": { "type": "integer", "description": "[GM-ONLY] Static DC. If omitted, falls back to the scene's level-based DC. Player view does not show DCs." },
+        "description": { "type": "string", "description": "[PLAYER-VISIBLE] Short flavor text rendered on the player's role card. NEVER reference unrevealed antagonists, plot reveals, or GM-only mechanics here." },
         "outcomes": {
           "type": "object",
+          "description": "[PLAYER-VISIBLE — ALL FIELDS] All four outcome strings render in full on the player's role card under labels Crit / Pass / Fail / Fumble. ANY narrative spoiler placed in any of these strings (e.g. naming the antagonist, referencing a hidden objective, foreshadowing a twist) will be seen by the table. Keep outcomes mechanical and in-fiction-immediate.",
           "required": ["criticalSuccess", "success"],
           "properties": {
-            "criticalSuccess": { "type": "string" },
-            "success": { "type": "string" },
-            "failure": { "type": "string" },
+            "criticalSuccess": { "type": "string", "description": "[PLAYER-VISIBLE]" },
+            "success": { "type": "string", "description": "[PLAYER-VISIBLE]" },
+            "failure": { "type": "string", "description": "[PLAYER-VISIBLE]" },
             "criticalFailure": { "type": "string" }
           }
         },

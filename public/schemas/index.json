@@ -38,7 +38,8 @@
       "name": "Hacking Sessions",
       "description": "SF2e hackable computer encounters with access points and countermeasures",
       "schemaUrl": "/schemas/hacking-sessions.schema.json",
-      "exampleUrl": "/schemas/examples/hacking-sessions.example.json"
+      "exampleUrl": "/schemas/examples/hacking-sessions.example.json",
+      "annotatedExampleUrl": "/schemas/examples/hacking-encounter.example.yaml"
     },
     {
       "id": "starship-scenes",
