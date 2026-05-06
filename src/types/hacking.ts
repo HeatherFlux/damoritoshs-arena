@@ -56,6 +56,22 @@ export interface AccessPoint {
   countermeasures?: Countermeasure[]
   currentFailures?: number    // Track failures toward countermeasure threshold
 
+  /**
+   * Optional cumulative challenge mode (the "13-curse" fix). When set,
+   * the node breaches when cumulative.current >= cumulative.target.
+   * Each recorded roll adds (rollTotal - dc) margin: success adds
+   * positive margin, critical success adds 2× margin, failure adds
+   * 0, critical failure subtracts margin. This converts a stalled
+   * binary-success hack into HP-style progress so a string of low
+   * rolls still inches the players forward.
+   *
+   * Default target heuristic when authoring: dc * (successesRequired ?? 1).
+   */
+  cumulative?: {
+    target: number
+    current: number
+  }
+
   // GM notes for effects when breached/alarmed
   notes?: string
 }

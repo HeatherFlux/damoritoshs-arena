@@ -92,6 +92,15 @@
         },
         "dc": { "type": "integer" },
         "successesRequired": { "type": "integer", "minimum": 1 },
+        "cumulative": {
+          "type": "object",
+          "description": "[GM-ONLY] Optional cumulative challenge mode (the '13-curse' fix). When present, the node breaches when current >= target. Each recorded roll adds (rolled-DC) margin: success adds positive margin, critical success adds 2× margin, failure adds 0, critical failure subtracts margin. Default authoring heuristic: target = dc × successesRequired. Players still see a progress bar in the runner but never the underlying numbers — the GM records each roll's outcome via the Cumulative Challenge form on the GM-side AccessPointList.",
+          "required": ["target", "current"],
+          "properties": {
+            "target": { "type": "integer", "minimum": 1, "description": "Total margin needed to breach the node." },
+            "current": { "type": "integer", "minimum": 0, "description": "Running total — start at 0; the runner adds margin per recorded roll." }
+          }
+        },
         "hackSkills": {
           "type": "array",
           "items": {

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import { getRoleName, getRoleColor } from '../../data/starshipRoles'
 import type { StarshipAction } from '../../types/starship'
+import { normalizeObjective } from '../../types/starship'
 import { rollD20, rollDamage } from '../../utils/dice'
 import { getDCForLevel } from '../../utils/dcTable'
 import ThreatCard from './ThreatCard.vue'
@@ -10,11 +11,15 @@ import InitiativeTracker from './InitiativeTracker.vue'
 import InitiativeRollModal from './InitiativeRollModal.vue'
 import ActionRollPanel from './ActionRollPanel.vue'
 import ActionIcon from '../ActionIcon.vue'
+import MonteCarloModal from './MonteCarloModal.vue'
 
 const store = useStarshipStore()
 
 // Track whether to show initiative modal
 const showInitiativeModal = ref(false)
+
+// Monte Carlo simulation modal — pre-game balance preview.
+const showMonteCarlo = ref(false)
 
 const scene = computed(() => store.state.activeScene)
 const starship = computed(() => scene.value?.starship)
@@ -214,6 +219,33 @@ function applyDamage() {
     store.damageStarship(damageAmount.value)
     damageAmount.value = 0
   }
+}
+
+function applyHeal() {
+  if (damageAmount.value > 0) {
+    store.healStarship(damageAmount.value)
+    damageAmount.value = 0
+  }
+}
+
+// Objectives — accept legacy string[] and new {text, hidden}[] shape.
+const normalizedObjectives = computed(() => {
+  return (scene.value?.additionalObjectives ?? []).map(o => normalizeObjective(o))
+})
+
+/**
+ * Toggle the hidden flag on an objective in place. Converts a legacy
+ * string entry to the object shape if needed so the flag persists.
+ */
+function toggleObjectiveHidden(idx: number) {
+  if (!scene.value) return
+  const list = scene.value.additionalObjectives
+  if (!list) return
+  const current = list[idx]
+  const wasHidden = typeof current === 'string' ? false : !!current.hidden
+  const text = typeof current === 'string' ? current : current.text
+  list[idx] = { text, hidden: !wasHidden }
+  store.persistActiveScene()
 }
 
 function damageThreat(threatId: string, amount: number) {
@@ -418,6 +450,13 @@ function rollActionDamage(action: StarshipAction) {
           :title="editMode ? 'Exit edit mode' : 'Edit scene + threats during play'"
         >
           {{ editMode ? 'Done Editing' : 'Edit' }}
+        </button>
+        <button
+          class="btn btn-secondary btn-sm"
+          @click="showMonteCarlo = true"
+          title="Run a Monte Carlo simulation to estimate how this scene will play out"
+        >
+          Simulate
         </button>
         <span class="round-label">Round</span>
         <span class="round-number">{{ scene.currentRound }}</span>
@@ -642,9 +681,14 @@ function rollActionDamage(action: StarshipAction) {
             </div>
           </div>
 
-          <!-- Quick Damage -->
+          <!-- Quick Damage / Heal — same input feeds both buttons.
+               Damage flows shields-then-HP via store.damageStarship;
+               Heal goes straight to HP (capped at maxHP) via
+               store.healStarship. Healing comes mostly from rolled
+               crew actions like Patch Job, but the explicit button is
+               there for when the GM needs to nudge a value. -->
           <div class="damage-section">
-            <span class="damage-label">Apply Damage</span>
+            <span class="damage-label">Apply</span>
             <div class="damage-input-row">
               <input
                 type="number"
@@ -654,7 +698,8 @@ function rollActionDamage(action: StarshipAction) {
                 placeholder="0"
                 @keyup.enter="applyDamage"
               />
-              <button class="btn btn-danger" @click="applyDamage">Damage</button>
+              <button class="btn btn-danger btn-sm" @click="applyDamage">Damage</button>
+              <button class="btn btn-success btn-sm" @click="applyHeal">Heal</button>
             </div>
           </div>
 
@@ -763,12 +808,25 @@ function rollActionDamage(action: StarshipAction) {
           </label>
         </div>
 
-        <!-- Additional Objectives -->
-        <div v-if="scene.additionalObjectives && scene.additionalObjectives.length > 0" class="objectives-card panel">
+        <!-- Additional Objectives — eye toggle hides each from the
+             player view. Useful for spoiler-y objectives the GM only
+             reveals when relevant. -->
+        <div v-if="normalizedObjectives.length > 0" class="objectives-card panel">
           <h3 class="card-title">Additional Objectives</h3>
           <ul class="objectives-list">
-            <li v-for="(obj, idx) in scene.additionalObjectives" :key="idx" class="objective-item">
-              {{ obj }}
+            <li
+              v-for="(obj, idx) in normalizedObjectives"
+              :key="idx"
+              class="objective-item"
+              :class="{ 'objective-hidden': obj.hidden }"
+            >
+              <button
+                class="objective-eye"
+                :class="{ active: obj.hidden }"
+                @click="toggleObjectiveHidden(idx)"
+                :title="obj.hidden ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
+              >{{ obj.hidden ? '◌' : '●' }}</button>
+              <span>{{ obj.text }}</span>
             </li>
           </ul>
         </div>
@@ -807,6 +865,12 @@ function rollActionDamage(action: StarshipAction) {
 
     </div>
 
+    <!-- Monte Carlo simulator (pre-game tuning aid) -->
+    <MonteCarloModal
+      v-if="showMonteCarlo && scene"
+      :scene="scene"
+      @close="showMonteCarlo = false"
+    />
   </div>
 </template>
 
@@ -1721,6 +1785,39 @@ function rollActionDamage(action: StarshipAction) {
 }
 
 /* Objectives */
+/* Eye toggle on objective items — flips hidden flag for player view */
+.objective-item.objective-hidden {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.objective-eye {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-right: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--color-text-dim);
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.objective-eye.active {
+  background: var(--color-warning, #f59e0b);
+  color: var(--color-bg);
+  border-color: var(--color-warning, #f59e0b);
+}
+
+.objective-eye:hover {
+  border-color: var(--color-accent);
+}
+
 .objectives-card {
   padding: 1rem;
 }

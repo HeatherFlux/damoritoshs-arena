@@ -25,7 +25,7 @@ const emit = defineEmits<{
 // glance without an extra click. (Quick-attack rows are still promoted
 // at the top for one-tap rolls.)
 
-// Local damage input for the Apply Damage form
+// Local damage input for the Apply Damage / Heal form
 const damageInput = ref<number | null>(null)
 
 function applyDamage() {
@@ -33,6 +33,31 @@ function applyDamage() {
   if (!amt || amt <= 0) return
   emit('damage', amt)
   damageInput.value = null
+}
+
+function applyHeal() {
+  const amt = damageInput.value
+  if (!amt || amt <= 0) return
+  // Threat heals via update — clamp at maxHP.
+  const cur = props.threat.currentHP ?? 0
+  const max = props.threat.maxHP ?? 0
+  const next = Math.min(max, cur + amt)
+  emit('update', { currentHP: next, isDefeated: false })
+  damageInput.value = null
+}
+
+/**
+ * Flip the hidden flag on a single specialAbility. The runner emits
+ * an update with a fresh copy of the array so the parent's reactivity
+ * fires (in-place mutation through v-for can be flaky).
+ */
+function toggleSpecialAbilityHidden(idx: number) {
+  const list = props.threat.specialAbilities
+  if (!list) return
+  const nextList = list.map((sa, i) =>
+    i === idx ? { ...sa, hidden: !sa.hidden } : sa,
+  )
+  emit('update', { specialAbilities: nextList })
 }
 
 // Track expanded state for special abilities (separate from the regular
@@ -441,12 +466,12 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         </div>
       </div>
 
-      <!-- Apply Damage form — only renders when the threat has HP. Per
-           GM Core p.230, some threats (asteroid fields, magical effects,
-           anything intangible or too vast to attack) intentionally lack
-           HP and shouldn't have an attack target. -->
+      <!-- Apply Damage / Heal form — only renders when the threat has HP.
+           Per GM Core p.230, some threats (asteroid fields, magical
+           effects, anything intangible or too vast to attack) intentionally
+           lack HP and shouldn't have an attack target. -->
       <div v-if="threat.maxHP" class="threat-damage-section">
-        <span class="damage-label">Apply Damage</span>
+        <span class="damage-label">Apply</span>
         <div class="damage-input-row">
           <input
             type="number"
@@ -457,6 +482,7 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
             @keyup.enter="applyDamage"
           />
           <button class="btn btn-danger btn-sm" @click="applyDamage">Damage</button>
+          <button class="btn btn-success btn-sm" @click="applyHeal">Heal</button>
         </div>
       </div>
 
@@ -573,8 +599,21 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         <span class="toggle-icon">{{ showSpecialAbilities ? '▼' : '▶' }}</span>
       </button>
       <div v-if="showSpecialAbilities && threat.specialAbilities?.length" class="special-abilities-section">
-        <div v-for="sa in threat.specialAbilities" :key="sa.name" class="special-ability">
-          <div class="special-ability-name">{{ sa.name }}</div>
+        <div
+          v-for="(sa, idx) in threat.specialAbilities"
+          :key="sa.name"
+          class="special-ability"
+          :class="{ 'special-ability-hidden': sa.hidden }"
+        >
+          <div class="special-ability-name">
+            <button
+              class="objective-eye"
+              :class="{ active: sa.hidden }"
+              @click="toggleSpecialAbilityHidden(idx)"
+              :title="sa.hidden ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
+            >{{ sa.hidden ? '◌' : '●' }}</button>
+            <span>{{ sa.name }}</span>
+          </div>
           <div class="special-ability-desc">{{ sa.description }}</div>
         </div>
       </div>
@@ -1125,6 +1164,35 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Eye toggle on special abilities */
+.special-ability.special-ability-hidden {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.objective-eye {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-right: 0.375rem;
+  font-size: 0.625rem;
+  cursor: pointer;
+  color: var(--color-text-dim);
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.objective-eye.active {
+  background: var(--color-warning, #f59e0b);
+  color: var(--color-bg);
+  border-color: var(--color-warning, #f59e0b);
 }
 
 .special-ability-name {

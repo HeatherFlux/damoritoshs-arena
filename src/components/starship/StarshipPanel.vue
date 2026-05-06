@@ -498,12 +498,20 @@ defineExpose({
                 :vp-required="activeSetup.vpRequired"
                 :survival-rounds="activeSetup.survivalRounds"
                 :custom-condition="activeSetup.customCondition"
-                :additional-objectives="activeSetup.additionalObjectives"
+                :additional-objectives="(activeSetup.additionalObjectives ?? []).map(o => typeof o === 'string' ? o : o.text)"
                 @update:victory-condition="(v: VictoryCondition) => activeSetup!.victoryCondition = v"
                 @update:vp-required="(v: number) => activeSetup!.vpRequired = v"
                 @update:survival-rounds="(v: number) => activeSetup!.survivalRounds = v"
                 @update:custom-condition="(v: string) => activeSetup!.customCondition = v"
-                @update:additional-objectives="(v: string[]) => activeSetup!.additionalObjectives = v"
+                @update:additional-objectives="(v: string[]) => {
+                  // Preserve hidden flags on existing entries; new entries default to visible.
+                  const prev = activeSetup!.additionalObjectives ?? []
+                  activeSetup!.additionalObjectives = v.map((text, i) => {
+                    const old = prev[i]
+                    if (old && typeof old !== 'string' && old.hidden) return { text, hidden: true }
+                    return text
+                  })
+                }"
               />
             </section>
 

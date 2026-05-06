@@ -25,11 +25,52 @@ function formatSkill(check: SkillCheck): string {
 }
 
 function hasDetails(node: AccessPoint): boolean {
-  return !!(node.hackSkills?.length || node.vulnerabilities?.length || node.countermeasures?.length)
+  return !!(
+    node.hackSkills?.length ||
+    node.vulnerabilities?.length ||
+    node.countermeasures?.length ||
+    node.cumulative
+  )
 }
 
 function getNodeDC(node: AccessPoint): number | undefined {
   return node.dc || node.hackSkills?.[0]?.dc
+}
+
+// ============ Cumulative challenge mode ============
+
+// Per-node input state for the GM's "record this roll" form.
+const rollTotalInputs = ref<Record<string, number | null>>({})
+const cumulativeTargetInputs = ref<Record<string, number | null>>({})
+
+/** Default target heuristic — DC × successesRequired. */
+function getDefaultCumulativeTarget(node: AccessPoint): number {
+  const dc = getNodeDC(node) ?? 15
+  const successes = node.successesRequired ?? 1
+  return dc * successes
+}
+
+function enableCumulative(nodeId: string) {
+  const node = store.state.computer?.accessPoints.find(n => n.id === nodeId)
+  if (!node) return
+  const target = cumulativeTargetInputs.value[nodeId] || getDefaultCumulativeTarget(node)
+  store.setNodeCumulative(nodeId, target)
+  cumulativeTargetInputs.value[nodeId] = null
+}
+
+/**
+ * Record a hack roll. The GM enters the d20 total; we compute the
+ * margin (rolled - dc) and pass to the store mutator with the GM-
+ * declared outcome tier.
+ */
+function recordRoll(nodeId: string, outcome: 'critical_success' | 'success' | 'failure' | 'critical_failure') {
+  const node = store.state.computer?.accessPoints.find(n => n.id === nodeId)
+  if (!node || !node.cumulative) return
+  const total = rollTotalInputs.value[nodeId] ?? 0
+  const dc = getNodeDC(node) ?? 15
+  const margin = total - dc
+  store.recordHackProgress(nodeId, outcome, margin)
+  rollTotalInputs.value[nodeId] = null
 }
 </script>
 
@@ -69,9 +110,19 @@ function getNodeDC(node: AccessPoint): number | undefined {
             </div>
             <div class="node-meta">
               <span class="node-type">{{ node.type }}<span v-if="getNodeDC(node)"> | DC {{ getNodeDC(node) }}</span></span>
-              <span v-if="node.successesRequired" class="node-successes">
+              <span v-if="node.successesRequired && !node.cumulative" class="node-successes">
                 {{ node.successesRequired }} success{{ node.successesRequired > 1 ? 'es' : '' }}
               </span>
+              <span v-if="node.cumulative" class="node-successes" :title="`Cumulative challenge — ${node.cumulative.current} / ${node.cumulative.target} margin accumulated`">
+                {{ node.cumulative.current }} / {{ node.cumulative.target }}
+              </span>
+            </div>
+            <!-- Cumulative progress bar — visible when cumulative mode is on -->
+            <div v-if="node.cumulative" class="cumulative-bar-track" :title="`${node.cumulative.current} / ${node.cumulative.target}`">
+              <div
+                class="cumulative-bar-fill"
+                :style="{ width: Math.min(100, (node.cumulative.current / Math.max(1, node.cumulative.target)) * 100) + '%' }"
+              ></div>
             </div>
           </div>
 
@@ -120,6 +171,50 @@ function getNodeDC(node: AccessPoint): number | undefined {
 
         <!-- Expanded Details -->
         <div v-if="expandedNode === node.id" class="node-details">
+          <!-- Cumulative challenge mode — toggle + record-roll form. -->
+          <div class="detail-section cumulative-section">
+            <div class="section-label">Cumulative Challenge</div>
+            <div v-if="!node.cumulative" class="cumulative-enable">
+              <span class="cumul-hint">Margin-based progress (success adds rolled-DC to a running total). Set a target to enable.</span>
+              <div class="cumul-enable-row">
+                <input
+                  type="number"
+                  class="cumul-input"
+                  v-model.number="cumulativeTargetInputs[node.id]"
+                  :placeholder="String(getDefaultCumulativeTarget(node))"
+                  min="1"
+                />
+                <button
+                  class="btn-secondary btn-xs"
+                  @click.stop="enableCumulative(node.id)"
+                >Enable</button>
+              </div>
+            </div>
+            <div v-else class="cumulative-active">
+              <div class="cumul-status">
+                <strong>{{ node.cumulative.current }}</strong> / {{ node.cumulative.target }} margin
+                <button
+                  class="btn-secondary btn-xs"
+                  @click.stop="store.setNodeCumulative(node.id)"
+                  title="Disable cumulative mode"
+                >Disable</button>
+              </div>
+              <div class="cumul-record-row">
+                <span class="cumul-row-label">Record roll:</span>
+                <input
+                  type="number"
+                  class="cumul-input"
+                  v-model.number="rollTotalInputs[node.id]"
+                  placeholder="d20 total"
+                />
+                <button class="btn-secondary btn-xs cumul-outcome-crit-success" @click.stop="recordRoll(node.id, 'critical_success')" title="Critical success (margin × 2)">Crit</button>
+                <button class="btn-secondary btn-xs cumul-outcome-success" @click.stop="recordRoll(node.id, 'success')" title="Success (margin)">Pass</button>
+                <button class="btn-secondary btn-xs cumul-outcome-failure" @click.stop="recordRoll(node.id, 'failure')" title="Failure (no progress)">Fail</button>
+                <button class="btn-secondary btn-xs cumul-outcome-crit-failure" @click.stop="recordRoll(node.id, 'critical_failure')" title="Critical failure (-margin)">Fumble</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Vulnerabilities -->
           <div v-if="node.vulnerabilities?.length" class="detail-section">
             <div class="section-label vuln-label">Vulnerabilities</div>
@@ -519,6 +614,79 @@ function getNodeDC(node: AccessPoint): number | undefined {
     margin-bottom: 0.75rem;
   }
 }
+
+/* Cumulative challenge progress + record-roll form */
+.cumulative-bar-track {
+  height: 4px;
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+  border-radius: 2px;
+  margin: 0.25rem 0 0.25rem;
+  overflow: hidden;
+}
+
+.cumulative-bar-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.cumulative-section {
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+.cumul-hint {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+  margin-bottom: 0.375rem;
+  font-style: italic;
+}
+
+.cumul-enable-row,
+.cumul-record-row,
+.cumul-status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.cumul-status {
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+}
+
+.cumul-status strong {
+  color: var(--color-accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cumul-row-label {
+  font-size: 0.6875rem;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cumul-input {
+  width: 70px;
+  padding: 0.25rem 0.375rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.cumul-outcome-crit-success { color: var(--color-success); }
+.cumul-outcome-success { color: var(--color-text); }
+.cumul-outcome-failure { color: var(--color-text-dim); }
+.cumul-outcome-crit-failure { color: var(--color-danger); }
 
 .detail-section:last-child {
   margin-bottom: 0;

@@ -212,6 +212,111 @@ describe('hackingStore', () => {
       expect(result).toBeNull()
     })
 
+    // Cumulative challenge mode — A2.2 from session 13 feedback. Replaces
+    // binary success/fail with HP-style margin accumulation so players who
+    // keep rolling 13s still inch toward breaching the node.
+    describe('cumulative challenge mode', () => {
+      it('enables cumulative mode with a target', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+        })
+        store.setNodeCumulative('n1', 30)
+        const node = store.state.computer!.accessPoints[0]
+        expect(node.cumulative).toEqual({ target: 30, current: 0 })
+      })
+
+      it('disables cumulative mode when target is omitted or 0', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 5 },
+        })
+        store.setNodeCumulative('n1')
+        expect(store.state.computer!.accessPoints[0].cumulative).toBeUndefined()
+      })
+
+      it('success adds positive margin', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 0 },
+        })
+        // Margin of 5 → +5
+        const result = store.recordHackProgress('n1', 'success', 5)
+        expect(result).toBe(5)
+      })
+
+      it('critical success doubles the margin', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 0 },
+        })
+        const result = store.recordHackProgress('n1', 'critical_success', 5)
+        expect(result).toBe(10)
+      })
+
+      it('failure adds nothing (the 13-curse fix: no progress, but no setback)', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 7 },
+        })
+        const result = store.recordHackProgress('n1', 'failure', -5)
+        expect(result).toBe(7)
+      })
+
+      it('critical failure subtracts margin (clamped at 0)', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 3 },
+        })
+        const result = store.recordHackProgress('n1', 'critical_failure', 5)
+        expect(result).toBe(0) // 3 - 5 → -2 → clamped to 0
+      })
+
+      it('breaches the node when current reaches target', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 10, current: 8 },
+        })
+        store.recordHackProgress('n1', 'success', 5)
+        expect(store.state.computer!.accessPoints[0].state).toBe('breached')
+      })
+
+      it('treats a small positive margin as at least 1 (rolled === DC still progresses)', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+          cumulative: { target: 30, current: 0 },
+        })
+        // Margin = 0 (rolled exactly DC). Should still count as +1 success
+        const result = store.recordHackProgress('n1', 'success', 0)
+        expect(result).toBe(1)
+      })
+
+      it('returns null when cumulative mode is off', () => {
+        store.createNewComputer('Test')
+        store.state.computer!.accessPoints.push({
+          id: 'n1', name: 'Node', type: 'physical', state: 'locked',
+          position: { x: 0.5, y: 0.5 }, connectedTo: [], dc: 18,
+        })
+        const result = store.recordHackProgress('n1', 'success', 5)
+        expect(result).toBeNull()
+      })
+    })
+
     // Regression: the session bundle importer pushes directly into
     // state.savedEncounters (bypassing the typed mutators), so without
     // a watcher persisting on every change, bundle-imported encounters

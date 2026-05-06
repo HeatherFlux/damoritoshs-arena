@@ -98,7 +98,9 @@ export interface BundleStarship {
   availableRoles?: string[]
   starshipActions?: object[]
   partySize?: number
-  additionalObjectives?: string[]
+  /** Each entry can be a plain string (legacy) or an object with a
+   * hidden flag for spoiler-y objectives the GM only reveals later. */
+  additionalObjectives?: (string | { text: string; hidden?: boolean })[]
   roleDescriptions?: Record<string, string>
 }
 

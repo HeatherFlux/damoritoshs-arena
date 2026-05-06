@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import { getRoleName, getRoleColor } from '../../data/starshipRoles'
 import type { StarshipAction } from '../../types/starship'
+import { normalizeObjective } from '../../types/starship'
 
 const store = useStarshipStore()
 
@@ -84,6 +85,13 @@ onUnmounted(() => {
 // Computed values from active scene
 const scene = computed(() => store.state.activeScene)
 const starship = computed(() => scene.value?.starship)
+
+// Filter objectives the GM has toggled hidden via the eye icon.
+const visibleObjectives = computed(() => {
+  return (scene.value?.additionalObjectives ?? [])
+    .map(o => normalizeObjective(o))
+    .filter(o => !o.hidden)
+})
 
 const hpPercent = computed(() => {
   if (!starship.value) return 100
@@ -168,12 +176,13 @@ const hpColor = computed(() => {
         <p>Waiting for GM to start a scene...</p>
       </section>
 
-      <!-- Additional Objectives -->
-      <section v-if="scene?.additionalObjectives && scene.additionalObjectives.length > 0" class="objectives-section">
+      <!-- Additional Objectives — filter out objectives the GM has
+           toggled hidden via the eye icon. -->
+      <section v-if="visibleObjectives.length > 0" class="objectives-section">
         <h3 class="section-title">Objectives</h3>
         <ul class="objectives-list">
-          <li v-for="(obj, idx) in scene.additionalObjectives" :key="idx" class="objective-item">
-            {{ obj }}
+          <li v-for="(obj, idx) in visibleObjectives" :key="idx" class="objective-item">
+            {{ obj.text }}
           </li>
         </ul>
       </section>

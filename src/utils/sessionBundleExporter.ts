@@ -322,7 +322,12 @@ function mapStarshipScene(scene: SavedScene): BundleStarship {
 
   if (scene.partySize != null) out.partySize = scene.partySize
   if (scene.additionalObjectives && scene.additionalObjectives.length > 0) {
-    out.additionalObjectives = [...scene.additionalObjectives]
+    // Bundle still emits strings for backward compat. If any objective
+    // has a hidden flag, emit the object form so the flag round-trips.
+    out.additionalObjectives = scene.additionalObjectives.map(o => {
+      if (typeof o === 'string') return o
+      return o.hidden ? o : o.text
+    })
   }
   if (scene.roleDescriptions) {
     out.roleDescriptions = { ...scene.roleDescriptions }

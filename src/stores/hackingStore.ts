@@ -256,6 +256,61 @@ function setNodeState(nodeId: string, newState: NodeState) {
   }
 }
 
+/**
+ * Record a hacking roll against a node in cumulative challenge mode.
+ * Returns the new current value, or null if the node isn't in cumulative
+ * mode. The 4-tier outcome adjusts margin:
+ *   critical success: +2 × max(margin, 1)
+ *   success:          +max(margin, 1)
+ *   failure:           0
+ *   critical failure: -max(margin, 1)
+ * When current >= target, automatically sets node state to 'breached'
+ * and triggers the breach visual effect.
+ */
+function recordHackProgress(
+  nodeId: string,
+  outcome: 'critical_success' | 'success' | 'failure' | 'critical_failure',
+  margin: number,
+): number | null {
+  if (!state.computer) return null
+  const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
+  if (!node || !node.cumulative) return null
+
+  const positive = Math.max(margin, 1)
+  let delta = 0
+  switch (outcome) {
+    case 'critical_success': delta = positive * 2; break
+    case 'success':          delta = positive; break
+    case 'failure':          delta = 0; break
+    case 'critical_failure': delta = -positive; break
+  }
+
+  node.cumulative.current = Math.max(0, node.cumulative.current + delta)
+  broadcast('node-state', { nodeId, state: node.state })
+  saveToLocalStorage()
+
+  if (node.cumulative.current >= node.cumulative.target && node.state !== 'breached') {
+    setNodeState(nodeId, 'breached')
+  }
+  return node.cumulative.current
+}
+
+/**
+ * Toggle cumulative mode on/off for a node. Pass undefined to disable;
+ * pass a target to enable (current resets to 0 on enable).
+ */
+function setNodeCumulative(nodeId: string, target?: number) {
+  if (!state.computer) return
+  const node = state.computer.accessPoints.find(ap => ap.id === nodeId)
+  if (!node) return
+  if (target == null || target <= 0) {
+    delete node.cumulative
+  } else {
+    node.cumulative = { target, current: node.cumulative?.current ?? 0 }
+  }
+  saveToLocalStorage()
+}
+
 function setNodeNotes(nodeId: string, notes: string) {
   if (!state.computer) return
 
@@ -727,6 +782,8 @@ export function useHackingStore() {
     createNewComputer,
     generateComputer,
     setNodeState,
+    recordHackProgress,
+    setNodeCumulative,
     setNodeNotes,
     triggerEffect,
     setFocus,

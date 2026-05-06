@@ -186,11 +186,14 @@ export interface StarshipThreat {
   // The routine! (NEW)
   routine?: ThreatRoutine
 
-  // Special abilities outside routine (NEW)
+  // Special abilities outside routine (NEW). `hidden: true` keeps the
+  // ability off the player view until the GM reveals it (eye toggle on
+  // the GM threat card). Useful for "Civilian Crew Aboard"-style reveals.
   specialAbilities?: {
     name: string
     description: string
     trigger?: string
+    hidden?: boolean
   }[]
 
   // Immunities/resistances (NEW)
@@ -207,6 +210,22 @@ export interface StarshipThreat {
 
   // Track if defeated/resolved
   isDefeated: boolean
+}
+
+/**
+ * One additionalObjective entry. The legacy shape was a plain string.
+ * The new shape adds an optional `hidden` flag so the GM can author
+ * spoiler-y objectives that don't render in the player view until they
+ * decide to reveal them.
+ *
+ * Both shapes are accepted on input; use `normalizeObjective` to read
+ * a consistent { text, hidden } shape.
+ */
+export type ObjectiveEntry = string | { text: string; hidden?: boolean }
+
+export function normalizeObjective(o: ObjectiveEntry): { text: string; hidden: boolean } {
+  if (typeof o === 'string') return { text: o, hidden: false }
+  return { text: o.text, hidden: !!o.hidden }
 }
 
 // Victory condition types
@@ -242,7 +261,7 @@ export interface SavedScene {
   starshipActions: StarshipAction[] // Scene-specific actions with role tags
   // Party sizing and objectives
   partySize?: number
-  additionalObjectives?: string[]
+  additionalObjectives?: ObjectiveEntry[]
   roleDescriptions?: Record<string, string>
   savedAt: number
 }
@@ -265,7 +284,7 @@ export interface StarshipScene {
   starshipActions: StarshipAction[]
   // Party sizing and objectives
   partySize?: number
-  additionalObjectives?: string[]
+  additionalObjectives?: ObjectiveEntry[]
   roleDescriptions?: Record<string, string>
   // Runtime state
   currentRound: number
