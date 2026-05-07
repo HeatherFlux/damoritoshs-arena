@@ -135,14 +135,22 @@ function initChannel() {
 function broadcast(type: string, payload: unknown) {
   console.log('[Hacking] Broadcasting:', type, 'channel:', currentChannelSession)
 
+  // BroadcastChannel.postMessage uses structuredClone, which throws
+  // DataCloneError on Vue reactive proxies. Same defensive deep-clone as
+  // starshipStore's broadcast — see that file for the full incident
+  // story (initiative-doesn't-restart bug).
+  const safePayload = payload === undefined || payload === null
+    ? payload
+    : JSON.parse(JSON.stringify(payload))
+
   // Local tabs via BroadcastChannel
   if (channel) {
-    channel.postMessage({ type, payload })
+    channel.postMessage({ type, payload: safePayload })
   }
 
   // Remote devices via WebSocket (only if GM and sync enabled)
   if (wsTransport && state.isGMView && state.isRemoteSyncEnabled) {
-    wsTransport.send({ type, payload })
+    wsTransport.send({ type, payload: safePayload })
   }
 }
 

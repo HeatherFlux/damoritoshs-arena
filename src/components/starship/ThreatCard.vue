@@ -224,6 +224,34 @@ function rollQuickAction(action: ThreatRoutineAction) {
 function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipThreat[K]) {
   emit('update', { [field]: value })
 }
+
+// ============ Skill bonuses ============
+// threat.skills is a Record<string, number> read by skill_check actions
+// (see ThreatCard quickActions render and rollQuickAction). The editor
+// here lets the GM define those bonuses without leaving the card.
+
+const newSkillName = ref('')
+const newSkillBonus = ref<number>(0)
+
+function addSkill() {
+  const name = newSkillName.value.trim()
+  if (!name) return
+  const next = { ...(props.threat.skills ?? {}), [name]: newSkillBonus.value }
+  emit('update', { skills: next })
+  newSkillName.value = ''
+  newSkillBonus.value = 0
+}
+
+function updateSkill(name: string, bonus: number) {
+  const next = { ...(props.threat.skills ?? {}), [name]: bonus }
+  emit('update', { skills: next })
+}
+
+function removeSkill(name: string) {
+  const current = props.threat.skills ?? {}
+  const { [name]: _, ...rest } = current
+  emit('update', { skills: rest })
+}
 </script>
 
 <template>
@@ -378,6 +406,48 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         </label>
       </div>
 
+      <!-- Skill Bonuses — feeds skill_check routine actions. The action's
+           `skill` field looks up the bonus here, so a Piloting check with
+           +12 Piloting rolls 1d20+12 vs the targeted defense/DC. -->
+      <div class="skills-section">
+        <div class="skills-header">
+          <span class="skills-label">Skill Bonuses</span>
+          <span class="skills-hint">used by skill_check routine actions</span>
+        </div>
+        <div v-if="threat.skills && Object.keys(threat.skills).length > 0" class="skill-list">
+          <div
+            v-for="(bonus, skill) in threat.skills"
+            :key="skill"
+            class="skill-row"
+          >
+            <span class="skill-name">{{ skill }}</span>
+            <input
+              type="number"
+              class="input input-number skill-bonus-input"
+              :value="bonus"
+              @input="updateSkill(skill as string, parseInt(($event.target as HTMLInputElement).value) || 0)"
+            />
+            <button class="skill-remove" @click="removeSkill(skill as string)" title="Remove skill">&times;</button>
+          </div>
+        </div>
+        <div class="skill-add-row">
+          <input
+            type="text"
+            class="input skill-add-name"
+            v-model="newSkillName"
+            placeholder="Skill (e.g. Piloting)"
+            @keyup.enter="addSkill"
+          />
+          <input
+            type="number"
+            class="input input-number skill-add-bonus"
+            v-model.number="newSkillBonus"
+            placeholder="+/-"
+          />
+          <button class="btn btn-secondary btn-sm" :disabled="!newSkillName.trim()" @click="addSkill">+ Skill</button>
+        </div>
+      </div>
+
       <label class="field-label description-field">
         <span>Description / Abilities</span>
         <textarea
@@ -433,56 +503,36 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
         </div>
       </div>
 
-      <!-- HP Bar (for enemy ships) -->
-      <div v-if="threat.maxHP" class="hp-section">
-        <div class="hp-bar-container">
-          <div
-            class="hp-bar"
-            :style="{ width: hpPercent + '%', background: hpColor }"
-          ></div>
+      <!-- HP/Shield bars + damage/heal — combat-tab `hp-bar flex-1`
+           pattern. Per GM Core p.230, some threats (asteroid fields,
+           magical effects, anything intangible) intentionally lack HP
+           and shouldn't have an attack target — those skip the row. -->
+      <div v-if="threat.maxHP" class="threat-stats-row">
+        <div class="threat-bars">
+          <div v-if="threat.maxShields && threat.maxShields > 0" class="hp-bar ship-bar-shields">
+            <div class="hp-bar-fill shield-fill" :style="{ width: shieldPercent + '%' }"></div>
+            <div class="hp-bar-text">
+              {{ threat.currentShields ?? 0 }}<span class="opacity-50">/</span>{{ threat.maxShields }} Shields
+              <span v-if="threat.shieldRegen" class="opacity-70">(+{{ threat.shieldRegen }}/rd)</span>
+            </div>
+          </div>
+          <div class="hp-bar">
+            <div class="hp-bar-fill" :style="{ width: hpPercent + '%', background: hpColor }"></div>
+            <div class="hp-bar-text">
+              {{ threat.currentHP }}<span class="opacity-50">/</span>{{ threat.maxHP }} HP
+            </div>
+          </div>
         </div>
-        <div class="hp-text-row">
-          <span class="hp-text">
-            {{ threat.currentHP }} / {{ threat.maxHP }} HP
-          </span>
-        </div>
-      </div>
-
-      <!-- Shields (regen happens automatically each round via the
-           starshipStore; per-round value shown for GM visibility) -->
-      <div v-if="threat.maxShields && threat.maxShields > 0" class="shield-section">
-        <div class="shield-header">
-          <span class="shield-label">Shields</span>
-          <span class="shield-text">
-            {{ threat.currentShields ?? 0 }} / {{ threat.maxShields }}
-            <span v-if="threat.shieldRegen" class="shield-regen">+{{ threat.shieldRegen }}/rd</span>
-          </span>
-        </div>
-        <div class="shield-bar-container">
-          <div
-            class="shield-bar"
-            :style="{ width: shieldPercent + '%' }"
-          ></div>
-        </div>
-      </div>
-
-      <!-- Apply Damage / Heal form — only renders when the threat has HP.
-           Per GM Core p.230, some threats (asteroid fields, magical
-           effects, anything intangible or too vast to attack) intentionally
-           lack HP and shouldn't have an attack target. -->
-      <div v-if="threat.maxHP" class="threat-damage-section">
-        <span class="damage-label">Apply</span>
-        <div class="damage-input-row">
+        <div class="hp-controls shrink-0">
+          <button class="hp-btn hp-btn-damage" @click="applyDamage">−</button>
           <input
             type="number"
-            class="damage-input"
+            class="hp-input"
             v-model.number="damageInput"
-            min="0"
             placeholder="0"
             @keyup.enter="applyDamage"
           />
-          <button class="btn btn-danger btn-sm" @click="applyDamage">Damage</button>
-          <button class="btn btn-success btn-sm" @click="applyHeal">Heal</button>
+          <button class="hp-btn hp-btn-heal" @click="applyHeal">+</button>
         </div>
       </div>
 
@@ -781,6 +831,98 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   grid-column: 1 / -1;
 }
 
+/* Skill bonuses section in editing mode. Compact list of
+   {skill, +bonus, x} rows plus an add form. Mirrors the starship-bonuses
+   pattern in StarshipBuilder so the GM gets the same shape on both
+   sides of the table. */
+.skills-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.skills-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.skills-label {
+  font-size: 0.625rem;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.skills-hint {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.375rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.skill-name {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+.skill-bonus-input {
+  width: 4rem;
+  font-weight: 600;
+}
+
+.skill-remove {
+  padding: 0 0.25rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.skill-remove:hover {
+  color: var(--color-danger);
+}
+
+.skill-add-row {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.skill-add-name {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.skill-add-bonus {
+  width: 4rem;
+}
+
 .input {
   padding: 0.375rem 0.5rem;
   background: var(--color-bg);
@@ -821,117 +963,35 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   appearance: textfield;
 }
 
-/* HP Section */
-.hp-section {
-  margin: 0.5rem 0;
-}
-
-.hp-bar-container {
-  height: 0.5rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-bottom: 0.375rem;
-}
-
-.hp-bar {
-  height: 100%;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-
-.hp-controls {
+/* Threat HP/Shield row — combat-tab `hp-bar flex-1` pattern with
+   shared damage/heal controls. The .hp-bar / .hp-bar-fill /
+   .hp-bar-text / .hp-controls / .hp-btn / .hp-input classes are
+   global (style.css) so this card matches the combat tracker visually.
+   Only the threat-local layout wrapper + the cyan shield variant live
+   here. */
+.threat-stats-row {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-}
-
-.hp-btn {
-  padding: 0.25rem 0.5rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.hp-btn.damage:hover {
-  background: var(--color-danger);
-  border-color: var(--color-danger);
-  color: white;
-}
-
-.hp-btn.heal:hover {
-  background: var(--color-success);
-  border-color: var(--color-success);
-  color: white;
-}
-
-.hp-text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8125rem;
-  color: var(--color-text);
-}
-
-.hp-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Shield section — mirrors hp-section but with cyan/info coloring */
-.shield-section {
   margin: 0.5rem 0;
 }
 
-.shield-header {
+.threat-bars {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.shield-label {
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-dim);
-}
-
-.shield-text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--color-primary);
-}
-
-.shield-regen {
-  margin-left: 0.5rem;
-  font-size: 0.625rem;
-  color: var(--color-text-dim);
-}
-
-.shield-bar-container {
-  height: 4px;
-  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.shield-bar {
-  height: 100%;
+.shield-fill {
   background: var(--color-primary);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--color-primary) 60%, transparent);
-  transition: width 0.2s ease;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-primary) 50%, transparent);
 }
 
-.shield-controls {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+.ship-bar-shields {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
 }
 
 /* Defenses + Initiative chip row */
@@ -1015,55 +1075,6 @@ function updateField<K extends keyof StarshipThreat>(field: K, value: StarshipTh
   color: var(--color-danger, #f87171);
 }
 
-/* HP/Shield text rows — display only, no nudge buttons. */
-.hp-text-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.25rem;
-}
-
-/* Threat damage form — mirrors the PC ship's Apply Damage. The number
-   input + Damage button is the canonical way to deal damage; +5/-5
-   nudge buttons are not part of the rules. */
-.threat-damage-section {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-
-.threat-damage-section .damage-label {
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-dim);
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.threat-damage-section .damage-input-row {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex: 1;
-}
-
-.threat-damage-section .damage-input {
-  flex: 1;
-  min-width: 0;
-  padding: 0.25rem 0.375rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  text-align: center;
-}
 
 /* Quick-action rows — promoted attack/skill-check entries pulled from the
    routine so the GM can roll without expanding "Show Routine" first. */

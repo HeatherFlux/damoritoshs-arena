@@ -645,62 +645,42 @@ function rollActionDamage(action: StarshipAction) {
             </label>
           </div>
 
-          <!-- HP — healing comes from rolling actions (e.g. Patch Job)
-               and damage from the Apply Damage form below. No arbitrary
-               nudge buttons; those weren't part of the rules. -->
-          <div class="stat-section">
-            <div class="stat-header">
-              <span class="stat-label">Hull Points</span>
-              <span class="stat-value">{{ starship.currentHP }} / {{ starship.maxHP }}</span>
+          <!-- HP/Shield bars + damage/heal — combat-tab `hp-bar flex-1`
+               pattern. One control row shared by both bars: damage
+               cascades shields-then-hull via store.damageStarship; heal
+               targets hull via store.healStarship. Per-round shield
+               regen is automatic on Next Round; the manual Regen button
+               below is for advancing round outside of Next Turn. -->
+          <div class="ship-stats-row">
+            <div class="ship-bars">
+              <div class="hp-bar ship-bar-shields">
+                <div class="hp-bar-fill shield-fill" :style="{ width: shieldPercent + '%' }"></div>
+                <div class="hp-bar-text">
+                  {{ starship.currentShields }}<span class="opacity-50">/</span>{{ starship.maxShields }} Shields
+                </div>
+              </div>
+              <div class="hp-bar ship-bar-hull">
+                <div class="hp-bar-fill" :style="{ width: hpPercent + '%', background: hpColor }"></div>
+                <div class="hp-bar-text">
+                  {{ starship.currentHP }}<span class="opacity-50">/</span>{{ starship.maxHP }} Hull
+                </div>
+              </div>
             </div>
-            <div class="stat-bar-container">
-              <div
-                class="stat-bar"
-                :style="{ width: hpPercent + '%', background: hpColor }"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Shields. Shields regenerate at the start of each round per
-               GM Core; the Regen button is a manual trigger for that
-               same per-round event when the GM advances the round
-               outside of Next Turn. -->
-          <div class="stat-section">
-            <div class="stat-header">
-              <span class="stat-label">Shields</span>
-              <span class="stat-value">{{ starship.currentShields }} / {{ starship.maxShields }}</span>
-            </div>
-            <div class="stat-bar-container shields">
-              <div
-                class="stat-bar"
-                :style="{ width: shieldPercent + '%' }"
-              ></div>
-            </div>
-            <div class="stat-controls">
-              <button class="stat-btn regen" @click="store.regenerateShields()">Regen (+{{ starship.shieldRegen }})</button>
-            </div>
-          </div>
-
-          <!-- Quick Damage / Heal — same input feeds both buttons.
-               Damage flows shields-then-HP via store.damageStarship;
-               Heal goes straight to HP (capped at maxHP) via
-               store.healStarship. Healing comes mostly from rolled
-               crew actions like Patch Job, but the explicit button is
-               there for when the GM needs to nudge a value. -->
-          <div class="damage-section">
-            <span class="damage-label">Apply</span>
-            <div class="damage-input-row">
+            <div class="hp-controls shrink-0">
+              <button class="hp-btn hp-btn-damage" @click="applyDamage">−</button>
               <input
                 type="number"
-                class="input damage-input"
+                class="hp-input"
                 v-model.number="damageAmount"
-                min="0"
                 placeholder="0"
                 @keyup.enter="applyDamage"
               />
-              <button class="btn btn-danger btn-sm" @click="applyDamage">Damage</button>
-              <button class="btn btn-success btn-sm" @click="applyHeal">Heal</button>
+              <button class="hp-btn hp-btn-heal" @click="applyHeal">+</button>
             </div>
+          </div>
+
+          <div class="ship-stat-row-sub">
+            <button class="stat-btn regen" @click="store.regenerateShields()">Regen (+{{ starship.shieldRegen }})</button>
           </div>
 
           <!-- Defenses — AC is the target the GM rolls vs. Fort/Ref are
@@ -1120,61 +1100,38 @@ function rollActionDamage(action: StarshipAction) {
   letter-spacing: 0.05em;
 }
 
-.stat-section {
-  margin-bottom: 1rem;
-}
-
-.stat-header {
+/* Ship stats row: bars stacked on the left, combat-tab hp-controls on
+   the right. Reuses the global .hp-bar / .hp-bar-fill / .hp-bar-text /
+   .hp-controls / .hp-btn / .hp-input classes from style.css so the GM
+   screen and combat tab share visual treatment. */
+.ship-stats-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.375rem;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--color-text-dim);
-  text-transform: uppercase;
-}
-
-.stat-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.stat-bar-container {
-  height: 0.75rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-/* Shield fill uses the cyan primary color so a full shield bar reads
-   as a glowing force field rather than an empty trough. The container
-   gets a faint tinted bg so even at 0/N shields the channel shows the
-   color, not solid black. */
-.stat-bar-container.shields {
-  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
-  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+.ship-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.stat-bar-container.shields .stat-bar {
+.shield-fill {
   background: var(--color-primary);
   box-shadow: 0 0 6px color-mix(in srgb, var(--color-primary) 50%, transparent);
 }
 
-.stat-bar {
-  height: 100%;
-  transition: width 0.3s ease;
+.ship-bar-shields {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
 }
 
-.stat-controls {
+.ship-stat-row-sub {
   display: flex;
-  gap: 0.375rem;
+  margin-bottom: 1rem;
 }
 
 .stat-btn {
@@ -1196,36 +1153,7 @@ function rollActionDamage(action: StarshipAction) {
 }
 
 .stat-btn.regen {
-  flex: 2;
-}
-
-/* Damage Section */
-.damage-section {
-  padding: 0.75rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-danger);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
-}
-
-.damage-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--color-danger);
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-}
-
-.damage-input-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.damage-input {
   flex: 1;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1rem;
 }
 
 .btn-danger {

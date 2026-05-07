@@ -311,6 +311,123 @@ describe('starshipStore', () => {
       expect(store.state.activeScene!.starship.currentShields).toBe(9)
       expect(store.state.activeScene!.threats[0].currentShields).toBe(5)
     })
+
+    // Bug: threats with maxShields and shieldRegen but currentShields=undefined
+    // never regenerated because the guard `threat.currentShields !== undefined`
+    // silently skipped them. This happens for threats imported from older
+    // bundles or hand-edited state where currentShields wasn't persisted.
+    it('regenerates threat shields even when currentShields is undefined', () => {
+      const saved = createEmptySavedScene()
+      saved.threats = [makeThreat({ maxShields: 10, shieldRegen: 3 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+
+      // Simulate the bundle-import / older-save case: maxShields and
+      // shieldRegen are set but currentShields was never tracked.
+      store.state.activeScene!.threats[0].currentShields = undefined as unknown as number
+
+      store.regenerateShields()
+
+      // Treat undefined as 0, regen up by shieldRegen.
+      const t = store.state.activeScene!.threats.find(x => x.id === id)!
+      expect(t.currentShields).toBe(3)
+    })
+
+    it('does not regen threats with maxShields=0', () => {
+      const saved = createEmptySavedScene()
+      saved.threats = [makeThreat({ maxShields: 0, shieldRegen: 3 })]
+      store.startScene(saved)
+      const id = store.state.activeScene!.threats[0].id
+
+      store.regenerateShields()
+
+      // No shield system on this threat — regen must not invent shields.
+      const t = store.state.activeScene!.threats.find(x => x.id === id)!
+      expect(t.currentShields ?? 0).toBe(0)
+    })
+  })
+
+  // Initiative round-end behavior. The user reported that at the end of
+  // round 1, pressing Next Turn was bumping the round counter without
+  // restarting initiative. These tests pin down the contract:
+  //  - Walking through every entry exactly once advances to round 2.
+  //  - When the round advances, `currentTurnIndex` returns to 0 and every
+  //    entry's `hasActedThisRound` flag resets to false.
+  //  - Subsequent presses then walk through round 2 normally.
+  describe('nextTurn round-end behavior', () => {
+    function startSceneWithInitiative(threats: StarshipThreat[]) {
+      const saved = createEmptySavedScene()
+      saved.threats = threats
+      store.startScene(saved)
+      // Roll initiative with a single PC plus the threats. The exact
+      // initiative values don't matter for round-completion — only that
+      // an order exists.
+      store.rollInitiative([
+        { playerName: 'Pilot Pete', roleId: 'pilot', roll: 18 },
+      ])
+    }
+
+    it('advances to round 2 with currentTurnIndex=0 after walking every entry', () => {
+      // Two threats + one PC = 3 entries.
+      startSceneWithInitiative([
+        makeThreat({ id: 'tA', name: 'Cruiser A', initiativeBonus: 5 }),
+        makeThreat({ id: 'tB', name: 'Cruiser B', initiativeBonus: 5 }),
+      ])
+      const orderLength = store.state.activeScene!.initiativeOrder.length
+      expect(orderLength).toBe(3)
+      expect(store.state.activeScene!.currentRound).toBe(1)
+      expect(store.state.activeScene!.currentTurnIndex).toBe(0)
+
+      // Walk through every entry. The Nth press should be the round-end
+      // trigger, advancing to round 2 and resetting state.
+      for (let i = 0; i < orderLength; i++) {
+        store.nextTurn()
+      }
+
+      expect(store.state.activeScene!.currentRound).toBe(2)
+      expect(store.state.activeScene!.currentTurnIndex).toBe(0)
+      // Crucially: every entry's hasActedThisRound flag must reset, or the
+      // tracker stays "everyone is greyed out" and the next press keeps
+      // bumping the round.
+      for (const entry of store.state.activeScene!.initiativeOrder) {
+        expect(entry.hasActedThisRound).toBe(false)
+      }
+    })
+
+    it('walks through round 2 normally after a round-end reset', () => {
+      startSceneWithInitiative([
+        makeThreat({ id: 'tA', name: 'Cruiser A' }),
+        makeThreat({ id: 'tB', name: 'Cruiser B' }),
+      ])
+      const orderLength = store.state.activeScene!.initiativeOrder.length
+
+      // Complete round 1.
+      for (let i = 0; i < orderLength; i++) store.nextTurn()
+      expect(store.state.activeScene!.currentRound).toBe(2)
+
+      // First press of round 2: should advance currentTurnIndex from 0 to
+      // 1, NOT bump the round again.
+      store.nextTurn()
+      expect(store.state.activeScene!.currentRound).toBe(2)
+      expect(store.state.activeScene!.currentTurnIndex).toBe(1)
+      expect(store.state.activeScene!.initiativeOrder[0].hasActedThisRound).toBe(true)
+      expect(store.state.activeScene!.initiativeOrder[1].hasActedThisRound).toBe(false)
+    })
+
+    it('refuses to advance when initiative was rolled but order is empty', () => {
+      const saved = createEmptySavedScene()
+      store.startScene(saved)
+      // Skip Initiative path — initiativeRolled=true, order empty.
+      store.skipInitiative()
+      const before = store.state.activeScene!.currentRound
+
+      store.nextTurn()
+      store.nextTurn()
+      store.nextTurn()
+
+      // No initiative order, no progress — GM must use Next Round.
+      expect(store.state.activeScene!.currentRound).toBe(before)
+    })
   })
 
   // Reference-sharing regressions: shallow spreads in saveScene and

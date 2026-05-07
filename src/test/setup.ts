@@ -13,12 +13,18 @@ const localStorageMock = {
 
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock })
 
-// Mock BroadcastChannel
+// Mock BroadcastChannel — postMessage runs structuredClone so the mock
+// matches real-browser semantics. The previous no-op mock silently
+// hid bugs where stores broadcast Vue reactive proxies (which throw
+// DataCloneError under real BroadcastChannel.postMessage). Caught the
+// nextTurn-doesn't-reset-initiative bug from session-13 testing.
 class MockBroadcastChannel {
   name: string
   onmessage: ((event: MessageEvent) => void) | null = null
   constructor(name: string) { this.name = name }
-  postMessage(_data: unknown) {}
+  postMessage(data: unknown) {
+    structuredClone(data)
+  }
   close() {}
 }
 

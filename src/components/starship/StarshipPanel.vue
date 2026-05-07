@@ -112,6 +112,33 @@ function removeThreat(index: number) {
   activeSetup.value.threats.splice(index, 1)
 }
 
+// ============ Ship Bonus Management (setup) ============
+
+const newSetupBonusKey = ref('')
+const newSetupBonusValue = ref(0)
+
+function addSetupBonus() {
+  if (!activeSetup.value) return
+  const key = newSetupBonusKey.value.trim()
+  if (!key) return
+
+  // Re-spread so reactivity sees a new bonuses reference rather than
+  // a mutation on the same object.
+  activeSetup.value.starship.bonuses = {
+    ...activeSetup.value.starship.bonuses,
+    [key]: newSetupBonusValue.value
+  }
+
+  newSetupBonusKey.value = ''
+  newSetupBonusValue.value = 0
+}
+
+function removeSetupBonus(key: string) {
+  if (!activeSetup.value) return
+  const { [key]: _, ...rest } = activeSetup.value.starship.bonuses
+  activeSetup.value.starship.bonuses = rest
+}
+
 // ============ Role Management (setup) ============
 
 const customRoleName = ref('')
@@ -585,9 +612,38 @@ defineExpose({
                 </div>
               </div>
               <div v-if="Object.keys(activeSetup.starship.bonuses).length > 0" class="ship-bonuses">
-                <span v-for="(val, key) in activeSetup.starship.bonuses" :key="key" class="bonus-tag">
-                  {{ key }} +{{ val }}
-                </span>
+                <label v-for="(_, key) in activeSetup.starship.bonuses" :key="key" class="bonus-tag bonus-tag-editable">
+                  <span class="bonus-tag-name">{{ key }}</span>
+                  <input
+                    type="number"
+                    class="bonus-tag-input"
+                    v-model.number="activeSetup.starship.bonuses[key as string]"
+                  />
+                  <button
+                    type="button"
+                    class="bonus-tag-remove"
+                    title="Remove bonus"
+                    @click="removeSetupBonus(key as string)"
+                  >&times;</button>
+                </label>
+              </div>
+              <div class="add-bonus-row">
+                <input
+                  type="text"
+                  class="input bonus-add-key"
+                  v-model="newSetupBonusKey"
+                  placeholder="Skill (e.g. Piloting)"
+                  @keyup.enter="addSetupBonus"
+                />
+                <input
+                  type="number"
+                  class="input bonus-add-value"
+                  v-model.number="newSetupBonusValue"
+                  placeholder="+/-"
+                />
+                <button class="btn btn-secondary btn-sm" :disabled="!newSetupBonusKey.trim()" @click="addSetupBonus">
+                  + Bonus
+                </button>
               </div>
             </section>
 
@@ -1245,6 +1301,69 @@ defineExpose({
   color: var(--color-bg);
   font-size: 0.75rem;
   border-radius: var(--radius-sm);
+}
+
+/* Editable variant — keeps the accent pill look but inlines an input
+   for the value plus a remove button so the GM can retune at the
+   setup table without going through Add/Remove gymnastics. */
+.bonus-tag-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: text;
+}
+
+.bonus-tag-name {
+  font-weight: 600;
+}
+
+.bonus-tag-input {
+  width: 3rem;
+  padding: 0 0.25rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.bonus-tag-remove {
+  padding: 0 0.25rem;
+  background: none;
+  border: none;
+  color: var(--color-bg);
+  cursor: pointer;
+  font-size: 0.875rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.bonus-tag-remove:hover {
+  opacity: 1;
+}
+
+.add-bonus-row {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bonus-add-key {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.bonus-add-value {
+  width: 4rem;
 }
 
 /* ROLE CHIPS */

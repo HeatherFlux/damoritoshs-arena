@@ -1,11 +1,33 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStarshipStore } from '../../stores/starshipStore'
 import { getRoleName, getRoleColor } from '../../data/starshipRoles'
 import type { StarshipAction } from '../../types/starship'
 import { normalizeObjective } from '../../types/starship'
 
 const store = useStarshipStore()
+
+// Local damage/heal entry for the ship. Player view runs with
+// state.isGMView = false, so store.damageStarship / store.healStarship
+// mutate the local activeScene snapshot only — broadcast() bails on the
+// non-GM check so the GM's screen is unaffected. The next round-change /
+// scene-update broadcast from the GM will overwrite local values, which
+// is the agreed behavior (shield regen flows from GM).
+const damageAmount = ref<number | null>(null)
+
+function applyDamage() {
+  const amt = damageAmount.value
+  if (!amt || amt <= 0) return
+  store.damageStarship(amt)
+  damageAmount.value = null
+}
+
+function applyHeal() {
+  const amt = damageAmount.value
+  if (!amt || amt <= 0) return
+  store.healStarship(amt)
+  damageAmount.value = null
+}
 
 // Sync status — derived from store's WebSocket state
 const syncStatus = computed(() => {
@@ -124,33 +146,37 @@ const hpColor = computed(() => {
           </div>
         </div>
 
-        <div class="ship-bars">
-          <!-- Shields -->
-          <div class="bar-group">
-            <div class="bar-header">
-              <span class="bar-label">Shields</span>
-              <span class="bar-numbers">{{ starship.currentShields }} / {{ starship.maxShields }}</span>
+        <!-- HP/Shield bars + damage/heal — combat-tab `hp-bar flex-1`
+             pattern. One control row shared by both bars: damage cascades
+             shields-then-hull via store.damageStarship; heal targets
+             hull via store.healStarship. Local-only — does not sync to
+             the GM (player-view broadcasts are no-ops). -->
+        <div class="ship-stats-row">
+          <div class="ship-bars">
+            <div class="hp-bar ship-bar-shields">
+              <div class="hp-bar-fill shield-fill" :style="{ width: shieldPercent + '%' }"></div>
+              <div class="hp-bar-text">
+                {{ starship.currentShields }}<span class="opacity-50">/</span>{{ starship.maxShields }} Shields
+              </div>
             </div>
-            <div class="bar-track">
-              <div
-                class="bar-fill shields"
-                :style="{ width: shieldPercent + '%' }"
-              ></div>
+            <div class="hp-bar ship-bar-hull">
+              <div class="hp-bar-fill" :style="{ width: hpPercent + '%', background: hpColor }"></div>
+              <div class="hp-bar-text">
+                {{ starship.currentHP }}<span class="opacity-50">/</span>{{ starship.maxHP }} Hull
+              </div>
             </div>
           </div>
-
-          <!-- Hull -->
-          <div class="bar-group">
-            <div class="bar-header">
-              <span class="bar-label">Hull</span>
-              <span class="bar-numbers">{{ starship.currentHP }} / {{ starship.maxHP }}</span>
-            </div>
-            <div class="bar-track">
-              <div
-                class="bar-fill hull"
-                :style="{ width: hpPercent + '%', background: hpColor }"
-              ></div>
-            </div>
+          <div class="hp-controls shrink-0">
+            <button class="hp-btn hp-btn-damage" @click="applyDamage">−</button>
+            <input
+              v-model.number="damageAmount"
+              type="number"
+              class="hp-input"
+              placeholder="0"
+              @keydown.enter.exact="applyDamage"
+              @keydown.enter.shift="applyHeal"
+            />
+            <button class="hp-btn hp-btn-heal" @click="applyHeal">+</button>
           </div>
         </div>
 
@@ -323,54 +349,26 @@ const hpColor = computed(() => {
   color: var(--color-accent);
 }
 
-.ship-bars {
+/* Ship stats row: bars stack vertically on the left (combat hp-bar
+   pattern with overlaid numbers), shared damage/heal controls on the
+   right. The combat .hp-bar / .hp-bar-fill / .hp-bar-text /
+   .hp-controls / .hp-btn / .hp-input classes are global (style.css). */
+.ship-stats-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.bar-group {
+.ship-bars {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-.bar-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-}
-
-.bar-label {
-  color: var(--color-text-dim);
-  text-transform: uppercase;
-}
-
-.bar-numbers {
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--color-text);
-}
-
-.bar-track {
-  height: 1.25rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.bar-fill.shields {
+.shield-fill {
   background: var(--color-info);
-}
-
-.bar-fill.hull {
-  background: var(--color-success);
 }
 
 .ship-defenses {

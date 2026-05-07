@@ -93,11 +93,22 @@ function initChannel() {
 function broadcast(type: StarshipSyncMessageType, payload: unknown) {
   if (!state.isGMView) return
 
+  // BroadcastChannel.postMessage uses the structuredClone algorithm,
+  // which throws DataCloneError on Vue reactive Proxy objects. Most of
+  // our payloads are reactive references into state.activeScene (the
+  // ship, threats, the scene itself), so we deep-strip reactivity by
+  // round-tripping through JSON before sending. Same problem applies to
+  // the WebSocket transport. Fixes session-13 nextTurn bug where the
+  // BroadcastChannel throw killed the rest of nextTurn after the round
+  // had already incremented, leaving initiative frozen on the last
+  // entry while the round counter kept ticking up.
+  const safePayload = payload === undefined ? undefined : JSON.parse(JSON.stringify(payload))
+
   // Local tabs via BroadcastChannel
   if (channel) {
     const message: StarshipSyncMessage = {
       type,
-      payload,
+      payload: safePayload,
       timestamp: Date.now()
     }
     console.log('[Starship] Broadcasting:', type)
@@ -106,7 +117,7 @@ function broadcast(type: StarshipSyncMessageType, payload: unknown) {
 
   // Remote devices via WebSocket (only if GM and sync enabled)
   if (wsTransport && state.isRemoteSyncEnabled) {
-    wsTransport.send({ type, payload })
+    wsTransport.send({ type, payload: safePayload })
   }
 }
 
@@ -433,11 +444,19 @@ function regenerateShields() {
   ship.currentShields = Math.min(ship.maxShields, ship.currentShields + ship.shieldRegen)
   broadcast('starship-update', ship)
 
-  // Also regenerate threat shields
+  // Also regenerate threat shields. Treat undefined currentShields as 0 so
+  // threats authored with maxShields but no explicit currentShields (e.g.
+  // imported from older bundles) still regenerate. Skip only when the
+  // threat genuinely has no shield system (maxShields = 0/undefined) or
+  // no regen rate. Covered by the "currentShields=undefined" regression
+  // test in starshipStore.test.ts.
   for (const threat of state.activeScene.threats) {
     if (threat.isDefeated) continue
-    if (threat.shieldRegen && threat.shieldRegen > 0 && threat.maxShields && threat.currentShields !== undefined) {
-      threat.currentShields = Math.min(threat.maxShields, threat.currentShields + threat.shieldRegen)
+    const regen = threat.shieldRegen ?? 0
+    const max = threat.maxShields ?? 0
+    if (regen > 0 && max > 0) {
+      const cur = threat.currentShields ?? 0
+      threat.currentShields = Math.min(max, cur + regen)
       broadcast('threat-update', threat)
     }
   }

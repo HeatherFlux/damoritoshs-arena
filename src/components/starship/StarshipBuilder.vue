@@ -58,6 +58,20 @@ function removeBonus(key: string) {
   }
 }
 
+function updateBonus(key: string, value: number) {
+  // Re-spread so the watcher / store sees a new bonuses reference and
+  // doesn't lose the change to a shallow-equality bail-out somewhere
+  // downstream.
+  starship.value.bonuses = {
+    ...starship.value.bonuses,
+    [key]: value
+  }
+
+  if (store.state.activeScene) {
+    store.updateStarship({ bonuses: starship.value.bonuses })
+  }
+}
+
 function resetToDefaults() {
   starship.value = createDefaultStarship()
 }
@@ -214,10 +228,14 @@ defineExpose({
             class="bonus-item"
           >
             <span class="bonus-name">{{ key }}</span>
-            <span class="bonus-value" :class="{ positive: value > 0, negative: value < 0 }">
-              {{ value > 0 ? '+' : '' }}{{ value }}
-            </span>
-            <button class="bonus-remove" @click="removeBonus(key as string)">&times;</button>
+            <input
+              type="number"
+              class="input input-number bonus-value-input"
+              :class="{ positive: value > 0, negative: value < 0 }"
+              :value="value"
+              @input="updateBonus(key as string, parseInt(($event.target as HTMLInputElement).value) || 0)"
+            />
+            <button class="bonus-remove" @click="removeBonus(key as string)" title="Remove bonus">&times;</button>
           </div>
         </div>
 
@@ -385,6 +403,23 @@ defineExpose({
 }
 
 .bonus-value.negative {
+  color: var(--color-danger);
+}
+
+/* Editable variant — inherits the same color treatment so a positive
+   value still shows green, negative red. Width is small to keep the row
+   compact. */
+.bonus-value-input {
+  width: 4rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.bonus-value-input.positive {
+  color: var(--color-success);
+}
+
+.bonus-value-input.negative {
   color: var(--color-danger);
 }
 
