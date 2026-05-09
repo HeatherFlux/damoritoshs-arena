@@ -155,7 +155,7 @@
         "initiativeBonus": { "type": "integer", "description": "Modifier applied to the d20 initiative roll. Clickable to re-roll." },
         "skills": {
           "type": "object",
-          "description": "Skill modifiers the threat has (e.g. {'Piloting': 12, 'Stealth': 8}). Used for any check the GM calls for outside the routine.",
+          "description": "Skill modifiers the threat has (e.g. {'Piloting': 12, 'Arcana': 14}). Drives auto-roll for any routine action with type='skill_check': the runner looks up the action's `skill` here and rolls d20 + bonus for the threat (chip shows '+14 Arcana'). Also used for ad-hoc checks the GM calls outside the routine.",
           "additionalProperties": { "type": "number" }
         },
         "tacticalRole": {

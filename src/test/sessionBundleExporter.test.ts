@@ -509,5 +509,90 @@ describe('sessionBundleExporter', () => {
       expect(shopStore.state.savedShops[0].name).toBe('Round Trip Bazaar')
       expect(shopStore.state.savedShops[0].shop.inventory.equipment?.[0].name).toBe('Hacking Kit')
     })
+
+    // The new threat-skills editor lets a GM author bonuses like
+    // {Piloting: 12, Arcana: 14} on a threat. The runner reads them when
+    // a skill_check routine action fires (chip shows "+12 Piloting", click
+    // rolls d20+12). Both schema and example YAML already documented
+    // this shape, but no test exercised the round-trip.
+    it('preserves threat.skills (e.g. Piloting +12, Arcana +14) through YAML round-trip', () => {
+      starshipStore.state.savedScenes.push(makeSavedScene({
+        id: 'scene-skills',
+        name: 'Bonesinger Encounter',
+        threats: [
+          {
+            id: 'threat-bonesinger',
+            name: 'Bonesinger',
+            type: 'enemy_ship',
+            level: 5,
+            maxHP: 80, currentHP: 80,
+            maxShields: 12, currentShields: 12, shieldRegen: 4,
+            ac: 23, fortitude: 14, reflex: 8,
+            initiativeSkill: 'Arcana', initiativeBonus: 14,
+            skills: { Arcana: 14, Piloting: 12 },
+            description: 'Necrotic cruiser.',
+            isDefeated: false,
+            routineActionsUsed: [],
+            routine: {
+              actionsPerTurn: 2,
+              description: 'Disruptive Scan, then fire.',
+              actions: [
+                {
+                  id: 'rt-scan',
+                  name: 'Disruptive Scan',
+                  actionCost: 1,
+                  type: 'skill_check',
+                  description: 'Magical scan.',
+                  skill: 'Arcana',
+                  vsDefense: 'Will DC',
+                  dc: 22,
+                },
+              ],
+            },
+          },
+        ],
+      }))
+
+      const bundle = buildSessionBundle(
+        { encounterStore, partyStore, hackingStore, starshipStore, shopStore },
+        { name: 'Skills Round Trip' }
+      )
+      const yamlText = serializeBundle(bundle, 'yaml').content
+      const reparsed = parseSessionBundle(yamlText)
+
+      clearAll(encounterStore, partyStore, hackingStore, starshipStore, shopStore)
+      expect(starshipStore.state.savedScenes).toHaveLength(0)
+
+      const importStores: ImportStores = {
+        encounterStore: {
+          state: encounterStore.state,
+          importCustomCreatures: encounterStore.importCustomCreatures,
+          importCustomHazards: encounterStore.importCustomHazards,
+          importEncounters: encounterStore.importEncounters,
+        },
+        hackingStore: { state: hackingStore.state },
+        starshipStore: { importScenes: starshipStore.importScenes },
+        partyStore: { importParties: partyStore.importParties },
+        shopStore: { state: shopStore.state },
+      }
+      importSessionBundle(reparsed, importStores)
+
+      // Importer regenerates scene/threat IDs by design (so a re-import
+      // can't clobber existing scenes with same id), so look up by name.
+      const restored = starshipStore.state.savedScenes.find(s => s.name === 'Bonesinger Encounter')
+      expect(restored).toBeTruthy()
+      const threat = restored!.threats.find(t => t.name === 'Bonesinger')
+      expect(threat).toBeTruthy()
+      // The full skill bonus map must survive YAML serialization, not
+      // just the keys.
+      expect(threat!.skills).toEqual({ Arcana: 14, Piloting: 12 })
+      // And the skill_check action that depends on it must still point
+      // at the right skill (so the runner's auto-roll still resolves).
+      expect(threat!.routine.actions[0].skill).toBe('Arcana')
+      // Other threat metadata that was getting silently dropped on
+      // import: initiative, tacticalRole hints, etc.
+      expect(threat!.initiativeSkill).toBe('Arcana')
+      expect(threat!.initiativeBonus).toBe(14)
+    })
   })
 })

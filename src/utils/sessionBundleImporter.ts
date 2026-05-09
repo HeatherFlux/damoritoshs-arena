@@ -66,13 +66,36 @@ export interface BundleStarshipThreat {
   type: 'enemy_ship' | 'hazard' | 'environmental'
   level: number
   maxHP?: number
+  currentHP?: number
   ac?: number
   maxShields?: number
+  currentShields?: number
   shieldRegen?: number
   fortitude?: number
   reflex?: number
   description?: string
+  // Initiative — needed for the runner's auto-roll on enemy turns.
+  initiativeSkill?: string
+  initiativeBonus?: number
+  // Skill-bonus map. The runner reads this when a `skill_check`
+  // routine action fires (chip shows "+12 Piloting", click rolls
+  // d20+12). Drop this and the chip falls back to flat d20.
+  skills?: Record<string, number>
+  // Tactical hint shown as a badge on the threat card.
+  tacticalRole?: 'standard' | 'complication' | 'indiscriminate'
+  // Routine: 4-tier outcomes, attack bonuses, damage, etc.
   routine?: object
+  // Out-of-routine abilities (auras, reactions). `hidden: true` keeps
+  // the ability off the player view until the GM reveals it.
+  specialAbilities?: {
+    name: string
+    description: string
+    trigger?: string
+    hidden?: boolean
+  }[]
+  immunities?: string[]
+  resistances?: Record<string, number>
+  weaknesses?: Record<string, number>
 }
 
 export interface BundleStarship {
@@ -555,23 +578,25 @@ export function importSessionBundle(
         shieldRegen: s.starship.shieldRegen ?? defaultStarship.shieldRegen,
       } : defaultStarship
 
+      // Spread the full threat first so optional fields survive
+      // (skills, initiativeSkill/Bonus, tacticalRole, specialAbilities,
+      // immunities, weaknesses, resistances). The earlier hand-picked
+      // whitelist silently dropped them, which broke the runner's
+      // auto-roll for skill_check routine actions on imported threats.
+      // Then layer runtime defaults and regenerate the id so re-imports
+      // can't clobber existing live state.
       const threats: StarshipThreat[] = (s.threats ?? []).map(t => ({
         ...createDefaultThreat(),
+        ...(t as Partial<StarshipThreat>),
         id: crypto.randomUUID(),
-        name: t.name,
-        type: t.type,
-        level: t.level,
         maxHP: t.maxHP ?? 30,
         currentHP: t.maxHP ?? 30,
         maxShields: t.maxShields,
         currentShields: t.maxShields,
-        shieldRegen: t.shieldRegen,
         ac: t.ac ?? 14,
-        fortitude: t.fortitude,
-        reflex: t.reflex,
-        description: t.description,
         routine: t.routine as StarshipThreat['routine'],
         isDefeated: false,
+        routineActionsUsed: [],
       }))
 
       const base = createEmptySavedScene()

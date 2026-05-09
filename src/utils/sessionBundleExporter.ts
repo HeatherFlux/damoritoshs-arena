@@ -350,5 +350,24 @@ function mapStarshipThreat(t: SavedScene['threats'][number]): BundleStarshipThre
   if (t.reflex != null) out.reflex = t.reflex
   if (t.description) out.description = t.description
   if (t.routine) out.routine = t.routine as object
+  // Initiative — needed for the runner's auto-roll on enemy turns.
+  if (t.initiativeSkill) out.initiativeSkill = t.initiativeSkill
+  if (t.initiativeBonus != null) out.initiativeBonus = t.initiativeBonus
+  // Threat skill-bonus map. Drives `skill_check` routine action rolls
+  // (chip "+12 Piloting" → d20+12). Whitelisting the prior fields
+  // dropped this silently — the chip would still render but always at
+  // flat d20 after a re-import.
+  if (t.skills && Object.keys(t.skills).length > 0) out.skills = { ...t.skills }
+  if (t.tacticalRole) out.tacticalRole = t.tacticalRole
+  if (t.specialAbilities && t.specialAbilities.length > 0) {
+    out.specialAbilities = t.specialAbilities.map(sa => ({ ...sa }))
+  }
+  if (t.immunities && t.immunities.length > 0) out.immunities = [...t.immunities]
+  if (t.resistances && Object.keys(t.resistances).length > 0) {
+    out.resistances = { ...t.resistances }
+  }
+  if (t.weaknesses && Object.keys(t.weaknesses).length > 0) {
+    out.weaknesses = { ...t.weaknesses }
+  }
   return out
 }
