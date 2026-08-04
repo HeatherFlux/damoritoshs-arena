@@ -4,6 +4,14 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-XSS-Protection: 1; mode=block
 
+# App shell — always revalidate so a reload picks up the newest build's
+# hashed assets. The bundle files below stay immutable (unique per build).
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
 /*.js
   Cache-Control: public, max-age=31536000, immutable
 
