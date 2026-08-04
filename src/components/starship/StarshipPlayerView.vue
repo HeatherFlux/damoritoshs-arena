@@ -86,7 +86,15 @@ function getRoleCount(roleId: string): number {
   return scene.value.availableRoles.filter(r => r === roleId).length
 }
 
+// A new share link opened in this same tab changes only the URL fragment, which
+// does not remount this view. Reload so the new link's session is fully
+// re-initialized (also picks up any newer deployed build).
+function onHashChange() {
+  if (window.location.hash.includes('/starship/view')) window.location.reload()
+}
+
 onMounted(async () => {
+  window.addEventListener('hashchange', onHashChange)
   store.setGMView(false)
   store.ensureChannel()
 
@@ -101,6 +109,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('hashchange', onHashChange)
   store.disableRemoteSync()
 })
 

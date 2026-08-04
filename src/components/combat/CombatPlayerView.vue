@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from 'vue'
+import { onMounted, onUnmounted, computed, ref, watch } from 'vue'
 import { useCombatStore, type CombatPlayerData } from '../../stores/combatStore'
 
 const combatStore = useCombatStore()
 const remoteStatus = ref('')
 const isRemoteSession = ref(false)
 
+// A new share link opened in this same tab changes only the URL fragment, which
+// does not remount this view. Reload so the new link's session is fully
+// re-initialized (also picks up any newer deployed build).
+function onHashChange() {
+  if (window.location.hash.includes('/combat/view')) window.location.reload()
+}
+
 onMounted(async () => {
+  window.addEventListener('hashchange', onHashChange)
   combatStore.setGMView(false)
   combatStore.ensureChannel()
   // Load state immediately from localStorage + request fresh state from GM (same-device)
@@ -43,6 +51,10 @@ watch(() => combatStore.remoteSyncState.connectionState, (state) => {
       remoteStatus.value = 'Disconnected'
       break
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('hashchange', onHashChange)
 })
 
 // Clear "waiting for state" once data arrives

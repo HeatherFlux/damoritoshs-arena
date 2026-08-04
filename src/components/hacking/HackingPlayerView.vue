@@ -24,7 +24,15 @@ const statusLabel = computed(() => {
   }
 })
 
+// A new share link opened in this same tab changes only the URL fragment, which
+// does not remount this view. Reload so the new link's session/state is fully
+// re-initialized (also picks up any newer deployed build).
+function onHashChange() {
+  if (window.location.hash.includes('/hacking/view')) window.location.reload()
+}
+
 onMounted(async () => {
+  window.addEventListener('hashchange', onHashChange)
   store.setGMView(false)
 
   // Try to load state from URL first
@@ -52,6 +60,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('hashchange', onHashChange)
   // Cleanup sync on unmount
   if (store.state.isRemoteSyncEnabled) {
     store.disableRemoteSync()

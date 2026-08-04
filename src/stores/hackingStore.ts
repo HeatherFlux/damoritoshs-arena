@@ -629,10 +629,29 @@ function disableRemoteSync(): void {
  * Unified player view launcher: enables remote sync if available, copies
  * the share URL to clipboard, then opens the player view in a new tab.
  */
-async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
-  let syncEnabled = state.isRemoteSyncEnabled
+/**
+ * Mint a fresh session id. A new share link must not inherit a prior session's
+ * retained state (same-device BroadcastChannel and the sync-worker Durable
+ * Object are both keyed by session id), so every shared session gets a clean id.
+ */
+function rotateSession(): void {
+  const newId = crypto.randomUUID().slice(-8)
+  state.sessionId = newId
+  sessionStorage.setItem('sf2e-hacking-session', newId)
+  // Re-key the same-device channel onto the new id (initChannel closes the old one).
+  initChannel()
+}
 
-  if (isSyncAvailable() && !syncEnabled) {
+async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
+  // Rotate on every copy so a new link starts a clean session (fixes "new link
+  // shows the old link's content"). Drop the old-session connection first, then
+  // re-enable sync — which reconnects the GM to the new id and re-publishes the
+  // current computer, so joining players see current content.
+  if (state.isRemoteSyncEnabled) disableRemoteSync()
+  rotateSession()
+
+  let syncEnabled = false
+  if (isSyncAvailable()) {
     syncEnabled = await enableRemoteSync()
   }
 
@@ -813,6 +832,7 @@ export function useHackingStore() {
     loadFromUrl,
     ensureChannel,
     hasRemoteSyncInUrl,
+    rotateSession,
     // Remote sync
     enableRemoteSync,
     joinRemoteSession,

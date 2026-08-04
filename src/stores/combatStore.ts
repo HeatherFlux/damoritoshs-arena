@@ -879,11 +879,25 @@ function ensureChannel() {
  * Unified player view launcher: enables remote sync if available, copies
  * the share URL to clipboard, then opens the player view in a new tab.
  */
-async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
-  let syncEnabled = remoteSyncState.enabled
+/**
+ * Mint a fresh session id. A new share link must not inherit a prior session's
+ * retained state on the sync-worker Durable Object (keyed by session id), so
+ * every shared session gets a clean id. Combat's same-device BroadcastChannel
+ * name is session-independent, so only the remote (WS) session id rotates.
+ */
+function rotateCombatSession(): void {
+  combatSessionId = crypto.randomUUID().slice(-8)
+}
 
-  // Auto-enable sync if available and not already on
-  if (isSyncAvailable() && !syncEnabled) {
+async function openPlayerView(): Promise<{ success: boolean; syncEnabled: boolean }> {
+  // Rotate on every copy so a new link starts a clean session (fixes "new link
+  // shows the old link's content"). Drop the old-session connection first, then
+  // re-enable sync — which reconnects the GM to the new id.
+  if (remoteSyncState.enabled) disableCombatRemoteSync()
+  rotateCombatSession()
+
+  let syncEnabled = false
+  if (isSyncAvailable()) {
     syncEnabled = await enableCombatRemoteSync()
   }
 
@@ -955,6 +969,7 @@ export const useCombatStore = () => ({
   joinCombatRemoteSession,
   disableCombatRemoteSync,
   generateCombatShareUrl,
+  rotateCombatSession,
   hasCombatRemoteSyncInUrl,
   getCombatSessionFromUrl,
   isSyncAvailable: isSyncAvailable,
