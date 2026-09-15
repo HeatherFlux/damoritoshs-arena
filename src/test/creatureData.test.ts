@@ -21,6 +21,7 @@ interface Creature {
   source: string
   hp: number
   ac: number
+  skills: Record<string, number>
   attacks: Attack[]
   specialAbilities: SpecialAbility[]
 }
@@ -37,11 +38,73 @@ const STOCK_ABILITY_NAMES = new Set([
   'Exigency',
   'Attack of Opportunity',
   'Ferocity',
+  'No Breath',
+  'Light Blindness',
+  'All-Around Vision',
+  'Lifesense',
+  'Engulf',
+  'Throw Rock',
+  'Rend',
 ])
 
 describe('creature data invariants — full scan of every creature', () => {
   it('has at least 270 creatures', () => {
     expect(data.length).toBeGreaterThanOrEqual(270)
+  })
+
+  it('includes the Tales from the Vast adventures and Absalom Station', () => {
+    const sources = new Set(data.map(c => c.source))
+    for (const s of ['Expedition to the Drowned Planet', 'The Moonside-250 Terror', 'Sihedron Showdown', 'Paradise Shutdown', 'Secrets of the Swarm', 'Starfinder Absalom Station']) {
+      expect(sources.has(s), s).toBe(true)
+    }
+  })
+
+  it('keeps Computers, Piloting and Lore skills (skill_mod omits them; parser must read skill_markdown)', () => {
+    expect(data.filter(c => 'computers' in c.skills).length).toBeGreaterThanOrEqual(50)
+    expect(data.filter(c => 'piloting' in c.skills).length).toBeGreaterThanOrEqual(20)
+    expect(data.filter(c => Object.keys(c.skills).some(k => k.endsWith(' lore'))).length).toBeGreaterThanOrEqual(50)
+  })
+
+  it('spellcasters keep their spell lists, not just the DC line', () => {
+    const spellBlocks = data.flatMap(c => c.specialAbilities.filter(a => /\bspells\b/i.test(a.name)))
+    expect(spellBlocks.length).toBeGreaterThanOrEqual(100)
+    const withList = spellBlocks.filter(a => /(cantrips|1st|2nd|3rd|\dth)[^:]*: /i.test(a.description))
+    expect(withList.length).toBeGreaterThanOrEqual(100)
+  })
+
+  it('adult and ancient dragons carry their own spell DCs, not the young dragon\'s', () => {
+    const byName = new Map(data.map(c => [c.name, c]))
+    for (const family of ['Host', 'Akashic', 'Abysium', 'Cosmic']) {
+      const dcs = ['Young', 'Adult', 'Ancient'].map(age => {
+        const c = byName.get(`${age} ${family} Dragon`)
+        const prepared = c?.specialAbilities.find(a => /Prepared Spells/.test(a.name))
+        return prepared?.description.match(/DC (\d+)/)?.[1]
+      })
+      expect(dcs.every(Boolean), family).toBe(true)
+      expect(new Set(dcs).size, `${family}: ${dcs.join(',')}`).toBe(3)
+    }
+  })
+
+  it('no attack falls back to placeholder 1d6 damage', () => {
+    for (const c of data) {
+      for (const a of c.attacks) {
+        expect(a.damage, `${c.name} :: ${a.name}`).not.toBe('1d6')
+      }
+    }
+  })
+
+  it('no special ability description contains literal markdown bold markers', () => {
+    for (const c of data) {
+      for (const a of c.specialAbilities) {
+        expect(a.description, `${c.name} :: ${a.name}`).not.toContain('**')
+      }
+    }
+  })
+
+  it('Auto-Fire attacks are captured as area attacks', () => {
+    const autoFire = data.flatMap(c => c.attacks.filter(a => (a as Attack & { area?: string }).area === 'Auto-Fire'))
+    expect(autoFire.length).toBeGreaterThanOrEqual(5)
+    for (const a of autoFire) expect(a.type).toBe('area')
   })
 
   it('no special ability description starts with malformed punctuation', () => {
@@ -145,10 +208,27 @@ describe('creature data invariants — full scan of every creature', () => {
     expect(issues, `HTML tags in descriptions:\n${issues.join('\n')}`).toEqual([])
   })
 
-  it('all special ability descriptions are 500 chars or fewer (parser truncates)', () => {
+  it('all special ability descriptions are 1500 chars or fewer (parser truncates)', () => {
     for (const c of data) {
       for (const a of c.specialAbilities) {
-        expect(a.description.length, `${c.name} :: ${a.name}`).toBeLessThanOrEqual(500)
+        expect(a.description.length, `${c.name} :: ${a.name}`).toBeLessThanOrEqual(1500)
+      }
+    }
+  })
+
+  it('no special ability description is cut off by the cap', () => {
+    for (const c of data) {
+      for (const a of c.specialAbilities) {
+        expect(a.description.length, `${c.name} :: ${a.name}`).toBeLessThan(1500)
+      }
+    }
+  })
+
+  it('no special ability description runs into the Items section or leaves template junk', () => {
+    for (const c of data) {
+      for (const a of c.specialAbilities) {
+        expect(a.description, `${c.name} :: ${a.name}`).not.toMatch(/\bItems [a-z][^.]*$/)
+        expect(a.description, `${c.name} :: ${a.name}`).not.toContain('{{')
       }
     }
   })
@@ -230,15 +310,26 @@ describe('creature data invariants — full scan of every creature', () => {
     }
   })
 
-  it('regression: empty descriptions count stays at most 5 across all creatures', () => {
-    // Was 75 before the parser fix. Setting a generous ceiling so future creature
-    // additions don't fail this; lowering the bar would catch obvious regressions.
+  it('regression: empty descriptions count stays at most 20 across all creatures', () => {
+    // Was 75 before the parser fix. The remaining empties are abilities the archive
+    // itself lists as a bare name + action icon (Fan Mail, Attack Pattern Beta…).
     let emptyCount = 0
     for (const c of data) {
       for (const a of c.specialAbilities) {
         if (!a.description) emptyCount++
       }
     }
-    expect(emptyCount).toBeLessThanOrEqual(5)
+    expect(emptyCount).toBeLessThanOrEqual(20)
+  })
+
+  it('rendered-page abilities are merged in (breath weapons, afflictions, attack traits)', () => {
+    const byName = new Map(data.map(c => [c.name, c]))
+    const names = (n: string) => byName.get(n)?.specialAbilities.map(a => a.name) ?? []
+    expect(names('Ancient Host Dragon')).toEqual(expect.arrayContaining(['Draconic Frenzy', 'Swarm Breath', 'Swallow Whole']))
+    expect(names('Giant Centipede')).toContain('Giant Centipede Venom')
+    expect(names('Elder Psychic Fungus')).toContain('Befuddling Spores')
+    const agile = data.flatMap(c => c.attacks).filter(a => (a as Attack & { traits?: string[] }).traits?.includes('agile'))
+    expect(agile.length).toBeGreaterThanOrEqual(100)
+    expect(data.reduce((n, c) => n + c.specialAbilities.length, 0)).toBeGreaterThanOrEqual(1500)
   })
 })

@@ -167,18 +167,32 @@ function adaptAoNHazard(hit) {
 const raw = JSON.parse(readFileSync('/tmp/aon_hazards_raw.json', 'utf-8'));
 const hits = raw.hits?.hits || [];
 
-// Deduplicate by name (keep first occurrence, which should be latest)
-const seen = new Set();
-const hazards = hits
-  .map(hit => adaptAoNHazard(hit))
-  .filter(h => {
-    if (h === null) return false;
-    const key = h.name.toLowerCase();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  })
-  .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+// Keep all hazard variants. When multiple entries share the same name, the
+// GM Core variant keeps the plain name; others get "(Source)" appended.
+// If no GM Core variant exists, the first (by AoN ID) keeps the plain name.
+const adapted = hits.map(hit => adaptAoNHazard(hit)).filter(h => h !== null);
+
+const byName = new Map();
+for (const h of adapted) {
+  const key = h.name.toLowerCase();
+  if (!byName.has(key)) byName.set(key, []);
+  byName.get(key).push(h);
+}
+
+const hazards = [];
+for (const [, variants] of byName) {
+  if (variants.length === 1) {
+    hazards.push(variants[0]);
+    continue;
+  }
+  const coreIdx = variants.findIndex(v => v.source === 'GM Core');
+  const primaryIdx = coreIdx !== -1 ? coreIdx : 0;
+  variants.forEach((v, i) => {
+    hazards.push(i === primaryIdx ? v : { ...v, name: `${v.name} (${v.source})` });
+  });
+}
+
+hazards.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 
 writeFileSync('./src/data/hazards.json', JSON.stringify(hazards, null, 2));
 console.log('Saved', hazards.length, 'hazards to src/data/hazards.json');

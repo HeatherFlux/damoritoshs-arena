@@ -70,7 +70,8 @@ function rollCritDamage(attackName: string, damage: string) {
   rollDamage(cleanDamage(damage), attackName, props.creature.name, true, penalties.value.damage)
 }
 
-// Parse damage for display — handles multi-group like "1d6+3 piercing plus 1d4 acid"
+// Parse damage for display — handles multi-group like "1d6+3 piercing plus 1d4 acid".
+// Dice-less riders ("plus Grab", "plus befuddling spores") are kept and shown after the dice.
 const parseAttackDamage = computed(() => {
   return (damage: string) => {
     const clean = cleanDamage(damage)
@@ -81,9 +82,12 @@ const parseAttackDamage = computed(() => {
       const mod = g.modifier !== 0 ? `${g.modifier >= 0 ? '+' : ''}${g.modifier}` : ''
       return `${g.numDice}d${g.dieSize}${mod}${g.damageType ? ' ' + g.damageType : ''}`
     })
+    const riders = clean
+      .split(/\s+plus\s+/i)
+      .filter(part => parseDamageExpression(part).length === 0)
     return {
       dice: parts.join(' + '),
-      type: '' // Type is now inline with each dice group
+      type: riders.length ? 'plus ' + riders.join(' plus ') : ''
     }
   }
 })
@@ -271,11 +275,11 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
     <!-- Attacks -->
     <div v-for="attack in creature.attacks" :key="attack.name + attack.bonus" class="attack-block">
       <div class="flex items-center gap-1.5 flex-wrap">
-        <strong>{{ attack.type === 'melee' ? 'Melee' : 'Ranged' }}</strong>
+        <strong>{{ attack.type === 'melee' ? 'Melee' : attack.type === 'ranged' ? 'Ranged' : (attack.area || 'Area') }}</strong>
         <ActionIcon :action="attack.actions ?? 1" class="text-accent" />
         <span class="text-text">{{ attack.name }}</span>
-        <!-- MAP Attack Buttons -->
-        <span class="inline-flex gap-1 ml-1">
+        <!-- MAP Attack Buttons (not for save-based Area Fire / Auto-Fire attacks) -->
+        <span v-if="attack.type !== 'area'" class="inline-flex gap-1 ml-1">
           <span
             class="rollable map-btn"
             @click="rollAttack(attack.name, attack.bonus, attack.damage)"
