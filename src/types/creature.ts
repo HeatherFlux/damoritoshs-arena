@@ -92,12 +92,18 @@ export interface EncounterCreature {
 }
 
 import type { EncounterHazard } from './hazard'
+import type { EncounterStarship, EncounterStarshipHazard } from './tsc'
 
 export interface Encounter {
   id: string
   name: string
   creatures: EncounterCreature[]
   hazards?: EncounterHazard[]
+  /** Tech Core tactical starship combat: NPC starships (XP as creatures) and starship hazards. */
+  starships?: EncounterStarship[]
+  starshipHazards?: EncounterStarshipHazard[]
+  /** Crew of 3 or fewer PCs: tactical starship budget is 10 lower (trivial/low) or 20 lower (moderate+). */
+  tscSmallCrew?: boolean
   partyLevel: number
   partySize: number
   notes?: string

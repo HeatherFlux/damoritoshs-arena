@@ -2,6 +2,7 @@
 import { useEncounterStore } from '../stores/encounterStore'
 import { useCombatStore } from '../stores/combatStore'
 import { usePartyStore } from '../stores/partyStore'
+import { useTscStore } from '../stores/tscStore'
 import { DIFFICULTY_BUDGETS, getAdjustedBudget } from '../types/encounter'
 import { formatComplexity, formatHazardType } from '../types/hazard'
 import SciFiDial from './SciFiDial.vue'
@@ -9,10 +10,20 @@ import SciFiDial from './SciFiDial.vue'
 const store = useEncounterStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
+const tscStore = useTscStore()
 
 const emit = defineEmits<{
   (e: 'run-encounter'): void
+  (e: 'run-tsc'): void
 }>()
+
+function runTacticalStarshipCombat() {
+  const encounter = store.activeEncounter.value
+  if (!encounter) return
+  if (tscStore.state.activeScene && !confirm('Replace the running tactical starship scene?')) return
+  tscStore.startFromEncounter(encounter, partyStore.getPartyPlayers())
+  emit('run-tsc')
+}
 
 function runEncounter() {
   const encounter = store.activeEncounter.value
@@ -87,6 +98,14 @@ function getDifficultyBudgets() {
           title="Start combat with this encounter"
         >
           ▶ Run
+        </button>
+        <button
+          v-if="store.activeEncounter.value.starships?.length || store.activeEncounter.value.starshipHazards?.length"
+          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-accent text-white border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:-translate-y-px"
+          @click="runTacticalStarshipCombat"
+          title="Start tactical starship combat with this encounter's starships and starship hazards"
+        >
+          ▶ Run in TSC
         </button>
       </div>
 
@@ -227,7 +246,7 @@ function getDifficultyBudgets() {
         </div>
 
         <!-- Empty State -->
-        <div v-if="!store.activeEncounter.value.creatures.length && !store.activeEncounter.value.hazards?.length && !partyStore.activeParty.value?.players?.length" class="text-center py-6 lg:py-8 text-dim">
+        <div v-if="!store.activeEncounter.value.creatures.length && !store.activeEncounter.value.hazards?.length && !store.activeEncounter.value.starships?.length && !store.activeEncounter.value.starshipHazards?.length && !partyStore.activeParty.value?.players?.length" class="text-center py-6 lg:py-8 text-dim">
           <p class="text-sm lg:text-base">No threats in this encounter</p>
           <p class="text-xs lg:text-sm mt-2">Search and add creatures or hazards from the panel above</p>
         </div>
@@ -320,6 +339,75 @@ function getDifficultyBudgets() {
                 />
                 Elite
               </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Starship List (Tech Core tactical starship combat) -->
+        <div v-if="store.encounterXP.value?.starshipBreakdown?.length || store.encounterXP.value?.starshipHazardBreakdown?.length" class="flex flex-col gap-1.5 lg:gap-2 mb-3 lg:mb-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-xs lg:text-sm font-semibold text-dim uppercase tracking-wide">Tactical Starship Combat</h3>
+            <label class="flex items-center gap-1 text-[0.625rem] lg:text-xs text-dim ml-auto" title="Tech Core p. 208: a crew of three or fewer PCs treats the budget as 10 lower (trivial/low) or 20 lower (moderate+). Defaults to on when the party has 3 or fewer members.">
+              <input type="checkbox" :checked="store.encounterXP.value?.smallCrewAdjusted" @change="store.setSmallCrew(($event.target as HTMLInputElement).checked)" />
+              small crew budget
+            </label>
+          </div>
+          <div
+            v-for="entry in store.encounterXP.value?.starshipBreakdown ?? []"
+            :key="entry.starship.id"
+            class="bg-surface border border-border rounded-lg p-2 lg:p-3 border-l-3 border-l-accent"
+          >
+            <div class="flex items-center gap-2 lg:gap-3">
+              <div class="flex items-center gap-0.5 lg:gap-1">
+                <button class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base" @click="store.updateStarshipCount(entry.starship.id, entry.count - 1)">-</button>
+                <span class="w-5 lg:w-6 text-center font-semibold text-sm lg:text-base">{{ entry.count }}</span>
+                <button class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base" @click="store.updateStarshipCount(entry.starship.id, entry.count + 1)">+</button>
+              </div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <span class="font-medium text-sm lg:text-base truncate">{{ entry.starship.name }}</span>
+                <div class="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+                  <span class="text-[0.625rem] lg:text-xs text-dim">
+                    Level {{ entry.starship.level }}
+                    <span class="font-medium" :style="{ color: getXPColor(entry.levelDiff) }">({{ formatLevelDiff(entry.levelDiff) }})</span>
+                  </span>
+                  <span class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated text-accent">starship</span>
+                  <span class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated text-dim">{{ entry.starship.size }} · {{ entry.starship.faction }}</span>
+                </div>
+              </div>
+              <div class="flex flex-col items-end text-[0.625rem] lg:text-xs shrink-0">
+                <span class="text-dim hidden lg:block">{{ entry.xpEach }} XP ea.</span>
+                <span class="font-semibold text-accent">{{ entry.xpTotal }} XP</span>
+              </div>
+              <button class="btn-icon btn-danger btn-xs lg:btn-sm" @click="store.removeStarshipFromEncounter(entry.starship.id)" title="Remove all">&times;</button>
+            </div>
+          </div>
+          <div
+            v-for="entry in store.encounterXP.value?.starshipHazardBreakdown ?? []"
+            :key="entry.hazard.id"
+            class="bg-surface border border-border rounded-lg p-2 lg:p-3 border-l-3 border-l-warning"
+          >
+            <div class="flex items-center gap-2 lg:gap-3">
+              <div class="flex items-center gap-0.5 lg:gap-1">
+                <button class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base" @click="store.updateStarshipHazardCount(entry.hazard.id, entry.count - 1)">-</button>
+                <span class="w-5 lg:w-6 text-center font-semibold text-sm lg:text-base">{{ entry.count }}</span>
+                <button class="w-5 h-5 lg:w-6 lg:h-6 p-0 flex items-center justify-center bg-elevated border border-border text-sm lg:text-base" @click="store.updateStarshipHazardCount(entry.hazard.id, entry.count + 1)">+</button>
+              </div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <span class="font-medium text-sm lg:text-base truncate">{{ entry.hazard.name }}</span>
+                <div class="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+                  <span class="text-[0.625rem] lg:text-xs text-dim">
+                    Level {{ entry.hazard.level }}
+                    <span class="font-medium" :style="{ color: getXPColor(entry.levelDiff) }">({{ formatLevelDiff(entry.levelDiff) }})</span>
+                  </span>
+                  <span class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated" :class="entry.hazard.complexity === 'complex' ? 'text-warning' : 'text-dim'">{{ entry.hazard.complexity }} starship hazard</span>
+                  <span class="text-[0.5rem] lg:text-[0.625rem] px-1 lg:px-1.5 py-0.5 rounded font-medium uppercase bg-elevated text-dim">{{ entry.hazard.scale === 'starship' ? 'sensor map' : 'deck' }}</span>
+                </div>
+              </div>
+              <div class="flex flex-col items-end text-[0.625rem] lg:text-xs shrink-0">
+                <span class="text-dim hidden lg:block">{{ entry.xpEach }} XP ea.</span>
+                <span class="font-semibold text-warning">{{ entry.xpTotal }} XP</span>
+              </div>
+              <button class="btn-icon btn-danger btn-xs lg:btn-sm" @click="store.removeStarshipHazardFromEncounter(entry.hazard.id)" title="Remove all">&times;</button>
             </div>
           </div>
         </div>

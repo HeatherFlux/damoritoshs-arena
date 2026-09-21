@@ -83,9 +83,9 @@ defineExpose({ loadSceneFromSidebar, editShipFromSidebar, saveCurrentSetup })
       <!-- Library -->
       <div v-else-if="activeTab === 'library'" class="h-full flex flex-col">
         <div class="flex gap-1 mb-2 shrink-0">
-          <button class="btn-secondary btn-xs" :class="{ 'btn-primary': libraryTab === 'starships' }" @click="libraryTab = 'starships'">Starships</button>
-          <button class="btn-secondary btn-xs" :class="{ 'btn-primary': libraryTab === 'hazards' }" @click="libraryTab = 'hazards'">Starship Hazards</button>
-          <button class="btn-secondary btn-xs" :class="{ 'btn-primary': libraryTab === 'vehicles' }" @click="libraryTab = 'vehicles'">Vehicles</button>
+          <button class="btn-xs" :class="libraryTab === 'starships' ? 'btn-primary' : 'btn-secondary'" @click="libraryTab = 'starships'">Starships</button>
+          <button class="btn-xs" :class="libraryTab === 'hazards' ? 'btn-primary' : 'btn-secondary'" @click="libraryTab = 'hazards'">Starship Hazards</button>
+          <button class="btn-xs" :class="libraryTab === 'vehicles' ? 'btn-primary' : 'btn-secondary'" @click="libraryTab = 'vehicles'">Vehicles</button>
         </div>
         <div class="flex-1 overflow-hidden">
           <TscStarshipSearch v-if="libraryTab === 'starships'" :party-level="partyLevel" add-label="Add to scene" @add="addShipToScene" />

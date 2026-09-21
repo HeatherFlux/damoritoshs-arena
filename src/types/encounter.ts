@@ -5,7 +5,8 @@
 
 import type { Creature, EncounterCreature, CreatureAdjustment, EncounterHazard } from './creature'
 import type { Hazard } from './hazard'
-import { calculateHazardXP } from './hazard'
+import { calculateHazardXP, SIMPLE_HAZARD_XP, COMPLEX_HAZARD_XP } from './hazard'
+import type { EncounterStarship, EncounterStarshipHazard, NpcStarship, StarshipHazard } from './tsc'
 
 export type Difficulty = 'trivial' | 'low' | 'moderate' | 'severe' | 'extreme'
 
@@ -49,12 +50,33 @@ export const ADJUSTMENT_LEVEL_CHANGE: Record<CreatureAdjustment, number> = {
   weak: -1,
 }
 
+/**
+ * Tech Core p. 208: a crew of three or fewer PCs treats the tactical starship
+ * encounter budget as 20 lower for moderate or harder encounters and 10 lower
+ * for low or trivial ones.
+ */
+export const SMALL_CREW_REDUCTION: Record<Difficulty, number> = {
+  trivial: 10,
+  low: 10,
+  moderate: 20,
+  severe: 20,
+  extreme: 20,
+}
+
+export interface EncounterXPOptions {
+  /** Apply the Tech Core small-crew budget reduction (starship encounters only). */
+  smallCrew?: boolean
+}
+
 export interface EncounterXPResult {
   totalXP: number
   creatureXP: number
   hazardXP: number
+  starshipXP: number
+  starshipHazardXP: number
   adjustedBudget: number
   difficulty: Difficulty
+  smallCrewAdjusted: boolean
   creatureBreakdown: Array<{
     creature: Creature
     count: number
@@ -71,6 +93,26 @@ export interface EncounterXPResult {
     xpEach: number
     xpTotal: number
   }>
+  starshipBreakdown: Array<{
+    starship: NpcStarship
+    count: number
+    levelDiff: number
+    xpEach: number
+    xpTotal: number
+  }>
+  starshipHazardBreakdown: Array<{
+    hazard: StarshipHazard
+    count: number
+    levelDiff: number
+    xpEach: number
+    xpTotal: number
+  }>
+}
+
+/** Starship hazards use the same simple/complex hazard XP tables as GM Core hazards (Tech Core p. 246, 249). */
+export function calculateStarshipHazardXP(hazard: Pick<StarshipHazard, 'level' | 'complexity'>, partyLevel: number): number {
+  const clampedDiff = Math.max(-4, Math.min(4, hazard.level - partyLevel))
+  return (hazard.complexity === 'simple' ? SIMPLE_HAZARD_XP : COMPLEX_HAZARD_XP)[clampedDiff] || 0
 }
 
 /**
@@ -93,13 +135,14 @@ export function getAdjustedBudget(partySize: number, baseBudget: number): number
 /**
  * Determine encounter difficulty from XP total
  */
-export function getDifficulty(xp: number, partySize: number): Difficulty {
+export function getDifficulty(xp: number, partySize: number, smallCrew = false): Difficulty {
+  const budget = (d: Difficulty) => getAdjustedBudget(partySize, DIFFICULTY_BUDGETS[d]) - (smallCrew ? SMALL_CREW_REDUCTION[d] : 0)
   const thresholds: Array<{ difficulty: Difficulty; threshold: number }> = [
-    { difficulty: 'trivial', threshold: getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.trivial) },
-    { difficulty: 'low', threshold: getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.low) },
-    { difficulty: 'moderate', threshold: getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.moderate) },
-    { difficulty: 'severe', threshold: getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.severe) },
-    { difficulty: 'extreme', threshold: getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.extreme) },
+    { difficulty: 'trivial', threshold: budget('trivial') },
+    { difficulty: 'low', threshold: budget('low') },
+    { difficulty: 'moderate', threshold: budget('moderate') },
+    { difficulty: 'severe', threshold: budget('severe') },
+    { difficulty: 'extreme', threshold: budget('extreme') },
   ]
 
   let difficulty: Difficulty = 'trivial'
@@ -118,7 +161,10 @@ export function calculateEncounterXP(
   creatures: EncounterCreature[],
   partyLevel: number,
   partySize: number,
-  hazards: EncounterHazard[] = []
+  hazards: EncounterHazard[] = [],
+  starships: EncounterStarship[] = [],
+  starshipHazards: EncounterStarshipHazard[] = [],
+  options: EncounterXPOptions = {}
 ): EncounterXPResult {
   // Calculate creature XP
   const creatureBreakdown = creatures.map(({ creature, count, adjustment }) => {
@@ -154,19 +200,40 @@ export function calculateEncounterXP(
     }
   })
 
+  // Tech Core p. 208: treat starships as creatures for the experience budget.
+  const starshipBreakdown = starships.map(({ starship, count }) => {
+    const levelDiff = starship.level - partyLevel
+    const xpEach = getCreatureXP(levelDiff)
+    return { starship, count, levelDiff, xpEach, xpTotal: xpEach * count }
+  })
+
+  const starshipHazardBreakdown = starshipHazards.map(({ hazard, count }) => {
+    const levelDiff = hazard.level - partyLevel
+    const xpEach = calculateStarshipHazardXP(hazard, partyLevel)
+    return { hazard, count, levelDiff, xpEach, xpTotal: xpEach * count }
+  })
+
   const creatureXP = creatureBreakdown.reduce((sum, b) => sum + b.xpTotal, 0)
   const hazardXP = hazardBreakdown.reduce((sum, b) => sum + b.xpTotal, 0)
-  const totalXP = creatureXP + hazardXP
-  const adjustedBudget = getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.moderate)
-  const difficulty = getDifficulty(totalXP, partySize)
+  const starshipXP = starshipBreakdown.reduce((sum, b) => sum + b.xpTotal, 0)
+  const starshipHazardXP = starshipHazardBreakdown.reduce((sum, b) => sum + b.xpTotal, 0)
+  const totalXP = creatureXP + hazardXP + starshipXP + starshipHazardXP
+  const smallCrewAdjusted = !!options.smallCrew && (starships.length > 0 || starshipHazards.length > 0)
+  const adjustedBudget = getAdjustedBudget(partySize, DIFFICULTY_BUDGETS.moderate) - (smallCrewAdjusted ? SMALL_CREW_REDUCTION.moderate : 0)
+  const difficulty = getDifficulty(totalXP, partySize, smallCrewAdjusted)
 
   return {
     totalXP,
     creatureXP,
     hazardXP,
+    starshipXP,
+    starshipHazardXP,
     adjustedBudget,
     difficulty,
+    smallCrewAdjusted,
     creatureBreakdown,
     hazardBreakdown,
+    starshipBreakdown,
+    starshipHazardBreakdown,
   }
 }

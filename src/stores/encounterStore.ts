@@ -2,6 +2,7 @@ import { reactive, computed, watch } from 'vue'
 import type { Creature, Encounter, CreatureAdjustment, EncounterHazard } from '../types/creature'
 import type { Hazard } from '../types/hazard'
 import { calculateEncounterXP, type EncounterXPResult } from '../types/encounter'
+import type { NpcStarship, StarshipHazard } from '../types/tsc'
 import { usePartyStore } from './partyStore'
 
 // Import bundled creature data (pre-fetched from AoN)
@@ -166,7 +167,10 @@ const encounterXP = computed((): EncounterXPResult | null => {
     encounter.creatures,
     effectivePartyLevel.value,
     effectivePartySize.value,
-    encounter.hazards ?? []
+    encounter.hazards ?? [],
+    encounter.starships ?? [],
+    encounter.starshipHazards ?? [],
+    { smallCrew: encounter.tscSmallCrew ?? effectivePartySize.value <= 3 }
   )
 })
 
@@ -321,6 +325,79 @@ function removeHazardFromEncounter(hazardId: string) {
     }
     encounter.updatedAt = new Date()
   }
+}
+
+// ============ Tactical starship combat (Tech Core) ============
+
+function addStarshipToEncounter(starship: NpcStarship) {
+  const encounter = activeEncounter.value
+  if (!encounter) return
+  if (!encounter.starships) encounter.starships = []
+  const existing = encounter.starships.find(es => es.starship.id === starship.id)
+  if (existing) existing.count++
+  else encounter.starships.push({ starship, count: 1 })
+  encounter.updatedAt = new Date()
+}
+
+function removeStarshipFromEncounter(starshipId: string) {
+  const encounter = activeEncounter.value
+  if (!encounter?.starships) return
+  const index = encounter.starships.findIndex(es => es.starship.id === starshipId)
+  if (index !== -1) {
+    encounter.starships.splice(index, 1)
+    encounter.updatedAt = new Date()
+  }
+}
+
+function updateStarshipCount(starshipId: string, count: number) {
+  const encounter = activeEncounter.value
+  if (!encounter?.starships) return
+  const es = encounter.starships.find(x => x.starship.id === starshipId)
+  if (!es) return
+  if (count <= 0) removeStarshipFromEncounter(starshipId)
+  else {
+    es.count = count
+    encounter.updatedAt = new Date()
+  }
+}
+
+function addStarshipHazardToEncounter(hazard: StarshipHazard) {
+  const encounter = activeEncounter.value
+  if (!encounter) return
+  if (!encounter.starshipHazards) encounter.starshipHazards = []
+  const existing = encounter.starshipHazards.find(eh => eh.hazard.id === hazard.id)
+  if (existing) existing.count++
+  else encounter.starshipHazards.push({ hazard, count: 1 })
+  encounter.updatedAt = new Date()
+}
+
+function removeStarshipHazardFromEncounter(hazardId: string) {
+  const encounter = activeEncounter.value
+  if (!encounter?.starshipHazards) return
+  const index = encounter.starshipHazards.findIndex(eh => eh.hazard.id === hazardId)
+  if (index !== -1) {
+    encounter.starshipHazards.splice(index, 1)
+    encounter.updatedAt = new Date()
+  }
+}
+
+function updateStarshipHazardCount(hazardId: string, count: number) {
+  const encounter = activeEncounter.value
+  if (!encounter?.starshipHazards) return
+  const eh = encounter.starshipHazards.find(x => x.hazard.id === hazardId)
+  if (!eh) return
+  if (count <= 0) removeStarshipHazardFromEncounter(hazardId)
+  else {
+    eh.count = count
+    encounter.updatedAt = new Date()
+  }
+}
+
+function setSmallCrew(value: boolean | undefined) {
+  const encounter = activeEncounter.value
+  if (!encounter) return
+  encounter.tscSmallCrew = value
+  encounter.updatedAt = new Date()
 }
 
 function updateHazardCount(hazardId: string, count: number) {
@@ -565,6 +642,15 @@ export const useEncounterStore = () => ({
   addHazardToEncounter,
   removeHazardFromEncounter,
   updateHazardCount,
+
+  // Tactical starship combat (Tech Core)
+  addStarshipToEncounter,
+  removeStarshipFromEncounter,
+  updateStarshipCount,
+  addStarshipHazardToEncounter,
+  removeStarshipHazardFromEncounter,
+  updateStarshipHazardCount,
+  setSmallCrew,
 
   // Party Settings
   setPartyLevel,

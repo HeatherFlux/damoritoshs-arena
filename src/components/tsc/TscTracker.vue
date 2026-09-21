@@ -156,13 +156,13 @@ function entryClass(e: TscInitiativeEntry, i: number) {
           <button class="btn-secondary btn-xs" @click="addPc">+ PC</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
-          <div v-for="pc in scene.pcs" :key="pc.id" class="bg-elevated p-1.5 flex items-center gap-2 text-[0.6875rem]" :class="{ 'card-glow': currentEntry?.refId === pc.id }">
-            <span class="font-semibold flex-1 min-w-0 truncate">{{ pc.name }}</span>
-            <select :value="pc.stationId ?? ''" class="input input-sm select w-32" title="Helming" @change="store.setPcStation(pc.id, ($event.target as HTMLSelectElement).value || undefined)">
+          <div v-for="pc in scene.pcs" :key="pc.id" class="bg-elevated p-1.5 flex flex-wrap items-center gap-2 text-[0.6875rem]" :class="{ 'card-glow': currentEntry?.refId === pc.id }">
+            <span class="font-semibold flex-1 min-w-[5rem] truncate">{{ pc.name }}</span>
+            <select :value="pc.stationId ?? ''" class="input input-sm select w-28" title="Helming" @change="store.setPcStation(pc.id, ($event.target as HTMLSelectElement).value || undefined)">
               <option value="">— no station —</option>
               <option v-for="st in stationOptions" :key="st.id" :value="st.id">{{ st.label }}</option>
             </select>
-            <select :value="pc.explorationActivityId ?? ''" class="input input-sm select w-36" title="Exploration activity (free action at initiative)" @change="store.setPcExplorationActivity(pc.id, ($event.target as HTMLSelectElement).value || undefined)">
+            <select :value="pc.explorationActivityId ?? ''" class="input input-sm select w-32" title="Exploration activity (free action at initiative)" @change="store.setPcExplorationActivity(pc.id, ($event.target as HTMLSelectElement).value || undefined)">
               <option value="">— exploring —</option>
               <option v-for="a in TSC_EXPLORATION_ACTIVITIES" :key="a.id" :value="a.id">{{ a.name }}</option>
             </select>

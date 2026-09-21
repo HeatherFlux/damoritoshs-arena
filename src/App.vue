@@ -117,6 +117,11 @@ function handleRunEncounter() {
   activeTab.value = 'combat'
 }
 
+function handleRunTsc() {
+  starshipMode.value = 'tsc'
+  activeTab.value = 'starship'
+}
+
 // ============ Starship Scene Import/Export ============
 
 const showStarshipImportModal = ref(false)
@@ -382,7 +387,7 @@ function handleTscFileUpload(event: Event) {
               <ThreatSearch />
             </div>
             <div class="overflow-y-auto flex-1 lg:h-full min-w-0">
-              <EncounterBuilder @run-encounter="handleRunEncounter" />
+              <EncounterBuilder @run-encounter="handleRunEncounter" @run-tsc="handleRunTsc" />
             </div>
           </div>
         </section>
@@ -470,14 +475,14 @@ function handleTscFileUpload(event: Event) {
             <span class="text-[0.625rem] uppercase tracking-widest text-dim">Mode</span>
             <div class="flex gap-1">
               <button
-                class="btn-secondary btn-xs"
-                :class="{ 'btn-primary': starshipMode === 'csc' }"
+                class="btn-xs"
+                :class="starshipMode === 'csc' ? 'btn-primary' : 'btn-secondary'"
                 title="Cinematic Starship Combat (GM Core scenes: crew roles and Victory Points)"
                 @click="starshipMode = 'csc'"
               >CSC</button>
               <button
-                class="btn-secondary btn-xs"
-                :class="{ 'btn-primary': starshipMode === 'tsc' }"
+                class="btn-xs"
+                :class="starshipMode === 'tsc' ? 'btn-primary' : 'btn-secondary'"
                 title="Tactical Starship Combat (Tech Core: battle stations, sensor map, Hull and Shield Points)"
                 @click="starshipMode = 'tsc'"
               >TSC</button>

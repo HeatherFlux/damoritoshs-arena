@@ -359,6 +359,25 @@ describe('tscStore', () => {
     })
   })
 
+  describe('startFromEncounter', () => {
+    it('seeds ships, hazards, crew, and the latest starship sheet from an encounter', () => {
+      const sheet = store.newPlayerShip('bulwark', 3, 'Anvil')
+      const encounter = {
+        id: 'e1', name: 'Blockade Run', creatures: [], partyLevel: 3, partySize: 4, createdAt: new Date(), updatedAt: new Date(),
+        starships: [{ starship: trident, count: 2 }, { starship: buccaneer, count: 1 }],
+        starshipHazards: [{ hazard: asteroidField, count: 1 }],
+      }
+      const scene = store.startFromEncounter(encounter, [{ id: 'p1', name: 'Iseph', maxHP: 30, ac: 18, perception: 7 }])
+      expect(scene.name).toBe('Blockade Run')
+      expect(scene.level).toBe(3)
+      expect(scene.npcShips.map(n => n.label)).toEqual(['Raider Trident', 'Raider Trident 2', 'Dread Buccaneer'])
+      expect(scene.hazards.map(h => h.label)).toEqual(['Asteroid Field'])
+      expect(scene.pcs.map(p => [p.name, p.initiativeBonus])).toEqual([['Iseph', 7]])
+      expect(scene.playerShip?.templateId).toBe(sheet.id)
+      expect(scene.initiativeRolled).toBe(false)
+    })
+  })
+
   describe('crew and stations', () => {
     it('setPcStation helms exactly one station per PC and one PC per station', () => {
       startBasicScene(store)

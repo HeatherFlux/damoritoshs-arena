@@ -31,6 +31,8 @@ import type {
   TscSyncMessageType,
 } from '../types/tsc'
 import type { CombatantCondition } from '../types/combat'
+import type { Encounter } from '../types/creature'
+import type { Player } from '../types/party'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import {
   createPlayerStarship,
@@ -610,6 +612,27 @@ function endScene() {
   state.activeScene = null
   saveToLocalStorage()
   broadcastPlayerData()
+}
+
+/**
+ * Seed and start a tactical scene from an ENCOUNTERS-tab encounter: every
+ * attached starship and starship hazard becomes an instance (counts expanded
+ * with numeric labels), the active party becomes the crew, and the most
+ * recently saved player starship sheet is loaded. Initiative is left unrolled.
+ */
+function startFromEncounter(encounter: Encounter, players: Player[] = []): TscScene {
+  const saved = createEmptyTscScene()
+  saved.name = encounter.name
+  saved.level = encounter.partyLevel
+  const template = state.playerShips[state.playerShips.length - 1]
+  saved.playerShip = template ? instantiatePlayerShip(template.id) : null
+  saved.pcs = players.map(p => ({ id: crypto.randomUUID(), name: p.name, playerId: p.id, initiativeBonus: p.perception }))
+  const sc = startScene(saved)
+  for (const es of encounter.starships ?? []) addNpcShip(es.starship, es.count)
+  for (const eh of encounter.starshipHazards ?? []) for (let i = 0; i < eh.count; i++) addHazard(eh.hazard)
+  logEntry(`Seeded from encounter "${encounter.name}"`)
+  broadcastPlayerData()
+  return sc
 }
 
 function exportScenes(): string {
@@ -1396,6 +1419,7 @@ export function useTscStore() {
     deleteScene,
     getSavedScene,
     startScene,
+    startFromEncounter,
     saveActiveSceneAsTemplate,
     endScene,
     exportScenes,

@@ -162,3 +162,70 @@ describe('calculateEncounterXP', () => {
     expect(result.creatureBreakdown[1].count).toBe(1)
   })
 })
+
+// ============ Tech Core: tactical starship combat budgeting ============
+
+import { calculateStarshipHazardXP, SMALL_CREW_REDUCTION } from '../types/encounter'
+import { TSC_STARSHIPS } from '../data/tscStarships'
+import { TSC_HAZARDS } from '../data/tscHazards'
+
+describe('starships in the encounter budget (Tech Core p. 208)', () => {
+  const trident = TSC_STARSHIPS.find(s => s.name === 'Raider Trident')!        // level -1
+  const buccaneer = TSC_STARSHIPS.find(s => s.name === 'Dread Buccaneer')!     // level 3
+  const asteroidField = TSC_HAZARDS.find(h => h.name === 'Asteroid Field')!   // level 5 simple
+  const boardingPod = TSC_HAZARDS.find(h => h.name === 'Boarding Pod')!       // level 1 complex
+
+  it('starships use the creature XP table by level difference', () => {
+    const r = calculateEncounterXP([], 3, 4, [], [{ starship: buccaneer, count: 2 }, { starship: trident, count: 1 }])
+    expect(r.starshipBreakdown.map(b => [b.levelDiff, b.xpEach, b.xpTotal])).toEqual([[0, 40, 80], [-4, 10, 10]])
+    expect(r.starshipXP).toBe(90)
+    expect(r.totalXP).toBe(90)
+    expect(r.difficulty).toBe('moderate')
+  })
+
+  it('starship hazards use the simple/complex hazard XP tables', () => {
+    expect(calculateStarshipHazardXP(asteroidField, 5)).toBe(8)
+    expect(calculateStarshipHazardXP(asteroidField, 1)).toBe(32)
+    expect(calculateStarshipHazardXP(boardingPod, 1)).toBe(40)
+    const r = calculateEncounterXP([], 1, 4, [], [], [{ hazard: boardingPod, count: 1 }, { hazard: asteroidField, count: 1 }])
+    expect(r.starshipHazardXP).toBe(72)
+    expect(r.totalXP).toBe(72)
+  })
+
+  it('creatures, hazards, starships and starship hazards share one budget', () => {
+    const r = calculateEncounterXP(
+      [{ creature: makeCreature({ level: 3 }), count: 1, adjustment: 'normal' }],
+      3, 4,
+      [{ hazard: makeHazard({ level: 3, complexity: 'simple' }), count: 1 }],
+      [{ starship: buccaneer, count: 1 }],
+      [{ hazard: boardingPod, count: 1 }],
+    )
+    expect(r.totalXP).toBe(40 + 8 + 40 + 20)
+  })
+
+  it('small crews lower the thresholds by 10 (trivial/low) and 20 (moderate+) when starships are present', () => {
+    expect(SMALL_CREW_REDUCTION).toEqual({ trivial: 10, low: 10, moderate: 20, severe: 20, extreme: 20 })
+    // Party of 3: budgets are 20/40/60/100/140. With small crew: 10/30/40/80/120.
+    expect(getDifficulty(50, 3)).toBe('low')
+    expect(getDifficulty(50, 3, true)).toBe('moderate')
+    expect(getDifficulty(35, 3, true)).toBe('low')
+    const r = calculateEncounterXP([], 3, 3, [], [{ starship: buccaneer, count: 1 }], [], { smallCrew: true })
+    expect(r.smallCrewAdjusted).toBe(true)
+    expect(r.adjustedBudget).toBe(40)
+    expect(r.difficulty).toBe('moderate')
+  })
+
+  it('the small-crew option is ignored for encounters without starship threats', () => {
+    const r = calculateEncounterXP([{ creature: makeCreature({ level: 3 }), count: 1, adjustment: 'normal' }], 3, 3, [], [], [], { smallCrew: true })
+    expect(r.smallCrewAdjusted).toBe(false)
+    expect(r.adjustedBudget).toBe(60)
+  })
+
+  it('existing call sites without starship arguments are unchanged', () => {
+    const r = calculateEncounterXP([{ creature: makeCreature({ level: 3 }), count: 1, adjustment: 'normal' }], 3, 4)
+    expect(r.starshipXP).toBe(0)
+    expect(r.starshipHazardXP).toBe(0)
+    expect(r.starshipBreakdown).toEqual([])
+    expect(r.totalXP).toBe(40)
+  })
+})

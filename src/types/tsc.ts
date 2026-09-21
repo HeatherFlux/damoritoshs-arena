@@ -329,6 +329,20 @@ export interface DerivedStarshipStats {
   statusPenalties: { ac: number; ref: number }
 }
 
+// ============ Encounter builder attachments ============
+
+/** An NPC starship attached to an ENCOUNTERS-tab encounter. Starships count as creatures for XP (p. 208). */
+export interface EncounterStarship {
+  starship: NpcStarship
+  count: number
+  notes?: string
+}
+
+export interface EncounterStarshipHazard {
+  hazard: StarshipHazard
+  count: number
+}
+
 // ============ Encounter scene ============
 
 /**
