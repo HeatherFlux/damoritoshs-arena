@@ -52,7 +52,7 @@ export interface ConditionDefinition {
   shortDescription: string
   effects: ConditionEffect
   decreasesAtEndOfTurn?: boolean
-  group?: 'detection' | 'senses' | 'death' | 'attitudes' | 'lowered-abilities' | 'other'
+  group?: 'detection' | 'senses' | 'death' | 'attitudes' | 'lowered-abilities' | 'other' | 'starship'
 }
 
 export const CONDITIONS: Record<string, ConditionDefinition> = {
@@ -558,7 +558,68 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
     effects: {},
     group: 'attitudes',
   },
+
+  // ============ Tactical starship combat conditions (Starfinder Tech Core p. 173) ============
+  // These apply to starships and battle stations, not creatures, so they are exported
+  // via TSC_CONDITIONS and deliberately kept out of COMBAT_CONDITIONS.
+
+  compromised: {
+    name: 'Compromised',
+    hasValue: true,
+    description: 'A compromised starship has a heavily damaged hull and failing life support systems and is at risk of destruction. When a starship gains this condition, it also becomes inoperable, and all its battle stations are malfunctioning. Compromised always includes a value, and if a starship reaches compromised 10, the starship is destroyed. While compromised, a starship must attempt a hull integrity check (a flat check with a DC of 10 + its compromised value) each round on its turn: critical success −2, success −1, failure +1, critical failure +2. Its compromised value increases by 1 if it takes damage while compromised, or by 2 if the damage came from a critical hit or its own critical failure at a save. A starship loses the compromised condition if it ever has 1 Hull Point or more, and whenever it loses the condition it becomes wrecked 1 or increases its wrecked value by 1.',
+    shortDescription: 'At 0 Hull Points; hull integrity check each round; destroyed at 10',
+    effects: {},
+    group: 'starship',
+  },
+
+  inoperable: {
+    name: 'Inoperable',
+    hasValue: false,
+    description: 'An inoperable starship has been shut down, whether knocked out by some kind of starship-wide scrambling effect or by damage. While a starship is inoperable, it can\'t take actions or move, and its battle stations are malfunctioning. Inoperable starships also take a −4 status penalty to AC, Perception, and Reflex saves and are off-guard to all attacks. A creature on an inoperable player starship can repair a malfunctioning battle station and use its station actions.',
+    shortDescription: '−4 status to AC, Perception, Reflex; off-guard; can\'t act',
+    effects: {
+      ac: -4,
+      perception: -4,
+      reflex: -4,
+      offGuard: true,
+      cannotAct: true,
+    },
+    group: 'starship',
+  },
+
+  malfunctioning: {
+    name: 'Malfunctioning',
+    hasValue: false,
+    description: 'A malfunctioning battle station has been hacked, sabotaged, heavily damaged, or shut down. A crew member helming a malfunctioning station can\'t use its station actions, though they still gain any passive benefits from helming it. Any crew member helming the station can remove the condition with the Repair Station action, even if the starship is inoperable. A non-player starship can\'t use the actions or features associated with a malfunctioning station and can Repair Self to fix one station.',
+    shortDescription: 'Battle station: no station actions until repaired',
+    effects: {},
+    group: 'starship',
+  },
+
+  'off-kilter': {
+    name: 'Off-Kilter',
+    hasValue: false,
+    description: 'The starship is askew. It takes a −2 circumstance penalty to attack rolls, Area Fire DCs, Auto-Fire DCs, and Reflex saves, and it can\'t use station actions that cause it to move any distance. It can right itself, ending the off-kilter condition, by using the Change Heading pilot\'s console station action.',
+    shortDescription: '−2 circumstance to attacks, Area/Auto-Fire DCs, Reflex; can\'t move',
+    effects: {
+      attackRolls: -2,
+      reflex: -2,
+    },
+    group: 'starship',
+  },
+
+  wrecked: {
+    name: 'Wrecked',
+    hasValue: true,
+    description: 'A wrecked starship has sustained severe and lasting damage to its hull. If a starship loses the compromised condition and doesn\'t already have the wrecked condition, it becomes wrecked 1. If it already has the wrecked condition when it loses the compromised condition, its wrecked value increases by 1. If it gains the compromised condition while wrecked, increase its compromised value by its wrecked value. The wrecked condition can typically only be removed using the Emergency Repairs exploration activity.',
+    shortDescription: 'Lasting hull damage; adds to compromised when reduced to 0 HP again',
+    effects: {},
+    group: 'starship',
+  },
 }
+
+/** Starship and battle-station conditions from Tech Core (not shown in the creature condition picker). */
+export const TSC_CONDITIONS = ['compromised', 'inoperable', 'malfunctioning', 'off-kilter', 'wrecked'] as const
 
 // Combat-relevant conditions for the condition picker (alphabetized)
 export const COMBAT_CONDITIONS = [

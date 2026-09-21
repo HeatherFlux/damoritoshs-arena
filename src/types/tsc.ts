@@ -11,6 +11,7 @@
  */
 
 import type { AbilityScores, Saves } from './creature'
+import type { CombatantCondition } from './combat'
 
 // ============ Shared vocab ============
 
@@ -256,4 +257,74 @@ export interface Vehicle {
   speedText: string
   collision: { damage: string; dc: number; type?: string }
   abilities: TscAbility[]
+}
+
+// ============ Player starship (frame + level derived) ============
+
+/** A battle station installed on the player starship. */
+export interface PlayerStation {
+  id: string
+  kind: StationKind
+  /** Default stations come with the frame and cannot be removed. */
+  slot: 'default' | 'custom'
+  /** Upgrade ids from tscStationUpgrades (frame default upgrades do not count against the limit). */
+  upgrades: string[]
+  /** Installed weapon ids from tscWeapons (gunnery only; a second weapon needs Secondary Armaments). */
+  weaponIds?: string[]
+  /** Party member id or free-text name of the crew member helming the station. */
+  helmedBy?: string
+  malfunctioning: boolean
+}
+
+export interface PlayerStarship {
+  id: string
+  name: string
+  frame: FrameId
+  /** Mirrors the party's level; the GM may override. */
+  level: number
+  stations: PlayerStation[]
+  /** Expansion bay ids from tscExpansionBays. */
+  expansionBays: string[]
+  /** Piloting DC of the helming pilot; the ship's AC is this value when higher. */
+  pilotingDC?: number
+  currentHP: number
+  currentSP: number
+  compromised: number
+  wrecked: number
+  inoperable: boolean
+  offKilter: boolean
+  conditions: CombatantCondition[]
+  notes?: string
+  /** Template this ship was loaded from; runtime damage writes back to it on scene end. */
+  templateId?: string
+}
+
+export interface DerivedStationStats {
+  id: string
+  kind: StationKind
+  grade: StationGrade
+  upgradeSlots: number
+  /** Gunnery weapon damage dice at this grade. */
+  damageDice: number
+  /** Gunnery tracking bonus at this grade. */
+  tracking: number
+  /** Drones controllable at this grade (drone console). */
+  drones: number
+  helmed: boolean
+}
+
+export interface DerivedStarshipStats {
+  maxHP: number
+  maxSP: number
+  ac: number
+  fort: number
+  ref: number
+  will: number
+  speed: number
+  sensorRange: number
+  stations: DerivedStationStats[]
+  /** Item bonuses currently applied from helmed stations (scanners' sensor bonus always applies). */
+  itemBonuses: { ac: number; fort: number; ref: number; will: number; sensorRange: number }
+  /** Status penalties from the inoperable condition. */
+  statusPenalties: { ac: number; ref: number }
 }
