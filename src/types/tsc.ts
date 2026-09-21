@@ -417,6 +417,8 @@ export interface TscLogEntry {
   round: number
   timestamp: number
   text: string
+  /** Not sent to the player view (exact NPC damage, hidden-entity events). */
+  gmOnly?: boolean
 }
 
 export interface TscScene {

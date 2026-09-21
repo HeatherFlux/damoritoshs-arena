@@ -298,7 +298,7 @@ export function buildTscPlayerData(scene: TscScene | null, identifiedModels: Rec
       disabled: h.disabled,
     })),
     sensorMap: { ...scene.sensorMap, zones: [...scene.sensorMap.zones] },
-    log: scene.log.slice(-12),
+    log: scene.log.filter(e => !e.gmOnly).slice(-12),
   }
 }
 
@@ -525,10 +525,10 @@ function scene(): TscScene {
   return state.activeScene
 }
 
-function logEntry(text: string) {
+function logEntry(text: string, gmOnly = false) {
   const s = state.activeScene
   if (!s) return
-  s.log.push({ id: crypto.randomUUID(), round: s.round, timestamp: Date.now(), text })
+  s.log.push({ id: crypto.randomUUID(), round: s.round, timestamp: Date.now(), text, ...(gmOnly ? { gmOnly: true } : {}) })
   if (s.log.length > 200) s.log.splice(0, s.log.length - 200)
 }
 
@@ -1013,9 +1013,9 @@ function damageShip(target: ShipTarget, amount: number, opts: { bypassing?: bool
     if (destroyed) {
       n.destroyed = true
       removeEntry(n.instanceId)
-      logEntry(`${n.label} is destroyed`)
+      logEntry(`${n.label} is destroyed`, n.hiddenFromPlayers || !n.detected)
     } else if (r.hullDamage || r.shieldDamage) {
-      logEntry(`${n.label} takes ${amount} damage (${r.shieldDamage} shields, ${r.hullDamage} hull)`)
+      logEntry(`${n.label} takes ${amount} damage (${r.shieldDamage} shields, ${r.hullDamage} hull)`, true)
     }
     broadcastPlayerData()
     return { ...r, destroyed, becameCompromised: false }
@@ -1120,7 +1120,7 @@ function healShip(target: ShipTarget, amount: number) {
     const n = findNpc(target.instanceId)
     if (!n || n.destroyed) return
     n.currentHP = Math.min(n.model.hp, n.currentHP + heal)
-    logEntry(`${n.label} regains ${heal} Hull Points`)
+    logEntry(`${n.label} regains ${heal} Hull Points`, true)
   } else {
     const ship = s.playerShip
     if (!ship || s.playerShipDestroyed) return
@@ -1139,7 +1139,7 @@ function restoreShields(target: ShipTarget, amount?: number) {
     if (!n || n.destroyed || n.model.sp === undefined) return
     const gain = amount ?? n.model.fortify ?? 0
     n.currentSP = Math.min(n.model.sp, n.currentSP + Math.max(0, gain))
-    logEntry(`${n.label} regains ${gain} Shield Points`)
+    logEntry(`${n.label} regains ${gain} Shield Points`, true)
   } else {
     const ship = s.playerShip
     if (!ship) return
@@ -1198,7 +1198,7 @@ function setStationMalfunction(target: ShipTarget, stationKey: string, malfuncti
     if (!n) return
     if (!n.stationState[stationKey]) n.stationState[stationKey] = { malfunctioning: false }
     n.stationState[stationKey].malfunctioning = malfunctioning
-    logEntry(`${n.label}: ${stationKey} ${malfunctioning ? 'is malfunctioning' : 'repaired'}`)
+    logEntry(`${n.label}: ${stationKey} ${malfunctioning ? 'is malfunctioning' : 'repaired'}`, true)
   } else if (s.playerShip) {
     const st = s.playerShip.stations.find(x => x.id === stationKey)
     if (st) {
@@ -1220,7 +1220,7 @@ function repairSelf(instanceId: string, stationKey?: string) {
   const key = stationKey ?? Object.entries(n.stationState).find(([, st]) => st.malfunctioning)?.[0]
   if (key && n.stationState[key]) n.stationState[key].malfunctioning = false
   n.currentHP = Math.min(n.model.hp, n.currentHP + Math.max(0, n.model.level))
-  logEntry(`${n.label} Repairs Self${key ? ` (${key})` : ''}`)
+  logEntry(`${n.label} Repairs Self${key ? ` (${key})` : ''}`, true)
   broadcastPlayerData()
 }
 
@@ -1278,7 +1278,7 @@ function setHazardDisabled(instanceId: string, disabled: boolean) {
   if (!h) return
   h.disabled = disabled
   if (disabled) removeEntry(instanceId)
-  logEntry(`${h.label} ${disabled ? 'disabled' : 're-armed'}`)
+  logEntry(`${h.label} ${disabled ? 'disabled' : 're-armed'}`, !h.detected || h.hiddenFromPlayers)
   broadcastPlayerData()
 }
 
