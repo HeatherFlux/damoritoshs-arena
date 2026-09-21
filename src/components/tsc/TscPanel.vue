@@ -8,6 +8,7 @@ import TscHazardSearch from './TscHazardSearch.vue'
 import VehicleSearch from './VehicleSearch.vue'
 import TscPlayerShipSheet from './TscPlayerShipSheet.vue'
 import TscTracker from './TscTracker.vue'
+import TscStarshipBuilder from './TscStarshipBuilder.vue'
 
 type SubTab = 'tracker' | 'library' | 'ship' | 'builder'
 type LibraryTab = 'starships' | 'hazards' | 'vehicles'
@@ -18,6 +19,20 @@ const partyStore = usePartyStore()
 const activeTab = ref<SubTab>(store.state.activeScene ? 'tracker' : 'library')
 const libraryTab = ref<LibraryTab>('starships')
 const editingShip = ref<PlayerStarship | null>(null)
+const builderShip = ref<NpcStarship | null>(null)
+const builderEditing = ref(false)
+
+function cloneToBuilder(ship: NpcStarship) {
+  builderShip.value = ship
+  builderEditing.value = false
+  activeTab.value = 'builder'
+}
+
+function editInBuilder(ship: NpcStarship) {
+  builderShip.value = ship
+  builderEditing.value = true
+  activeTab.value = 'builder'
+}
 const draftScene = ref<TscSavedScene | null>(null)
 
 const partyLevel = computed(() => partyStore.partyLevel.value || 1)
@@ -88,7 +103,7 @@ defineExpose({ loadSceneFromSidebar, editShipFromSidebar, saveCurrentSetup })
           <button class="btn-xs" :class="libraryTab === 'vehicles' ? 'btn-primary' : 'btn-secondary'" @click="libraryTab = 'vehicles'">Vehicles</button>
         </div>
         <div class="flex-1 overflow-hidden">
-          <TscStarshipSearch v-if="libraryTab === 'starships'" :party-level="partyLevel" add-label="Add to scene" @add="addShipToScene" />
+          <TscStarshipSearch v-if="libraryTab === 'starships'" :party-level="partyLevel" add-label="Add to scene" cloneable @add="addShipToScene" @clone="cloneToBuilder" @edit="editInBuilder" />
           <TscHazardSearch v-else-if="libraryTab === 'hazards'" :party-level="partyLevel" add-label="Add to scene" @add="addHazardToScene" />
           <VehicleSearch v-else />
         </div>
@@ -100,11 +115,8 @@ defineExpose({ loadSceneFromSidebar, editShipFromSidebar, saveCurrentSetup })
       </div>
 
       <!-- Builder -->
-      <div v-else class="h-full overflow-y-auto">
-        <div class="card p-4 text-sm text-dim">
-          <p class="font-semibold text-text mb-1">Custom NPC starship builder</p>
-          <p>Coming in a later phase.</p>
-        </div>
+      <div v-else class="h-full overflow-hidden">
+        <TscStarshipBuilder :ship="builderShip" :editing="builderEditing" @saved="(ship) => { builderShip = ship; builderEditing = true }" />
       </div>
     </div>
   </div>

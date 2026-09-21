@@ -200,3 +200,18 @@ export const TSC_STARSHIP_SPELLS: StarshipSpell[] = [
   { id: 'cosmic-fortification', name: 'Cosmic Fortification', rank: 1, actions: 1, summary: 'Grant 1d4+4 Shield Points to a starship in sensor range. Heightened (+1): +1d4+4.' },
   { id: 'cosmic-repairs', name: 'Cosmic Repairs', rank: 1, actions: 2, summary: 'Restore 1d8+8 Hull Points to a starship in sensor range. Heightened (+1): +1d8+8.' },
 ]
+
+/** NPC starship Speed and sensor range by size (Tech Core p. 207); raise one by lowering the other. */
+export const NPC_SIZE_DEFAULTS: Record<string, { speed: number; sensorRange: number }> = {
+  tiny: { speed: 5, sensorRange: 3 },
+  small: { speed: 4, sensorRange: 4 },
+  medium: { speed: 4, sensorRange: 4 },
+  large: { speed: 3, sensorRange: 5 },
+  huge: { speed: 2, sensorRange: 6 },
+  gargantuan: { speed: 2, sensorRange: 7 },
+}
+
+/** Fortify value for an NPC generator: half max SP, or 5 when max SP is 10 or less (p. 207). */
+export function npcFortifyFor(sp: number): number {
+  return sp <= 10 ? 5 : Math.floor(sp / 2)
+}
