@@ -9,7 +9,9 @@
     "exampleFile": "/schemas/examples/session-bundle.example.yaml"
   },
   "type": "object",
-  "required": ["name"],
+  "required": [
+    "name"
+  ],
   "properties": {
     "name": {
       "type": "string",
@@ -31,7 +33,11 @@
       "items": {
         "type": "object",
         "description": "Full Creature object (see creatures.schema.json)",
-        "required": ["id", "name", "level"]
+        "required": [
+          "id",
+          "name",
+          "level"
+        ]
       }
     },
     "hazards": {
@@ -40,32 +46,67 @@
       "items": {
         "type": "object",
         "description": "Full Hazard object (see hazards.schema.json)",
-        "required": ["id", "name", "level"]
+        "required": [
+          "id",
+          "name",
+          "level"
+        ]
       }
     },
     "party": {
       "type": "object",
       "description": "Party configuration for the session",
-      "required": ["name", "players"],
+      "required": [
+        "name",
+        "players"
+      ],
       "properties": {
-        "name": { "type": "string" },
+        "name": {
+          "type": "string"
+        },
         "players": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "maxHP", "ac"],
+            "required": [
+              "name",
+              "maxHP",
+              "ac"
+            ],
             "properties": {
-              "name": { "type": "string" },
-              "level": { "type": "integer" },
-              "maxHP": { "type": "integer" },
-              "ac": { "type": "integer" },
-              "class": { "type": "string" },
-              "ancestry": { "type": "string" },
-              "perception": { "type": "integer" },
-              "fortitude": { "type": "integer" },
-              "reflex": { "type": "integer" },
-              "will": { "type": "integer" },
-              "notes": { "type": "string" }
+              "name": {
+                "type": "string"
+              },
+              "level": {
+                "type": "integer"
+              },
+              "maxHP": {
+                "type": "integer"
+              },
+              "ac": {
+                "type": "integer"
+              },
+              "class": {
+                "type": "string"
+              },
+              "ancestry": {
+                "type": "string"
+              },
+              "perception": {
+                "type": "integer"
+              },
+              "fortitude": {
+                "type": "integer"
+              },
+              "reflex": {
+                "type": "integer"
+              },
+              "will": {
+                "type": "integer"
+              },
+              "notes": {
+                "type": "string"
+              }
             }
           }
         }
@@ -76,12 +117,22 @@
       "description": "Encounters for the session. Creatures can be referenced by creatureId/creatureName.",
       "items": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "partyLevel": { "type": "integer" },
-          "partySize": { "type": "integer" },
-          "notes": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
+          "partyLevel": {
+            "type": "integer"
+          },
+          "partySize": {
+            "type": "integer"
+          },
+          "notes": {
+            "type": "string"
+          },
           "creatures": {
             "type": "array",
             "items": {
@@ -95,10 +146,18 @@
                   "type": "string",
                   "description": "Reference a creature by name (fuzzy matched against all loaded creatures)"
                 },
-                "count": { "type": "integer", "minimum": 1, "default": 1 },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1
+                },
                 "adjustment": {
                   "type": "string",
-                  "enum": ["normal", "elite", "weak"],
+                  "enum": [
+                    "normal",
+                    "elite",
+                    "weak"
+                  ],
                   "default": "normal"
                 }
               }
@@ -109,11 +168,56 @@
             "items": {
               "type": "object",
               "properties": {
-                "hazardId": { "type": "string" },
-                "hazardName": { "type": "string" },
-                "count": { "type": "integer", "minimum": 1, "default": 1 }
+                "hazardId": {
+                  "type": "string"
+                },
+                "hazardName": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1
+                }
               }
             }
+          },
+          "starships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "starshipId": {
+                  "type": "string"
+                },
+                "starshipName": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "starshipHazards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hazardId": {
+                  "type": "string"
+                },
+                "hazardName": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "tscSmallCrew": {
+            "type": "boolean"
           }
         }
       }
@@ -123,57 +227,111 @@
       "description": "Hacking encounters with computer stat blocks",
       "items": {
         "type": "object",
-        "required": ["name", "computer"],
+        "required": [
+          "name",
+          "computer"
+        ],
         "properties": {
-          "name": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
           "computer": {
             "type": "object",
             "description": "Full Computer object (see hacking-sessions.schema.json)",
-            "required": ["name", "level", "type", "accessPoints"]
+            "required": [
+              "name",
+              "level",
+              "type",
+              "accessPoints"
+            ]
           }
         }
       }
     },
     "starship": {
       "type": "array",
-      "description": "Cinematic starship scene templates. The shape mirrors SavedScene from starship-scenes.schema.json — see that file for the full field reference. Important fields the runner exercises: starship.bonuses (clickable skill chips), starship.templateId (link to a saved ship template), threats[].routine (per-turn actions with rollable attackBonus / damage / dc), threats[].immunities/weaknesses/resistances, threats[].specialAbilities, starshipActions[] grouped by role.",
+      "description": "Cinematic starship scene templates. The shape mirrors SavedScene from starship-scenes.schema.json \u2014 see that file for the full field reference. Important fields the runner exercises: starship.bonuses (clickable skill chips), starship.templateId (link to a saved ship template), threats[].routine (per-turn actions with rollable attackBonus / damage / dc), threats[].immunities/weaknesses/resistances, threats[].specialAbilities, starshipActions[] grouped by role.",
       "items": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "level": { "type": "integer" },
-          "description": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
           "victoryCondition": {
             "type": "string",
-            "enum": ["defeat", "victory_points", "survival", "escape", "custom"],
-            "description": "Drives the inline progress chip in the scene header. defeat → 'Threats N / M active'; victory_points → '+/-/+2' counter with vpRequired target; survival → 'Survive N / M rds'; escape → 'in progress'; custom → renders customCondition text."
+            "enum": [
+              "defeat",
+              "victory_points",
+              "survival",
+              "escape",
+              "custom"
+            ],
+            "description": "Drives the inline progress chip in the scene header. defeat \u2192 'Threats N / M active'; victory_points \u2192 '+/-/+2' counter with vpRequired target; survival \u2192 'Survive N / M rds'; escape \u2192 'in progress'; custom \u2192 renders customCondition text."
           },
-          "vpRequired": { "type": "integer", "description": "Required for victory_points scenes." },
-          "survivalRounds": { "type": "integer", "description": "Required for survival scenes." },
-          "customCondition": { "type": "string", "description": "Required for custom scenes — short label rendered in the header." },
-          "partySize": { "type": "integer", "description": "Default 4 (per GM Core baseline)." },
-          "additionalObjectives": { "type": "array", "items": { "type": "string" } },
+          "vpRequired": {
+            "type": "integer",
+            "description": "Required for victory_points scenes."
+          },
+          "survivalRounds": {
+            "type": "integer",
+            "description": "Required for survival scenes."
+          },
+          "customCondition": {
+            "type": "string",
+            "description": "Required for custom scenes \u2014 short label rendered in the header."
+          },
+          "partySize": {
+            "type": "integer",
+            "description": "Default 4 (per GM Core baseline)."
+          },
+          "additionalObjectives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "roleDescriptions": {
             "type": "object",
-            "additionalProperties": { "type": "string" },
+            "additionalProperties": {
+              "type": "string"
+            },
             "description": "Flavour text per role for the GM to read aloud."
           },
           "availableRoles": {
             "type": "array",
-            "items": { "type": "string" },
-            "description": "Role ids PCs can occupy. Standard set per GM Core p.231: captain, engineer, gunner, magic_officer, pilot, science_officer. Repeats allowed (e.g. ['gunner', 'gunner']). Custom 'niche' roles (GM Core p.231) are supported — use any snake_case id (e.g. 'cook', 'corporate_liaison'). Unknown ids render as title-cased pills with a default gray. Tag the role's actions in starshipActions[].role with the same id."
+            "items": {
+              "type": "string"
+            },
+            "description": "Role ids PCs can occupy. Standard set per GM Core p.231: captain, engineer, gunner, magic_officer, pilot, science_officer. Repeats allowed (e.g. ['gunner', 'gunner']). Custom 'niche' roles (GM Core p.231) are supported \u2014 use any snake_case id (e.g. 'cook', 'corporate_liaison'). Unknown ids render as title-cased pills with a default gray. Tag the role's actions in starshipActions[].role with the same id."
           },
           "roles": {
             "type": "array",
             "description": "Pre-assigned role/PC pairings for this scene. The InitiativeRollModal uses these to prefill rows; falls back to the active party from partyStore if empty.",
             "items": {
               "type": "object",
-              "required": ["roleId", "playerName"],
+              "required": [
+                "roleId",
+                "playerName"
+              ],
               "properties": {
-                "roleId": { "type": "string" },
-                "playerName": { "type": "string" },
-                "playerId": { "type": "string" }
+                "roleId": {
+                  "type": "string"
+                },
+                "playerName": {
+                  "type": "string"
+                },
+                "playerId": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -185,29 +343,52 @@
           "threats": {
             "type": "array",
             "description": "Enemy ships, hazards, environmental dangers. See starship-scenes.schema.json#/definitions/StarshipThreat for the full shape. The runner promotes routine attack/skill_check actions to a top-level 'Attacks & Checks' row on each card with click-to-roll bonuses, damage, and DCs.",
-            "items": { "type": "object", "additionalProperties": true }
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           },
           "starshipActions": {
             "type": "array",
             "description": "Crew actions available to PCs. See starship-scenes.schema.json#/definitions/StarshipAction. Grouped by role in the Crew Actions reference list.",
-            "items": { "type": "object", "additionalProperties": true }
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         }
       }
     },
     "starshipTemplates": {
       "type": "array",
-      "description": "Reusable PC starship templates — see starship-templates.schema.json. Loading a template into a scene sets scene.starship.templateId so the GM can save the configuration once and reuse it across encounters. Templates marked isCampaignShip persist post-scene HP/Shields back so damage carries forward.",
+      "description": "Reusable PC starship templates \u2014 see starship-templates.schema.json. Loading a template into a scene sets scene.starship.templateId so the GM can save the configuration once and reuse it across encounters. Templates marked isCampaignShip persist post-scene HP/Shields back so damage carries forward.",
       "items": {
         "type": "object",
-        "required": ["id", "name", "starship"],
+        "required": [
+          "id",
+          "name",
+          "starship"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "isCampaignShip": { "type": "boolean" },
-          "starship": { "type": "object", "additionalProperties": true },
-          "savedAt": { "type": "number" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "isCampaignShip": {
+            "type": "boolean"
+          },
+          "starship": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "savedAt": {
+            "type": "number"
+          }
         }
       }
     },
@@ -216,29 +397,55 @@
       "description": "Saved shop snapshots, including rolled inventory and shopkeeper. Items persist as full objects so the same inventory comes back on import (no re-rolling). The legacy params-only shape ({name, shopType, settlement, partyLevel}) is still accepted for backward compatibility but will be skipped with a warning by the importer.",
       "items": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
-          "name": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
           "shop": {
             "type": "object",
-            "description": "Full GeneratedShop snapshot — see /schemas/shops.schema.json for the complete shape (inventory, shopkeeper, levelRange, itemCount).",
+            "description": "Full GeneratedShop snapshot \u2014 see /schemas/shops.schema.json for the complete shape (inventory, shopkeeper, levelRange, itemCount).",
             "additionalProperties": true
           },
           "shopkeeper": {
             "oneOf": [
-              { "type": "null" },
-              { "type": "object", "additionalProperties": true }
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
             ]
           },
-          "savedAt": { "type": "number" },
+          "savedAt": {
+            "type": "number"
+          },
           "shopType": {
             "type": "string",
-            "enum": ["general", "weapons", "armor", "tech", "medical", "grenades", "magic", "blackmarket"],
+            "enum": [
+              "general",
+              "weapons",
+              "armor",
+              "tech",
+              "medical",
+              "grenades",
+              "magic",
+              "blackmarket"
+            ],
             "description": "Legacy: dropped on import. Present in old bundles only."
           },
           "settlement": {
             "type": "string",
-            "enum": ["outpost", "village", "city", "metropolis", "megacity"],
+            "enum": [
+              "outpost",
+              "village",
+              "city",
+              "metropolis",
+              "megacity"
+            ],
             "description": "Legacy: dropped on import. Present in old bundles only."
           },
           "partyLevel": {
@@ -246,6 +453,27 @@
             "description": "Legacy: dropped on import. Present in old bundles only."
           }
         }
+      }
+    },
+    "tscScenes": {
+      "type": "array",
+      "description": "Tactical starship combat scenes (see tsc-scenes.schema.json)",
+      "items": {
+        "type": "object"
+      }
+    },
+    "tscPlayerShips": {
+      "type": "array",
+      "description": "Player starship sheets (see tsc-player-starships.schema.json)",
+      "items": {
+        "type": "object"
+      }
+    },
+    "tscCustomStarships": {
+      "type": "array",
+      "description": "Custom NPC starships (see tsc-starships.schema.json)",
+      "items": {
+        "type": "object"
       }
     }
   }

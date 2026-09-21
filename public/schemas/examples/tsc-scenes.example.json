@@ -1,0 +1,315 @@
+[
+  {
+    "id": "scene-ambush",
+    "name": "Ambush at the Drift Beacon",
+    "level": 5,
+    "description": "Two Free Captain skiffs jump the crew near an asteroid field.",
+    "playerShip": {
+      "id": "wanderer",
+      "name": "Wanderer",
+      "frame": "explorer",
+      "level": 5,
+      "stations": [
+        {
+          "id": "st-pilot",
+          "kind": "pilot's console",
+          "slot": "default",
+          "upgrades": [],
+          "helmedBy": "Iseph",
+          "malfunctioning": false
+        },
+        {
+          "id": "st-gen",
+          "kind": "generator",
+          "slot": "default",
+          "upgrades": [
+            "mechanic-generator-module"
+          ],
+          "malfunctioning": false
+        },
+        {
+          "id": "st-gun",
+          "kind": "gunnery",
+          "slot": "custom",
+          "upgrades": [
+            "secondary-armaments"
+          ],
+          "weaponIds": [
+            "light-laser-cannon",
+            "farseeker-missiles"
+          ],
+          "helmedBy": "Obozaya",
+          "malfunctioning": false
+        },
+        {
+          "id": "st-scan",
+          "kind": "scanners",
+          "slot": "custom",
+          "upgrades": [
+            "communications-overlay"
+          ],
+          "helmedBy": "Navasi",
+          "malfunctioning": false
+        }
+      ],
+      "expansionBays": [
+        "medical-bay",
+        "science-lab",
+        "crew-quarters-bunks",
+        "lounge",
+        "mess-bay"
+      ],
+      "pilotingDC": 22,
+      "currentHP": 77,
+      "currentSP": 36,
+      "compromised": 0,
+      "wrecked": 0,
+      "inoperable": false,
+      "offKilter": false,
+      "conditions": [],
+      "notes": "Explorer frame; Chk Chk helms the magic conduit when needed."
+    },
+    "pcs": [
+      {
+        "id": "pc-1",
+        "name": "Iseph",
+        "initiativeBonus": 9,
+        "stationId": "st-pilot",
+        "explorationActivityId": "fly-the-ship"
+      },
+      {
+        "id": "pc-2",
+        "name": "Navasi",
+        "initiativeBonus": 7,
+        "stationId": "st-scan",
+        "explorationActivityId": "scan-surroundings"
+      }
+    ],
+    "npcShips": [
+      {
+        "instanceId": "npc-1",
+        "label": "Raider Trident",
+        "model": {
+          "id": "raider-trident",
+          "name": "Raider Trident",
+          "level": -1,
+          "source": "Starfinder Tech Core",
+          "page": 216,
+          "description": "There are few starships that are as cost-effective to produce and acquire as the Trident. Free Captains receive access to its schematics so they can fabricate them on their own starships. However, this deadly vehicle has proven to be as dangerous for its driver as it is for its targets. As it chews through its prey’s hull, the Trident is an easy and brittle target that often gets caught in the crossfire.",
+          "faction": "Free Captains",
+          "factionSlug": "free-captains",
+          "rarity": "common",
+          "size": "tiny",
+          "traits": [
+            "tech"
+          ],
+          "skills": {
+            "Piloting": 4
+          },
+          "battleStations": [
+            {
+              "name": "pilot's console",
+              "entries": [
+                {
+                  "name": "Boost Thrusters",
+                  "shared": false,
+                  "kind": "action"
+                },
+                {
+                  "name": "Chainsaw Prow",
+                  "shared": false,
+                  "kind": "action"
+                },
+                {
+                  "name": "Change Heading",
+                  "shared": false,
+                  "kind": "action"
+                }
+              ]
+            },
+            {
+              "name": "gunnery",
+              "entries": [
+                {
+                  "name": "scrap launcher",
+                  "shared": false,
+                  "kind": "weapon"
+                }
+              ]
+            }
+          ],
+          "immunities": [
+            "starship immunities"
+          ],
+          "weaknesses": [],
+          "resistances": [],
+          "attacks": [
+            {
+              "mode": "ranged",
+              "name": "scrap launcher",
+              "actions": 1,
+              "traits": [
+                "analog"
+              ],
+              "bonus": 6,
+              "rangeIncrement": 2,
+              "damage": "1d6 piercing"
+            }
+          ],
+          "specialAbilities": [
+            {
+              "name": "Chainsaw Prow",
+              "actions": 1,
+              "effect": "DC 13, 1d4+3 slashing damage (see above)",
+              "placement": "offense"
+            }
+          ],
+          "perception": 4,
+          "sensorRange": 2,
+          "abilities": {
+            "str": 3,
+            "dex": 3,
+            "con": 1,
+            "int": 0,
+            "wis": 1,
+            "cha": 2
+          },
+          "ac": 14,
+          "saves": {
+            "fort": 4,
+            "ref": 6,
+            "will": 2
+          },
+          "hp": 10,
+          "speed": 4
+        },
+        "currentHP": 10,
+        "currentSP": 0,
+        "stationState": {
+          "pilot's console": {
+            "malfunctioning": false
+          },
+          "gunnery": {
+            "malfunctioning": false
+          }
+        },
+        "conditions": [],
+        "offKilter": false,
+        "inoperable": false,
+        "position": {
+          "zone": "4",
+          "heading": "aft"
+        },
+        "destroyed": false,
+        "hiddenFromPlayers": false,
+        "detected": true
+      }
+    ],
+    "hazards": [
+      {
+        "instanceId": "hz-1",
+        "label": "Asteroid Field",
+        "hazard": {
+          "id": "asteroid-field",
+          "name": "Asteroid Field",
+          "level": 5,
+          "source": "Starfinder Tech Core",
+          "page": 247,
+          "complexity": "simple",
+          "immunities": [
+            "critical hits",
+            "object immunities",
+            "precision damage"
+          ],
+          "weaknesses": [
+            "area damage 5"
+          ],
+          "resistances": [],
+          "components": [
+            {
+              "name": "Asteroid",
+              "hardness": 12,
+              "hp": 10,
+              "bt": 5,
+              "each": true
+            }
+          ],
+          "reactions": [
+            {
+              "name": "Collide",
+              "actions": "reaction",
+              "trigger": "A starship moves through the hazard’s zone but doesn’t start or end its movement in that zone",
+              "effect": "The hazard makes a collision Strike against the triggering starship. One asteroid is destroyed."
+            }
+          ],
+          "abilities": [],
+          "attacks": [
+            {
+              "mode": "melee",
+              "name": "collision",
+              "actions": 1,
+              "traits": [],
+              "bonus": 19,
+              "damage": "2d8+7 bludgeoning"
+            }
+          ],
+          "rarity": "common",
+          "traits": [
+            "environmental",
+            "starship"
+          ],
+          "scale": "starship",
+          "stealth": {
+            "text": "DC 18 (trained)",
+            "dc": 18,
+            "proficiency": "trained"
+          },
+          "description": "A sprawling field of floating rocks litters this part of space. The hazard is a Large starship object.",
+          "disable": [
+            {
+              "dc": 21,
+              "skill": "Computers",
+              "proficiency": "trained",
+              "station": "scanners"
+            },
+            {
+              "dc": 23,
+              "skill": "Piloting",
+              "proficiency": "trained",
+              "station": "pilot's console"
+            }
+          ],
+          "disableText": "DC 21 Computers (trained; scanners) to calculate a safe route, or DC 23 Piloting (trained; pilot’s console) to navigate around the hazard (these checks don’t disable the hazard)",
+          "ac": 19,
+          "saves": {
+            "fort": 14,
+            "ref": 8
+          },
+          "reset": "The asteroid field resets automatically until at least 10 asteroids have been destroyed, eliminating the hazard."
+        },
+        "componentHP": {
+          "Asteroid": 10
+        },
+        "position": {
+          "zone": "3",
+          "heading": "fore"
+        },
+        "disabled": false,
+        "detected": false,
+        "hiddenFromPlayers": false
+      }
+    ],
+    "sensorMap": {
+      "kind": "freeform",
+      "zones": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    "savedAt": 1758480000000
+  }
+]

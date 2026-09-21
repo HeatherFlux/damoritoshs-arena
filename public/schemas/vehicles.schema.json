@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/vehicles.schema.json",
+  "title": "Vehicles",
+  "description": "Reference format for the bundled Tech Core vehicles (src/data/vehicles.json). Browse-only; vehicles use GM Core vehicle rules (feet, Hardness/HP/BT).",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "level",
+      "size",
+      "price",
+      "ac",
+      "hardness",
+      "hp",
+      "speed",
+      "collision"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "level": {
+        "type": "integer"
+      },
+      "rarity": {
+        "type": "string"
+      },
+      "size": {
+        "type": "string"
+      },
+      "traits": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "price": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "space": {
+        "type": "string"
+      },
+      "crew": {
+        "type": "string"
+      },
+      "passengers": {
+        "type": "integer"
+      },
+      "pilotingChecks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "skill": {
+              "type": "string"
+            },
+            "dc": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "pilotingCheckText": {
+        "type": "string"
+      },
+      "ac": {
+        "type": "integer"
+      },
+      "saves": {
+        "type": "object"
+      },
+      "hardness": {
+        "type": "integer"
+      },
+      "hp": {
+        "type": "integer"
+      },
+      "bt": {
+        "type": "integer"
+      },
+      "immunities": {
+        "type": "array"
+      },
+      "speed": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "feet": {
+              "type": "integer"
+            },
+            "mode": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "speedText": {
+        "type": "string"
+      },
+      "collision": {
+        "type": "object",
+        "properties": {
+          "damage": {
+            "type": "string"
+          },
+          "dc": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "abilities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "effect"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "actions": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "actionsMax": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "station": {
+              "type": "string"
+            },
+            "frequency": {
+              "type": "string"
+            },
+            "requirements": {
+              "type": "string"
+            },
+            "trigger": {
+              "type": "string"
+            },
+            "effect": {
+              "type": "string"
+            },
+            "outcomes": {
+              "type": "object",
+              "properties": {
+                "criticalSuccess": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "string"
+                },
+                "failure": {
+                  "type": "string"
+                },
+                "criticalFailure": {
+                  "type": "string"
+                }
+              }
+            },
+            "placement": {
+              "enum": [
+                "defense",
+                "offense"
+              ]
+            },
+            "sharedRef": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

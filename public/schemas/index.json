@@ -1,6 +1,6 @@
 {
   "title": "Damoritosh's Arena - Data Schemas",
-  "description": "Schema index for AI agents. Fetch individual schemas to understand import formats for creatures, hazards, encounters, hacking sessions, starship scenes, parties, and session bundles.",
+  "description": "Schema index for AI agents. Fetch individual schemas to understand import formats for creatures, hazards, encounters, hacking sessions, starship scenes, tactical starship combat (Tech Core), parties, and session bundles.",
   "version": "1.0.0",
   "baseUrl": "https://damoritoshs-arena.pages.dev/schemas",
   "sessionBundleSchema": "/schemas/session-bundle.schema.json",
@@ -51,7 +51,7 @@
     {
       "id": "starship-templates",
       "name": "Starship Templates",
-      "description": "Reusable PC starship configurations — load once, drop into any scene",
+      "description": "Reusable PC starship configurations \u2014 load once, drop into any scene",
       "schemaUrl": "/schemas/starship-templates.schema.json",
       "exampleUrl": "/schemas/examples/starship-templates.example.json"
     },
@@ -67,6 +67,39 @@
       "description": "Unified YAML/JSON bundle containing all data for a game session",
       "schemaUrl": "/schemas/session-bundle.schema.json",
       "exampleUrl": "/schemas/examples/session-bundle.example.yaml"
+    },
+    {
+      "id": "tsc-starships",
+      "name": "TSC NPC Starships",
+      "description": "Starfinder Tech Core NPC starship stat blocks for tactical starship combat (bundled archive + custom import)",
+      "schemaUrl": "/schemas/tsc-starships.schema.json",
+      "exampleUrl": "/schemas/examples/tsc-starships.example.json"
+    },
+    {
+      "id": "tsc-hazards",
+      "name": "TSC Starship Hazards",
+      "description": "Tech Core starship hazards (bundled reference data)",
+      "schemaUrl": "/schemas/tsc-hazards.schema.json"
+    },
+    {
+      "id": "tsc-player-starships",
+      "name": "TSC Player Starships",
+      "description": "Player starship sheets derived from frame + level with battle stations, upgrades and expansion bays",
+      "schemaUrl": "/schemas/tsc-player-starships.schema.json",
+      "exampleUrl": "/schemas/examples/tsc-player-starships.example.json"
+    },
+    {
+      "id": "tsc-scenes",
+      "name": "TSC Tactical Scenes",
+      "description": "Saved tactical starship combat scenes with crew, NPC ships, hazards and sensor map zones",
+      "schemaUrl": "/schemas/tsc-scenes.schema.json",
+      "exampleUrl": "/schemas/examples/tsc-scenes.example.json"
+    },
+    {
+      "id": "vehicles",
+      "name": "Vehicles",
+      "description": "Tech Core vehicles (bundled reference data)",
+      "schemaUrl": "/schemas/vehicles.schema.json"
     }
   ]
 }

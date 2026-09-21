@@ -1,6 +1,6 @@
 # Damoritosh's Arena
 
-A free encounter builder, combat tracker, and cinematic starship-scene runner for Starfinder 2E.
+A free encounter builder, combat tracker, cinematic starship-scene runner, and Tech Core tactical starship combat tracker for Starfinder 2E.
 
 **Live:** [damoritoshs-arena.pages.dev](https://damoritoshs-arena.pages.dev)
 
@@ -21,6 +21,15 @@ A free encounter builder, combat tracker, and cinematic starship-scene runner fo
     player view while keeping them on the GM screen
 - Expandable statblocks for creatures and hazards
 - Turn advancement with round counter
+
+### Tactical Starship Combat (Tech Core)
+Starfinder Tech Core's tactical starship combat, in a CSC / TSC toggle on the STARSHIP tab:
+- **Library** of all 74 NPC starships, 32 starship hazards and 30 vehicles from the book, with rollable attacks
+- **Player starship sheets** derived from frame + level: battle stations with grades, upgrade slots, helmed bonuses, gunnery weapons and expansion bays
+- **Tracker** with initiative for crew, NPC ships and complex hazards, shields-then-hull damage, the compromised / wrecked spiral with hull integrity checks, station malfunctions and identification, sensor-map zones and headings, Discord turn notifications
+- **Player view** (`#/tsc/view`) that shows only what the crew knows: hull bands instead of numbers, identified stations, detected hazards
+- **Encounter budgeting**: starships count as creatures, starship hazards use the hazard tables, and small crews get the reduced budget
+- **Custom NPC starship builder** with the book's design guidance and faction common actions
 
 ### Cinematic Starship Scenes
 SF2e GM Core's cinematic starship combat, fully wired up:
@@ -99,6 +108,9 @@ Everything saves to browser localStorage:
 | `sf2e-starship-state` | Current starship scene |
 | `sf2e-starship-saved` | Saved starship scenes |
 | `sf2e-starship-templates` | Reusable PC ship templates |
+| `sf2e-tsc` | Tactical starship scenes and identified-model memory |
+| `sf2e-tsc-player-ships` | Player starship sheets (Tech Core) |
+| `sf2e-tsc-custom-starships` | Custom NPC starships |
 | `sf2e-shops` | Saved shops with full inventory |
 
 Use **Settings → Export Session Bundle** to back up everything in one YAML/JSON

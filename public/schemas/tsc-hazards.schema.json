@@ -1,0 +1,383 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/tsc-hazards.schema.json",
+  "title": "TSC Starship Hazards",
+  "description": "Reference format for the bundled Tech Core starship hazards (src/data/tscHazards.json). Encounters and tactical scenes reference them by id or name; they are not user-importable.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "level",
+      "complexity",
+      "scale",
+      "stealth",
+      "description",
+      "disable"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "level": {
+        "type": "integer"
+      },
+      "complexity": {
+        "enum": [
+          "simple",
+          "complex"
+        ]
+      },
+      "rarity": {
+        "enum": [
+          "common",
+          "uncommon",
+          "rare",
+          "unique"
+        ]
+      },
+      "traits": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "scale": {
+        "enum": [
+          "starship",
+          "deck"
+        ],
+        "description": "starship = sensor map; deck = the player starship's map"
+      },
+      "stealth": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "dc": {
+            "type": "integer"
+          },
+          "modifier": {
+            "type": "integer"
+          },
+          "proficiency": {
+            "type": "string"
+          }
+        }
+      },
+      "description": {
+        "type": "string"
+      },
+      "disable": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "dc": {
+              "type": "integer"
+            },
+            "skill": {
+              "type": "string"
+            },
+            "proficiency": {
+              "type": "string"
+            },
+            "station": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "disableText": {
+        "type": "string"
+      },
+      "ac": {
+        "type": "integer"
+      },
+      "saves": {
+        "type": "object"
+      },
+      "components": {
+        "type": "array"
+      },
+      "hardness": {
+        "type": "integer"
+      },
+      "hp": {
+        "type": "integer"
+      },
+      "bt": {
+        "type": "integer"
+      },
+      "immunities": {
+        "type": "array"
+      },
+      "weaknesses": {
+        "type": "array"
+      },
+      "resistances": {
+        "type": "array"
+      },
+      "reactions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "effect"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "actions": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "actionsMax": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "station": {
+              "type": "string"
+            },
+            "frequency": {
+              "type": "string"
+            },
+            "requirements": {
+              "type": "string"
+            },
+            "trigger": {
+              "type": "string"
+            },
+            "effect": {
+              "type": "string"
+            },
+            "outcomes": {
+              "type": "object",
+              "properties": {
+                "criticalSuccess": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "string"
+                },
+                "failure": {
+                  "type": "string"
+                },
+                "criticalFailure": {
+                  "type": "string"
+                }
+              }
+            },
+            "placement": {
+              "enum": [
+                "defense",
+                "offense"
+              ]
+            },
+            "sharedRef": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "abilities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "effect"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "actions": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "actionsMax": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "station": {
+              "type": "string"
+            },
+            "frequency": {
+              "type": "string"
+            },
+            "requirements": {
+              "type": "string"
+            },
+            "trigger": {
+              "type": "string"
+            },
+            "effect": {
+              "type": "string"
+            },
+            "outcomes": {
+              "type": "object",
+              "properties": {
+                "criticalSuccess": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "string"
+                },
+                "failure": {
+                  "type": "string"
+                },
+                "criticalFailure": {
+                  "type": "string"
+                }
+              }
+            },
+            "placement": {
+              "enum": [
+                "defense",
+                "offense"
+              ]
+            },
+            "sharedRef": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "attacks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "mode",
+            "name",
+            "actions",
+            "traits",
+            "damage"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "melee",
+                "ranged",
+                "areaFire",
+                "autoFire"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "actions": {
+              "enum": [
+                1,
+                2,
+                3,
+                "reaction",
+                "free"
+              ]
+            },
+            "traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "bonus": {
+              "type": "integer"
+            },
+            "rangeIncrement": {
+              "type": "integer"
+            },
+            "range": {
+              "type": "integer"
+            },
+            "area": {
+              "type": "string"
+            },
+            "damage": {
+              "type": "string"
+            },
+            "saveDC": {
+              "type": "integer"
+            },
+            "saveType": {
+              "enum": [
+                "fortitude",
+                "reflex",
+                "will"
+              ]
+            }
+          }
+        }
+      },
+      "routine": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "reset": {
+        "type": "string"
+      },
+      "special": {
+        "type": "string"
+      }
+    }
+  }
+}

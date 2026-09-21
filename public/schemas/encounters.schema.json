@@ -15,48 +15,157 @@
   "definitions": {
     "Encounter": {
       "type": "object",
-      "required": ["id", "name", "creatures", "partyLevel", "partySize"],
+      "required": [
+        "id",
+        "name",
+        "creatures",
+        "partyLevel",
+        "partySize"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
         "creatures": {
           "type": "array",
-          "items": { "$ref": "#/definitions/EncounterCreature" }
+          "items": {
+            "$ref": "#/definitions/EncounterCreature"
+          }
         },
         "hazards": {
           "type": "array",
-          "items": { "$ref": "#/definitions/EncounterHazard" }
+          "items": {
+            "$ref": "#/definitions/EncounterHazard"
+          }
         },
-        "partyLevel": { "type": "integer", "minimum": 1, "maximum": 20 },
-        "partySize": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "notes": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "partyLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "partySize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "notes": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "starships": {
+          "type": "array",
+          "description": "Tech Core NPC starships; XP uses the creature table (Tech Core p. 208)",
+          "items": {
+            "$ref": "#/definitions/EncounterStarship"
+          }
+        },
+        "starshipHazards": {
+          "type": "array",
+          "description": "Tech Core starship hazards; XP uses the simple/complex hazard tables",
+          "items": {
+            "$ref": "#/definitions/EncounterStarshipHazard"
+          }
+        },
+        "tscSmallCrew": {
+          "type": "boolean",
+          "description": "Apply the small-crew budget reduction (-10 trivial/low, -20 moderate+) for crews of three or fewer PCs"
+        }
       }
     },
     "EncounterCreature": {
       "type": "object",
-      "required": ["creature", "count", "adjustment"],
+      "required": [
+        "creature",
+        "count",
+        "adjustment"
+      ],
       "properties": {
         "creature": {
           "description": "Full creature stat block object (see creatures.schema.json)",
           "type": "object"
         },
-        "count": { "type": "integer", "minimum": 1 },
-        "adjustment": { "type": "string", "enum": ["normal", "elite", "weak"] },
-        "notes": { "type": "string" }
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "adjustment": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "elite",
+            "weak"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
       }
     },
     "EncounterHazard": {
       "type": "object",
-      "required": ["hazard", "count"],
+      "required": [
+        "hazard",
+        "count"
+      ],
       "properties": {
         "hazard": {
           "description": "Full hazard stat block object (see hazards.schema.json)",
           "type": "object"
         },
-        "count": { "type": "integer", "minimum": 1 },
-        "notes": { "type": "string" }
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "EncounterStarship": {
+      "type": "object",
+      "required": [
+        "starship",
+        "count"
+      ],
+      "properties": {
+        "starship": {
+          "description": "Full NPC starship object (see tsc-starships.schema.json)",
+          "type": "object"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "EncounterStarshipHazard": {
+      "type": "object",
+      "required": [
+        "hazard",
+        "count"
+      ],
+      "properties": {
+        "hazard": {
+          "description": "Full starship hazard object (see tsc-hazards.schema.json)",
+          "type": "object"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     }
   }

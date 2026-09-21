@@ -596,3 +596,85 @@ describe('sessionBundleExporter', () => {
     })
   })
 })
+
+// ============ Tech Core tactical starship combat round-trip ============
+
+import { useTscStore, createEmptyTscScene, __resetTscStore } from '../stores/tscStore'
+import { TSC_STARSHIPS } from '../data/tscStarships'
+import { TSC_HAZARDS } from '../data/tscHazards'
+
+describe('session bundle: tactical starship combat', () => {
+  beforeEach(() => {
+    __resetTscStore()
+  })
+
+  function allStores() {
+    const encounterStore = useEncounterStore()
+    const partyStore = usePartyStore()
+    const hackingStore = useHackingStore()
+    const starshipStore = useStarshipStore()
+    const shopStore = useShopStore()
+    const tscStore = useTscStore()
+    return { encounterStore, partyStore, hackingStore, starshipStore, shopStore, tscStore }
+  }
+
+  it('exports TSC scenes, player ships, custom starships and encounter starship refs, and imports them back', () => {
+    const stores = allStores()
+    const trident = TSC_STARSHIPS.find(s => s.name === 'Raider Trident')!
+    const pod = TSC_HAZARDS.find(h => h.name === 'Boarding Pod')!
+    const sheet = stores.tscStore.newPlayerShip('skirmisher', 4, 'Dart')
+    const custom = stores.tscStore.addCustomStarship({ ...trident, id: 'scrap-raider', name: 'Scrap Raider' })
+    const scene = createEmptyTscScene()
+    scene.name = 'Bundle Scene'
+    stores.tscStore.saveScene(scene)
+    stores.encounterStore.createEncounter('Blockade')
+    stores.encounterStore.addStarshipToEncounter(custom)
+    stores.encounterStore.addStarshipToEncounter(trident)
+    stores.encounterStore.updateStarshipCount(trident.id, 2)
+    stores.encounterStore.addStarshipHazardToEncounter(pod)
+    stores.encounterStore.setSmallCrew(true)
+
+    const bundle = buildSessionBundle(stores, { name: 'TSC test' })
+    expect(bundle.tscScenes?.map(s => s.name)).toEqual(['Bundle Scene'])
+    expect(bundle.tscPlayerShips?.map(s => s.id)).toEqual([sheet.id])
+    expect(bundle.tscCustomStarships?.map(s => s.id)).toEqual(['custom-starship-scrap-raider'])
+    const enc = bundle.encounters!.find(e => e.name === 'Blockade')!
+    expect(enc.starships).toEqual([
+      { starshipId: 'custom-starship-scrap-raider', starshipName: 'Scrap Raider', count: 1 },
+      { starshipId: trident.id, starshipName: 'Raider Trident', count: 2 },
+    ])
+    expect(enc.starshipHazards).toEqual([{ hazardId: pod.id, hazardName: 'Boarding Pod', count: 1 }])
+    expect(enc.tscSmallCrew).toBe(true)
+
+    // Round-trip through YAML into a clean set of stores.
+    const { content } = serializeBundle(bundle, 'yaml')
+    const parsed = parseSessionBundle(content)
+    __resetTscStore()
+    const fresh = allStores()
+    fresh.encounterStore.state.encounters = []
+    const result = importSessionBundle(parsed, fresh as unknown as ImportStores)
+    expect(result.tscScenes).toBe(1)
+    expect(result.tscPlayerShips).toBe(1)
+    expect(result.tscCustomStarships).toBe(1)
+    expect(result.warnings.filter(w => w.section === 'encounters')).toEqual([])
+    const imported = fresh.encounterStore.state.encounters.find(e => e.name === 'Blockade')!
+    expect(imported.starships?.map(s => [s.starship.name, s.count])).toEqual([['Scrap Raider', 1], ['Raider Trident', 2]])
+    expect(imported.starshipHazards?.map(h => [h.hazard.name, h.count])).toEqual([['Boarding Pod', 1]])
+    expect(imported.tscSmallCrew).toBe(true)
+    expect(fresh.tscStore.state.savedScenes.map(s => s.name)).toEqual(['Bundle Scene'])
+    expect(fresh.tscStore.state.playerShips.map(s => s.name)).toEqual(['Dart'])
+  })
+
+  it('resolves starship references by name when the id is unknown', () => {
+    const stores = allStores()
+    const bundle = parseSessionBundle(JSON.stringify({
+      name: 'ByName',
+      encounters: [{ name: 'Pirates', starships: [{ starshipName: 'dread buccaneer', count: 1 }], starshipHazards: [{ hazardName: 'Asteroid Field' }] }],
+    }))
+    const result = importSessionBundle(bundle, stores as unknown as ImportStores)
+    expect(result.warnings.filter(w => w.section === 'encounters')).toEqual([])
+    const enc = stores.encounterStore.state.encounters.find(e => e.name === 'Pirates')!
+    expect(enc.starships?.[0].starship.name).toBe('Dread Buccaneer')
+    expect(enc.starshipHazards?.[0].hazard.name).toBe('Asteroid Field')
+  })
+})

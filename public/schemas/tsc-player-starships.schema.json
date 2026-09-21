@@ -1,0 +1,213 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/tsc-player-starships.schema.json",
+  "title": "TSC Player Starships",
+  "description": "Array of player starship sheets. Max HP/SP, AC, saves, Speed and sensor range are derived from frame + level (Tech Core pp. 196-199), so only the frame, level, stations, upgrades, bays and current damage are stored.",
+  "x-import-info": {
+    "storeMethod": "tscStore.importPlayerShips(json)",
+    "notes": "Merged by id. Ship level should equal the party level.",
+    "exampleFile": "/schemas/examples/tsc-player-starships.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/PlayerStarship"
+  },
+  "definitions": {
+    "PlayerStation": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "slot",
+        "upgrades",
+        "malfunctioning"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "drone console",
+            "generator",
+            "gunnery",
+            "magic conduit",
+            "pilot's console",
+            "scanners"
+          ]
+        },
+        "slot": {
+          "enum": [
+            "default",
+            "custom"
+          ]
+        },
+        "upgrades": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "upgrade ids from src/data/tscStationUpgrades.ts"
+          }
+        },
+        "weaponIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "weapon ids from src/data/tscWeapons.ts"
+          }
+        },
+        "helmedBy": {
+          "type": "string"
+        },
+        "malfunctioning": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PlayerStarship": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "frame",
+        "level",
+        "stations",
+        "expansionBays",
+        "currentHP",
+        "currentSP",
+        "compromised",
+        "wrecked",
+        "inoperable",
+        "offKilter",
+        "conditions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "frame": {
+          "enum": [
+            "bulwark",
+            "explorer",
+            "skirmisher"
+          ]
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "stations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "slot",
+              "upgrades",
+              "malfunctioning"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "drone console",
+                  "generator",
+                  "gunnery",
+                  "magic conduit",
+                  "pilot's console",
+                  "scanners"
+                ]
+              },
+              "slot": {
+                "enum": [
+                  "default",
+                  "custom"
+                ]
+              },
+              "upgrades": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "upgrade ids from src/data/tscStationUpgrades.ts"
+                }
+              },
+              "weaponIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "weapon ids from src/data/tscWeapons.ts"
+                }
+              },
+              "helmedBy": {
+                "type": "string"
+              },
+              "malfunctioning": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "expansionBays": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pilotingDC": {
+          "type": "integer"
+        },
+        "currentHP": {
+          "type": "integer"
+        },
+        "currentSP": {
+          "type": "integer"
+        },
+        "compromised": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "wrecked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inoperable": {
+          "type": "boolean"
+        },
+        "offKilter": {
+          "type": "boolean"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "integer"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "templateId": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+[
+  {
+    "id": "custom-starship-scrapyard-raider",
+    "name": "Scrapyard Raider",
+    "level": -1,
+    "source": "Custom",
+    "page": 216,
+    "description": "There are few starships that are as cost-effective to produce and acquire as the Trident. Free Captains receive access to its schematics so they can fabricate them on their own starships. However, this deadly vehicle has proven to be as dangerous for its driver as it is for its targets. As it chews through its prey’s hull, the Trident is an easy and brittle target that often gets caught in the crossfire.",
+    "faction": "Custom",
+    "factionSlug": "custom",
+    "rarity": "common",
+    "size": "tiny",
+    "traits": [
+      "tech"
+    ],
+    "skills": {
+      "Piloting": 4
+    },
+    "battleStations": [
+      {
+        "name": "pilot's console",
+        "entries": [
+          {
+            "name": "Boost Thrusters",
+            "shared": false,
+            "kind": "action"
+          },
+          {
+            "name": "Chainsaw Prow",
+            "shared": false,
+            "kind": "action"
+          },
+          {
+            "name": "Change Heading",
+            "shared": false,
+            "kind": "action"
+          }
+        ]
+      },
+      {
+        "name": "gunnery",
+        "entries": [
+          {
+            "name": "scrap launcher",
+            "shared": false,
+            "kind": "weapon"
+          }
+        ]
+      }
+    ],
+    "immunities": [
+      "starship immunities"
+    ],
+    "weaknesses": [],
+    "resistances": [],
+    "attacks": [
+      {
+        "mode": "ranged",
+        "name": "scrap launcher",
+        "actions": 1,
+        "traits": [
+          "analog"
+        ],
+        "bonus": 6,
+        "rangeIncrement": 2,
+        "damage": "1d6 piercing"
+      }
+    ],
+    "specialAbilities": [
+      {
+        "name": "Chainsaw Prow",
+        "actions": 1,
+        "effect": "DC 13, 1d4+3 slashing damage (see above)",
+        "placement": "offense"
+      }
+    ],
+    "perception": 4,
+    "sensorRange": 2,
+    "abilities": {
+      "str": 3,
+      "dex": 3,
+      "con": 1,
+      "int": 0,
+      "wis": 1,
+      "cha": 2
+    },
+    "ac": 14,
+    "saves": {
+      "fort": 4,
+      "ref": 6,
+      "will": 2
+    },
+    "hp": 10,
+    "speed": 4
+  }
+]

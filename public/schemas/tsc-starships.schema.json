@@ -1,0 +1,396 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/tsc-starships.schema.json",
+  "title": "TSC NPC Starships",
+  "description": "Array of Starfinder Tech Core NPC starship stat blocks (tactical starship combat). Bundled ships live in src/data/tscStarships.json; custom ships import through this format.",
+  "x-import-info": {
+    "storeMethod": "tscStore.importCustomStarships(json)",
+    "notes": "Ids are prefixed custom-starship- on import. Weapons in battleStations must match an attack name; actions must match a specialAbilities name or a common action (sharedRef).",
+    "exampleFile": "/schemas/examples/tsc-starships.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/NpcStarship"
+  },
+  "definitions": {
+    "TscAbility": {
+      "type": "object",
+      "required": [
+        "name",
+        "effect"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "actions": {
+          "enum": [
+            1,
+            2,
+            3,
+            "reaction",
+            "free"
+          ]
+        },
+        "actionsMax": {
+          "enum": [
+            1,
+            2,
+            3,
+            "reaction",
+            "free"
+          ]
+        },
+        "traits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "station": {
+          "type": "string"
+        },
+        "frequency": {
+          "type": "string"
+        },
+        "requirements": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "string"
+        },
+        "effect": {
+          "type": "string"
+        },
+        "outcomes": {
+          "type": "object",
+          "properties": {
+            "criticalSuccess": {
+              "type": "string"
+            },
+            "success": {
+              "type": "string"
+            },
+            "failure": {
+              "type": "string"
+            },
+            "criticalFailure": {
+              "type": "string"
+            }
+          }
+        },
+        "placement": {
+          "enum": [
+            "defense",
+            "offense"
+          ]
+        },
+        "sharedRef": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TscAttack": {
+      "type": "object",
+      "required": [
+        "mode",
+        "name",
+        "actions",
+        "traits",
+        "damage"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "melee",
+            "ranged",
+            "areaFire",
+            "autoFire"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "actions": {
+          "enum": [
+            1,
+            2,
+            3,
+            "reaction",
+            "free"
+          ]
+        },
+        "traits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bonus": {
+          "type": "integer"
+        },
+        "rangeIncrement": {
+          "type": "integer"
+        },
+        "range": {
+          "type": "integer"
+        },
+        "area": {
+          "type": "string"
+        },
+        "damage": {
+          "type": "string"
+        },
+        "saveDC": {
+          "type": "integer"
+        },
+        "saveType": {
+          "enum": [
+            "fortitude",
+            "reflex",
+            "will"
+          ]
+        }
+      }
+    },
+    "NpcStarship": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "level",
+        "faction",
+        "rarity",
+        "size",
+        "traits",
+        "perception",
+        "sensorRange",
+        "skills",
+        "battleStations",
+        "abilities",
+        "ac",
+        "saves",
+        "hp",
+        "immunities",
+        "weaknesses",
+        "resistances",
+        "speed",
+        "attacks",
+        "specialAbilities"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 25
+        },
+        "source": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "faction": {
+          "type": "string"
+        },
+        "factionSlug": {
+          "type": "string"
+        },
+        "rarity": {
+          "enum": [
+            "common",
+            "uncommon",
+            "rare",
+            "unique"
+          ]
+        },
+        "size": {
+          "enum": [
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "huge",
+            "gargantuan"
+          ]
+        },
+        "traits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "perception": {
+          "type": "integer"
+        },
+        "sensorRange": {
+          "type": "integer",
+          "description": "zones"
+        },
+        "senses": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "battleStations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "entries"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "kind",
+                    "shared"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "weapon",
+                        "action"
+                      ]
+                    },
+                    "shared": {
+                      "type": "boolean",
+                      "description": "Marked * in the book: usable only while none of the listed stations is malfunctioning"
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "abilities": {
+          "type": "object",
+          "properties": {
+            "str": {
+              "type": "integer"
+            },
+            "dex": {
+              "type": "integer"
+            },
+            "con": {
+              "type": "integer"
+            },
+            "int": {
+              "type": "integer"
+            },
+            "wis": {
+              "type": "integer"
+            },
+            "cha": {
+              "type": "integer"
+            }
+          }
+        },
+        "ac": {
+          "type": "integer"
+        },
+        "saves": {
+          "type": "object",
+          "properties": {
+            "fort": {
+              "type": "integer"
+            },
+            "ref": {
+              "type": "integer"
+            },
+            "will": {
+              "type": "integer"
+            }
+          }
+        },
+        "hp": {
+          "type": "integer",
+          "description": "Hull Points"
+        },
+        "hpNotes": {
+          "type": "string"
+        },
+        "sp": {
+          "type": "integer",
+          "description": "Shield Points (omit for ships without a generator)"
+        },
+        "fortify": {
+          "type": "integer",
+          "description": "SP regained by Fortify Shield Points"
+        },
+        "immunities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "weaknesses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resistances": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "speed": {
+          "type": "integer",
+          "description": "zones"
+        },
+        "speedNotes": {
+          "type": "string"
+        },
+        "attacks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TscAttack"
+          }
+        },
+        "specialAbilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TscAbility"
+          }
+        },
+        "livingStarship": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

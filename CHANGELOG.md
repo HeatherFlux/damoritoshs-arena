@@ -1,5 +1,15 @@
 # Damoritosh's Arena - Changelog
 
+## Tech Core: Tactical Starship Combat
+- STARSHIP tab gains a CSC / TSC mode toggle; the cinematic runner is unchanged
+- Bundled Starfinder Tech Core data parsed from the PDF: 74 NPC starships, 32 starship hazards, 30 vehicles, faction common actions
+- Library with searchable stat blocks and rollable attacks
+- Player starship sheets derived from frame (bulwark / explorer / skirmisher) + level with battle-station grades, upgrades, weapons and expansion bays
+- Tactical tracker: initiative for crew, NPC ships and complex hazards; shields-then-hull damage; compromised / wrecked / inoperable / off-kilter handling with hull integrity checks; station malfunction and identification memory; zone + heading positions; Discord turn notifications
+- `#/tsc/view` player sensor feed with hull bands instead of numbers
+- Encounter builder: starships and starship hazards count toward XP; small-crew budget; "Run in TSC"
+- Custom NPC starship builder; session bundles and schemas cover TSC data
+
 ## Starship Scene Save/Load & Improved Editing
 - Full threat editing via ThreatCard (type, tactical role, saves, shield regen, initiative, routines)
 - Victory conditions editor as standalone component

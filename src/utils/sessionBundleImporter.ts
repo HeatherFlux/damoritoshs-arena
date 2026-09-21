@@ -10,6 +10,9 @@ import type { Creature, CreatureAdjustment, EncounterCreature } from '../types/c
 import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter, Computer, AccessPoint } from '../types/hacking'
 import type { SavedScene, StarshipThreat } from '../types/starship'
+import type { EncounterStarship, EncounterStarshipHazard, NpcStarship, PlayerStarship, StarshipHazard, TscSavedScene } from '../types/tsc'
+import { TSC_STARSHIPS } from '../data/tscStarships'
+import { TSC_HAZARDS } from '../data/tscHazards'
 import { createDefaultStarship, createDefaultThreat, createEmptySavedScene } from '../types/starship'
 import type { ShopType, SettlementSize, SavedShop } from '../types/shop'
 
@@ -47,6 +50,18 @@ export interface BundleHazardRef {
   count?: number
 }
 
+export interface BundleStarshipRef {
+  starshipId?: string
+  starshipName?: string
+  count?: number
+}
+
+export interface BundleStarshipHazardRef {
+  hazardId?: string
+  hazardName?: string
+  count?: number
+}
+
 export interface BundleEncounter {
   name: string
   partyLevel?: number
@@ -54,6 +69,11 @@ export interface BundleEncounter {
   notes?: string
   creatures?: BundleCreatureRef[]
   hazards?: BundleHazardRef[]
+  /** Tech Core NPC starships attached to the encounter (resolved against bundled + custom starships). */
+  starships?: BundleStarshipRef[]
+  /** Tech Core starship hazards (resolved against the bundled tscHazards data). */
+  starshipHazards?: BundleStarshipHazardRef[]
+  tscSmallCrew?: boolean
 }
 
 export interface BundleHacking {
@@ -161,6 +181,12 @@ export interface SessionBundle {
   /** Reusable PC ship templates — see starship-templates.schema.json */
   starshipTemplates?: BundleStarshipTemplate[]
   shops?: BundleShop[]
+  /** Tech Core tactical starship combat — see tsc-scenes.schema.json */
+  tscScenes?: TscSavedScene[]
+  /** Player starship sheets — see tsc-player-starships.schema.json */
+  tscPlayerShips?: PlayerStarship[]
+  /** GM-authored NPC starships — see tsc-starships.schema.json */
+  tscCustomStarships?: NpcStarship[]
 }
 
 export interface BundleStarshipTemplate {
@@ -203,6 +229,9 @@ export interface ImportResult {
   starshipScenes: number
   starshipTemplates: number
   shops: number
+  tscScenes: number
+  tscPlayerShips: number
+  tscCustomStarships: number
   warnings: ImportWarning[]
 }
 
@@ -332,6 +361,38 @@ export interface ImportStores {
       savedShops: SavedShop[]
     }
   }
+  /** Optional — present in tscStore. Required to round-trip tactical starship data. */
+  tscStore?: {
+    importScenes: (json: string) => void
+    importPlayerShips: (json: string) => void
+    importCustomStarships: (json: string) => number
+    getStarshipById: (id: string) => NpcStarship | undefined
+    allStarships: { value: NpcStarship[] }
+  }
+}
+
+function resolveStarshipRef(ref: BundleStarshipRef, pool: NpcStarship[]): NpcStarship | undefined {
+  if (ref.starshipId) {
+    const byId = pool.find(s => s.id === ref.starshipId)
+    if (byId) return byId
+  }
+  if (ref.starshipName) {
+    const name = ref.starshipName.toLowerCase()
+    return pool.find(s => s.name.toLowerCase() === name)
+  }
+  return undefined
+}
+
+function resolveStarshipHazardRef(ref: BundleStarshipHazardRef): StarshipHazard | undefined {
+  if (ref.hazardId) {
+    const byId = TSC_HAZARDS.find(h => h.id === ref.hazardId)
+    if (byId) return byId
+  }
+  if (ref.hazardName) {
+    const name = ref.hazardName.toLowerCase()
+    return TSC_HAZARDS.find(h => h.name.toLowerCase() === name)
+  }
+  return undefined
 }
 
 // ============ Import Logic ============
@@ -357,6 +418,9 @@ export function importSessionBundle(
     hackingSessions: 0,
     starshipScenes: 0,
     starshipTemplates: 0,
+    tscScenes: 0,
+    tscPlayerShips: 0,
+    tscCustomStarships: 0,
     shops: 0,
     warnings: [],
   }
@@ -430,14 +494,43 @@ export function importSessionBundle(
     }
   }
 
+  // 3b. Import custom NPC starships before encounters so starship references resolve
+  if (bundle.tscCustomStarships && bundle.tscCustomStarships.length > 0) {
+    if (!stores.tscStore) {
+      result.warnings.push({ section: 'tsc', message: 'Bundle contains tscCustomStarships but the store is not available — skipping.' })
+    } else {
+      try {
+        result.tscCustomStarships = stores.tscStore.importCustomStarships(JSON.stringify(bundle.tscCustomStarships))
+      } catch (e) {
+        result.warnings.push({ section: 'tsc', message: `Failed to import custom starships: ${(e as Error).message}` })
+      }
+    }
+  }
+
   // 4. Import encounters (resolve creature/hazard references)
   if (bundle.encounters && bundle.encounters.length > 0) {
     const allCreatures = stores.encounterStore.state.creatures
     const allHazards = stores.encounterStore.state.hazards
 
+    const starshipPool = stores.tscStore?.allStarships.value ?? TSC_STARSHIPS
+
     const encounters = bundle.encounters.map(enc => {
       const encounterCreatures: EncounterCreature[] = []
       const encounterHazards: EncounterHazard[] = []
+      const encounterStarships: EncounterStarship[] = []
+      const encounterStarshipHazards: EncounterStarshipHazard[] = []
+
+      // Resolve Tech Core starship and starship-hazard references
+      for (const ref of enc.starships ?? []) {
+        const starship = resolveStarshipRef(ref, starshipPool)
+        if (starship) encounterStarships.push({ starship, count: ref.count ?? 1 })
+        else result.warnings.push({ section: 'encounters', message: `Could not resolve starship reference: "${ref.starshipId || ref.starshipName || 'unknown'}"`, item: enc.name })
+      }
+      for (const ref of enc.starshipHazards ?? []) {
+        const hazard = resolveStarshipHazardRef(ref)
+        if (hazard) encounterStarshipHazards.push({ hazard, count: ref.count ?? 1 })
+        else result.warnings.push({ section: 'encounters', message: `Could not resolve starship hazard reference: "${ref.hazardId || ref.hazardName || 'unknown'}"`, item: enc.name })
+      }
 
       // Resolve creature references
       if (enc.creatures) {
@@ -485,6 +578,9 @@ export function importSessionBundle(
         name: enc.name,
         creatures: encounterCreatures,
         hazards: encounterHazards,
+        ...(encounterStarships.length ? { starships: encounterStarships } : {}),
+        ...(encounterStarshipHazards.length ? { starshipHazards: encounterStarshipHazards } : {}),
+        ...(enc.tscSmallCrew !== undefined ? { tscSmallCrew: enc.tscSmallCrew } : {}),
         partyLevel: enc.partyLevel ?? bundle.partyLevel ?? 1,
         partySize: enc.partySize ?? 4,
         notes: enc.notes,
@@ -501,6 +597,28 @@ export function importSessionBundle(
         section: 'encounters',
         message: `Failed to import encounters: ${(e as Error).message}`,
       })
+    }
+  }
+
+  // 4b. Tactical starship scenes and player starship sheets
+  if ((bundle.tscScenes?.length || bundle.tscPlayerShips?.length) && !stores.tscStore) {
+    result.warnings.push({ section: 'tsc', message: 'Bundle contains tactical starship data but the store is not available — skipping.' })
+  } else if (stores.tscStore) {
+    if (bundle.tscPlayerShips && bundle.tscPlayerShips.length > 0) {
+      try {
+        stores.tscStore.importPlayerShips(JSON.stringify(bundle.tscPlayerShips))
+        result.tscPlayerShips = bundle.tscPlayerShips.length
+      } catch (e) {
+        result.warnings.push({ section: 'tsc', message: `Failed to import player starships: ${(e as Error).message}` })
+      }
+    }
+    if (bundle.tscScenes && bundle.tscScenes.length > 0) {
+      try {
+        stores.tscStore.importScenes(JSON.stringify(bundle.tscScenes))
+        result.tscScenes = bundle.tscScenes.length
+      } catch (e) {
+        result.warnings.push({ section: 'tsc', message: `Failed to import tactical scenes: ${(e as Error).message}` })
+      }
     }
   }
 
@@ -736,6 +854,9 @@ export function previewSessionBundle(bundle: SessionBundle): {
   hacking: string[]
   starship: string[]
   shops: string[]
+  tscScenes: string[]
+  tscPlayerShips: string[]
+  tscCustomStarships: number
 } {
   return {
     creatures: bundle.creatures?.length ?? 0,
@@ -745,5 +866,8 @@ export function previewSessionBundle(bundle: SessionBundle): {
     hacking: bundle.hacking?.map(h => h.name) ?? [],
     starship: bundle.starship?.map(s => s.name) ?? [],
     shops: bundle.shops?.map(s => s.name) ?? [],
+    tscScenes: bundle.tscScenes?.map(s => s.name) ?? [],
+    tscPlayerShips: bundle.tscPlayerShips?.map(s => s.name) ?? [],
+    tscCustomStarships: bundle.tscCustomStarships?.length ?? 0,
   }
 }

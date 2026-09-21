@@ -1,0 +1,67 @@
+[
+  {
+    "id": "wanderer",
+    "name": "Wanderer",
+    "frame": "explorer",
+    "level": 5,
+    "stations": [
+      {
+        "id": "st-pilot",
+        "kind": "pilot's console",
+        "slot": "default",
+        "upgrades": [],
+        "helmedBy": "Iseph",
+        "malfunctioning": false
+      },
+      {
+        "id": "st-gen",
+        "kind": "generator",
+        "slot": "default",
+        "upgrades": [
+          "mechanic-generator-module"
+        ],
+        "malfunctioning": false
+      },
+      {
+        "id": "st-gun",
+        "kind": "gunnery",
+        "slot": "custom",
+        "upgrades": [
+          "secondary-armaments"
+        ],
+        "weaponIds": [
+          "light-laser-cannon",
+          "farseeker-missiles"
+        ],
+        "helmedBy": "Obozaya",
+        "malfunctioning": false
+      },
+      {
+        "id": "st-scan",
+        "kind": "scanners",
+        "slot": "custom",
+        "upgrades": [
+          "communications-overlay"
+        ],
+        "helmedBy": "Navasi",
+        "malfunctioning": false
+      }
+    ],
+    "expansionBays": [
+      "medical-bay",
+      "science-lab",
+      "crew-quarters-bunks",
+      "lounge",
+      "mess-bay"
+    ],
+    "pilotingDC": 22,
+    "currentHP": 77,
+    "currentSP": 36,
+    "compromised": 0,
+    "wrecked": 0,
+    "inoperable": false,
+    "offKilter": false,
+    "conditions": [],
+    "notes": "Explorer frame; Chk Chk helms the magic conduit when needed."
+  }
+]

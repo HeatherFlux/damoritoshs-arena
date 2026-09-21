@@ -1,0 +1,500 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/tsc-scenes.schema.json",
+  "title": "TSC Tactical Scenes",
+  "description": "Array of saved tactical starship combat scenes (Tech Core ch. 6-7). NPC ships and hazards are embedded as instances so scenes stay self-contained; runtime state (initiative, HP) is reset when a scene starts.",
+  "x-import-info": {
+    "storeMethod": "tscStore.importScenes(json)",
+    "notes": "Merged by id. sensorMap.kind is 'freeform' (zone labels) today; 'grid' is reserved for a visual sensor map.",
+    "exampleFile": "/schemas/examples/tsc-scenes.example.json"
+  },
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/TscSavedScene"
+  },
+  "definitions": {
+    "TscPosition": {
+      "type": "object",
+      "required": [
+        "zone",
+        "heading"
+      ],
+      "properties": {
+        "zone": {
+          "type": "string"
+        },
+        "heading": {
+          "enum": [
+            "fore",
+            "aft",
+            "port",
+            "starboard"
+          ]
+        },
+        "gridX": {
+          "type": "integer"
+        },
+        "gridY": {
+          "type": "integer"
+        }
+      }
+    },
+    "PlayerStarship": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "frame",
+        "level",
+        "stations",
+        "expansionBays",
+        "currentHP",
+        "currentSP",
+        "compromised",
+        "wrecked",
+        "inoperable",
+        "offKilter",
+        "conditions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "frame": {
+          "enum": [
+            "bulwark",
+            "explorer",
+            "skirmisher"
+          ]
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "stations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "slot",
+              "upgrades",
+              "malfunctioning"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "drone console",
+                  "generator",
+                  "gunnery",
+                  "magic conduit",
+                  "pilot's console",
+                  "scanners"
+                ]
+              },
+              "slot": {
+                "enum": [
+                  "default",
+                  "custom"
+                ]
+              },
+              "upgrades": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "upgrade ids from src/data/tscStationUpgrades.ts"
+                }
+              },
+              "weaponIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "weapon ids from src/data/tscWeapons.ts"
+                }
+              },
+              "helmedBy": {
+                "type": "string"
+              },
+              "malfunctioning": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "expansionBays": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pilotingDC": {
+          "type": "integer"
+        },
+        "currentHP": {
+          "type": "integer"
+        },
+        "currentSP": {
+          "type": "integer"
+        },
+        "compromised": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "wrecked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inoperable": {
+          "type": "boolean"
+        },
+        "offKilter": {
+          "type": "boolean"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "integer"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "templateId": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayerStation": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "slot",
+        "upgrades",
+        "malfunctioning"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "drone console",
+            "generator",
+            "gunnery",
+            "magic conduit",
+            "pilot's console",
+            "scanners"
+          ]
+        },
+        "slot": {
+          "enum": [
+            "default",
+            "custom"
+          ]
+        },
+        "upgrades": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "upgrade ids from src/data/tscStationUpgrades.ts"
+          }
+        },
+        "weaponIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "weapon ids from src/data/tscWeapons.ts"
+          }
+        },
+        "helmedBy": {
+          "type": "string"
+        },
+        "malfunctioning": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TscSavedScene": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "level",
+        "playerShip",
+        "pcs",
+        "npcShips",
+        "hazards",
+        "sensorMap",
+        "savedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "playerShip": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/PlayerStarship"
+            }
+          ]
+        },
+        "pcs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "playerId": {
+                "type": "string"
+              },
+              "stationId": {
+                "type": "string"
+              },
+              "explorationActivityId": {
+                "type": "string"
+              },
+              "initiativeBonus": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "npcShips": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "instanceId",
+              "label",
+              "model",
+              "currentHP",
+              "currentSP",
+              "stationState",
+              "conditions",
+              "position",
+              "destroyed",
+              "hiddenFromPlayers",
+              "detected"
+            ],
+            "properties": {
+              "instanceId": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "model": {
+                "description": "Full NpcStarship (see tsc-starships.schema.json)",
+                "type": "object"
+              },
+              "currentHP": {
+                "type": "integer"
+              },
+              "currentSP": {
+                "type": "integer"
+              },
+              "stationState": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "malfunctioning": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "conditions": {
+                "type": "array"
+              },
+              "offKilter": {
+                "type": "boolean"
+              },
+              "inoperable": {
+                "type": "boolean"
+              },
+              "position": {
+                "type": "object",
+                "required": [
+                  "zone",
+                  "heading"
+                ],
+                "properties": {
+                  "zone": {
+                    "type": "string"
+                  },
+                  "heading": {
+                    "enum": [
+                      "fore",
+                      "aft",
+                      "port",
+                      "starboard"
+                    ]
+                  },
+                  "gridX": {
+                    "type": "integer"
+                  },
+                  "gridY": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "destroyed": {
+                "type": "boolean"
+              },
+              "hiddenFromPlayers": {
+                "type": "boolean"
+              },
+              "detected": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "hazards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "instanceId",
+              "label",
+              "hazard",
+              "position",
+              "disabled",
+              "detected",
+              "hiddenFromPlayers"
+            ],
+            "properties": {
+              "instanceId": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "hazard": {
+                "description": "Full StarshipHazard (see tsc-hazards.schema.json)",
+                "type": "object"
+              },
+              "currentHP": {
+                "type": "integer"
+              },
+              "componentHP": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "position": {
+                "type": "object",
+                "required": [
+                  "zone",
+                  "heading"
+                ],
+                "properties": {
+                  "zone": {
+                    "type": "string"
+                  },
+                  "heading": {
+                    "enum": [
+                      "fore",
+                      "aft",
+                      "port",
+                      "starboard"
+                    ]
+                  },
+                  "gridX": {
+                    "type": "integer"
+                  },
+                  "gridY": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "detected": {
+                "type": "boolean"
+              },
+              "hiddenFromPlayers": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "sensorMap": {
+          "type": "object",
+          "required": [
+            "kind",
+            "zones"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "freeform",
+                "grid"
+              ]
+            },
+            "zones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            }
+          }
+        },
+        "savedAt": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

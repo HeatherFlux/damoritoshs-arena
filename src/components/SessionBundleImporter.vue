@@ -4,6 +4,7 @@ import { parseSessionBundle, previewSessionBundle, importSessionBundle, type Ses
 import { useEncounterStore } from '../stores/encounterStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
+import { useTscStore } from '../stores/tscStore'
 import { usePartyStore } from '../stores/partyStore'
 import { useShopStore } from '../stores/shopStore'
 
@@ -15,6 +16,7 @@ defineEmits<{
 const encounterStore = useEncounterStore()
 const hackingStore = useHackingStore()
 const starshipStore = useStarshipStore()
+const tscStore = useTscStore()
 const partyStore = usePartyStore()
 const shopStore = useShopStore()
 
@@ -98,6 +100,7 @@ function doImport() {
       encounterStore,
       hackingStore,
       starshipStore,
+      tscStore,
       partyStore,
       shopStore,
     })

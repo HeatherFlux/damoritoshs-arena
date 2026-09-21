@@ -18,6 +18,7 @@ import type { SavedHackingEncounter } from '../types/hacking'
 import type { SavedScene, SavedStarship } from '../types/starship'
 import type { Party } from '../types/party'
 import type { SavedShop } from '../types/shop'
+import type { NpcStarship, PlayerStarship, TscSavedScene } from '../types/tsc'
 import type {
   SessionBundle,
   BundleParty,
@@ -50,6 +51,11 @@ export interface ExportStores {
   }
   shopStore: {
     state: { savedShops: SavedShop[] }
+  }
+  /** Optional — tactical starship combat (Tech Core). */
+  tscStore?: {
+    state: { savedScenes: TscSavedScene[]; playerShips: PlayerStarship[] }
+    exportCustomStarships: () => string
   }
 }
 
@@ -125,6 +131,16 @@ export function buildSessionBundle(
   const shops = stores.shopStore.state.savedShops
   if (shops.length > 0) {
     bundle.shops = shops.map(mapShop)
+  }
+
+  // ---- Tactical starship combat (Tech Core) ----
+  if (stores.tscStore) {
+    const tscScenes = stores.tscStore.state.savedScenes
+    if (tscScenes.length > 0) bundle.tscScenes = JSON.parse(JSON.stringify(tscScenes))
+    const playerShips = stores.tscStore.state.playerShips
+    if (playerShips.length > 0) bundle.tscPlayerShips = JSON.parse(JSON.stringify(playerShips))
+    const customStarships = parseJsonArray<NpcStarship>(stores.tscStore.exportCustomStarships())
+    if (customStarships.length > 0) bundle.tscCustomStarships = customStarships
   }
 
   return bundle
@@ -247,6 +263,13 @@ function mapEncounter(enc: Encounter): BundleEncounter {
   if (enc.hazards && enc.hazards.length > 0) {
     out.hazards = enc.hazards.map(mapHazardRef)
   }
+  if (enc.starships && enc.starships.length > 0) {
+    out.starships = enc.starships.map(es => ({ starshipId: es.starship.id, starshipName: es.starship.name, count: es.count }))
+  }
+  if (enc.starshipHazards && enc.starshipHazards.length > 0) {
+    out.starshipHazards = enc.starshipHazards.map(eh => ({ hazardId: eh.hazard.id, hazardName: eh.hazard.name, count: eh.count }))
+  }
+  if (enc.tscSmallCrew !== undefined) out.tscSmallCrew = enc.tscSmallCrew
   return out
 }
 
