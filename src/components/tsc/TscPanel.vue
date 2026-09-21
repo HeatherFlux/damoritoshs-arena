@@ -7,6 +7,7 @@ import TscStarshipSearch from './TscStarshipSearch.vue'
 import TscHazardSearch from './TscHazardSearch.vue'
 import VehicleSearch from './VehicleSearch.vue'
 import TscPlayerShipSheet from './TscPlayerShipSheet.vue'
+import TscTracker from './TscTracker.vue'
 
 type SubTab = 'tracker' | 'library' | 'ship' | 'builder'
 type LibraryTab = 'starships' | 'hazards' | 'vehicles'
@@ -14,7 +15,7 @@ type LibraryTab = 'starships' | 'hazards' | 'vehicles'
 const store = useTscStore()
 const partyStore = usePartyStore()
 
-const activeTab = ref<SubTab>('library')
+const activeTab = ref<SubTab>(store.state.activeScene ? 'tracker' : 'library')
 const libraryTab = ref<LibraryTab>('starships')
 const editingShip = ref<PlayerStarship | null>(null)
 const draftScene = ref<TscSavedScene | null>(null)
@@ -75,16 +76,8 @@ defineExpose({ loadSceneFromSidebar, editShipFromSidebar, saveCurrentSetup })
 
     <div class="flex-1 overflow-hidden p-3">
       <!-- Tracker -->
-      <div v-if="activeTab === 'tracker'" class="h-full overflow-y-auto">
-        <div class="card p-4 text-sm text-dim">
-          <p class="font-semibold text-text mb-1">Tactical tracker</p>
-          <p v-if="store.state.activeScene">
-            Scene "{{ store.state.activeScene.name }}" is running with
-            {{ store.state.activeScene.npcShips.length }} NPC starship(s) and
-            {{ store.state.activeScene.hazards.length }} hazard(s). The tracker UI lands in the next phase.
-          </p>
-          <p v-else>No tactical scene running. Add starships or hazards from the Library to start one.</p>
-        </div>
+      <div v-if="activeTab === 'tracker'" class="h-full overflow-hidden">
+        <TscTracker @open-library="activeTab = 'library'" @open-ship="activeTab = 'ship'" />
       </div>
 
       <!-- Library -->
