@@ -328,3 +328,208 @@ export interface DerivedStarshipStats {
   /** Status penalties from the inoperable condition. */
   statusPenalties: { ac: number; ref: number }
 }
+
+// ============ Encounter scene ============
+
+/**
+ * Position on the sensor map. v1 tracks a free-text zone label and a heading;
+ * `gridX`/`gridY` are reserved so a visual zone grid can be layered on later
+ * without a data migration.
+ */
+export interface TscPosition {
+  zone: string
+  heading: Heading
+  gridX?: number
+  gridY?: number
+}
+
+export interface SensorMapDescriptor {
+  kind: 'freeform' | 'grid'
+  /** Zone labels available in the zone picker (freeform) or generated from the grid. */
+  zones: string[]
+  width?: number
+  height?: number
+}
+
+export interface TscStationState {
+  malfunctioning: boolean
+}
+
+/** An NPC starship placed in a scene. The model is snapshotted so scenes stay self-contained. */
+export interface TscNpcShipInstance {
+  instanceId: string
+  /** Display label, e.g. "Raider Trident 2". */
+  label: string
+  model: NpcStarship
+  currentHP: number
+  currentSP: number
+  stationState: Record<string, TscStationState>
+  conditions: CombatantCondition[]
+  offKilter: boolean
+  inoperable: boolean
+  position: TscPosition
+  destroyed: boolean
+  /** GM-only until revealed; hidden entities never reach the player view. */
+  hiddenFromPlayers: boolean
+  /** Whether the crew has detected the ship (undetected ships also stay off the player view). */
+  detected: boolean
+}
+
+export interface TscHazardInstance {
+  instanceId: string
+  label: string
+  hazard: StarshipHazard
+  currentHP?: number
+  /** Remaining HP per named component ("Pod", "Asteroid"). */
+  componentHP?: Record<string, number>
+  position: TscPosition
+  disabled: boolean
+  detected: boolean
+  hiddenFromPlayers: boolean
+}
+
+export interface TscPc {
+  id: string
+  name: string
+  /** Party member id when added from the active party. */
+  playerId?: string
+  /** Battle station the PC is helming. */
+  stationId?: string
+  /** Exploration activity id from tscStations (grants a free action at initiative). */
+  explorationActivityId?: string
+  initiativeBonus?: number
+}
+
+export type TscInitiativeKind = 'pc' | 'npcShip' | 'hazard' | 'playerShip'
+
+export interface TscInitiativeEntry {
+  id: string
+  kind: TscInitiativeKind
+  /** Id of the PC, NPC ship instance, hazard instance, or player ship. */
+  refId: string
+  name: string
+  initiative: number
+  hasActedThisRound: boolean
+}
+
+export interface TscLogEntry {
+  id: string
+  round: number
+  timestamp: number
+  text: string
+}
+
+export interface TscScene {
+  id: string
+  name: string
+  level: number
+  description?: string
+  playerShip: PlayerStarship | null
+  playerShipPosition: TscPosition
+  playerShipDestroyed: boolean
+  pcs: TscPc[]
+  npcShips: TscNpcShipInstance[]
+  hazards: TscHazardInstance[]
+  sensorMap: SensorMapDescriptor
+  initiativeOrder: TscInitiativeEntry[]
+  currentTurnIndex: number
+  initiativeRolled: boolean
+  round: number
+  isActive: boolean
+  log: TscLogEntry[]
+}
+
+/** A scene template before it is started (runtime fields are reset on start). */
+export interface TscSavedScene {
+  id: string
+  name: string
+  level: number
+  description?: string
+  playerShip: PlayerStarship | null
+  pcs: TscPc[]
+  npcShips: TscNpcShipInstance[]
+  hazards: TscHazardInstance[]
+  sensorMap: SensorMapDescriptor
+  savedAt: number
+}
+
+export interface TscState {
+  savedScenes: TscSavedScene[]
+  activeScene: TscScene | null
+  /** Reusable player starship sheets. */
+  playerShips: PlayerStarship[]
+  /** GM-authored NPC starships (ids prefixed "custom-starship-"). */
+  customStarships: NpcStarship[]
+  /** Model name -> battle station names identified with Scan Target; persists across scenes. */
+  identifiedModels: Record<string, string[]>
+  sessionId: string
+  isGMView: boolean
+  /** Sanitized snapshot received by player views. */
+  playerData: TscPlayerData | null
+  wsConnectionState: 'disconnected' | 'connecting' | 'connected' | 'error'
+  isRemoteSyncEnabled: boolean
+}
+
+// ============ Player view ============
+
+export type HullBand = 'intact' | 'damaged' | 'critical' | 'destroyed'
+
+export interface TscPlayerData {
+  sceneName: string
+  round: number
+  isActive: boolean
+  initiativeRolled: boolean
+  /** Index into `entries` of the current turn. */
+  turn: number
+  entries: { kind: TscInitiativeKind; name: string }[]
+  playerShip: {
+    name: string
+    frame: FrameId
+    level: number
+    currentHP: number
+    maxHP: number
+    currentSP: number
+    maxSP: number
+    ac: number
+    fort: number
+    ref: number
+    will: number
+    speed: number
+    sensorRange: number
+    compromised: number
+    wrecked: number
+    inoperable: boolean
+    offKilter: boolean
+    conditions: CombatantCondition[]
+    stations: { id: string; kind: StationKind; grade: StationGrade; helmedBy?: string; malfunctioning: boolean }[]
+    position: TscPosition
+    destroyed: boolean
+  } | null
+  npcShips: {
+    instanceId: string
+    label: string
+    /** Model name once Scan Target has identified it. */
+    modelName?: string
+    size: StarshipSize
+    band: HullBand
+    shieldsUp: boolean
+    identifiedStations: string[]
+    malfunctioningStations: string[]
+    conditions: CombatantCondition[]
+    offKilter: boolean
+    inoperable: boolean
+    position: TscPosition
+    destroyed: boolean
+  }[]
+  hazards: { instanceId: string; label: string; name: string; position: TscPosition; disabled: boolean }[]
+  sensorMap: SensorMapDescriptor
+  log: TscLogEntry[]
+}
+
+export type TscSyncMessageType = 'player-data' | 'request-state'
+
+export interface TscSyncMessage {
+  type: TscSyncMessageType
+  payload: unknown
+  timestamp: number
+}
