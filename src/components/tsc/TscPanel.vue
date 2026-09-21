@@ -6,6 +6,7 @@ import type { NpcStarship, PlayerStarship, StarshipHazard, TscSavedScene } from 
 import TscStarshipSearch from './TscStarshipSearch.vue'
 import TscHazardSearch from './TscHazardSearch.vue'
 import VehicleSearch from './VehicleSearch.vue'
+import TscPlayerShipSheet from './TscPlayerShipSheet.vue'
 
 type SubTab = 'tracker' | 'library' | 'ship' | 'builder'
 type LibraryTab = 'starships' | 'hazards' | 'vehicles'
@@ -101,12 +102,8 @@ defineExpose({ loadSceneFromSidebar, editShipFromSidebar, saveCurrentSetup })
       </div>
 
       <!-- Player ship -->
-      <div v-else-if="activeTab === 'ship'" class="h-full overflow-y-auto">
-        <div class="card p-4 text-sm text-dim">
-          <p class="font-semibold text-text mb-1">Player starship sheet</p>
-          <p v-if="editingShip">Editing "{{ editingShip.name }}". The sheet editor lands in the next phase.</p>
-          <p v-else>Frame + level derived starship sheets. The sheet editor lands in the next phase.</p>
-        </div>
+      <div v-else-if="activeTab === 'ship'" class="h-full overflow-hidden">
+        <TscPlayerShipSheet :ship="editingShip" @saved="(ship) => (editingShip = ship)" />
       </div>
 
       <!-- Builder -->
