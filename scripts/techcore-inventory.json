@@ -1,0 +1,31 @@
+{
+  "starships": {
+    "Sovereign Harrier": 1, "Vanguard Comet": 3, "Vanguard Monitor": 5, "Sovereign Dominator": 8, "Sihedron Apostle": 13, "Klokworx Nexus": 16,
+    "Dutybound Necrofighter": 0, "Barrow Dirgesinger": 3, "Soul Harvest Necrofighter": 5, "Barrow Eulogy": 9, "Barrow Cenotaph": 18,
+    "Raider Trident": -1, "Raider Rustbringer": 2, "Dread Buccaneer": 3, "Raider Heartbreaker": 6, "Dread Dominator": 8, "Pentacorn": 10, "Raider Starcrusher": 11, "Skyshatter Jolly Roger": 12, "Skyshatter Starsplitter": 14,
+    "Infernex Burning Nail": 1, "Infernex Stalwart": 4, "Infernex Justiciar": 11, "Infernex Citadel": 16,
+    "Inheritorworks Surestrike": -1, "Inheritorworks Brightsword": 3, "Inheritorworks Shieldcraft": 6, "Inheritorworks Cathedralship": 14,
+    "ATech Gold Spacer Truck": -1, "Ringworks Sentinel": 0, "Yolaku Canopyskipper": 1, "Kevolari Wanderlust": 2, "Skyfire Star Dragon": 5, "SFS Moonhopper": 6, "Aspis Moonlighter": 7, "Idaran Cantripper": 7, "Skyfire Galactic Dragon": 8, "Skyfire Trident": 8, "Symbiotic Oma": 11, "Opulus Drift Cruiser": 12, "AAC Vigilance": 12, "ATech Gold Bazaar": 14,
+    "Bastion Driller": 1, "Ringworks Scout": 4, "Steward Ambassador": 8, "Steward Sentinel": 10,
+    "Hivebound Clustership": 2, "Hivebound Propagator": 4, "Converted Dreadnought": 10, "Hivebound Behemoth": 17,
+    "BMC Mauler": 3, "Norikama Dropship": 8, "BMC Devastator": 13, "Vindicas Tyrant": 19,
+    "UC Pod": 1, "UC Bloom": 4, "UC Gardenship": 8, "UC Arkship": 11,
+    "BD Freighter": 1, "Sword-Class Attack Vessel": 2, "Flint-Class Mining Vessel": 3, "SC Jackknife": 3, "Harpoon-Class Blockade Vessel": 4, "Cloak-Class Ambassador Vessel": 5, "Dashadz Wayfarer": 6, "SC Vaultship": 7,
+    "Long-Haul Freighter": 1, "Dominion Derelict": 3, "Jinsul Breacher": 3, "Jinsul Carrier": 5, "Shadari Voidbringer": 10, "Dominion Seeder": 13, "Alghollthu Warshell": 14, "Biotech Sporehall": 16
+  },
+  "hazards": {
+    "Astral Barnacles": [0, "simple"], "Orbital Mine": [0, "simple"], "Ionized Gas Cloud": [1, "simple"], "Junker's Snare": [1, "simple"], "Boarding Pod": [1, "complex"],
+    "Cursed Relay": [2, "simple"], "Meteor Shower": [2, "simple"], "Hacked Drift Beacon": [3, "complex"], "Hull Breach": [3, "complex"], "Pipe Breakage": [3, "complex"],
+    "Slime Infestation": [4, "complex"], "Asteroid Field": [5, "simple"], "Infernal Vice": [5, "complex"], "Orbital Mine Field": [6, "simple"], "Planar Breach": [6, "complex"],
+    "Wailing Rings": [7, "complex"], "Quantum Crossover": [8, "simple"], "Micro Black Hole": [8, "complex"], "Extinct Astral Behemoth": [9, "simple"], "Tachyon Burst": [10, "simple"],
+    "Drift Beacon Malfunction": [10, "simple"], "Possessed Battle Stations": [11, "complex"], "Spectral Sortie": [12, "complex"], "Logic Crucible": [13, "simple"], "Rip in Reality": [13, "complex"],
+    "Ancient Bombardment": [14, "complex"], "Time Loop": [14, "complex"], "Black Hole": [15, "complex"], "Ominous Planetoid": [16, "simple"], "Unstable Munition": [17, "complex"],
+    "Unholy Vortex": [19, "complex"], "Deific Star": [20, "complex"]
+  },
+  "vehicles": {
+    "Aerobike": 2, "Brethedan Ray": 4, "Hardlight Ultralight": 6, "Jotuncraft": 9, "Spheridyne": 11, "Dragon of Damoritosh": 15,
+    "Daytripper Person Carrier": 0, "Electric Chariot": 1, "Hoverbike": 1, "Somnambupod": 1, "All-Terrain Dune Buggy": 4, "Armored Personnel Carrier": 7, "Spider-Crawler": 7, "Terminus Monster Truck": 11,
+    "Hydrofoil": 6, "Underwater Skimmer": 6, "Magma Cruiser": 8, "Biosub": 11, "Apex Battleship": 13, "Ultra-Luxe Yacht": 14,
+    "Boatercycle": 1, "Cloudskipper": 1, "Glidecycle": 2, "Landcutter Canoe": 2, "Acid Skiff": 4, "Spiralrunner": 4, "Clifftreader": 6, "Talon Strike Craft": 9, "All-Terrain Hauler": 10, "Wealcol": 13
+  }
+}

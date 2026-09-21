@@ -1,0 +1,190 @@
+[
+  {
+    "name": "Autonomous Starship",
+    "effect": "The starship isn’t helmed by living creatures. Autonomous starships have the tech trait and are immune to mental damage and effects.",
+    "id": "global:autonomous-starship",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Engaged Strike",
+    "actions": "reaction",
+    "trigger": "A starship in the same zone moves to another zone",
+    "effect": "This starship attempts the specified Strike against the triggering starship.",
+    "id": "global:engaged-strike",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Living Starship",
+    "effect": "The starship is a living organism or composed entirely of biomass. A living starship usually has organs or structures instead of battle stations. Living starships don’t have starship immunities.",
+    "id": "global:living-starship",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Fortify Shield Points",
+    "station": "generator",
+    "actions": 1,
+    "effect": "The starship regains Shield Points equal to the listed fortify value.",
+    "id": "global:fortify-shield-points",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Tractor Beam",
+    "station": "generator",
+    "actions": 1,
+    "effect": "A target within 2 zones must attempt a Fortitude save.",
+    "outcomes": {
+      "criticalSuccess": "The target is unaffected.",
+      "success": "The target takes a –1-zone status penalty to its Speed for 1 round.",
+      "failure": "The target is pulled 1 zone closer to the starship, and it takes a –1-zone status penalty to its Speed for 1 round.",
+      "criticalFailure": "The target is pulled 2 zones closer to the starship, and it takes a –2-zone status penalty to its Speed for 1 round."
+    },
+    "id": "global:tractor-beam",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Boost Thrusters",
+    "station": "pilot's console",
+    "actions": 1,
+    "traits": [
+      "move"
+    ],
+    "frequency": "once per turn",
+    "effect": "The starship moves up to its Speed in the direction of its heading.",
+    "id": "global:boost-thrusters",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Change Heading",
+    "station": "pilot's console",
+    "actions": 1,
+    "traits": [
+      "move"
+    ],
+    "effect": "The starship changes its heading. If the starship is off-kilter, it’s no longer off-kilter.",
+    "id": "global:change-heading",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Evade",
+    "station": "pilot's console",
+    "actions": 1,
+    "actionsMax": 2,
+    "effect": "The starship gains a +1 circumstance bonus to AC for 1 round. The bonus increases to +2 if you spend two actions.",
+    "id": "global:evade",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Stick to Cover",
+    "station": "pilot's console",
+    "actions": 1,
+    "requirements": "The starship is in the same zone as a starship or object one or more sizes larger than it",
+    "effect": "The starship gains a +1 circumstance bonus to AC and Reflex saves against attacks originating in its zone. This bonus lasts until the starship moves any number of zones, attacks, becomes inoperable, or ends this effect as a free action that’s a pilot console’s station action.",
+    "id": "global:stick-to-cover",
+    "scope": "global",
+    "page": 208
+  },
+  {
+    "name": "Repair Self",
+    "actions": 3,
+    "effect": "The crew stops a battle station from malfunctioning and regains Hull Points equal to its level.",
+    "id": "default:repair-self",
+    "scope": "default",
+    "page": 208
+  },
+  {
+    "name": "Seek Starships",
+    "actions": 1,
+    "effect": "The starship attempts a Perception check against the Stealth DCs of any undetected or hidden starships or hazards within sensor range.",
+    "outcomes": {
+      "criticalSuccess": "Any undetected or hidden starship or hazard the starship critically succeeded against becomes observed by the starship instead.",
+      "success": "Any undetected starship or hazard the starship succeeded against instead becomes hidden to the starship, and those that were hidden become observed."
+    },
+    "id": "default:seek-starships",
+    "scope": "default",
+    "page": 208
+  },
+  {
+    "name": "Protection Sigil",
+    "station": "magic conduit",
+    "actions": "reaction",
+    "traits": [
+      "divine"
+    ],
+    "frequency": "once per day",
+    "trigger": "The starship takes damage",
+    "effect": "A seven-pointed sigil blazes as divine energy surrounds the hull. The starship gains resistance against the triggering damage type equal to half its level + 1 (minimum 1) for 1 minute.",
+    "id": "azlanti-star-empire:protection-sigil",
+    "scope": "azlanti-star-empire",
+    "page": 210
+  },
+  {
+    "name": "Speed Sigil",
+    "station": "magic conduit",
+    "actions": 1,
+    "traits": [
+      "divine"
+    ],
+    "frequency": "once per day",
+    "effect": "The starship empowers its engines by activating a seven-pointed sigil. The starship gains a +2-zone status bonus to its Speed and a +1 status bonus to its AC and Reflex saves for 1 minute.",
+    "id": "azlanti-star-empire:speed-sigil",
+    "scope": "azlanti-star-empire",
+    "page": 210
+  },
+  {
+    "name": "Lissala’s Eye",
+    "station": "scanners",
+    "actions": 1,
+    "traits": [
+      "divine"
+    ],
+    "effect": "The starship emits a harmless laser beam that plants a unique signal onto a target within sensor range. The affected starship must attempt a Will save. On a failure, the target becomes off-guard to all the starship’s allies within sensor range for 1 round. On a critical failure, the target can’t benefit from cover against starships it’s off-guard to in this way.",
+    "id": "azlanti-star-empire:lissala-s-eye",
+    "scope": "azlanti-star-empire",
+    "page": 210
+  },
+  {
+    "name": "Piercing Harpoon",
+    "station": "gunnery",
+    "actions": 2,
+    "effect": "The Free Captain starship launches a harpoon at another starship within 1 zone. The target starship takes the listed piercing damage and attempts a Fortitude save against the listed DC.",
+    "outcomes": {
+      "criticalSuccess": "The target is unaffected.",
+      "success": "The target takes half damage.",
+      "failure": "The target takes full damage, and the Free Captain starship chooses a battle station on the target starship to become malfunctioning.",
+      "criticalFailure": "The target takes double damage, and the Free Captain starship chooses a battle station on the target to become malfunctioning. Additionally, the harpoon causes a Hull Breach hazard (page 251) to appear in a space adjacent to the malfunctioning battle station."
+    },
+    "id": "free-captains:piercing-harpoon",
+    "scope": "free-captains",
+    "page": 216
+  },
+  {
+    "name": "Chainsaw Prow",
+    "station": "pilot's console",
+    "actions": 1,
+    "effect": "The Free Captain starship sinks its rotating blades into the hull of a starship within 0 zones. The target takes the listed slashing damage with a basic Fortitude save against the listed DC. If Chainsaw Prow deals damage to the target’s Hull Points, and the target is larger than the Free Captain starship, the Free Captain starship clings to the target. Until the start of the Free Captain starship’s next turn, it moves with the target whenever the target moves.",
+    "id": "free-captains:chainsaw-prow",
+    "scope": "free-captains",
+    "page": 216
+  },
+  {
+    "name": "Wave Holo-Roger",
+    "station": "scanner",
+    "actions": 1,
+    "traits": [
+      "mental",
+      "visual"
+    ],
+    "effect": "A Free Captain starship’s holo-roger is a sight that gives rise to courage in the hearts of its allies. Allied creatures and starships within sensor range of the starship gain a +2 circumstance bonus to Will saves against fear effects for 1 round.",
+    "id": "free-captains:wave-holo-roger",
+    "scope": "free-captains",
+    "page": 216
+  }
+]

@@ -1,0 +1,1847 @@
+[
+  {
+    "id": "daytripper-person-carrier",
+    "name": "Daytripper Person Carrier",
+    "level": 0,
+    "source": "Starfinder Tech Core",
+    "page": 135,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Eco Charger",
+        "effect": "A daytripper’s internal commercial battery charges automatically from solar power and background radiation, fully recharging over the course of 24 hours as long as it isn’t in use. If the battery is fully charged, another battery-powered device can be connected to its charging port, depleting all the daytripper battery’s charges and transferring them to the other device’s battery."
+      },
+      {
+        "name": "Portable",
+        "effect": "Daytrippers are built with nanite technology, allowing them to shrink into a small cube as a single Interact action. While collapsed this way, the daytripper can be carried as an item with 1 Bulk. The daytripper must be reassembled as another Interact action before it can be used as a vehicle."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "90 credits",
+    "description": "This simple electric vehicle looks like a round platform with handles on each side, but it’s equipped with an automatic balancing system that allows the pilot to propel it forward simply be leaning in that direction. Originally developed decades ago, it found unimpressive initial sales due to its awkward design and poor versatility. In recent years, however, fans of retro vehicles have expressed an ironic fondness for the “overlooked” daytripper, often stylizing refurbished units with lights, holo-etchings, and flashy paint jobs.",
+    "space": "5 foot long, 5 feet wide, 4 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 12
+      },
+      {
+        "skill": "Acrobatics",
+        "dc": 14
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 12) or Acrobatics (DC 14)",
+    "ac": 11,
+    "saves": {
+      "fort": 5
+    },
+    "hardness": 3,
+    "hp": 14,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 20,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "20 feet (motorized)",
+    "collision": {
+      "damage": "1d8",
+      "dc": 14
+    }
+  },
+  {
+    "id": "boatercycle",
+    "name": "Boatercycle",
+    "level": 1,
+    "source": "Starfinder Tech Core",
+    "page": 139,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Reconfigure",
+        "actions": 1,
+        "traits": [
+          "manipulate"
+        ],
+        "effect": "The boatercycle rotates its wheels. It gains a Speed of 40 feet but loses its swim Speed, or vice versa."
+      },
+      {
+        "name": "Pedal Power",
+        "effect": "As an emergency measure if its battery runs dry, a boatercycle can be configured to use pedal power as a 1-minute activity. This functions as a pulled vehicle (GM Core 235)."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "500 credits",
+    "description": "With an aerodynamic shape and bidirectional wheels that swivel into twin propjets, a boatercycle’s purpose is obvious. It can seamlessly transition between road and sea, allowing an adventurous pilot to traverse the glimmering beaches of resort worlds however they please.",
+    "space": "10 feet long, 5 feet wide, 5 feet tall",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 16)",
+    "ac": 13,
+    "saves": {
+      "fort": 4
+    },
+    "hardness": 5,
+    "hp": 14,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized or pedaled",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 40 feet (motorized or pedaled)",
+    "collision": {
+      "damage": "1d10",
+      "dc": 15,
+      "type": "P"
+    }
+  },
+  {
+    "id": "cloudskipper",
+    "name": "Cloudskipper",
+    "level": 1,
+    "source": "Starfinder Tech Core",
+    "page": 140,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Reconfigure",
+        "actions": 1,
+        "traits": [
+          "manipulate"
+        ],
+        "effect": "The cloudskipper adjusts its thrusters. It gains a swim Speed of 35 feet but loses its fly Speed, or vice versa."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "650 credits",
+    "description": "Shaped like a slender bullet with a sharp nose, a cloudskipper is a one-person pod with short wings and adjustable thrusters. By adjusting the angle of the wings and thrusters, the cloudskipper can transition between skipping along the water and racing through the skies.",
+    "space": "10 feet long, 5 feet wide, 5 feet tall",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 16)",
+    "ac": 13,
+    "saves": {
+      "fort": 3
+    },
+    "hardness": 5,
+    "hp": 10,
+    "bt": 5,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 30 feet (motorized)",
+    "collision": {
+      "damage": "1d10",
+      "dc": 15,
+      "type": "P"
+    }
+  },
+  {
+    "id": "electric-chariot",
+    "name": "Electric Chariot",
+    "level": 1,
+    "source": "Starfinder Tech Core",
+    "page": 136,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Weapon Compartment",
+        "effect": "An electric chariot features several hidden compartments and can store a total of 2 Bulk worth of weapons. The pilot can Conceal weapons of greater than light Bulk in these compartments and can Interact to draw any weapon stored in these compartments as if they were being carried."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "600 credits",
+    "description": "Though it began its life as an upscale model of motorized mobility aid, the version of the electric chariot that reached store shelves also boasts remarkable combat capabilities, including armored panels and a hidden weapon compartment.",
+    "space": "5 feet long, 5 feet wide, 3 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 14
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 14)",
+    "ac": 12,
+    "saves": {
+      "fort": 4
+    },
+    "hardness": 4,
+    "hp": 18,
+    "bt": 9,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "40 feet (motorized)",
+    "collision": {
+      "damage": "1d10",
+      "dc": 15
+    }
+  },
+  {
+    "id": "hoverbike",
+    "name": "Hoverbike",
+    "level": 1,
+    "source": "Starfinder Tech Core",
+    "page": 136,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Hover",
+        "effect": "A hoverbike maintains an altitude of 6 inches above other surfaces, such as the ground or water. If driven off a high surface, the hoverbike loses 20 feet of altitude per round, landing without harm to the hoverbike or its pilot."
+      },
+      {
+        "name": "Sidecar",
+        "effect": "A hoverbike comes with a sleek sidecar that can be attached or detached as a 10-minute activity while the vehicle isn’t in use. While attached, the hoverbike can carry one passenger in addition to its pilot but takes a –5-foot status penalty to its Speed."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "850 credits",
+    "description": "Famed for its sleek knifelike design and matte black coating, the hoverbike is the go-to vehicle for enterprising couriers and street racers alike, owing to its quick acceleration capability and high cruising speeds. It’s also especially popular among low-level biker gangs due to the included sidecar, which allows them to transport more people to and from confrontations with other gangs.",
+    "space": "10 feet long, 5 feet wide, 3 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 16)",
+    "ac": 11,
+    "saves": {
+      "fort": 7
+    },
+    "hardness": 4,
+    "hp": 12,
+    "bt": 6,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "50 feet (motorized)",
+    "collision": {
+      "damage": "2d4",
+      "dc": 15
+    }
+  },
+  {
+    "id": "somnambupod",
+    "name": "Somnambupod",
+    "level": 1,
+    "source": "Starfinder Tech Core",
+    "page": 136,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "AI Navigation",
+        "effect": "In addition to being driven normally, the pilot can enter their destination into a somnambupod’s onboard AI by attempting a DC 12 Computers check.",
+        "outcomes": {
+          "criticalSuccess": "The somnambupod arrives at its destination faster than expected. It gains a +15-foot status bonus to its Speed until it arrives.",
+          "success": "The somnambupod arrives at its destination.",
+          "failure": "The somnambupod doesn’t move an inch.",
+          "criticalFailure": "The somnambupod moves toward a point 10 kilometers in the opposite direction from its destination."
+        }
+      },
+      {
+        "name": "Complete Luxury Relaxation",
+        "effect": "While riding in a somnambupod, the pilot can choose to initiate complete luxury relaxation mode. The pod’s enclosure becomes opaque, obscuring the outside world, and it plays calming music to allow for easy sleep. The pilot can take no actions while riding this way, including vehicle actions, but if the journey is at least 6 hours long, they gain the benefits of 8 hours of rest (Player Core 432)."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "900 credits",
+    "description": "The somnambupod was designed as a luxury machine for the technology-inclined elite. Resembling a small bed-shaped pod with four crablike legs, the somnambupod’s guiding design ethos is to provide riders relaxing, luxurious sleep during their journey. While it succeeds in this goal, it proved to lack mass appeal, leading one Pact Worlds journalist to famously state, “Who would even want something like this?”",
+    "space": "8 feet long, 5 feet wide, 5 feet high",
+    "crew": "1 passenger",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 12
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 12)",
+    "ac": 12,
+    "saves": {
+      "fort": 6
+    },
+    "hardness": 4,
+    "hp": 18,
+    "bt": 9,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "30 feet (motorized)",
+    "collision": {
+      "damage": "1d8",
+      "dc": 14
+    }
+  },
+  {
+    "id": "aerobike",
+    "name": "Aerobike",
+    "level": 2,
+    "source": "Starfinder Tech Core",
+    "page": 134,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Bank",
+        "effect": "The pilot of an aerobike can add the reckless trait to a Drive action, or attempt the Piloting check with a –1 circumstance penalty if it was already reckless, to shift the vehicle 5 feet to either side at any point during the movement without changing its heading."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "1,100 credits",
+    "description": "A favorite of would-be aerial daredevils for their relatively low price and impressive maneuverability, these wonders of engineering feature a lightweight, hollow frame and two pairs of narrow wings. Amateur aerobike racing leagues have sprouted up across the Pact Worlds in recent years, especially on Castrovel.",
+    "space": "10 feet long, 5 feet wide, 4 feet tall",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 15
+      },
+      {
+        "skill": "Acrobatics",
+        "dc": 17
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 15) or Acrobatics (DC 17)",
+    "ac": 12,
+    "saves": {
+      "fort": 5
+    },
+    "hardness": 5,
+    "hp": 36,
+    "bt": 18,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 50 feet (motorized)",
+    "collision": {
+      "damage": "1d10",
+      "dc": 17
+    }
+  },
+  {
+    "id": "glidecycle",
+    "name": "Glidecycle",
+    "level": 2,
+    "source": "Starfinder Tech Core",
+    "page": 140,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Ride The Current",
+        "actions": "free",
+        "requirements": "The glidecycle is in the air",
+        "effect": "The glidecycle’s wings pop open, allowing it to use its fly Speed until it next touches the ground. A glidecycle can’t use its fly Speed without first activating it with Ride the Current."
+      },
+      {
+        "name": "Jump Start",
+        "actions": 2,
+        "traits": [
+          "reckless"
+        ],
+        "effect": "You use the 1-action version of Drive, then the glidecycle’s engine propels it upward, launching it 20 feet into the air."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "1,500 credits",
+    "description": "The glidecycle originated with offroad racers trying to incorporate canyons and gorges into their tracks. With the press of a button, the motorcycle pops out ultralight wings from its sides and dives through the air.",
+    "space": "10 feet long, 5 feet wide, 5 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 16) or Nature (DC 19, wind only)",
+    "ac": 10,
+    "saves": {
+      "fort": 9
+    },
+    "hardness": 5,
+    "hp": 14,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized"
+      },
+      {
+        "feet": 25,
+        "mode": "wind",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "50 feet (motorized) or fly 25 feet (wind)",
+    "collision": {
+      "damage": "2d4",
+      "dc": 15
+    }
+  },
+  {
+    "id": "landcutter-canoe",
+    "name": "Landcutter Canoe",
+    "level": 2,
+    "source": "Starfinder Tech Core",
+    "page": 140,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Maneuverable",
+        "effect": "With a full complement of skilled rowers, a rowed landcutter canoe can turn swiftly, turn in place, and row backward. Each 90-degree turn made in less than a vehicle length costs 5 extra feet of movement. It can row backward no faster than half its swim Speed, and it can’t turn while rowing backward."
+      },
+      {
+        "name": "Portage",
+        "actions": 2,
+        "effect": "The landcutter switches between travel modes, rising onto its paddles to walk on land or sinking into the water to be rowed across the waves."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "700 credits",
+    "description": "Landcutter canoes are often used on mountainous worlds with difficult portages and were first developed on Vesk Prime. This vessel has lightweight metallic paddles that are reinforced so they can be slotted into ball joints attached to the hull, allowing it to rise from the water and walk on the blades of the paddles.",
+    "space": "15 feet long, 5 feet wide, 5 feet tall (on water) or 10 feet tall (on land)",
+    "crew": "1 pilot, 2 rowers (on water); Passengers 5 (on land), 3 (on water)",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 16) or Diplomacy (DC 18; on water)",
+    "ac": 11,
+    "saves": {
+      "fort": 4
+    },
+    "hardness": 5,
+    "hp": 40,
+    "bt": 20,
+    "speed": [
+      {
+        "feet": 25,
+        "mode": "motorized"
+      },
+      {
+        "feet": 30,
+        "mode": "rowed",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "25 feet (motorized), swim 30 feet (rowed)",
+    "collision": {
+      "damage": "2d6",
+      "dc": 15
+    }
+  },
+  {
+    "id": "acid-skiff",
+    "name": "Acid Skiff",
+    "level": 4,
+    "source": "Starfinder Tech Core",
+    "page": 140,
+    "immunities": [
+      "acid",
+      "object immunities",
+      "radiation"
+    ],
+    "abilities": [
+      {
+        "name": "Containment Hull",
+        "effect": "An acid skiff’s hull is fully enclosed and enchanted with magical radiation wards. Its crew and passengers aren’t exposed to radiation sickness when the vessel travels through areas where they normally would be. Alternatively, the passenger compartment can be converted to store radioactive materials securely, and the pilot and anyone outside the vehicle aren’t exposed to radiation sickness from items stored within."
+      },
+      {
+        "name": "Hover",
+        "effect": "An acid skiff maintains an altitude of 6 inches above other surfaces, such as the ground or water. If driven off a high surface, the acid skiff loses 20 feet of altitude per round, landing without harm to the skiff or its passengers."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "magical",
+      "tech"
+    ],
+    "price": "3,500 credits",
+    "description": "Designed to assist in rescue operations after toxic waste spills, reactor meltdowns, and other disasters, the acid skiff uses its magical wards to withstand environmental hazards, gliding over acid lakes and toxic gases while keeping its passengers insulated and safe in its fully enclosed shell.",
+    "space": "30 feet long, 10 feet wide, 10 feet high",
+    "crew": "1 pilot",
+    "passengers": 5,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 20
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 20)",
+    "ac": 16,
+    "saves": {
+      "fort": 12
+    },
+    "hardness": 5,
+    "hp": 60,
+    "bt": 30,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "magical"
+      }
+    ],
+    "speedText": "30 feet (magical)",
+    "collision": {
+      "damage": "2d6",
+      "dc": 16
+    }
+  },
+  {
+    "id": "all-terrain-dune-buggy",
+    "name": "All-Terrain Dune Buggy",
+    "level": 4,
+    "source": "Starfinder Tech Core",
+    "page": 136,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Suspension Wheels",
+        "effect": "An all-terrain dune buggy ignores non-magical difficult terrain (but not greater difficult terrain). In addition, it treats falls as 10 feet shorter as the buggy’s suspension absorbs some of the impact."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "3,450 credits",
+    "description": "Often employed by Starfinder Society agents when they need to traverse open ground at high speeds, the all-terrain dune buggy is designed with an emphasis on a strong suspension for rugged terrain. The open-air design doesn’t offer much protection, but the buggy’s large wheels are capable of rolling over most small boulders without issue, and the sturdy roll cage allows the vehicle to be easily righted if it overturns.",
+    "space": "10 feet long, 10 feet wide, 4 feet high",
+    "crew": "1 pilot",
+    "passengers": 3,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 20
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 20)",
+    "ac": 14,
+    "saves": {
+      "fort": 12
+    },
+    "hardness": 4,
+    "hp": 64,
+    "bt": 32,
+    "speed": [
+      {
+        "feet": 45,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "45 feet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 19
+    }
+  },
+  {
+    "id": "brethedan-ray",
+    "name": "Brethedan Ray",
+    "level": 4,
+    "source": "Starfinder Tech Core",
+    "page": 134,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Weapon Mount",
+        "effect": "A Brethedan ray has a weapon mount in the nose, which can have any ranged weapon installed or removed with two Interact actions. The ray’s crew can make Strikes with weapons installed this way. Weapons installed this way that require batteries don’t consume any charges when fired, as they can draw power directly from the ray’s engine."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "2,750 credits",
+    "description": "Designed to mimic the physical form of the majestic cloud ray, these ships were built to navigate the numerous layers of a gas giant’s atmosphere but have been adapted to fly on almost any planet in Near Space. The ray’s efficient use of internal space accommodates a relatively large passenger capacity compared to other vehicles of a similar size.",
+    "space": "15 feet long, 15 feet wide, 7 feet tall",
+    "crew": "1 pilot, 1 crew",
+    "passengers": 7,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 18
+      },
+      {
+        "skill": "Computers",
+        "dc": 20
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 18) or Computers (DC 20)",
+    "ac": 16,
+    "saves": {
+      "fort": 10
+    },
+    "hardness": 5,
+    "hp": 70,
+    "bt": 35,
+    "speed": [
+      {
+        "feet": 45,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 45 feet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 19
+    }
+  },
+  {
+    "id": "spiralrunner",
+    "name": "Spiralrunner",
+    "level": 4,
+    "source": "Starfinder Tech Core",
+    "page": 140,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Boring Drills",
+        "effect": "Collision damage from a spiralrunner ignores the first 5 points of an object’s Hardness. If an object or section of an object large enough for the spiralrunner to drive through is reduced to 0 Hit Points by a spiralrunner’s collision damage, the spiralrunner and its pilot and passengers take no damage."
+      },
+      {
+        "name": "Tunneler",
+        "effect": "When a spiralrunner uses its burrow Speed, it leaves a tunnel 10 feet wide and 5 feet high in its path."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "4,000 credits",
+    "description": "The spiralrunner speeds both on the roads and below them. Equipped with a massive burrowing drill and an array of smaller drills on its bumper, this sturdy rally car can dive into the earth, boring new paths to race down in its wake.",
+    "space": "10 feet long, 10 feet wide, 4 feet high",
+    "crew": "1 pilot",
+    "passengers": 3,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 19
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 19)",
+    "ac": 15,
+    "saves": {
+      "fort": 12
+    },
+    "hardness": 5,
+    "hp": 50,
+    "bt": 25,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized"
+      },
+      {
+        "feet": 35,
+        "mode": "motorized",
+        "kind": "burrow"
+      }
+    ],
+    "speedText": "50 feet (motorized), burrow 35 feet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 19
+    }
+  },
+  {
+    "id": "clifftreader",
+    "name": "Clifftreader",
+    "level": 6,
+    "source": "Starfinder Tech Core",
+    "page": 141,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Grapple Launch",
+        "actions": 2,
+        "traits": [
+          "reckless"
+        ],
+        "effect": "The clifftreader fires its dual grappling hooks at a vertical surface within 100 feet and pulls itself to that surface, clinging onto it with its deployable spikes."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "8,000 credits",
+    "description": "Scaling the sides of buildings as easily as it scales cliffsides, the clifftreader races through mountains and cityscapes alike with ease. This unique vehicle looks like a motorcycle whose singular, large wheel loops over the pilot, with deployable spikes to hook into and climb cliff faces. It’s also equipped with two grappling hooks to leap across gaps.",
+    "space": "10 feet long, 5 feet wide, 10 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 22
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 22)",
+    "ac": 18,
+    "saves": {
+      "fort": 12
+    },
+    "hardness": 10,
+    "hp": 80,
+    "bt": 40,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized"
+      },
+      {
+        "feet": 50,
+        "mode": "motorized",
+        "kind": "climb"
+      }
+    ],
+    "speedText": "50 feet (motorized), climb 50 feet (motorized)",
+    "collision": {
+      "damage": "3d10",
+      "dc": 21
+    }
+  },
+  {
+    "id": "hardlight-ultralight",
+    "name": "Hardlight Ultralight",
+    "level": 6,
+    "source": "Starfinder Tech Core",
+    "page": 134,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Bank",
+        "effect": "The pilot of a hardlight ultralight can add the reckless trait to a Drive action or attempt the Piloting check with a –1 circumstance penalty if it was already reckless, to shift the vehicle 5 feet to either side at any point during the movement without changing its heading."
+      },
+      {
+        "name": "Hardlight Storage",
+        "effect": "When not in use, an operator can deactivate or reactivate the projector as a 1-minute activity. While deactivated, the hardlight wings collapse entirely, and the ultralight can be carried as an item with 2 Bulk."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "7,400 credits",
+    "description": "Hardlight ultralights are the ultimate convenient, ready-to-go transport. While inactive, these vehicles are contained entirely within a hardlight projector small enough for most people to carry in a backpack. Once activated, the projector unfolds into a large, brightly-color craft with dramatically angled contours and a roughly triangular body.",
+    "space": "10 feet long, 8 feet wide, 5 feet high (when activated)",
+    "crew": "1 pilot",
+    "passengers": 2,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 21
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 21)",
+    "ac": 18,
+    "saves": {
+      "fort": 13
+    },
+    "hardness": 10,
+    "hp": 100,
+    "bt": 50,
+    "speed": [
+      {
+        "feet": 60,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 60 feet (motorized)",
+    "collision": {
+      "damage": "3d8",
+      "dc": 21
+    }
+  },
+  {
+    "id": "hydrofoil",
+    "name": "Hydrofoil",
+    "level": 6,
+    "source": "Starfinder Tech Core",
+    "page": 137,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Too Fast",
+        "effect": "A hydrofoil’s speed comes at the cost of maneuverability. It must move its full speed to turn up to 90 degrees, instead of the normal vehicle length. In addition, its pilot takes a –2 status penalty to Piloting checks for vehicle actions with the reckless trait."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "8,000",
+    "description": "These long and narrow boats are made to go extremely fast in straight lines but aren’t much good at anything else; even experienced operators have trouble getting much maneuverability out of the fragile vessels. When you need to get light cargo or a few passengers across a body of water as quickly as possible, though, a hydrofoil is hard to beat.",
+    "space": "40 feet long, 10 feet wide, 15 feet high",
+    "crew": "1 pilot, 1 crew",
+    "passengers": 4,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 23
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 23)",
+    "ac": 19,
+    "saves": {
+      "fort": 14
+    },
+    "hardness": 5,
+    "hp": 70,
+    "bt": 35,
+    "speed": [
+      {
+        "feet": 75,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 75 feet (motorized)",
+    "collision": {
+      "damage": "4d10",
+      "dc": 22
+    }
+  },
+  {
+    "id": "underwater-skimmer",
+    "name": "Underwater Skimmer",
+    "level": 6,
+    "source": "Starfinder Tech Core",
+    "page": 138,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Improved Cornering",
+        "effect": "While in surface mode, an underwater skimmer can turn up to 180 degrees for every vehicle length it moves forward, instead of the normal 90 degrees."
+      },
+      {
+        "name": "Reconfigure",
+        "actions": 2,
+        "traits": [
+          "manipulate"
+        ],
+        "effect": "The skimmer switches between surface mode and stealth mode."
+      },
+      {
+        "name": "Submersible",
+        "effect": "While in stealth mode, an underwater skimmer can travel beneath the surface of the water, to a depth of up to 1,000 feet. Its air reservoir can sustain 1 Medium creature for up to 4 hours, after which they must hold their breath or begin to suffocate until the skimmer surfaces again."
+      },
+      {
+        "name": "Underwater Infiltration",
+        "effect": "While an underwater skimmer is in stealth mode and submerged, the pilot can Hide as a vehicle action, conferring the benefits to the skimmer. They can roll Piloting instead of Stealth to do so."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "7,500 credits",
+    "description": "These nimble scout vessels can move quickly or stealthily in naval theaters, changing between configurations to meet the needs of the mission. Though they were originally military vehicles, they’re also widely used by marine xenobiologists, divers, and others who need a versatile undersea craft.",
+    "space": "10 feet long, 5 feet wide, 5 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 22
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 22)",
+    "ac": 19,
+    "saves": {
+      "fort": 13
+    },
+    "hardness": 10,
+    "hp": 90,
+    "bt": 45,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized; surface mode",
+        "kind": "swim"
+      },
+      {
+        "feet": 35,
+        "mode": "motorized; stealth mode",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 50 feet (motorized; surface mode), swim 35 feet (motorized; stealth mode)",
+    "collision": {
+      "damage": "4d10",
+      "dc": 22
+    }
+  },
+  {
+    "id": "armored-personnel-carrier",
+    "name": "Armored Personnel Carrier",
+    "level": 7,
+    "source": "Starfinder Tech Core",
+    "page": 137,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Dual Weapon Mounts",
+        "effect": "An armored personnel carrier has two weapon mounts, one on each side, which can each have any ranged weapon installed or removed with two Interact actions. Any of the carrier’s passengers can make Strikes with weapons installed this way. Weapons installed this way that require batteries don’t consume any charges when fired, as they can draw power directly from the carrier’s engine."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "10,000 credits",
+    "description": "While numerous high-tech means exist to deploy troops into combat, a sturdy armored personnel carrier remains standard throughout most of the Pact Worlds, thanks to its relative affordability and reliability. Since the carrier’s size and hardened armor slow its movement, it’s also equipped with a pair of weapon mounts that allow the troops within to unleash suppressive fire on nearby threats.",
+    "space": "20 feet long, 10 feet wide, 15 feet high",
+    "crew": "1 pilot",
+    "passengers": 6,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 23
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 23)",
+    "ac": 22,
+    "saves": {
+      "fort": 14
+    },
+    "hardness": 10,
+    "hp": 120,
+    "bt": 60,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "30 feet (motorized)",
+    "collision": {
+      "damage": "4d10",
+      "dc": 22
+    }
+  },
+  {
+    "id": "spider-crawler",
+    "name": "Spider-Crawler",
+    "level": 7,
+    "source": "Starfinder Tech Core",
+    "page": 137,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Platform Mode",
+        "actions": 3,
+        "requirements": "The spider-crawler is attached to a stable surface",
+        "effect": "The spider-crawler unfolds into a 20-foot by 10-foot flat platform, which its crew and passengers are standing on. The pilot can end the effect with a single Interact action, returning its crew and passengers to their seats and dropping any other creatures off the platform."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "9,500 credits",
+    "description": "Designed for heavily forested areas, the spider-crawler is a sturdy buggy that’s equally at home navigating mountainous areas and scaling trees. Instead of wheels, it’s equipped with four long, spider-like legs that make it remarkably nimble. Spider-crawlers are occasionally used by special ops teams, as their ability to unfold into a larger stationary platform allows for uniquely convenient sniping positions.",
+    "space": "8 feet long, 10 feet wide, 10 feet high",
+    "crew": "1 pilot",
+    "passengers": 3,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 21
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 21)",
+    "ac": 19,
+    "saves": {
+      "fort": 14
+    },
+    "hardness": 10,
+    "hp": 100,
+    "bt": 50,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized"
+      },
+      {
+        "feet": 30,
+        "mode": "motorized",
+        "kind": "climb"
+      }
+    ],
+    "speedText": "40 feet (motorized), climb 30 feet (motorized)",
+    "collision": {
+      "damage": "4d8",
+      "dc": 22
+    }
+  },
+  {
+    "id": "magma-cruiser",
+    "name": "Magma Cruiser",
+    "level": 8,
+    "source": "Starfinder Tech Core",
+    "page": 138,
+    "immunities": [
+      "fire",
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Thermal Shielding",
+        "effect": "A magma cruiser’s fire shielding protects its crew as well. Creatures on board a magma cruiser are immune to the effects of severe environmental heat or less. In addition, they reduce the effects of incredible environmental heat to those of extreme heat."
+      }
+    ],
+    "rarity": "common",
+    "size": "gargantuan",
+    "traits": [
+      "tech"
+    ],
+    "price": "15,000 credits",
+    "description": "With innumerable planets in the galaxy, there are always worlds that are worth exploring but have inherently dangerous environments. Engineers and shipbuilders see these hazardous environments not as deterrents, but as challenges to overcome. Worlds covered in magma or lava are often ideal locations for manufacturing or mining facilities, but surveyors and future inhabitants need a way to safely traverse the surface of such planets. While these magma cruisers are most common in Near Space, similar vessels also exist for other hostile environments such as acid lakes.",
+    "space": "40 feet long, 25 feet wide, 30 feet high",
+    "crew": "1 pilot, 3 crew",
+    "passengers": 8,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 23
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 23)",
+    "ac": 22,
+    "saves": {
+      "fort": 16
+    },
+    "hardness": 10,
+    "hp": 100,
+    "bt": 50,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 30 feet (motorized)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 24
+    }
+  },
+  {
+    "id": "jotuncraft",
+    "name": "Jotuncraft",
+    "level": 9,
+    "source": "Starfinder Tech Core",
+    "page": 134,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Giant Cargo",
+        "effect": "A jotuncraft can carry up to 500 Bulk of cargo."
+      },
+      {
+        "name": "Weapon Mount",
+        "effect": "A jotuncraft has a weapon mount emplacement, which can have any ranged weapon installed or removed with two Interact actions. The craft’s crew can make Strikes with weapons installed this way. Weapons installed this way that require batteries don’t consume any charges when fired, as they can draw power directly from the ray’s engine."
+      }
+    ],
+    "rarity": "common",
+    "size": "gargantuan",
+    "traits": [
+      "tech"
+    ],
+    "price": "22,000 credits",
+    "description": "The immense mass and utilitarian design of these monstrous crafts make them look more like bunkers than flying vehicles while stationary. The fortress-like jotuncraft are usually painted in drab colors and are equipped with massive cargo doors on the back and bottom and a reinforced turret emplacement. Originally designed for use by giants, a burst of unexpected commercial success meant modern models are largely retrofitted for smaller ancestries, leaving an oversized cargo bay perfect for large shipments.",
+    "space": "50 feet long, 35 feet wide, 25 feet high",
+    "crew": "1 pilot, 2 crew",
+    "passengers": 8,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 24
+      },
+      {
+        "skill": "Computers",
+        "dc": 26
+      },
+      {
+        "skill": "Engineering Lore",
+        "dc": 26
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 24), Computers (DC 26), or Engineering Lore (DC 26)",
+    "ac": 24,
+    "saves": {
+      "fort": 18
+    },
+    "hardness": 15,
+    "hp": 150,
+    "bt": 75,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 40 feet (motorized)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 25
+    }
+  },
+  {
+    "id": "talon-strike-craft",
+    "name": "Talon Strike Craft",
+    "level": 9,
+    "source": "Starfinder Tech Core",
+    "page": 141,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Bank",
+        "effect": "In its aerial form, the pilot of a talon strike craft can add the reckless trait to a Drive action, or attempt the Piloting check with a –1 circumstance penalty if it was already reckless, to shift the vehicle 5 feet to either side at any point during the movement without changing its heading."
+      },
+      {
+        "name": "Homing Shot",
+        "actions": 2,
+        "traits": [
+          "splash"
+        ],
+        "effect": "The talon strike craft fires homing missiles at a creature or object within 60 feet, dealing 3d8 bludgeoning damage and 3 fire splash damage (DC 25 basic Reflex save)."
+      },
+      {
+        "name": "Hover",
+        "effect": "A talon strike craft in its land-based form maintains an altitude of 6 inches above other surfaces, such as the ground or water. If driven off a high surface, the strike craft loses 20 feet of altitude per round unless it Reconfigures, landing without harm to the skiff or its passengers."
+      },
+      {
+        "name": "Laser Cannon",
+        "actions": 2,
+        "traits": [
+          "fire"
+        ],
+        "effect": "The talon strike craft fires its mounted laser cannon, dealing 5d8 fire damage to creatures and objects in a 30-foot line (DC 25 basic Reflex save). This ability can be used by the crew in addition to the pilot."
+      },
+      {
+        "name": "Reconfigure",
+        "actions": 2,
+        "traits": [
+          "manipulate"
+        ],
+        "effect": "The talon strike craft reconfigures its wings, switching between its aerial form and land-based form."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "price": "25,000 credits",
+    "description": "This fighter craft is designed to control the battlefield from any angle, fighting for control of the skies before folding its wings into a tank-like configuration and hovering across the ground.",
+    "space": "10 feet long, 15 feet wide, 5 feet high",
+    "crew": "1 pilot, 1 crew",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 25
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 25)",
+    "ac": 24,
+    "saves": {
+      "fort": 18
+    },
+    "hardness": 15,
+    "hp": 120,
+    "bt": 60,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized; land-based form"
+      },
+      {
+        "feet": 60,
+        "mode": "motorized; aerial form",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "40 feet (motorized; land-based form), fly 60 feet (motorized; aerial form)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 24
+    }
+  },
+  {
+    "id": "all-terrain-hauler",
+    "name": "All-Terrain Hauler",
+    "level": 10,
+    "source": "Starfinder Tech Core",
+    "page": 141,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "All-Terrain Treads",
+        "effect": "An all-terrain hauler ignores non-magical difficult terrain and greater difficult terrain."
+      },
+      {
+        "name": "Secured Storage",
+        "effect": "An all-terrain hauler’s cargo compartment can securely hold up to 200 Bulk of cargo, which takes no damage unless the hauler is fully destroyed. This compartment can be reconfigured to carry six additional passengers."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "magical",
+      "tech"
+    ],
+    "price": "32,000 credits",
+    "description": "The all-terrain hauler is a bulky treaded transport for when a shipment must be absolutely secure. Arcane enhancements allow the hauler to deploy wards onto its treads to crawl over the surface of mud, snow, or waves.",
+    "space": "20 feet long, 25 feet wide, 15 feet tall",
+    "crew": "1 pilot, 2 crew; Passengers 3 or 9",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 26
+      },
+      {
+        "skill": "Arcana",
+        "dc": 28
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 26) or Arcana (DC 28)",
+    "ac": 26,
+    "saves": {
+      "fort": 19
+    },
+    "hardness": 15,
+    "hp": 160,
+    "bt": 80,
+    "speed": [
+      {
+        "feet": 60,
+        "mode": "motorized"
+      },
+      {
+        "feet": 50,
+        "mode": "magical",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "60 feet (motorized), swim 50 feet (magical)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 27
+    }
+  },
+  {
+    "id": "biosub",
+    "name": "Biosub",
+    "level": 11,
+    "source": "Starfinder Tech Core",
+    "page": 138,
+    "immunities": [
+      "unconscious"
+    ],
+    "abilities": [
+      {
+        "name": "Organic Life Support",
+        "effect": "A biosub’s gills and internal gut biome can produce air, food, and water for its crew indefinitely, though the ship must be fed a Medium creature (usually a fish) every day to maintain these systems."
+      },
+      {
+        "name": "Semi-Living",
+        "effect": "Though a biosub is partially alive, its technological components make it more resistant to effects most vehicles are immune to (and vice versa). Any effect that applies to creatures or objects affects a biosub, though it gets a +2 circumstance bonus to saves against effects that would normally only affect one or the other."
+      },
+      {
+        "name": "Submersible",
+        "effect": "A biosub can travel beneath the surface of the water, built to withstand water pressure at any depth."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "42,000 credits",
+    "description": "In an effort to overcome the enormous challenge of creating vessels that can withstand the pressures of the deep sea, some engineers have capitalized on life’s ability to adapt to even the most extreme conditions. Biosubs use a combination of cutting-edge submersible technology and advanced biotech grafts to create a semi-living ship. Thanks to this unique construction, they enjoy some of the benefits (and drawbacks) of being simultaneously a living creature and a piece of technology.",
+    "space": "30 feet long, 15 feet wide, 20 feet high",
+    "crew": "1 pilot, 2 crew",
+    "passengers": 3,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 30
+      },
+      {
+        "skill": "Diplomacy",
+        "dc": 32
+      },
+      {
+        "skill": "Nature",
+        "dc": 28
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 30), Diplomacy (DC 32), or Nature (DC 28)",
+    "ac": 26,
+    "saves": {
+      "fort": 20,
+      "will": 22
+    },
+    "hardness": 10,
+    "hp": 200,
+    "bt": 100,
+    "resistances": [
+      "bleed 15",
+      "nonlethal 15",
+      "poison 15",
+      "spirit 15",
+      "vitality 15",
+      "void 15"
+    ],
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 40 feet (motorized)",
+    "collision": {
+      "damage": "7d10",
+      "dc": 28
+    }
+  },
+  {
+    "id": "spheridyne",
+    "name": "Spheridyne",
+    "level": 11,
+    "source": "Starfinder Tech Core",
+    "page": 135,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Gyroscopic Maneuverability",
+        "effect": "A spheridyne can turn swiftly, turn in place, and even fly backward. Each 90-degree turn made in less than a vehicle length costs 5 extra feet of movement, and it can Fly backward at its full speed."
+      },
+      {
+        "name": "Hover Thrusters",
+        "effect": "A spheridyne doesn’t fall if it’s airborne at the end of the pilot’s turn and didn’t use a Fly action this round, hovering in place instead."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "41,000 credits",
+    "description": "Though the craft’s design is a bit jarring, few can argue with its aerial maneuverability. Using a series of independently rotating, carefully angled discs, a spheridyne offers the ability to turn, stop, and reverse direction in an instant, perfect for the customer with unpredictable needs.",
+    "space": "15 feet long, 15 feet wide, 15 feet high",
+    "crew": "1 pilot",
+    "passengers": 4,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 27
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 27)",
+    "ac": 26,
+    "saves": {
+      "fort": 20
+    },
+    "hardness": 15,
+    "hp": 180,
+    "bt": 90,
+    "speed": [
+      {
+        "feet": 45,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 45 feet (motorized)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 28
+    }
+  },
+  {
+    "id": "terminus-monster-truck",
+    "name": "Terminus Monster Truck",
+    "level": 11,
+    "source": "Starfinder Tech Core",
+    "page": 137,
+    "immunities": [
+      "critical hits",
+      "object immunities",
+      "precision damage"
+    ],
+    "abilities": [
+      {
+        "name": "Crusher",
+        "effect": "When a terminus monster truck Runs Over and rams a target, if the target is reduced to 0 Hit Points by the collision damage, the monster truck and its pilots and passengers take no damage."
+      },
+      {
+        "name": "Huge Wheels",
+        "effect": "A terminus monster truck can move up and over obstacles up to 5 feet in height, though it treats such spaces as difficult terrain that mega suspension wheels doesn’t ignore."
+      },
+      {
+        "name": "Mega Suspension Wheels",
+        "effect": "A terminus monster truck ignores non-magical difficult terrain and greater difficult terrain. In addition, it treats falls as 15 feet shorter as the truck’s suspension absorbs some of the impact."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "price": "35,000 credits",
+    "description": "This gargantuan eight-wheeled vehicle is a commercial variant of prototype models developed for a destructive, vehicular arena combat sport played on Akiton and in the depths of Absalom Station. Although these initial prototypes made use of flashy and over-the-top weaponry, such as buzz saws and flamethrowers, the commercial model strips back these pyrotechnics in favor of a more dedicated, utility-orientated off-road design.",
+    "space": "20 feet long, 15 feet wide, 20 feet high",
+    "crew": "1 pilot",
+    "passengers": 7,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 25
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 25)",
+    "ac": 25,
+    "saves": {
+      "fort": 18
+    },
+    "hardness": 15,
+    "hp": 180,
+    "bt": 90,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "50 feet (motorized)",
+    "collision": {
+      "damage": "6d12",
+      "dc": 28
+    }
+  },
+  {
+    "id": "apex-battleship",
+    "name": "Apex Battleship",
+    "level": 13,
+    "source": "Starfinder Tech Core",
+    "page": 139,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Artillery Battery",
+        "actions": 3,
+        "traits": [
+          "fire"
+        ],
+        "frequency": "four times per day",
+        "effect": "The battleship unleashes a barrage from its artillery batteries, targeting a 20-foot burst within 200 feet. Creatures and objects in the area take 4d8 fire damage and 4d8 bludgeoning damage (DC 32 basic Reflex save). This ability can be used by crew or passengers, in addition to the pilot."
+      },
+      {
+        "name": "EMP",
+        "actions": 3,
+        "traits": [
+          "electricity",
+          "tech"
+        ],
+        "frequency": "once per 10 minutes",
+        "effect": "The battleship unleashes an electromagnetic pulse, disabling enemy ships. Creatures and objects in a 50-foot emanation must attempt a DC 32 Fortitude saving throw.",
+        "outcomes": {
+          "criticalSuccess": "The target is unaffected.",
+          "success": "The target becomes glitching 1 for 1 round.",
+          "failure": "The target becomes glitching 2 for 1 minute.",
+          "criticalFailure": "The target becomes glitching 4 for 1 minute."
+        }
+      },
+      {
+        "name": "Laser Sweep",
+        "actions": 3,
+        "traits": [
+          "fire",
+          "tech"
+        ],
+        "frequency": "once per round",
+        "effect": "The battleship sweeps its massive laser across the battlefield, dealing 8d6 fire damage to creatures and objects in a 60-foot cone (DC 32 basic Reflex save). This ability can be used by crew or passengers, in addition to the pilot."
+      }
+    ],
+    "rarity": "common",
+    "size": "gargantuan",
+    "traits": [
+      "tech"
+    ],
+    "price": "110,000 credits",
+    "description": "This colossal ship is built for one purpose: war. It wears that purpose proudly, with its massive spinal laser cannon, reinforced batteries, and anti-artillery armor clearly displayed to make a bold statement on whichever sea it finds itself. The battleship’s passenger quarters are typically filled with off-duty crew rather than civilians, allowing it to be active around the clock as its crew and pilot operate in shifts. Despite its size, the apex battleship is far from sluggish or clumsy, with massive turbine engines that allow it to keep pace with smaller craft in battle.",
+    "space": "130 feet long, 40 feet wide, 25 feet high",
+    "crew": "1 Pilot, 8 crew",
+    "passengers": 32,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 31
+      },
+      {
+        "skill": "Computers",
+        "dc": 33
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 31) or Computers (DC 33)",
+    "ac": 29,
+    "saves": {
+      "fort": 23
+    },
+    "hardness": 20,
+    "hp": 250,
+    "bt": 125,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 40 feet (motorized)",
+    "collision": {
+      "damage": "8d10",
+      "dc": 31
+    }
+  },
+  {
+    "id": "wealcol",
+    "name": "Wealcol",
+    "level": 13,
+    "source": "Starfinder Tech Core",
+    "page": 141,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Magnetic Protection",
+        "effect": "The tiny components that make up a wealcol automatically reposition to move the pilot out of danger and shield them from impact. When the pilot Runs Over and rams a target, the wealcol can make a basic Reflex save against its own collision DC to protect the pilot from the collision damage."
+      },
+      {
+        "name": "Swarm Form",
+        "effect": "A wealcol’s fluid nature allows it to squeeze through spaces that would otherwise be too small for it. A wealcol can attempt to Drive through an opening that’s smaller than one of its dimensions, giving the action the reckless trait. If the pilot maintains control of the vehicle, the wealcol changes its shape on the fly and can fit through any opening the pilot could."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "price": "84,000 credits",
+    "description": "A unique, highly specialized single-passenger transport with a fluid design, this vehicle is composed of tens of thousands of autonomous, 1-inch cubic robots working in tandem in a specially designed magnetic field. The wealcol can adapt on the fly, compacting itself to fit through tight spaces and bending to keep its operator away from harm.",
+    "space": "12 feet long, 8 feet wide, 5 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 30
+      },
+      {
+        "skill": "Nature",
+        "dc": 32
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 30) or Nature (DC 32)",
+    "ac": 28,
+    "saves": {
+      "fort": 21,
+      "ref": 23
+    },
+    "hardness": 15,
+    "hp": 160,
+    "bt": 80,
+    "weaknesses": [
+      "area 10"
+    ],
+    "speed": [
+      {
+        "feet": 65,
+        "mode": "motorized"
+      },
+      {
+        "feet": 65,
+        "mode": "motorized",
+        "kind": "fly"
+      },
+      {
+        "feet": 65,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "65 feet (motorized), fly 65 feet (motorized), swim 65 feet (motorized)",
+    "collision": {
+      "damage": "8d8",
+      "dc": 30,
+      "type": "slashing"
+    }
+  },
+  {
+    "id": "ultra-luxe-yacht",
+    "name": "Ultra-Luxe Yacht",
+    "level": 14,
+    "source": "Starfinder Tech Core",
+    "page": 139,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [],
+    "rarity": "common",
+    "size": "gargantuan",
+    "traits": [
+      "tech"
+    ],
+    "price": "150,000",
+    "description": "The wealthiest citizens of the Pact Worlds just can’t help but show off their wealth, and luxurious yachts are designed to do just that. More a mobile marine resort than a vehicle, they contain everything needed to entertain the passengers for months at a time, including theaters, swimming pools, top-of-the-line holoprojectors, lavish sleeping quarters, and even a landing pad for small aircraft. Despite their size, these ships are meant to operate with almost no crew, to allow for the utmost privacy of the owner and their guests.",
+    "space": "230 feet long, 100 feet wide, 60 feet high",
+    "crew": "1 pilot",
+    "passengers": 60,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 32
+      },
+      {
+        "skill": "Computers",
+        "dc": 34
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 32) or Computers (DC 34)",
+    "ac": 30,
+    "saves": {
+      "fort": 24
+    },
+    "hardness": 20,
+    "hp": 200,
+    "bt": 100,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 40 feet (motorized)",
+    "collision": {
+      "damage": "10d10",
+      "dc": 30
+    }
+  },
+  {
+    "id": "dragon-of-damoritosh",
+    "name": "Dragon of Damoritosh",
+    "level": 15,
+    "source": "Starfinder Tech Core",
+    "page": 135,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Dual Weapon Mounts",
+        "effect": "A dragon of Damoritosh has two weapon mounts, one in each of the dragon’s hands, which can each have any ranged weapon installed or removed with two Interact actions. Any of the dragon’s crew or passengers can make Strikes with weapons installed this way. Weapons installed this way that require batteries don’t consume any charges when fired, as they can draw power directly from the ship’s engine."
+      },
+      {
+        "name": "Fire Breath",
+        "actions": 3,
+        "traits": [
+          "fire"
+        ],
+        "effect": "The massive flame cannon built into the dragon of Damoritosh’s mouth ignites, dealing 12d6 fire damage to creatures and objects in a 40-foot cone or an 80-foot line (DC 33 basic Reflex save). This ability can be used by crew or passengers, in addition to the pilot. Fire Breath requires 1d4 rounds to cool down before it can be used again."
+      },
+      {
+        "name": "Frightful Appearance",
+        "actions": 2,
+        "traits": [
+          "emotion",
+          "fear",
+          "magical",
+          "mental"
+        ],
+        "effect": "The dragon of Damoritosh’s intimidating design is magically enhanced to simulate the terrifying presence of an actual dragon. Creatures within a 60-foot emanation, except the crew and passengers, must attempt a DC 32 Will save. This ability can be used by crew or passengers, in addition to the pilot.",
+        "outcomes": {
+          "criticalSuccess": "The target is unaffected.",
+          "success": "The target is frightened 1.",
+          "failure": "The target is frightened 2.",
+          "criticalFailure": "The target is frightened 4."
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "size": "gargantuan",
+    "traits": [
+      "magical",
+      "tech"
+    ],
+    "price": "200,000 credits",
+    "description": "A dragon of Damoritosh resembles a huge dragon formed from interlocking metal plates with enormous, magically enhanced wings, making it a terrifying sight to behold. The incredibly detailed dragon’s head, which doubles as a flamethrower, was designed by talented artists to appear lifelike. The dragon has become a favorite vehicle for crowd suppression and intimidation campaigns—for those who can afford one.",
+    "space": "30 feet long, 50 feet wide, 15 feet high",
+    "crew": "1 pilot, 2 crew",
+    "passengers": 3,
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 31
+      },
+      {
+        "skill": "Arcana",
+        "dc": 33
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 31) or Arcana (DC 33)",
+    "ac": 32,
+    "saves": {
+      "fort": 26
+    },
+    "hardness": 20,
+    "hp": 240,
+    "bt": 120,
+    "resistances": [
+      "fire 20"
+    ],
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "magic or motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 50 feet (magic or motorized)",
+    "collision": {
+      "damage": "10d10",
+      "dc": 32
+    }
+  }
+]
