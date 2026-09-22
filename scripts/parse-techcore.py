@@ -102,7 +102,7 @@ def is_continuation_label(text: str) -> bool:
             return True
     return False
 FIELD_KEYS = ('Frequency', 'Requirements', 'Prerequisites', 'Trigger', 'Effect')
-SHARED_REF_RE = re.compile(r"^(?:DC (?P<dc>\d+),?\s*)?(?:(?P<damage>\d+d\d+(?:[+\-]\d+)?) (?P<dtype>[a-z]+) damage,?\s*)?(?P<extra>[A-Za-z][a-z'’\- ]*?(?: \d+)?)?\s*(?:See )?\(?page (?P<page>\d+)\)?\.?$")
+SHARED_REF_RE = re.compile(r"^(?:DC (?P<dc>\d+),?\s*)?(?:(?P<damage>\d+d\d+(?:[+\-]\d+)?) (?P<dtype>[a-z]+) damage,?\s*)?(?P<extra>[A-Za-z][a-z'’\- ]*?(?: \d+)?)?\s*(?:(?:See )?\(?page (?P<page>\d+)\)?|\(see above\))\.?$")
 AS_REF_RE = re.compile(r"^As (?:the )?(?P<ship>[A-Z][A-Za-z0-9'’\- ]+?)\.?$")
 
 
@@ -436,8 +436,10 @@ def parse_ability(entry_lines):
         ab['traits'] = [t.strip() for t in m.group('traits').split(',') if t.strip()]
     rest = (m.group('rest') or '').strip()
     ref = SHARED_REF_RE.match(rest)
+    if ref and not ref.group('page') and not (ref.group('dc') or ref.group('damage')):
+        ref = None   # a bare "(see above)" is prose, not a common-action reference
     if rest and ref:
-        ab['sharedPage'] = int(ref.group('page'))
+        ab['sharedPage'] = int(ref.group('page')) if ref.group('page') else 0
         params = {}
         if ref.group('dc'):
             params['dc'] = ref.group('dc')
@@ -459,6 +461,8 @@ def parse_ability(entry_lines):
         asm = AS_REF_RE.match(rest)
         if asm:
             ab['asRef'] = asm.group('ship')
+        # Book typo (Idaran Cantripper, p. 227): "Resistances three times per day" is a Frequency line.
+        rest = re.sub(r'^Resistances ((?:once|twice|three times|\w+) per (?:day|hour|round|turn|minute))\b', r'Frequency \1;', rest)
         fields = split_fields(rest)
         for k, v in fields.items():
             ab[k] = v
@@ -468,7 +472,7 @@ def parse_ability(entry_lines):
 
 
 ATTACK_RE = re.compile(
-    r"^(?P<mode>Melee|Ranged|Area Fire|Auto-Fire)(?:\s*\[(?P<glyph>[a-z-]+)\])?\s+"
+    r"^(?P<mode>Melee|Ranged|Area Fire|Auto[- ]Fire)(?:\s*\[(?P<glyph>[a-z-]+)\])?\s+"
     r"(?P<name>.+?)(?:\s+\+(?P<bonus>\d+))?(?:\s+\((?P<traits>[^)]*)\))?,?\s+Damage\s+(?P<damage>.+)$")
 
 
@@ -476,16 +480,13 @@ def parse_attack(text):
     m = ATTACK_RE.match(text)
     if not m:
         return None
-    mode = {'Melee': 'melee', 'Ranged': 'ranged', 'Area Fire': 'areaFire', 'Auto-Fire': 'autoFire'}[m.group('mode')]
+    mode = {'Melee': 'melee', 'Ranged': 'ranged', 'Area Fire': 'areaFire', 'Auto-Fire': 'autoFire', 'Auto Fire': 'autoFire'}[m.group('mode')]
     atk = {'mode': mode, 'name': m.group('name').strip(),
            'actions': GLYPH_COST.get(m.group('glyph') or '', 2 if mode in ('areaFire', 'autoFire') else 1),
            'traits': []}
     if m.group('bonus'):
         atk['bonus'] = int(m.group('bonus'))
-    for t in (m.group('traits') or '').split(','):
-        t = t.strip()
-        if not t:
-            continue
+    for t in split_trait_list(m.group('traits') or ''):
         mi = re.match(r'range increment (\d+) zones?', t)
         mr = re.match(r'range (\d+) zones?', t)
         ma = re.match(r'(\d+)-zone (burst|cone|line|emanation)', t)
@@ -508,7 +509,26 @@ def parse_attack(text):
 
 
 def split_comma_list(text):
-    return [s.strip() for s in text.split(',') if s.strip()]
+    """Split on commas that are not inside parentheses, e.g. "starship immunities (except spirit, vitality, void)"."""
+    out, depth, cur = [], 0, ''
+    for ch in text:
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+        if ch == ',' and depth == 0:
+            out.append(cur)
+            cur = ''
+        else:
+            cur += ch
+    out.append(cur)
+    return [s.strip() for s in out if s.strip()]
+
+
+def split_trait_list(text):
+    """Split a weapon trait list, keeping "versatile A, C, E, or F" together."""
+    text = re.sub(r'versatile ((?:[A-Z], )*(?:[A-Z],? )?or [A-Z])', lambda m: 'versatile ' + '/'.join(re.findall(r'[A-Z]', m.group(1))), text)
+    return [t.strip() for t in text.split(',') if t.strip()]
 
 
 def parse_defense_lists(text, rec):
@@ -717,7 +737,8 @@ def resolve_shared(ships, shared):
             if 'weapon' in params:
                 effect = effect.replace('the specified Strike', f"a {params['weapon']} Strike")
             if 'resistance' in params:
-                effect = effect.replace('equal to half its level + 1 (minimum 1)', params['resistance'])
+                effect = effect.replace('gains resistance against the triggering damage type equal to half its level + 1 (minimum 1)',
+                                        f"gains resistance {params['resistance']} against the triggering damage type")
             for k in ('traits', 'frequency', 'requirements', 'trigger', 'outcomes', 'station', 'actions', 'actionsMax'):
                 if k in src and k not in ab:
                     ab[k] = src[k]
@@ -749,7 +770,42 @@ def resolve_shared(ships, shared):
 # Hazards
 # ---------------------------------------------------------------------------
 
-DISABLE_RE = re.compile(r"DC (?P<dc>\d+) (?P<skill>[A-Z][A-Za-z ]+?) \((?P<prof>trained|expert|master|legendary|untrained)?(?:; (?P<station>[^)]+))?\)")
+PROF = r'trained|expert|master|legendary|untrained'
+DISABLE_GROUP_RE = re.compile(r"DC (?P<dc>\d+) (?P<body>.*?)(?=(?:,| or|;)? DC \d+ |$)")
+DISABLE_SKILL_RE = re.compile(r"(?P<skill>(?:any )?[A-Z][A-Za-z]*(?: [A-Z][A-Za-z]*)*(?: Lore)?)(?: \((?P<prof>" + PROF + r")?(?:; (?P<station>[^)]+))?\))?")
+
+
+def parse_disable(body):
+    """Structured entries for "DC 21 Computers (trained; scanners) to …, or DC 23 Piloting (trained; pilot's console) …".
+    A DC may cover several skills ("DC 35 Computers, Crafting, or Thievery (expert)"); a parenthetical applies to the
+    skills listed before it since the previous parenthetical."""
+    entries = []
+    for g in DISABLE_GROUP_RE.finditer(body):
+        dc = int(g.group('dc'))
+        text = g.group('body')
+        # keep only the skill list: cut at " to " / " or Counter Magic" / other prose after the last parenthetical
+        pending = []
+        pos = 0
+        for m in DISABLE_SKILL_RE.finditer(text):
+            if m.start() > pos and not re.match(r"^[\s,]*(?:or\s+)?$", text[pos:m.start()]):
+                break   # prose began ("to calculate a safe route, or ...")
+            skill = m.group('skill').strip()
+            if skill.lower() in ('counter', 'counter magic'):
+                break
+            pending.append(skill)
+            if m.group(0).endswith(')'):
+                for sk in pending:
+                    e = {'dc': dc, 'skill': sk}
+                    if m.group('prof'):
+                        e['proficiency'] = m.group('prof')
+                    if m.group('station'):
+                        e['station'] = m.group('station').replace('’', "'")
+                    entries.append(e)
+                pending = []
+            pos = m.end()
+        for sk in pending:
+            entries.append({'dc': dc, 'skill': sk})
+    return entries
 
 
 def parse_hazard(block):
@@ -783,10 +839,7 @@ def parse_hazard(block):
             continue
         if head.startswith('Disable '):
             body = text[len('Disable '):]
-            rec['disable'] = [{'dc': int(m.group('dc')), 'skill': m.group('skill').strip(),
-                               **({'proficiency': m.group('prof')} if m.group('prof') else {}),
-                               **({'station': m.group('station').replace('’', "'")} if m.group('station') else {})}
-                              for m in DISABLE_RE.finditer(body)]
+            rec['disable'] = parse_disable(body)
             rec['disableText'] = body
             continue
         m = re.match(r'^(?:(?P<label>[A-Z][A-Za-z ]+?) )?AC (?P<ac>\d+); Fort \+?(?P<fort>-?\d+)(?:, Ref \+?(?P<ref>-?\d+))?(?:, Will \+?(?P<will>-?\d+))?', text)
@@ -803,7 +856,7 @@ def parse_hazard(block):
         if re.match(r'^(?:[A-Z][A-Za-z ]+ )?(Hardness|HP) \d+', head):
             for m in re.finditer(r'(?:(?P<label>[A-Z][A-Za-z ]+?) )?Hardness (?P<h>\d+)', text):
                 rec['components'].append({'name': (m.group('label') or 'Hazard').strip(), 'hardness': int(m.group('h'))})
-            for m in re.finditer(r'(?:(?P<label>[A-Z][A-Za-z ]+?) )?HP (?P<hp>\d+)(?P<each> each)?(?: \(BT (?P<bt>\d+)\))?', text):
+            for m in re.finditer(r'(?:(?P<label>[A-Z][A-Za-z ]+?) )?HP (?P<hp>\d+)(?P<each> each)?(?: \(BT (?P<bt>\d+)\))?(?P<each2> each)?', text):
                 label = (m.group('label') or 'Hazard').strip()
                 comp = next((c for c in rec['components'] if c['name'] == label), None)
                 if not comp:
@@ -812,7 +865,7 @@ def parse_hazard(block):
                 comp['hp'] = int(m.group('hp'))
                 if m.group('bt'):
                     comp['bt'] = int(m.group('bt'))
-                if m.group('each'):
+                if m.group('each') or m.group('each2'):
                     comp['each'] = True
             parse_defense_lists(text, rec)
             continue
@@ -879,14 +932,24 @@ def parse_vehicle(block):
         if head.startswith('Space '):
             rec['space'] = text[len('Space '):]
         elif head.startswith('Crew '):
-            m = re.match(r'Crew (.+?)(?:; Passengers (\d+))?$', text)
-            rec['crew'] = m.group(1) if m else text
+            m = re.match(r'Crew (.+?)(?:; Passengers (.+))?$', text[len('Crew '):] and text)
+            rec['crew'] = (m.group(1) if m else text[len('Crew '):]).replace('Crew ', '', 1) if m and m.group(1).startswith('Crew ') else (m.group(1) if m else text[len('Crew '):])
             if m and m.group(2):
-                rec['passengers'] = int(m.group(2))
+                ptxt = m.group(2).strip()
+                rec['passengersText'] = ptxt
+                mp = re.match(r'(\d+)', ptxt)
+                if mp:
+                    rec['passengers'] = int(mp.group(1))
         elif head.startswith('Piloting Check '):
             body = text[len('Piloting Check '):]
-            rec['pilotingChecks'] = [{'skill': m.group(1).strip(), 'dc': int(m.group(2))}
-                                     for m in re.finditer(r'(?:^|or |, )([A-Z][A-Za-z ]+?) \(DC (\d+)\)', body)]
+            checks = []
+            for m in re.finditer(r'([A-Z][A-Za-z ]+?(?: or [A-Z][A-Za-z ]+?)*) \(DC (\d+)(?:[,;] ([^)]+))?\)', body):
+                for sk in re.split(r' or |, ', m.group(1)):
+                    e = {'skill': sk.strip(), 'dc': int(m.group(2))}
+                    if m.group(3):
+                        e['note'] = m.group(3).strip()
+                    checks.append(e)
+            rec['pilotingChecks'] = checks
             rec['pilotingCheckText'] = body
         elif re.match(r'^AC \d', head):
             m = re.match(r'AC (\d+); Fort \+?(-?\d+)(?:, Ref(?:lex)? \+?(-?\d+))?(?:, Will \+?(-?\d+))?', text)
@@ -1002,7 +1065,7 @@ def validate(ships, hazards, vehicles, shared, unresolved_shared):
                 errors.append(f'{lbl}: ability "{ab["name"]}" has no effect text')
             if len(ab['name'].split()) > 6:
                 errors.append(f'{lbl}: suspicious ability name "{ab["name"]}"')
-            if re.search(r'(?:See )?\(?page \d+\)?\.?$', ab.get('effect', '')):
+            if re.search(r'(?:See )?\(?page \d+\)?\.?$|^(?:DC \d+,? )?(?:\d+d\d+[+\-]?\d* \w+ damage )?\(see above\)\.?$', ab.get('effect', '')):
                 errors.append(f'{lbl}: unresolved page reference in "{ab["name"]}" effect')
             if 'sharedRef' in ab and not any(x['id'] == ab['sharedRef'] for x in shared):
                 errors.append(f'{lbl}: dangling sharedRef {ab["sharedRef"]}')

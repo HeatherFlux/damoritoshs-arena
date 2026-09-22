@@ -430,6 +430,11 @@
       {
         "skill": "Piloting",
         "dc": 16
+      },
+      {
+        "skill": "Nature",
+        "dc": 19,
+        "note": "wind only"
       }
     ],
     "pilotingCheckText": "Piloting (DC 16) or Nature (DC 19, wind only)",
@@ -485,11 +490,18 @@
     "price": "700 credits",
     "description": "Landcutter canoes are often used on mountainous worlds with difficult portages and were first developed on Vesk Prime. This vessel has lightweight metallic paddles that are reinforced so they can be slotted into ball joints attached to the hull, allowing it to rise from the water and walk on the blades of the paddles.",
     "space": "15 feet long, 5 feet wide, 5 feet tall (on water) or 10 feet tall (on land)",
-    "crew": "1 pilot, 2 rowers (on water); Passengers 5 (on land), 3 (on water)",
+    "crew": "1 pilot, 2 rowers (on water)",
+    "passengersText": "5 (on land), 3 (on water)",
+    "passengers": 5,
     "pilotingChecks": [
       {
         "skill": "Piloting",
         "dc": 16
+      },
+      {
+        "skill": "Diplomacy",
+        "dc": 18,
+        "note": "on water"
       }
     ],
     "pilotingCheckText": "Piloting (DC 16) or Diplomacy (DC 18; on water)",
@@ -548,6 +560,7 @@
     "description": "Designed to assist in rescue operations after toxic waste spills, reactor meltdowns, and other disasters, the acid skiff uses its magical wards to withstand environmental hazards, gliding over acid lakes and toxic gases while keeping its passengers insulated and safe in its fully enclosed shell.",
     "space": "30 feet long, 10 feet wide, 10 feet high",
     "crew": "1 pilot",
+    "passengersText": "5",
     "passengers": 5,
     "pilotingChecks": [
       {
@@ -599,6 +612,7 @@
     "description": "Often employed by Starfinder Society agents when they need to traverse open ground at high speeds, the all-terrain dune buggy is designed with an emphasis on a strong suspension for rugged terrain. The open-air design doesn’t offer much protection, but the buggy’s large wheels are capable of rolling over most small boulders without issue, and the sturdy roll cage allows the vehicle to be easily righted if it overturns.",
     "space": "10 feet long, 10 feet wide, 4 feet high",
     "crew": "1 pilot",
+    "passengersText": "3",
     "passengers": 3,
     "pilotingChecks": [
       {
@@ -650,6 +664,7 @@
     "description": "Designed to mimic the physical form of the majestic cloud ray, these ships were built to navigate the numerous layers of a gas giant’s atmosphere but have been adapted to fly on almost any planet in Near Space. The ray’s efficient use of internal space accommodates a relatively large passenger capacity compared to other vehicles of a similar size.",
     "space": "15 feet long, 15 feet wide, 7 feet tall",
     "crew": "1 pilot, 1 crew",
+    "passengersText": "7",
     "passengers": 7,
     "pilotingChecks": [
       {
@@ -710,6 +725,7 @@
     "description": "The spiralrunner speeds both on the roads and below them. Equipped with a massive burrowing drill and an array of smaller drills on its bumper, this sturdy rally car can dive into the earth, boring new paths to race down in its wake.",
     "space": "10 feet long, 10 feet wide, 4 feet high",
     "crew": "1 pilot",
+    "passengersText": "3",
     "passengers": 3,
     "pilotingChecks": [
       {
@@ -829,6 +845,7 @@
     "description": "Hardlight ultralights are the ultimate convenient, ready-to-go transport. While inactive, these vehicles are contained entirely within a hardlight projector small enough for most people to carry in a backpack. Once activated, the projector unfolds into a large, brightly-color craft with dramatically angled contours and a roughly triangular body.",
     "space": "10 feet long, 8 feet wide, 5 feet high (when activated)",
     "crew": "1 pilot",
+    "passengersText": "2",
     "passengers": 2,
     "pilotingChecks": [
       {
@@ -881,6 +898,7 @@
     "description": "These long and narrow boats are made to go extremely fast in straight lines but aren’t much good at anything else; even experienced operators have trouble getting much maneuverability out of the fragile vessels. When you need to get light cargo or a few passengers across a body of water as quickly as possible, though, a hydrofoil is hard to beat.",
     "space": "40 feet long, 10 feet wide, 15 feet high",
     "crew": "1 pilot, 1 crew",
+    "passengersText": "4",
     "passengers": 4,
     "pilotingChecks": [
       {
@@ -1005,6 +1023,7 @@
     "description": "While numerous high-tech means exist to deploy troops into combat, a sturdy armored personnel carrier remains standard throughout most of the Pact Worlds, thanks to its relative affordability and reliability. Since the carrier’s size and hardened armor slow its movement, it’s also equipped with a pair of weapon mounts that allow the troops within to unleash suppressive fire on nearby threats.",
     "space": "20 feet long, 10 feet wide, 15 feet high",
     "crew": "1 pilot",
+    "passengersText": "6",
     "passengers": 6,
     "pilotingChecks": [
       {
@@ -1058,6 +1077,7 @@
     "description": "Designed for heavily forested areas, the spider-crawler is a sturdy buggy that’s equally at home navigating mountainous areas and scaling trees. Instead of wheels, it’s equipped with four long, spider-like legs that make it remarkably nimble. Spider-crawlers are occasionally used by special ops teams, as their ability to unfold into a larger stationary platform allows for uniquely convenient sniping positions.",
     "space": "8 feet long, 10 feet wide, 10 feet high",
     "crew": "1 pilot",
+    "passengersText": "3",
     "passengers": 3,
     "pilotingChecks": [
       {
@@ -1115,6 +1135,7 @@
     "description": "With innumerable planets in the galaxy, there are always worlds that are worth exploring but have inherently dangerous environments. Engineers and shipbuilders see these hazardous environments not as deterrents, but as challenges to overcome. Worlds covered in magma or lava are often ideal locations for manufacturing or mining facilities, but surveyors and future inhabitants need a way to safely traverse the surface of such planets. While these magma cruisers are most common in Near Space, similar vessels also exist for other hostile environments such as acid lakes.",
     "space": "40 feet long, 25 feet wide, 30 feet high",
     "crew": "1 pilot, 3 crew",
+    "passengersText": "8",
     "passengers": 8,
     "pilotingChecks": [
       {
@@ -1171,6 +1192,7 @@
     "description": "The immense mass and utilitarian design of these monstrous crafts make them look more like bunkers than flying vehicles while stationary. The fortress-like jotuncraft are usually painted in drab colors and are equipped with massive cargo doors on the back and bottom and a reinforced turret emplacement. Originally designed for use by giants, a burst of unexpected commercial success meant modern models are largely retrofitted for smaller ancestries, leaving an oversized cargo bay perfect for large shipments.",
     "space": "50 feet long, 35 feet wide, 25 feet high",
     "crew": "1 pilot, 2 crew",
+    "passengersText": "8",
     "passengers": 8,
     "pilotingChecks": [
       {
@@ -1318,7 +1340,9 @@
     "price": "32,000 credits",
     "description": "The all-terrain hauler is a bulky treaded transport for when a shipment must be absolutely secure. Arcane enhancements allow the hauler to deploy wards onto its treads to crawl over the surface of mud, snow, or waves.",
     "space": "20 feet long, 25 feet wide, 15 feet tall",
-    "crew": "1 pilot, 2 crew; Passengers 3 or 9",
+    "crew": "1 pilot, 2 crew",
+    "passengersText": "3 or 9",
+    "passengers": 3,
     "pilotingChecks": [
       {
         "skill": "Piloting",
@@ -1386,6 +1410,7 @@
     "description": "In an effort to overcome the enormous challenge of creating vessels that can withstand the pressures of the deep sea, some engineers have capitalized on life’s ability to adapt to even the most extreme conditions. Biosubs use a combination of cutting-edge submersible technology and advanced biotech grafts to create a semi-living ship. Thanks to this unique construction, they enjoy some of the benefits (and drawbacks) of being simultaneously a living creature and a piece of technology.",
     "space": "30 feet long, 15 feet wide, 20 feet high",
     "crew": "1 pilot, 2 crew",
+    "passengersText": "3",
     "passengers": 3,
     "pilotingChecks": [
       {
@@ -1459,6 +1484,7 @@
     "description": "Though the craft’s design is a bit jarring, few can argue with its aerial maneuverability. Using a series of independently rotating, carefully angled discs, a spheridyne offers the ability to turn, stop, and reverse direction in an instant, perfect for the customer with unpredictable needs.",
     "space": "15 feet long, 15 feet wide, 15 feet high",
     "crew": "1 pilot",
+    "passengersText": "4",
     "passengers": 4,
     "pilotingChecks": [
       {
@@ -1521,6 +1547,7 @@
     "description": "This gargantuan eight-wheeled vehicle is a commercial variant of prototype models developed for a destructive, vehicular arena combat sport played on Akiton and in the depths of Absalom Station. Although these initial prototypes made use of flashy and over-the-top weaponry, such as buzz saws and flamethrowers, the commercial model strips back these pyrotechnics in favor of a more dedicated, utility-orientated off-road design.",
     "space": "20 feet long, 15 feet wide, 20 feet high",
     "crew": "1 pilot",
+    "passengersText": "7",
     "passengers": 7,
     "pilotingChecks": [
       {
@@ -1603,6 +1630,7 @@
     "description": "This colossal ship is built for one purpose: war. It wears that purpose proudly, with its massive spinal laser cannon, reinforced batteries, and anti-artillery armor clearly displayed to make a bold statement on whichever sea it finds itself. The battleship’s passenger quarters are typically filled with off-duty crew rather than civilians, allowing it to be active around the clock as its crew and pilot operate in shifts. Despite its size, the apex battleship is far from sluggish or clumsy, with massive turbine engines that allow it to keep pace with smaller craft in battle.",
     "space": "130 feet long, 40 feet wide, 25 feet high",
     "crew": "1 Pilot, 8 crew",
+    "passengersText": "32",
     "passengers": 32,
     "pilotingChecks": [
       {
@@ -1727,6 +1755,7 @@
     "description": "The wealthiest citizens of the Pact Worlds just can’t help but show off their wealth, and luxurious yachts are designed to do just that. More a mobile marine resort than a vehicle, they contain everything needed to entertain the passengers for months at a time, including theaters, swimming pools, top-of-the-line holoprojectors, lavish sleeping quarters, and even a landing pad for small aircraft. Despite their size, these ships are meant to operate with almost no crew, to allow for the utmost privacy of the owner and their guests.",
     "space": "230 feet long, 100 feet wide, 60 feet high",
     "crew": "1 pilot",
+    "passengersText": "60",
     "passengers": 60,
     "pilotingChecks": [
       {
@@ -1809,6 +1838,7 @@
     "description": "A dragon of Damoritosh resembles a huge dragon formed from interlocking metal plates with enormous, magically enhanced wings, making it a terrifying sight to behold. The incredibly detailed dragon’s head, which doubles as a flamethrower, was designed by talented artists to appear lifelike. The dragon has become a favorite vehicle for crowd suppression and intimidation campaigns—for those who can afford one.",
     "space": "30 feet long, 50 feet wide, 15 feet high",
     "crew": "1 pilot, 2 crew",
+    "passengersText": "3",
     "passengers": 3,
     "pilotingChecks": [
       {

@@ -277,8 +277,14 @@
       {
         "name": "Chainsaw Prow",
         "actions": 1,
-        "effect": "DC 13, 1d4+3 slashing damage (see above)",
-        "placement": "offense"
+        "params": {
+          "dc": "13",
+          "damage": "1d4+3 slashing"
+        },
+        "effect": "The Free Captain starship sinks its rotating blades into the hull of a starship within 0 zones. The target takes 1d4+3 slashing damage with a basic Fortitude save against DC 13. If Chainsaw Prow deals damage to the target’s Hull Points, and the target is larger than the Free Captain starship, the Free Captain starship clings to the target. Until the start of the Free Captain starship’s next turn, it moves with the target whenever the target moves.",
+        "placement": "offense",
+        "station": "pilot's console",
+        "sharedRef": "free-captains:chainsaw-prow"
       }
     ],
     "perception": 4,
@@ -353,9 +359,7 @@
       }
     ],
     "immunities": [
-      "starship immunities (except spirit",
-      "vitality",
-      "void)"
+      "starship immunities (except spirit, vitality, void)"
     ],
     "weaknesses": [],
     "resistances": [],
@@ -2097,9 +2101,7 @@
       }
     ],
     "immunities": [
-      "starship immunities (except spirit",
-      "vitality",
-      "void)"
+      "starship immunities (except spirit, vitality, void)"
     ],
     "weaknesses": [],
     "resistances": [],
@@ -3051,15 +3053,22 @@
         "bonus": 10,
         "rangeIncrement": 6,
         "damage": "1d12+3 piercing"
+      },
+      {
+        "mode": "autoFire",
+        "name": "magnetar rail",
+        "actions": 2,
+        "traits": [
+          "analog",
+          "ordnance"
+        ],
+        "area": "3-zone cone",
+        "saveDC": 16,
+        "saveType": "reflex",
+        "damage": "1d12+3 piercing"
       }
     ],
     "specialAbilities": [
-      {
-        "name": "Auto Fire",
-        "actions": 2,
-        "effect": "magnetar rail (3-zone cone, analog, ordnance), Damage 1d12+3 piercing (DC 16 basic Reflex save)",
-        "placement": "offense"
-      },
       {
         "name": "Deploy Turret",
         "actions": 1,
@@ -4575,10 +4584,7 @@
         "actions": 1,
         "traits": [
           "tech",
-          "versatile A",
-          "C",
-          "E",
-          "or F",
+          "versatile A/C/E/F",
           "volley 2 zones"
         ],
         "bonus": 11,
@@ -4596,7 +4602,7 @@
         "params": {
           "resistance": "3"
         },
-        "effect": "A seven-pointed sigil blazes as divine energy surrounds the hull. The starship gains resistance against the triggering damage type 3 for 1 minute.",
+        "effect": "A seven-pointed sigil blazes as divine energy surrounds the hull. The starship gains resistance 3 against the triggering damage type for 1 minute.",
         "placement": "defense",
         "frequency": "once per day",
         "trigger": "The starship takes damage",
@@ -5436,7 +5442,8 @@
           "arcane",
           "fire"
         ],
-        "effect": "Resistances three times per day The Cantripper creates an explosion mimicking the death of a star in a zone within sensor range. Starships in that zone take 6d6 fire damage (DC 24 basic Reflex save).",
+        "frequency": "three times per day",
+        "effect": "The Cantripper creates an explosion mimicking the death of a star in a zone within sensor range. Starships in that zone take 6d6 fire damage (DC 24 basic Reflex save).",
         "placement": "offense"
       }
     ],
@@ -5698,10 +5705,7 @@
           "boost 2d10",
           "ordnance",
           "tech",
-          "versatile A",
-          "C",
-          "E",
-          "or F"
+          "versatile A/C/E/F"
         ],
         "bonus": 15,
         "rangeIncrement": 1,
@@ -6381,10 +6385,7 @@
           "boost 2d8",
           "ordnance",
           "tech",
-          "versatile A",
-          "C",
-          "E",
-          "or F"
+          "versatile A/C/E/F"
         ],
         "bonus": 15,
         "rangeIncrement": 2,
@@ -6848,9 +6849,7 @@
       }
     ],
     "immunities": [
-      "starship immunities (except spirit",
-      "vitality",
-      "void)"
+      "starship immunities (except spirit, vitality, void)"
     ],
     "weaknesses": [],
     "resistances": [],
@@ -10436,9 +10435,7 @@
       }
     ],
     "immunities": [
-      "starship immunities (except spirit",
-      "vitality",
-      "void)"
+      "starship immunities (except spirit, vitality, void)"
     ],
     "weaknesses": [],
     "resistances": [],

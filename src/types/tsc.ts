@@ -242,8 +242,10 @@ export interface Vehicle {
   description: string
   space: string
   crew: string
+  /** First number of the passengers entry; see passengersText for qualifiers such as "3 or 9". */
   passengers?: number
-  pilotingChecks: { skill: string; dc: number }[]
+  passengersText?: string
+  pilotingChecks: { skill: string; dc: number; note?: string }[]
   pilotingCheckText: string
   ac: number
   saves: { fort: number; ref?: number; will?: number }

@@ -341,6 +341,12 @@
         "skill": "Crafting",
         "proficiency": "trained",
         "station": "drone console, pilot's console"
+      },
+      {
+        "dc": 17,
+        "skill": "Thievery",
+        "proficiency": "trained",
+        "station": "drone console"
       }
     ],
     "disableText": "DC 17 Crafting (trained; drone console, pilot’s console) or Thievery (trained; drone console) to disable the mechanism"
@@ -607,6 +613,10 @@
         "dc": 19,
         "skill": "Crafting",
         "proficiency": "trained"
+      },
+      {
+        "dc": 19,
+        "skill": "Acrobatics"
       }
     ],
     "disableText": "DC 19 Crafting (trained) to patch up the hull, or restore 10 or more Hull Points to the starship; restoring 5 or more Shield Points to the starship suppresses the trap until the starship loses all its Shield Points but doesn’t disable the trap; DC 19 Acrobatics to Maneuver in Flight or Athletics to Grab a Ledge avoids or stops the effects of Pull Into Space (this doesn’t disable the trap)",
@@ -746,6 +756,11 @@
       {
         "dc": 18,
         "skill": "Nature",
+        "proficiency": "trained"
+      },
+      {
+        "dc": 18,
+        "skill": "Survival",
         "proficiency": "trained"
       },
       {
@@ -924,6 +939,12 @@
         "skill": "Legal Lore",
         "proficiency": "expert",
         "station": "scanners"
+      },
+      {
+        "dc": 25,
+        "skill": "Religion",
+        "proficiency": "expert",
+        "station": "magic conduit"
       }
     ],
     "disableText": "DC 25 Legal Lore (expert; scanners) or Religion (expert; magic conduit) to rewrite the trap’s diabolical bindings, or Counter Magic (magic conduit; 3rd rank; counteract DC 20) to counteract the trap",
@@ -987,10 +1008,22 @@
         "station": "scanners"
       },
       {
+        "dc": 19,
+        "skill": "Perception",
+        "proficiency": "expert",
+        "station": "any battle station"
+      },
+      {
         "dc": 25,
         "skill": "Crafting",
         "proficiency": "trained",
         "station": "generator"
+      },
+      {
+        "dc": 25,
+        "skill": "Thievery",
+        "proficiency": "expert",
+        "station": "drone console"
       }
     ],
     "disableText": "DC 19 Computers (trained; scanners) or Perception (expert; any battle station) to locate the mines, or DC 25 Crafting (trained; generator) or Thievery (expert; drone console) to rewire the mines",
@@ -1051,6 +1084,12 @@
       {
         "dc": 22,
         "skill": "Nature",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 22,
+        "skill": "Occultism",
         "proficiency": "expert",
         "station": "magic conduit"
       }
@@ -1115,8 +1154,26 @@
         "station": "magic conduit"
       },
       {
+        "dc": 30,
+        "skill": "Nature",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 30,
+        "skill": "Occultism",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
         "dc": 26,
         "skill": "Music Lore",
+        "proficiency": "expert",
+        "station": "generator, scanners"
+      },
+      {
+        "dc": 26,
+        "skill": "Performance",
         "proficiency": "expert",
         "station": "generator, scanners"
       }
@@ -1180,6 +1237,18 @@
         "skill": "Computers",
         "proficiency": "expert",
         "station": "scanners"
+      },
+      {
+        "dc": 26,
+        "skill": "Nature",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 26,
+        "skill": "Physical Science Lore",
+        "proficiency": "trained",
+        "station": "scanners"
       }
     ],
     "disableText": "DC 28 Piloting (expert; pilot’s console) to avoid the event horizon, DC 28 Crafting (expert; generator) to divert enough power to the engines to avoid being pulled in, DC 26 Computers (expert; scanners), Nature (expert; magic conduit), or Physical Science Lore (trained; scanners) to calculate a safe path around the hazard",
@@ -1230,6 +1299,12 @@
       {
         "dc": 28,
         "skill": "Arcana",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 28,
+        "skill": "Occultism",
         "proficiency": "expert",
         "station": "magic conduit"
       }
@@ -1361,6 +1436,12 @@
         "station": "pilot's console, scanners"
       },
       {
+        "dc": 32,
+        "skill": "Piloting",
+        "proficiency": "master",
+        "station": "pilot's console"
+      },
+      {
         "dc": 34,
         "skill": "Religion",
         "proficiency": "master",
@@ -1411,8 +1492,20 @@
         "station": "magic conduit"
       },
       {
+        "dc": 25,
+        "skill": "Nature",
+        "proficiency": "master",
+        "station": "magic conduit"
+      },
+      {
         "dc": 27,
         "skill": "Computers",
+        "proficiency": "expert",
+        "station": "scanners"
+      },
+      {
+        "dc": 27,
+        "skill": "Physical Science Lore",
         "proficiency": "expert",
         "station": "scanners"
       }
@@ -1471,7 +1564,31 @@
       },
       {
         "dc": 28,
+        "skill": "Nature",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 28,
+        "skill": "Occultism",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 28,
+        "skill": "Religion",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 28,
         "skill": "Athletics",
+        "proficiency": "expert",
+        "station": "gunnery"
+      },
+      {
+        "dc": 28,
+        "skill": "Intimidation",
         "proficiency": "expert",
         "station": "gunnery"
       },
@@ -1484,6 +1601,12 @@
       {
         "dc": 28,
         "skill": "Computers",
+        "proficiency": "expert",
+        "station": "drone console"
+      },
+      {
+        "dc": 28,
+        "skill": "Crafting",
         "proficiency": "expert",
         "station": "drone console"
       },
@@ -1663,8 +1786,28 @@
     "description": "A mysterious probe appears with a simple but deadly task: solve its equation or be destroyed.",
     "disable": [
       {
+        "dc": 35,
+        "skill": "Computers",
+        "proficiency": "expert"
+      },
+      {
+        "dc": 35,
+        "skill": "Crafting",
+        "proficiency": "expert"
+      },
+      {
+        "dc": 35,
+        "skill": "Thievery",
+        "proficiency": "expert"
+      },
+      {
         "dc": 37,
-        "skill": "Arcana or any Science Lore",
+        "skill": "Arcana",
+        "proficiency": "expert"
+      },
+      {
+        "dc": 37,
+        "skill": "any Science Lore",
         "proficiency": "expert"
       }
     ],
@@ -1729,6 +1872,11 @@
         "dc": 38,
         "skill": "Occultism",
         "proficiency": "master"
+      },
+      {
+        "dc": 38,
+        "skill": "Religion",
+        "proficiency": "master"
       }
     ],
     "disableText": "DC 38 Occultism (master) or Religion (master) to seal the pit (two successes are required to disable the trap), or dispel magic (7th rank; counteract DC 37) or planar seal or planar tether (7th rank; counteract DC 33) to counteract the trap",
@@ -1757,7 +1905,8 @@
         "name": "Missile",
         "hardness": 5,
         "hp": 20,
-        "bt": 10
+        "bt": 10,
+        "each": true
       }
     ],
     "reactions": [
@@ -1865,8 +2014,20 @@
         "station": "magic conduit, scanners"
       },
       {
+        "dc": 38,
+        "skill": "Religion",
+        "proficiency": "expert",
+        "station": "magic conduit, scanners"
+      },
+      {
         "dc": 40,
         "skill": "Arcana",
+        "proficiency": "expert",
+        "station": "any battle station"
+      },
+      {
+        "dc": 40,
+        "skill": "Society",
         "proficiency": "expert",
         "station": "any battle station"
       }
@@ -1939,6 +2100,18 @@
         "station": "scanners"
       },
       {
+        "dc": 35,
+        "skill": "Nature",
+        "proficiency": "expert",
+        "station": "scanners"
+      },
+      {
+        "dc": 35,
+        "skill": "Physical Science Lore",
+        "proficiency": "trained",
+        "station": "scanners"
+      },
+      {
         "dc": 40,
         "skill": "Piloting",
         "proficiency": "expert",
@@ -1995,6 +2168,24 @@
       {
         "dc": 36,
         "skill": "Arcana",
+        "proficiency": "master",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 36,
+        "skill": "Nature",
+        "proficiency": "master",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 36,
+        "skill": "Occultism",
+        "proficiency": "master",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 36,
+        "skill": "Religion",
         "proficiency": "master",
         "station": "magic conduit"
       }
@@ -2167,6 +2358,18 @@
         "station": "scanners"
       },
       {
+        "dc": 47,
+        "skill": "Nature",
+        "proficiency": "expert",
+        "station": "magic conduit"
+      },
+      {
+        "dc": 47,
+        "skill": "Physical Science Lore",
+        "proficiency": "trained",
+        "station": "generator or scanners"
+      },
+      {
         "dc": 50,
         "skill": "Piloting",
         "proficiency": "expert",
@@ -2249,6 +2452,12 @@
       {
         "dc": 48,
         "skill": "Deception",
+        "proficiency": "legendary",
+        "station": "any battle station"
+      },
+      {
+        "dc": 48,
+        "skill": "Diplomacy",
         "proficiency": "legendary",
         "station": "any battle station"
       },
