@@ -325,8 +325,12 @@ export interface DerivedStarshipStats {
   stations: DerivedStationStats[]
   /** Item bonuses currently applied from helmed stations (scanners' sensor bonus always applies). */
   itemBonuses: { ac: number; fort: number; ref: number; will: number; sensorRange: number }
-  /** Status penalties from the inoperable condition. */
-  statusPenalties: { ac: number; ref: number }
+  /** Status penalties from the inoperable condition (AC, Reflex, Perception). */
+  statusPenalties: { ac: number; ref: number; perception: number }
+  /** Circumstance penalties from off-kilter (Reflex saves, attack rolls, Area/Auto-Fire DCs). */
+  circumstancePenalties: { ref: number; attackRolls: number }
+  /** Inoperable starships are off-guard to all attacks. */
+  offGuard: boolean
 }
 
 // ============ Encounter builder attachments ============
@@ -400,6 +404,8 @@ export interface TscHazardInstance {
   disabled: boolean
   detected: boolean
   hiddenFromPlayers: boolean
+  /** Complex hazards roll initiative only once their trigger fires ("The hazard then rolls initiative."). */
+  triggered?: boolean
 }
 
 export interface TscPc {

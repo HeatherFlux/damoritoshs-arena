@@ -112,7 +112,7 @@ function renameLabel(e: Event) {
       </div>
       <label class="flex items-center gap-1"><input v-model="bypassing" type="checkbox" /> bypassing</label>
       <button v-if="model.sp !== undefined" class="btn-secondary btn-xs" :title="`Fortify Shield Points (+${model.fortify ?? 0} SP, or the amount entered)`" @click="fortify">Fortify</button>
-      <button class="btn-secondary btn-xs" title="Repair Self (3 actions): fix one malfunctioning station, regain HP equal to level" @click="store.repairSelf(instance.instanceId)">Repair Self</button>
+      <button class="btn-secondary btn-xs" :disabled="instance.inoperable" :title="instance.inoperable ? 'Inoperable starships can\'t act' : 'Repair Self (3 actions): fix one malfunctioning station, regain HP equal to level'" @click="store.repairSelf(instance.instanceId)">Repair Self</button>
       <button class="trait" :class="instance.inoperable ? 'border-warning text-warning' : 'text-dim'" @click="store.setInoperable(target, !instance.inoperable)">inoperable</button>
       <button class="trait" :class="instance.offKilter ? 'border-warning text-warning' : 'text-dim'" @click="store.setOffKilter(target, !instance.offKilter)">off-kilter</button>
     </div>

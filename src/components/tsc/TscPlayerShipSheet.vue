@@ -126,7 +126,7 @@ function toggleBay(id: string) {
       if (i !== -1) bays.splice(i, 1)
     }
   }
-  if (!bay.universal && baySlotsUsed.value >= baySlots.value) return
+  if (!bay.universal && !bay.slotFree && baySlotsUsed.value >= baySlots.value) return
   bays.push(id)
 }
 
@@ -318,7 +318,7 @@ function resetDamage() {
           v-for="bay in TSC_EXPANSION_BAYS"
           :key="bay.id"
           class="trait"
-          :class="draft.expansionBays.includes(bay.id) ? 'border-success text-success' : bay.universal ? 'text-dim' : ''"
+          :class="draft.expansionBays.includes(bay.id) ? 'border-success text-success' : bay.universal || bay.slotFree ? 'text-dim' : ''"
           :title="bay.summary"
           @click="toggleBay(bay.id)"
         >{{ bay.name }}</button>

@@ -39,6 +39,13 @@ function renameLabel(e: Event) {
       <div class="ml-auto flex items-center gap-1">
         <button class="btn-xs" :class="instance.hiddenFromPlayers ? 'btn-danger' : 'btn-secondary'" @click="store.setHidden({ kind: 'hazard', instanceId: instance.instanceId }, !instance.hiddenFromPlayers)">{{ instance.hiddenFromPlayers ? 'hidden' : 'shown' }}</button>
         <button class="btn-xs" :class="instance.detected ? 'btn-secondary' : 'btn-danger'" :title="instance.detected ? 'Detected by the crew' : `Undetected: Stealth ${hazard.stealth.text}`" @click="store.setDetected({ kind: 'hazard', instanceId: instance.instanceId }, !instance.detected)">{{ instance.detected ? 'detected' : 'undetected' }}</button>
+        <button
+          v-if="hazard.complexity === 'complex'"
+          class="btn-xs"
+          :class="instance.triggered ? 'btn-secondary' : 'btn-primary'"
+          :title="instance.triggered ? 'Triggered: in initiative (click to withdraw)' : 'Its reaction fires: the hazard rolls initiative and joins the order'"
+          @click="instance.triggered ? store.untriggerHazard(instance.instanceId) : store.triggerHazard(instance.instanceId)"
+        >{{ instance.triggered ? 'Triggered' : 'Trigger' }}</button>
         <button class="btn-xs" :class="instance.disabled ? 'btn-secondary' : 'btn-danger'" @click="store.setHazardDisabled(instance.instanceId, !instance.disabled)">{{ instance.disabled ? 'Re-arm' : 'Disable' }}</button>
         <button class="btn-secondary btn-xs" @click="showStatBlock = !showStatBlock">{{ showStatBlock ? 'Hide' : 'Stat block' }}</button>
         <button class="btn-icon-sm text-danger" title="Remove from scene" @click="store.removeHazard(instance.instanceId)">×</button>

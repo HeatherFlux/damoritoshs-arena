@@ -1,14 +1,17 @@
 /**
  * Expansion bays (Starfinder Tech Core pp. 194–195). Player starships have four
- * expansion-bay slots; universal bays (crew quarters, lounge, mess bay) do not
- * consume a slot.
+ * expansion-bay slots. Universal bays (crew quarters, lounge, mess bay) come with
+ * every Medium or larger starship and use no slot; basic passenger quarters are
+ * not universal but also use no slot.
  */
 
 export interface ExpansionBay {
   id: string
   name: string
-  /** Universal bays come with every Medium or larger starship and use no slot. */
+  /** Universal bays come with every Medium or larger starship. */
   universal: boolean
+  /** Bays that do not consume an expansion-bay slot (all universal bays, plus basic passenger quarters). */
+  slotFree?: boolean
   /** Variants share one slot type; only one variant of a group can be installed. */
   group?: string
   summary: string
@@ -19,7 +22,7 @@ export const TSC_EXPANSION_BAYS: ExpansionBay[] = [
   { id: 'fabrication-lab', name: 'Fabrication Lab', universal: false, summary: 'Craft and Repair aboard without setup time; includes commercial creator capsules, UPB storage, workshops, and formulas for all level 0 adventuring gear.' },
   { id: 'holo-den', name: 'Holo Den', universal: false, summary: 'Retrain during downtime without a mentor; view any visual data stored on a bot, computer, or construct.' },
   { id: 'medical-bay', name: 'Medical Bay', universal: false, summary: 'Counts as a tactical medkit (+1 item bonus to Medicine inside); long-term rest recovers Con modifier × triple level HP.' },
-  { id: 'passenger-quarters-basic', name: 'Passenger Quarters (Basic)', universal: true, group: 'passenger-quarters', summary: 'Cots and bucket seats for non-crew travelers. Does not take up an expansion bay slot.' },
+  { id: 'passenger-quarters-basic', name: 'Passenger Quarters (Basic)', universal: false, slotFree: true, group: 'passenger-quarters', summary: 'Cots and bucket seats for non-crew travelers. Does not take up an expansion bay slot.' },
   { id: 'passenger-quarters-prison', name: 'Passenger Quarters (Prison)', universal: false, group: 'passenger-quarters', summary: 'Secure cells with elite locks keyed to registered crew; a locked-in creature is observed and restrained.' },
   { id: 'passenger-quarters-luxury', name: 'Passenger Quarters (Luxury)', universal: false, group: 'passenger-quarters', summary: 'Grand suites; creatures aboard reduce their Will DC against crew Diplomacy checks to Gather Information, Make an Impression, or make a Request.' },
   { id: 'science-lab', name: 'Science Lab', universal: false, summary: '+1 item bonus to Recall Knowledge to identify items and creatures (one check per downtime day with a specimen) and to Research previously identified creatures or items.' },
@@ -38,7 +41,7 @@ export function getExpansionBay(id: string): ExpansionBay | undefined {
 
 /** Number of expansion-bay slots a set of bays consumes (universal bays are free). */
 export function expansionBaySlotsUsed(ids: string[]): number {
-  return ids.filter(id => getExpansionBay(id)?.universal === false).length
+  return ids.filter(id => { const b = getExpansionBay(id); return b && !b.universal && !b.slotFree }).length
 }
 
 /** Extra slots granted by installed bays (comfortable crew quarters grant one). */

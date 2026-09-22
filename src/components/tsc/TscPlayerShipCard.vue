@@ -18,6 +18,7 @@ const entries = computed(() => scene.value.initiativeOrder)
 const amount = ref<number | null>(null)
 const bypassing = ref(false)
 const critical = ref(false)
+const nonlethal = ref(false)
 const sourceEntryId = ref<string>('')
 const conditionToAdd = ref('off-guard')
 const conditionValue = ref<number | null>(null)
@@ -33,6 +34,7 @@ function applyDamage() {
   store.damageShip({ kind: 'player' }, amount.value, {
     bypassing: bypassing.value,
     critical: critical.value,
+    nonlethal: nonlethal.value,
     sourceEntryId: sourceEntryId.value || undefined,
   })
   amount.value = null
@@ -86,6 +88,7 @@ function addCondition() {
       </div>
       <label class="flex items-center gap-1"><input v-model="bypassing" type="checkbox" /> bypassing</label>
       <label class="flex items-center gap-1"><input v-model="critical" type="checkbox" /> crit</label>
+      <label class="flex items-center gap-1" title="Nonlethal damage leaves the ship inoperable at 0 Hull Points instead of compromised"><input v-model="nonlethal" type="checkbox" /> nonlethal</label>
       <label v-if="entries.length" class="flex items-center gap-1">from
         <select v-model="sourceEntryId" class="input input-sm select w-36">
           <option value="">current turn</option>

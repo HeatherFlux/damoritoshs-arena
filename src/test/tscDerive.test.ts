@@ -143,8 +143,9 @@ describe('deriveStarshipStats', () => {
     ship.pilotingDC = 27
     expect(deriveStarshipStats(ship).ac).toBe(20)
     ship.stations[0].helmedBy = 'pilot'
-    expect(deriveStarshipStats(ship).ac).toBe(27)
-    ship.pilotingDC = 12 // lower than base 20 + helmed advanced-grade +1
+    // p. 181: AC becomes the Piloting DC when higher, and the helmed item bonus (+1 at advanced) still applies.
+    expect(deriveStarshipStats(ship).ac).toBe(28)
+    ship.pilotingDC = 12 // lower than the frame's AC 20; the +1 helmed bonus still applies
     expect(deriveStarshipStats(ship).ac).toBe(21)
   })
 
@@ -176,12 +177,22 @@ describe('deriveStarshipStats', () => {
     expect(at(19)).toEqual(['paragon', 4, 3])
   })
 
-  it('inoperable applies −4 status to AC and Reflex', () => {
+  it('inoperable applies −4 status to AC, Reflex and Perception and makes the ship off-guard', () => {
     const ship = explorer5()
     ship.inoperable = true
     const d = deriveStarshipStats(ship)
     expect(d.ac).toBe(16)
     expect(d.ref).toBe(9)
+    expect(d.statusPenalties.perception).toBe(-4)
+    expect(d.offGuard).toBe(true)
+  })
+
+  it('off-kilter applies −2 circumstance to Reflex saves and attack rolls', () => {
+    const ship = explorer5()
+    ship.offKilter = true
+    const d = deriveStarshipStats(ship)
+    expect(d.ref).toBe(11)
+    expect(d.circumstancePenalties).toEqual({ ref: -2, attackRolls: -2 })
   })
 
   it('setPlayerStarshipLevel keeps damage proportional', () => {
@@ -251,6 +262,7 @@ describe('reference tables', () => {
 
   it('expansion bays: universal bays use no slot, comfortable quarters add one', () => {
     expect(TSC_EXPANSION_BAYS.filter(b => !b.universal && !b.group)).toHaveLength(5)
+    expect(expansionBaySlotsUsed(['passenger-quarters-basic', 'holo-den'])).toBe(1)
     expect(expansionBaySlotsUsed(['data-center', 'lounge', 'medical-bay', 'crew-quarters-bunks'])).toBe(2)
     expect(expansionBayBonusSlots(['crew-quarters-comfortable'])).toBe(1)
     expect(expansionBayBonusSlots(['crew-quarters-bunks'])).toBe(0)

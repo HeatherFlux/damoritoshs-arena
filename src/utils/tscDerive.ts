@@ -116,22 +116,29 @@ export function deriveStarshipStats(ship: PlayerStarship): DerivedStarshipStats 
     }
     return derived
   })
-  const statusPenalties = { ac: ship.inoperable ? -4 : 0, ref: ship.inoperable ? -4 : 0 }
+  // Inoperable (p. 173): -4 status penalty to AC, Perception, and Reflex saves, and off-guard.
+  const statusPenalties = { ac: ship.inoperable ? -4 : 0, ref: ship.inoperable ? -4 : 0, perception: ship.inoperable ? -4 : 0 }
+  // Off-kilter (p. 174): -2 circumstance penalty to attack rolls, Area Fire and Auto-Fire DCs, and Reflex saves.
+  const circumstancePenalties = { ref: ship.offKilter ? -2 : 0, attackRolls: ship.offKilter ? -2 : 0 }
+  // Helmed pilot's console (p. 181): "The starship's AC is equal to your Piloting DC if it's higher. It gains an
+  // item bonus to its AC equal to its Helmed AC Bonus" — the substitution happens first, then the item bonus applies.
   const pilotHelmed = ship.stations.some(s => s.kind === "pilot's console" && s.helmedBy)
-  const baseAC = row.ac + itemBonuses.ac
-  const ac = (pilotHelmed && ship.pilotingDC ? Math.max(baseAC, ship.pilotingDC) : baseAC) + statusPenalties.ac
+  const baseAC = pilotHelmed && ship.pilotingDC ? Math.max(row.ac, ship.pilotingDC) : row.ac
+  const ac = baseAC + itemBonuses.ac + statusPenalties.ac
   return {
     maxHP: row.hp,
     maxSP: row.sp,
     ac,
     fort: row.fort + itemBonuses.fort,
-    ref: row.ref + itemBonuses.ref + statusPenalties.ref,
+    ref: row.ref + itemBonuses.ref + statusPenalties.ref + circumstancePenalties.ref,
     will: row.will + itemBonuses.will,
     speed: row.speed,
     sensorRange: frame.sensorRange + itemBonuses.sensorRange,
     stations,
     itemBonuses,
     statusPenalties,
+    circumstancePenalties,
+    offGuard: ship.inoperable,
   }
 }
 

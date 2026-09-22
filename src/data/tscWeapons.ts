@@ -52,7 +52,7 @@ export function getTscWeapon(id: string): StarshipWeapon | undefined {
   return TSC_WEAPONS.find(w => w.id === id)
 }
 
-/** New starship weapon traits introduced by Tech Core (p. 191). */
+/** Trait descriptions used by the stat blocks: arc and ordnance are starship weapon traits (p. 191); bypassing is a general trait (p. 174). */
 export const TSC_WEAPON_TRAIT_DESCRIPTIONS: Record<string, string> = {
   arc: 'The attack arcs to the closest non-allied starship in the initial target\'s zone. If the secondary target\'s AC is lower than your attack roll result, you deal electricity damage to that starship equal to 1 per weapon damage die.',
   ordnance: 'You can only fire ordnance weapons in the direction of your heading.',

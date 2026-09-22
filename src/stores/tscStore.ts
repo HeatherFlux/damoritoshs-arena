@@ -138,6 +138,7 @@ export function createHazardInstance(hazard: StarshipHazard, label?: string, pos
     // Hazards start undetected: the crew must Seek Starships (or trip them) first.
     detected: false,
     hiddenFromPlayers: false,
+    triggered: false,
   }
 }
 
@@ -158,17 +159,20 @@ export function createSceneFromSaved(saved: TscSavedScene): TscScene {
   const clone = JSON.parse(JSON.stringify(saved)) as TscSavedScene
   let playerShip: PlayerStarship | null = null
   if (clone.playerShip) {
+    // Hull Points are only regained by repairs (p. 173), so the sheet's damage, compromised/wrecked
+    // values and malfunctioning stations carry into the encounter; the generator starts every
+    // encounter with full Shield Points (p. 181). Off-kilter and other conditions are transient.
     const derived = deriveStarshipStats(clone.playerShip)
     playerShip = {
       ...clone.playerShip,
-      currentHP: derived.maxHP,
+      currentHP: Math.max(0, Math.min(derived.maxHP, clone.playerShip.currentHP ?? derived.maxHP)),
       currentSP: derived.maxSP,
-      compromised: 0,
+      compromised: clone.playerShip.compromised ?? 0,
       wrecked: clone.playerShip.wrecked ?? 0,
-      inoperable: false,
+      inoperable: clone.playerShip.inoperable ?? false,
       offKilter: false,
       conditions: [],
-      stations: clone.playerShip.stations.map(s => ({ ...s, malfunctioning: false })),
+      stations: clone.playerShip.stations.map(s => ({ ...s, malfunctioning: s.malfunctioning ?? false })),
     }
   }
   return {
@@ -795,6 +799,11 @@ function addNpcShip(model: NpcStarship, count = 1, opts: { hidden?: boolean; zon
     inst.hiddenFromPlayers = !!opts.hidden
     s.npcShips.push(inst)
     added.push(inst)
+    // Enemy starships always roll initiative (p. 169): reinforcements join a running order immediately.
+    if (s.initiativeRolled) {
+      const total = rollD20(model.perception, 'Initiative', label).total
+      insertEntrySorted({ id: crypto.randomUUID(), kind: 'npcShip', refId: inst.instanceId, name: label, initiative: total, hasActedThisRound: false })
+    }
   }
   broadcastPlayerData()
   return added
@@ -822,6 +831,37 @@ function removeHazard(instanceId: string) {
   const s = scene()
   const idx = s.hazards.findIndex(h => h.instanceId === instanceId)
   if (idx !== -1) s.hazards.splice(idx, 1)
+  removeEntry(instanceId)
+  broadcastPlayerData()
+}
+
+function hazardInitiativeModifier(h: TscHazardInstance): number {
+  return h.hazard.stealth.modifier ?? ((h.hazard.stealth.dc ?? 10) - 10)
+}
+
+/**
+ * A complex hazard's reaction has fired ("The hazard then rolls initiative."). It rolls
+ * 1d20 + its Stealth modifier and joins the running order; before initiative is rolled it
+ * is simply marked so rollInitiative includes it. Simple hazards never enter initiative.
+ */
+function triggerHazard(instanceId: string) {
+  const s = scene()
+  const h = findHazard(instanceId)
+  if (!h || h.disabled || h.hazard.complexity !== 'complex') return
+  h.triggered = true
+  h.detected = true
+  if (s.initiativeRolled && !s.initiativeOrder.some(e => e.refId === instanceId)) {
+    const total = rollD20(hazardInitiativeModifier(h), 'Initiative', h.label).total
+    insertEntrySorted({ id: crypto.randomUUID(), kind: 'hazard', refId: instanceId, name: h.label, initiative: total, hasActedThisRound: false })
+  }
+  logEntry(`${h.label} triggers`, h.hiddenFromPlayers)
+  broadcastPlayerData()
+}
+
+function untriggerHazard(instanceId: string) {
+  const h = findHazard(instanceId)
+  if (!h) return
+  h.triggered = false
   removeEntry(instanceId)
   broadcastPlayerData()
 }
@@ -878,12 +918,17 @@ function rollInitiative(pcRolls: { pcId: string; total: number }[]) {
     entries.push({ id: crypto.randomUUID(), kind: 'npcShip', refId: n.instanceId, name: n.label, initiative: total, hasActedThisRound: false })
   }
   for (const h of s.hazards) {
-    if (h.hazard.complexity !== 'complex' || h.disabled) continue
-    const mod = h.hazard.stealth.modifier ?? ((h.hazard.stealth.dc ?? 10) - 10)
-    const total = rollD20(mod, 'Initiative', h.label).total
+    // Complex hazards roll initiative when their trigger fires (p. 250-255); simple hazards never do (p. 246).
+    if (h.hazard.complexity !== 'complex' || h.disabled || !h.triggered) continue
+    const total = rollD20(hazardInitiativeModifier(h), 'Initiative', h.label).total
     entries.push({ id: crypto.randomUUID(), kind: 'hazard', refId: h.instanceId, name: h.label, initiative: total, hasActedThisRound: false })
   }
-  entries.sort((a, b) => b.initiative - a.initiative)
+  entries.sort(compareInitiative)
+  // A compromised player starship stays in initiative until it loses the condition (p. 173).
+  if (s.playerShip && s.playerShip.compromised > 0 && !s.playerShipDestroyed) {
+    entries.unshift({ id: crypto.randomUUID(), kind: 'playerShip', refId: s.playerShip.id, name: s.playerShip.name,
+      initiative: entries[0]?.initiative ?? 0, hasActedThisRound: false })
+  }
   s.initiativeOrder = entries
   s.currentTurnIndex = 0
   s.initiativeRolled = true
@@ -958,16 +1003,33 @@ function endRound() {
   broadcastPlayerData()
 }
 
+/** Higher initiative first; on a tie the adversary (NPC starship or hazard) acts before the crew (Player Core). */
+function compareInitiative(a: TscInitiativeEntry, b: TscInitiativeEntry): number {
+  if (b.initiative !== a.initiative) return b.initiative - a.initiative
+  const adversary = (e: TscInitiativeEntry) => (e.kind === 'npcShip' || e.kind === 'hazard' ? 0 : 1)
+  return adversary(a) - adversary(b)
+}
+
+/** Insert an entry at its sorted position in a running order without changing who is acting now. */
+function insertEntrySorted(entry: TscInitiativeEntry) {
+  const s = scene()
+  let idx = s.initiativeOrder.findIndex(e => compareInitiative(entry, e) < 0)
+  if (idx === -1) idx = s.initiativeOrder.length
+  s.initiativeOrder.splice(idx, 0, entry)
+  if (s.initiativeOrder.length > 1 && idx <= s.currentTurnIndex) s.currentTurnIndex++
+}
+
 /**
  * Insert the compromised player starship directly before the entry whose turn
- * reduced it to 0 Hull Points (p. 173). The current actor is unchanged.
+ * reduced it to 0 Hull Points (p. 173). The current actor is unchanged. Before
+ * initiative is rolled nothing is inserted; rollInitiative adds the ship instead.
  */
 function insertPlayerShipBefore(entryId: string | undefined) {
   const s = scene()
   if (!s.playerShip || !s.initiativeRolled) return
   if (s.initiativeOrder.some(e => e.kind === 'playerShip')) return
   let idx = entryId ? s.initiativeOrder.findIndex(e => e.id === entryId) : -1
-  if (idx === -1) idx = s.currentTurnIndex
+  if (idx === -1) idx = Math.min(s.currentTurnIndex, s.initiativeOrder.length)
   const anchor = s.initiativeOrder[idx]
   const entry: TscInitiativeEntry = {
     id: crypto.randomUUID(),
@@ -977,8 +1039,9 @@ function insertPlayerShipBefore(entryId: string | undefined) {
     initiative: anchor ? anchor.initiative : 0,
     hasActedThisRound: anchor ? anchor.hasActedThisRound : false,
   }
+  const wasEmpty = s.initiativeOrder.length === 0
   s.initiativeOrder.splice(idx, 0, entry)
-  if (s.currentTurnIndex >= idx) s.currentTurnIndex++
+  if (!wasEmpty && s.currentTurnIndex >= idx) s.currentTurnIndex++
 }
 
 /** Remove an entity from initiative, keeping the current actor pointed at the same entry. */
@@ -1023,7 +1086,7 @@ function applyDamageToPools(current: { hp: number; sp: number }, amount: number,
   return { shieldDamage, hullDamage }
 }
 
-function damageShip(target: ShipTarget, amount: number, opts: { bypassing?: boolean; critical?: boolean; sourceEntryId?: string } = {}): DamageResult {
+function damageShip(target: ShipTarget, amount: number, opts: { bypassing?: boolean; critical?: boolean; nonlethal?: boolean; sourceEntryId?: string } = {}): DamageResult {
   const s = scene()
   if (target.kind === 'npc') {
     const n = findNpc(target.instanceId)
@@ -1049,12 +1112,12 @@ function damageShip(target: ShipTarget, amount: number, opts: { bypassing?: bool
   const step = opts.critical ? 2 : 1
 
   if (ship.compromised > 0) {
-    // Already at 0 Hull Points: any unmitigated damage worsens the compromised value.
+    // Already at 0 Hull Points: damage that isn't completely mitigated by shields worsens the value (p. 173).
     const pools = { hp: 0, sp: ship.currentSP }
     const r = applyDamageToPools(pools, amount, !!opts.bypassing)
     ship.currentSP = pools.sp
     const unmitigated = Math.max(0, Math.floor(amount)) - r.shieldDamage
-    if (unmitigated > 0 || opts.bypassing) {
+    if (unmitigated > 0) {
       ship.compromised += step
       for (const st of ship.stations) st.malfunctioning = true
       logEntry(`${ship.name} takes damage while compromised: compromised ${ship.compromised}`)
@@ -1072,24 +1135,45 @@ function damageShip(target: ShipTarget, amount: number, opts: { bypassing?: bool
   const r = applyDamageToPools(pools, amount, !!opts.bypassing)
   ship.currentHP = pools.hp
   ship.currentSP = pools.sp
+  const unmitigated = Math.max(0, Math.floor(amount)) - r.shieldDamage
   let becameCompromised = false
-  if (ship.currentHP <= 0 && r.hullDamage > 0) {
-    becameCompromised = true
-    ship.compromised = step + ship.wrecked
-    ship.inoperable = true
-    for (const st of ship.stations) st.malfunctioning = true
-    insertPlayerShipBefore(opts.sourceEntryId ?? currentEntry.value?.id)
-    logEntry(`${ship.name} is reduced to 0 Hull Points: compromised ${ship.compromised}, inoperable, all stations malfunctioning`)
-    if (ship.compromised >= 10) {
-      destroyPlayerShip()
-      broadcastPlayerData()
-      return { ...r, destroyed: true, becameCompromised, compromised: ship.compromised }
+  if (ship.currentHP <= 0 && unmitigated > 0) {
+    if (opts.nonlethal) {
+      // p. 172: nonlethal damage doesn't compromise the ship; it's inoperable with 0 Hull Points instead.
+      ship.inoperable = true
+      for (const st of ship.stations) st.malfunctioning = true
+      logEntry(`${ship.name} is reduced to 0 Hull Points by nonlethal damage: inoperable`)
+    } else {
+      becameCompromised = true
+      becomeCompromised(step + ship.wrecked, opts.sourceEntryId)
+      if (s.playerShipDestroyed) {
+        broadcastPlayerData()
+        return { ...r, destroyed: true, becameCompromised, compromised: ship.compromised }
+      }
     }
   } else if (r.hullDamage || r.shieldDamage) {
     logEntry(`${ship.name} takes ${amount} damage (${r.shieldDamage} shields, ${r.hullDamage} hull)`)
   }
   broadcastPlayerData()
   return { ...r, destroyed: false, becameCompromised, compromised: ship.compromised || undefined }
+}
+
+/**
+ * The "reduced to 0 Hull Points" package (p. 172): the ship gains compromised at the given
+ * value (already including any wrecked value), becomes inoperable, every battle station
+ * malfunctions, and it enters initiative directly before the turn that dropped it.
+ */
+function becomeCompromised(value: number, sourceEntryId?: string) {
+  const s = scene()
+  const ship = s.playerShip
+  if (!ship) return
+  ship.currentHP = 0
+  ship.compromised = Math.max(1, value)
+  ship.inoperable = true
+  for (const st of ship.stations) st.malfunctioning = true
+  insertPlayerShipBefore(sourceEntryId ?? currentEntry.value?.id)
+  logEntry(`${ship.name} is reduced to 0 Hull Points: compromised ${ship.compromised}, inoperable, all stations malfunctioning`)
+  if (ship.compromised >= 10) destroyPlayerShip()
 }
 
 /** Losing compromised always grants wrecked 1 (or +1) and ends inoperable (p. 173). */
@@ -1117,7 +1201,7 @@ export interface HullIntegrityResult {
 function hullIntegrityCheck(roll?: number): HullIntegrityResult | null {
   const s = scene()
   const ship = s.playerShip
-  if (!ship || ship.compromised <= 0) return null
+  if (!ship || ship.compromised <= 0 || s.playerShipDestroyed) return null
   const dc = hullIntegrityDC(ship.compromised)
   const natural = roll ?? rollFlat(dc, 'Hull Integrity', ship.name).roll
   const degree = degreeOfSuccess(natural, dc, natural)
@@ -1150,9 +1234,20 @@ function healShip(target: ShipTarget, amount: number) {
     const max = deriveStarshipStats(ship).maxHP
     ship.currentHP = Math.min(max, ship.currentHP + heal)
     logEntry(`${ship.name} regains ${heal} Hull Points`)
-    if (ship.compromised > 0 && ship.currentHP >= 1) clearCompromised()
+    afterHullRestored()
   }
   broadcastPlayerData()
+}
+
+/** Regaining 1+ Hull Points ends compromised (p. 173) or, for a nonlethal knockout, ends inoperable. */
+function afterHullRestored() {
+  const ship = scene().playerShip
+  if (!ship || ship.currentHP < 1) return
+  if (ship.compromised > 0) clearCompromised()
+  else if (ship.inoperable) {
+    ship.inoperable = false
+    logEntry(`${ship.name} is no longer inoperable`)
+  }
 }
 
 function restoreShields(target: ShipTarget, amount?: number) {
@@ -1165,7 +1260,7 @@ function restoreShields(target: ShipTarget, amount?: number) {
     logEntry(`${n.label} regains ${gain} Shield Points`, true)
   } else {
     const ship = s.playerShip
-    if (!ship) return
+    if (!ship || s.playerShipDestroyed) return
     const max = deriveStarshipStats(ship).maxSP
     const gain = amount ?? rollDamage(generateShieldsDice(ship.level), 'Generate Shields', ship.name).total
     ship.currentSP = Math.min(max, ship.currentSP + Math.max(0, gain))
@@ -1179,10 +1274,15 @@ function setHP(target: ShipTarget, hp: number) {
   if (target.kind === 'npc') {
     const n = findNpc(target.instanceId)
     if (n) n.currentHP = Math.max(0, Math.min(n.model.hp, hp))
-  } else if (s.playerShip) {
+  } else if (s.playerShip && !s.playerShipDestroyed) {
     const ship = s.playerShip
-    ship.currentHP = Math.max(0, Math.min(deriveStarshipStats(ship).maxHP, hp))
-    if (ship.compromised > 0 && ship.currentHP >= 1) clearCompromised()
+    const next = Math.max(0, Math.min(deriveStarshipStats(ship).maxHP, hp))
+    if (next === 0 && ship.currentHP > 0 && ship.compromised === 0) {
+      becomeCompromised(1 + ship.wrecked)
+    } else {
+      ship.currentHP = next
+      afterHullRestored()
+    }
   }
   broadcastPlayerData()
 }
@@ -1192,7 +1292,7 @@ function setSP(target: ShipTarget, sp: number) {
   if (target.kind === 'npc') {
     const n = findNpc(target.instanceId)
     if (n) n.currentSP = Math.max(0, Math.min(n.model.sp ?? 0, sp))
-  } else if (s.playerShip) {
+  } else if (s.playerShip && !s.playerShipDestroyed) {
     s.playerShip.currentSP = Math.max(0, Math.min(deriveStarshipStats(s.playerShip).maxSP, sp))
   }
   broadcastPlayerData()
@@ -1204,13 +1304,19 @@ function setWrecked(value: number) {
   broadcastPlayerData()
 }
 
+/** GM override of the compromised value. Gaining it applies the full package; dropping to 0 counts as losing it. */
 function setCompromised(value: number) {
   const s = scene()
   const ship = s.playerShip
-  if (!ship) return
-  ship.compromised = Math.max(0, value)
-  if (ship.compromised >= 10) destroyPlayerShip()
-  else if (ship.compromised === 0 && ship.inoperable) clearCompromised()
+  if (!ship || s.playerShipDestroyed) return
+  const next = Math.max(0, Math.floor(value))
+  const prev = ship.compromised
+  if (prev === 0 && next > 0) becomeCompromised(next)
+  else if (prev > 0 && next === 0) clearCompromised()
+  else {
+    ship.compromised = next
+    if (next >= 10) destroyPlayerShip()
+  }
   broadcastPlayerData()
 }
 
@@ -1239,7 +1345,7 @@ function repairStation(target: ShipTarget, stationKey: string) {
 /** Repair Self (3 actions): fix one malfunctioning station and regain HP equal to level (p. 208). */
 function repairSelf(instanceId: string, stationKey?: string) {
   const n = findNpc(instanceId)
-  if (!n || n.destroyed) return
+  if (!n || n.destroyed || n.inoperable) return
   const key = stationKey ?? Object.entries(n.stationState).find(([, st]) => st.malfunctioning)?.[0]
   if (key && n.stationState[key]) n.stationState[key].malfunctioning = false
   n.currentHP = Math.min(n.model.hp, n.currentHP + Math.max(0, n.model.level))
@@ -1454,6 +1560,8 @@ export function useTscStore() {
     removeNpcShip,
     addHazard,
     removeHazard,
+    triggerHazard,
+    untriggerHazard,
     setPosition,
     setHidden,
     setDetected,

@@ -102,16 +102,6 @@ export const STATION_HELMED_BONUS: Record<StationKind, HelmedBonus[]> = {
   ],
 }
 
-/** Skill a crew member typically rolls for initiative while helming each station. */
-export const STATION_INITIATIVE_SKILL: Record<StationKind, string[]> = {
-  'drone console': ['Perception', 'Computers'],
-  generator: ['Crafting', 'Perception'],
-  gunnery: ['Perception'],
-  'magic conduit': ['Arcana', 'Nature', 'Occultism', 'Religion', 'Perception'],
-  "pilot's console": ['Piloting', 'Perception'],
-  scanners: ['Computers', 'Perception'],
-}
-
 /** Exploration activities that grant a free action when initiative is rolled (p. 174–175). */
 export interface ExplorationActivity {
   id: string
@@ -142,6 +132,7 @@ export interface StationAction {
   actionsMax?: ActionCost
   traits?: string[]
   frequency?: string
+  prerequisites?: string
   requirements?: string
   trigger?: string
   summary: string
@@ -174,13 +165,13 @@ export const TSC_STATION_ACTIONS: StationAction[] = [
   // Scanners
   { id: 'hack-comms', name: 'Hack Comms', station: 'scanners', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate', 'station'], requirements: 'A tech starship is within sensor range.', summary: 'Open a channel to a tech starship for 1 minute; crew helming stations can use auditory or verbal actions (such as Demoralize) against it.' },
   { id: 'seek-starships', name: 'Seek Starships', station: 'scanners', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate', 'station'], summary: 'The GM rolls a secret Computers or Perception check against the Stealth DCs of hidden or undetected starships and hazards within sensor range.' },
-  { id: 'target-lock', name: 'Target Lock', station: 'scanners', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate', 'station'], summary: 'The target attempts a Will save vs. your Computers DC. Failure: off-guard to your starship for 1 round; crit failure: 2 rounds and no cover against you.' },
-  { id: 'hack-battle-station', name: 'Hack Battle Station', station: 'scanners', grade: 'tactical', actions: 1, traits: ['concentrate', 'flourish', 'manipulate', 'station'], requirements: 'You target a tech starship within sensor range that has a battle station you have identified.', summary: 'Computers check vs. the target\'s Fortitude DC. Success: the chosen station becomes malfunctioning (failure: until the start of its next turn).' },
+  { id: 'target-lock', name: 'Target Lock', station: 'scanners', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate', 'station'], summary: 'The target attempts a Will save vs. your Computers DC. Crit success: unaffected. Success: off-guard to the next Strike from your starship within 1 round. Failure: off-guard to your starship for 1 round. Crit failure: off-guard for 2 rounds and can\'t benefit from cover against your starship while off-guard this way.' },
+  { id: 'hack-battle-station', name: 'Hack Battle Station', station: 'scanners', grade: 'tactical', actions: 1, traits: ['concentrate', 'flourish', 'manipulate', 'station'], prerequisites: 'trained in Computers', requirements: 'You target a tech starship within sensor range that has a battle station you have identified.', summary: 'Computers check vs. the target\'s Fortitude DC. Crit success: the station becomes malfunctioning and the target takes −1 circumstance to Will saves while it is. Success: the station becomes malfunctioning. Failure: malfunctioning until the start of the target\'s turn. Crit failure: your starship takes −1 circumstance to Will saves for 1 round.' },
   { id: 'scan-target', name: 'Scan Target', station: 'scanners', grade: 'tactical', actions: 1, traits: ['concentrate', 'manipulate', 'station'], summary: 'Computers check vs. the target\'s Will DC. Success: learn its model name, sensor range, and identify its battle stations. Failure: learn the model and identify one station. Identified stations are remembered for that model.' },
   { id: 'hack-munition', name: 'Hack Munition', station: 'scanners', grade: 'advanced', actions: 'reaction', traits: ['concentrate', 'manipulate', 'station'], trigger: 'You would be hit by a Strike from a tech starship within sensor range.', summary: 'Computers check vs. the target\'s Will DC. Success: the Strike takes −2 (failure −1); crit success: the granting station also becomes malfunctioning.' },
   // Other
-  { id: 'jump-start', name: 'Jump Start', station: 'any', grade: 'commercial', actions: 2, traits: ['concentrate', 'healing', 'manipulate'], frequency: 'once per hour', requirements: 'The starship is inoperable, and you are helming the generator, magic conduit, or scanners.', summary: 'DC 15 check (Crafting / Arcana, Occultism, Nature, Religion / Computers). Success: all stations stop malfunctioning and the ship regains 2d6 HP and 2d6 SP (4d6 on a crit); failure: stations stop malfunctioning only.' },
-  { id: 'repair-station', name: 'Repair Station', station: 'any', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate'], requirements: 'You are helming a malfunctioning battle station.', summary: 'Computers or Crafting check vs. the DC of the effect that caused the malfunction (or a level-based DC). Success: the station stops malfunctioning.' },
+  { id: 'jump-start', name: 'Jump Start', station: 'any', grade: 'commercial', actions: 2, traits: ['concentrate', 'healing', 'manipulate'], frequency: 'once per hour', requirements: 'The starship is inoperable, and you are helming the generator, magic conduit, or scanners.', summary: 'DC 15 check (Crafting at the generator; Arcana, Occultism, Nature, or Religion at the magic conduit; Computers at the scanners). Crit success: all stations stop malfunctioning and the ship regains 4d6 HP and 4d6 SP. Success: as crit success but 2d6 each. Failure: all stations stop malfunctioning. On a success or crit success, Jump Start can\'t restore Hull Points again for 1 hour. Special: an expert can instead attempt DC 20 to add 8 HP and SP, a master DC 30 to add 24, a legendary DC 40 to add 40.' },
+  { id: 'repair-station', name: 'Repair Station', station: 'any', grade: 'commercial', actions: 1, traits: ['concentrate', 'manipulate'], requirements: 'You are helming a malfunctioning battle station.', summary: 'Computers or Crafting check vs. the DC of the effect that caused the malfunction (typically its save DC or a level-based DC). Success: the station stops malfunctioning; crit success: it is also immune to malfunctioning for 1 round. Crit failure: the station is immune to Repair Station until the start of your next turn.' },
 ]
 
 /** Starship spells in every magic conduit's repository (p. 181). */

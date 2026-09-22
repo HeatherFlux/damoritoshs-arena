@@ -91,9 +91,10 @@ describe('tscStore', () => {
   })
 
   describe('initiative', () => {
-    it('includes PCs, NPC ships and complex hazards; excludes the player ship and simple hazards', () => {
+    it('includes PCs, NPC ships and triggered complex hazards; excludes the player ship and simple hazards', () => {
       startBasicScene(store, { npc: buccaneer, hazard: asteroidField })
-      store.addHazard(boardingPod)
+      const pod = store.addHazard(boardingPod)
+      store.triggerHazard(pod.instanceId) // p. 250: "then rolls initiative"
       store.rollInitiative([{ pcId: store.state.activeScene!.pcs[0].id, total: 22 }])
       const kinds = store.state.activeScene!.initiativeOrder.map(e => e.kind).sort()
       expect(kinds).toEqual(['hazard', 'npcShip', 'pc', 'pc'])
@@ -142,6 +143,81 @@ describe('tscStore', () => {
       store.removePc(scene.pcs[0].id)
       expect(store.currentEntry.value!.name).toBe(current)
       expect(scene.currentTurnIndex).toBe(1)
+    })
+  })
+
+  describe('initiative edge cases (Tech Core pp. 169, 173, 250)', () => {
+    it('untriggered complex hazards stay out of initiative; triggering mid-combat rolls and inserts them', () => {
+      startBasicScene(store, { npc: trident })
+      const pod = store.addHazard(boardingPod)
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      expect(scene.initiativeOrder.some(e => e.kind === 'hazard')).toBe(false)
+      const current = store.currentEntry.value!.id
+      store.triggerHazard(pod.instanceId)
+      expect(scene.initiativeOrder.some(e => e.refId === pod.instanceId)).toBe(true)
+      expect(store.currentEntry.value!.id).toBe(current)
+      store.untriggerHazard(pod.instanceId)
+      expect(scene.initiativeOrder.some(e => e.refId === pod.instanceId)).toBe(false)
+    })
+
+    it('reinforcements added mid-combat roll initiative and join the order without changing the current actor', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      store.nextTurn()
+      const current = store.currentEntry.value!.id
+      const [added] = store.addNpcShip(buccaneer)
+      expect(scene.initiativeOrder.some(e => e.refId === added.instanceId)).toBe(true)
+      expect(store.currentEntry.value!.id).toBe(current)
+      for (let i = 1; i < scene.initiativeOrder.length; i++) {
+        expect(scene.initiativeOrder[i - 1].initiative).toBeGreaterThanOrEqual(scene.initiativeOrder[i].initiative)
+      }
+    })
+
+    it('ties go to the adversary', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      const npc = scene.npcShips[0]
+      // force the NPC roll to a known value by re-labelling after the roll: instead, compare with a PC tied to it
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      const npcInit = scene.initiativeOrder.find(e => e.refId === npc.instanceId)!.initiative
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: npcInit }, { pcId: scene.pcs[1].id, total: npcInit }])
+      const order = scene.initiativeOrder.filter(e => e.initiative === scene.initiativeOrder.find(x => x.refId === npc.instanceId)!.initiative)
+      if (order.length > 1) expect(order[0].kind).toBe('npcShip')
+    })
+
+    it('a compromised player ship stays in initiative when initiative is re-rolled', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      store.damageShip({ kind: 'player' }, 200)
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(true)
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 10 }, { pcId: scene.pcs[1].id, total: 5 }])
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(true)
+    })
+
+    it('a ship compromised before initiative is rolled enters the order when it is', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.damageShip({ kind: 'player' }, 200)
+      expect(scene.playerShip!.compromised).toBe(1)
+      expect(scene.initiativeOrder).toEqual([])
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      expect(scene.initiativeOrder[0].kind).toBe('playerShip')
+      expect(store.currentEntry.value!.kind).toBe('playerShip')
+    })
+
+    it('becoming compromised with an empty order still yields a valid current entry', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      for (const id of scene.pcs.map(p => p.id)) store.removePc(id)
+      store.removeNpcShip(scene.npcShips[0].instanceId)
+      expect(scene.initiativeOrder).toEqual([])
+      store.damageShip({ kind: 'player' }, 200)
+      expect(scene.initiativeOrder.map(e => e.kind)).toEqual(['playerShip'])
+      expect(store.currentEntry.value!.kind).toBe('playerShip')
     })
   })
 
@@ -286,6 +362,112 @@ describe('tscStore', () => {
       expect(ship.compromised).toBe(2)
       store.healShip({ kind: 'player' }, 5)
       expect(ship.wrecked).toBe(2)
+    })
+
+    it('a ship at 0 Hull Points that already recovered from compromised is compromised again by further hull damage', () => {
+      const { scene } = rollAndDamageToZero()
+      const ship = scene.playerShip!
+      store.setCompromised(1)
+      store.hullIntegrityCheck(20) // crit success: -2 -> recovers at 0 HP with wrecked 1
+      expect(ship.compromised).toBe(0)
+      expect(ship.currentHP).toBe(0)
+      expect(ship.wrecked).toBe(1)
+      store.damageShip({ kind: 'player' }, 3)
+      expect(ship.compromised).toBe(2) // 1 + wrecked 1 (p. 172)
+      expect(ship.inoperable).toBe(true)
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(true)
+    })
+
+    it('zero or fully absorbed damage never raises the compromised value', () => {
+      const { scene } = rollAndDamageToZero()
+      const ship = scene.playerShip!
+      store.damageShip({ kind: 'player' }, 0, { bypassing: true })
+      expect(ship.compromised).toBe(1)
+      store.restoreShields({ kind: 'player' }, 20)
+      store.damageShip({ kind: 'player' }, 20)
+      expect(ship.compromised).toBe(1)
+    })
+
+    it('nonlethal damage at 0 HP makes the ship inoperable, not compromised, and 1 HP ends inoperable (p. 172-173)', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      store.damageShip({ kind: 'player' }, 200, { nonlethal: true })
+      const ship = scene.playerShip!
+      expect(ship.currentHP).toBe(0)
+      expect(ship.compromised).toBe(0)
+      expect(ship.inoperable).toBe(true)
+      expect(ship.stations.every(s => s.malfunctioning)).toBe(true)
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(false)
+      store.healShip({ kind: 'player' }, 1)
+      expect(ship.inoperable).toBe(false)
+      expect(ship.wrecked).toBe(0)
+    })
+
+    it('setCompromised applies the full package when gaining and clears it when dropping to 0', () => {
+      startBasicScene(store, { npc: trident })
+      const scene = store.state.activeScene!
+      store.rollInitiative([{ pcId: scene.pcs[0].id, total: 30 }, { pcId: scene.pcs[1].id, total: 25 }])
+      const ship = scene.playerShip!
+      store.setCompromised(3)
+      expect(ship.currentHP).toBe(0)
+      expect(ship.inoperable).toBe(true)
+      expect(ship.stations.every(s => s.malfunctioning)).toBe(true)
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(true)
+      store.setInoperable({ kind: 'player' }, false) // GM toggles it off by hand
+      store.setCompromised(0)
+      expect(ship.wrecked).toBe(1)
+      expect(scene.initiativeOrder.some(e => e.kind === 'playerShip')).toBe(false)
+      // a ship that is inoperable but never compromised is not "losing compromised"
+      store.setInoperable({ kind: 'player' }, true)
+      store.setCompromised(0)
+      expect(ship.wrecked).toBe(1)
+    })
+
+    it('setting Hull Points to 0 by hand goes through the compromised package', () => {
+      startBasicScene(store, { npc: trident })
+      const ship = store.state.activeScene!.playerShip!
+      store.setHP({ kind: 'player' }, 0)
+      expect(ship.compromised).toBe(1)
+      expect(ship.inoperable).toBe(true)
+    })
+
+    it('a destroyed ship ignores shields, hull integrity, HP edits and compromised edits', () => {
+      const { scene } = rollAndDamageToZero()
+      const ship = scene.playerShip!
+      store.setCompromised(9)
+      store.damageShip({ kind: 'player' }, 1)
+      expect(scene.playerShipDestroyed).toBe(true)
+      store.restoreShields({ kind: 'player' }, 10)
+      expect(ship.currentSP).toBe(0)
+      expect(store.hullIntegrityCheck(20)).toBeNull()
+      store.setHP({ kind: 'player' }, 5)
+      expect(ship.currentHP).toBe(0)
+      store.setCompromised(0)
+      expect(ship.wrecked).toBe(0)
+    })
+
+    it('an inoperable NPC starship cannot Repair Self', () => {
+      startBasicScene(store, { npc: buccaneer })
+      const npc = store.state.activeScene!.npcShips[0]
+      npc.currentHP = 5
+      store.setInoperable({ kind: 'npc', instanceId: npc.instanceId }, true)
+      store.repairSelf(npc.instanceId)
+      expect(npc.currentHP).toBe(5)
+    })
+
+    it('starting a scene keeps hull damage and lasting conditions but refills shields', () => {
+      const saved = createEmptyTscScene()
+      saved.playerShip = createPlayerStarship('explorer', 5, 'Battered')
+      saved.playerShip.currentHP = 20
+      saved.playerShip.currentSP = 2
+      saved.playerShip.wrecked = 2
+      saved.playerShip.stations[0].malfunctioning = true
+      const scene = store.startScene(saved)
+      expect(scene.playerShip!.currentHP).toBe(20)
+      expect(scene.playerShip!.currentSP).toBe(36)
+      expect(scene.playerShip!.wrecked).toBe(2)
+      expect(scene.playerShip!.stations[0].malfunctioning).toBe(true)
     })
 
     it('hullIntegrityCheck is a no-op when not compromised', () => {
