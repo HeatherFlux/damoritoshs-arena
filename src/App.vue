@@ -486,10 +486,18 @@ function handleTscFileUpload(event: Event) {
                 title="Tactical Starship Combat (Tech Core: battle stations, sensor map, Hull and Shield Points)"
                 @click="starshipMode = 'tsc'"
               >TSC</button>
+              <span class="badge-level badge-level-warning text-[0.5625rem] self-center" title="Tactical starship combat is in beta: rules and data were audited against Tech Core, but please report anything that disagrees with the book">BETA</span>
             </div>
             <span class="text-[0.625rem] text-dim hidden md:inline">
-              {{ starshipMode === 'csc' ? 'Cinematic starship scenes (GM Core)' : 'Tactical starship combat (Tech Core)' }}
+              {{ starshipMode === 'csc' ? 'Cinematic starship scenes (GM Core)' : 'Tactical starship combat (Tech Core) — beta' }}
             </span>
+            <a
+              v-if="starshipMode === 'tsc'"
+              class="text-[0.625rem] text-accent underline hidden md:inline"
+              href="https://github.com/HeatherFlux/damoritoshs-arena/issues/new?title=TSC%20beta%3A%20&body=Ship%2Fhazard%3A%0AWhat%20I%20did%3A%0AWhat%20happened%3A%0AWhat%20the%20book%20says%20(page)%3A"
+              target="_blank"
+              rel="noopener"
+            >Report a problem</a>
             <span v-if="tscStore.state.activeScene && starshipMode === 'csc'" class="text-[0.625rem] text-success ml-auto">TSC scene running</span>
             <span v-if="starshipStore.state.activeScene && starshipMode === 'tsc'" class="text-[0.625rem] text-success ml-auto">CSC scene running</span>
           </div>
