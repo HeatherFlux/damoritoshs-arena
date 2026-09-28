@@ -497,7 +497,8 @@
   .btn-secondary,
   .btn-danger,
   .btn-success {
-    --btn-chamfer: var(--cut-lg);
+    /* Full cut at the normal text size, easing off as the text (and so the button) shrinks */
+    --btn-chamfer: clamp(var(--cut-sm), calc(2em - 12px), var(--cut-lg));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -725,7 +726,7 @@
   .btn-secondary.btn-icon,
   .btn-danger.btn-icon,
   .btn-success.btn-icon {
-    --btn-chamfer: var(--cut-lg);
+    --btn-chamfer: var(--cut-md);
     padding: 0.5rem;
     aspect-ratio: 1;
   }
