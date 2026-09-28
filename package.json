@@ -14,6 +14,7 @@
     "parse-techcore": "python3 scripts/parse-techcore.py",
     "fetch-aon": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"category\":\"creature\"}},\"size\":1000}' -o /tmp/aon_creatures_raw.json && node scripts/fetch-aon-pages.mjs && node scripts/fetch-aon.mjs",
     "fetch-hazards": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"category\":\"hazard\"}},\"size\":200}' -o /tmp/aon_hazards_raw.json && node scripts/fetch-hazards.mjs",
+    "fetch-vehicles": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"term\":{\"category\":\"vehicle\"}},\"size\":200}' -o /tmp/aon_vehicles_raw.json && node scripts/fetch-vehicles.mjs",
     "fetch-conditions": "curl -s -X POST 'https://elasticsearch.aonprd.com/aonsf/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"category\":\"condition\"}},\"size\":100}' -o /tmp/aon_conditions_raw.json && node scripts/fetch-conditions.mjs"
   },
   "dependencies": {

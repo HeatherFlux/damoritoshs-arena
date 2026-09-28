@@ -4,16 +4,37 @@ import { useCombatStore } from '../stores/combatStore'
 import { useEncounterStore } from '../stores/encounterStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useCustomPanelStore } from '../stores/customPanelStore'
+import { useChaseStore } from '../stores/chaseStore'
+import { currentObstacle } from '../utils/chaseRules'
 import { getRollHistory, onRoll, type RollResult } from '../utils/dice'
 
 const props = defineProps<{
-  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop' | 'prep'
+  mode: 'builder' | 'combat' | 'hacking' | 'starship' | 'chase' | 'custom' | 'shop' | 'prep'
 }>()
 
 const combatStore = useCombatStore()
 const encounterStore = useEncounterStore()
 const hackingStore = useHackingStore()
 const customPanelStore = useCustomPanelStore()
+const chaseStore = useChaseStore()
+
+// Chase progress
+const chaseStats = computed(() => {
+  const scene = chaseStore.state.activeScene
+  if (!scene) return null
+  const party = scene.sides.find(s => s.isPlayers)
+  const obstacle = party ? currentObstacle(scene, party) : null
+  const gap = chaseStore.gap.value
+  return {
+    name: scene.name,
+    round: scene.end.roundLimit !== null ? `${scene.round}/${scene.end.roundLimit}` : String(scene.round),
+    obstacle: obstacle ? `${party!.position + 1}/${scene.obstacles.length} ${obstacle.name}` : null,
+    points: obstacle && party ? `${party.chasePoints}/${obstacle.chasePoints}` : null,
+    gap: gap === null ? null : gap === 0 ? 'LEVEL' : `${Math.abs(gap)} ${gap > 0 ? 'AHEAD' : 'BEHIND'}`,
+    gapClass: gap === null || gap === 0 ? 'text-warning' : gap > 0 ? 'text-success' : 'text-danger',
+    over: !!scene.outcome,
+  }
+})
 
 // Hacking sync status
 const hackingSyncEnabled = computed(() => hackingStore.state.isRemoteSyncEnabled)
@@ -147,6 +168,20 @@ const prepMessages = [
   'ADVENTURE FORGE ONLINE',
 ]
 
+const chaseMessages = [
+  'PURSUIT TRACKER ONLINE',
+  'ROUTE OBSTACLES MAPPED',
+  'ENGINES RUNNING HOT',
+  'CLOSING THE GAP',
+  'TRAFFIC PATTERNS ANALYZED',
+  'SHORTCUT CANDIDATES FOUND',
+  'QUARRY LAST SEEN AHEAD',
+  'HOLD ON TO SOMETHING',
+  'BRAKES ARE OPTIONAL',
+  'COLLISION ALERTS MUTED',
+  'READY TO RUN',
+]
+
 const starshipMessages = [
   'HELM CONTROLS ONLINE',
   'DRIFT ENGINE PRIMED',
@@ -180,6 +215,7 @@ const currentMessages = computed(() => {
   if (props.mode === 'hacking') return hackingMessages
   if (props.mode === 'custom') return customMessages
   if (props.mode === 'starship') return starshipMessages
+  if (props.mode === 'chase') return chaseMessages
   if (props.mode === 'prep') return prepMessages
   return builderMessages
 })
@@ -420,6 +456,35 @@ onUnmounted(() => {
       </div>
     </template>
 
+    <!-- CHASE MODE -->
+    <template v-else-if="mode === 'chase'">
+      <template v-if="chaseStats">
+        <div class="status-section">
+          <span class="status-label">CHASE</span>
+          <span class="status-value text-secondary">{{ chaseStats.name }}</span>
+          <span v-if="chaseStats.over" class="status-badge status-badge-chase">OVER</span>
+        </div>
+        <div class="status-section">
+          <span class="status-label">ROUND</span>
+          <span class="status-value">{{ chaseStats.round }}</span>
+        </div>
+        <div v-if="chaseStats.obstacle" class="status-section">
+          <span class="status-label">OBSTACLE</span>
+          <span class="status-value">{{ chaseStats.obstacle }}</span>
+          <span class="status-muted">{{ chaseStats.points }} CP</span>
+        </div>
+        <div v-if="chaseStats.gap" class="status-section">
+          <span class="status-label">PARTY</span>
+          <span class="status-value" :class="chaseStats.gapClass">{{ chaseStats.gap }}</span>
+        </div>
+      </template>
+      <div v-else class="status-section">
+        <span class="status-label">MODE</span>
+        <span class="status-badge status-badge-chase">CHASE</span>
+        <span class="status-muted">NO CHASE RUNNING</span>
+      </div>
+    </template>
+
     <!-- PREP MODE -->
     <template v-else-if="mode === 'prep'">
       <div class="status-section">
@@ -558,6 +623,7 @@ onUnmounted(() => {
         'indicator-hacking': mode === 'hacking',
         'indicator-custom': mode === 'custom',
         'indicator-starship': mode === 'starship',
+        'indicator-chase': mode === 'chase',
         'indicator-prep': mode === 'prep'
       }"></span>
       <span class="status-label">{{
@@ -565,6 +631,7 @@ onUnmounted(() => {
         mode === 'hacking' ? 'HACK' :
         mode === 'custom' ? 'FORGE' :
         mode === 'starship' ? 'HELM' :
+        mode === 'chase' ? 'CHASE' :
         mode === 'shop' ? 'SHOP' :
         mode === 'prep' ? 'PREP' :
         'BUILD'
@@ -694,6 +761,7 @@ onUnmounted(() => {
 .status-badge-moderate { background: var(--color-accent-subtle); color: var(--color-accent); }
 .status-badge-severe { background: var(--color-warning-subtle); color: var(--color-warning); }
 .status-badge-extreme { background: var(--color-danger-subtle); color: var(--color-danger); }
+.status-badge-chase { background: var(--color-warning-subtle); color: var(--color-warning); border: 1px solid var(--color-warning); }
 .status-badge-starship { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
 .status-badge-hacking { background: var(--color-secondary-subtle, rgba(0, 255, 136, 0.15)); color: var(--color-secondary); border: 1px solid rgba(0, 255, 136, 0.3); }
 .status-badge-prep { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
@@ -750,6 +818,11 @@ onUnmounted(() => {
 .status-indicator.indicator-custom {
   background: var(--color-warning);
   animation: pulse-glow-custom 2s ease-in-out infinite;
+}
+
+.status-indicator.indicator-chase {
+  background: var(--color-warning);
+  box-shadow: 0 0 6px var(--color-warning);
 }
 
 .status-indicator.indicator-starship {

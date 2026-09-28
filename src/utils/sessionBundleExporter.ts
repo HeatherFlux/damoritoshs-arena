@@ -19,6 +19,7 @@ import type { SavedScene, SavedStarship } from '../types/starship'
 import type { Party } from '../types/party'
 import type { SavedShop } from '../types/shop'
 import type { NpcStarship, PlayerStarship, TscSavedScene } from '../types/tsc'
+import type { SavedChase } from '../types/chase'
 import type {
   SessionBundle,
   BundleParty,
@@ -56,6 +57,10 @@ export interface ExportStores {
   tscStore?: {
     state: { savedScenes: TscSavedScene[]; playerShips: PlayerStarship[] }
     exportCustomStarships: () => string
+  }
+  /** Optional — chases (GM Core). */
+  chaseStore?: {
+    state: { savedChases: SavedChase[] }
   }
 }
 
@@ -141,6 +146,11 @@ export function buildSessionBundle(
     if (playerShips.length > 0) bundle.tscPlayerShips = JSON.parse(JSON.stringify(playerShips))
     const customStarships = parseJsonArray<NpcStarship>(stores.tscStore.exportCustomStarships())
     if (customStarships.length > 0) bundle.tscCustomStarships = customStarships
+  }
+
+  // ---- Chases (GM Core) ----
+  if (stores.chaseStore && stores.chaseStore.state.savedChases.length > 0) {
+    bundle.chases = JSON.parse(JSON.stringify(stores.chaseStore.state.savedChases))
   }
 
   return bundle

@@ -5,6 +5,7 @@ import { useEncounterStore } from '../stores/encounterStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
 import { useTscStore } from '../stores/tscStore'
+import { useChaseStore } from '../stores/chaseStore'
 import { usePartyStore } from '../stores/partyStore'
 import { useShopStore } from '../stores/shopStore'
 
@@ -17,6 +18,7 @@ const encounterStore = useEncounterStore()
 const hackingStore = useHackingStore()
 const starshipStore = useStarshipStore()
 const tscStore = useTscStore()
+const chaseStore = useChaseStore()
 const partyStore = usePartyStore()
 const shopStore = useShopStore()
 
@@ -101,6 +103,7 @@ function doImport() {
       hackingStore,
       starshipStore,
       tscStore,
+      chaseStore,
       partyStore,
       shopStore,
     })
@@ -249,6 +252,22 @@ function reset() {
             <div v-for="name in preview.shops" :key="'shop-' + name" class="flex items-center gap-1">
               <span class="text-accent">+</span>
               <span class="text-text">Shop: {{ name }}</span>
+            </div>
+            <div v-for="name in preview.tscScenes" :key="'tsc-' + name" class="flex items-center gap-1">
+              <span class="text-accent">+</span>
+              <span class="text-text">Tactical scene: {{ name }}</span>
+            </div>
+            <div v-for="name in preview.tscPlayerShips" :key="'pship-' + name" class="flex items-center gap-1">
+              <span class="text-accent">+</span>
+              <span class="text-text">Starship sheet: {{ name }}</span>
+            </div>
+            <div v-if="preview.tscCustomStarships" class="flex items-center gap-1">
+              <span class="text-accent">+</span>
+              <span class="text-text">{{ preview.tscCustomStarships }} custom starship{{ preview.tscCustomStarships === 1 ? '' : 's' }}</span>
+            </div>
+            <div v-for="name in preview.chases" :key="'chase-' + name" class="flex items-center gap-1">
+              <span class="text-accent">+</span>
+              <span class="text-text">Chase: {{ name }}</span>
             </div>
           </div>
         </div>

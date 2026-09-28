@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "chases": [
+    {
+      "id": "example-dock-run",
+      "name": "Dock Run",
+      "type": "run-away",
+      "length": "short",
+      "level": 1,
+      "roundLength": "3 actions",
+      "description": "The party flees station security through the cargo docks.",
+      "obstacles": [
+        {
+          "id": "ob-1",
+          "name": "Crowd",
+          "level": 1,
+          "environment": "urban",
+          "chasePoints": 3,
+          "description": "Throngs of people crowd the space station corridors, making it difficult to continue the chase.",
+          "revealedToPlayers": false,
+          "sampleId": "crowd",
+          "options": [
+            {
+              "id": "ob-1-a",
+              "dc": 15,
+              "skills": [
+                "Acrobatics",
+                "Athletics"
+              ],
+              "description": "weave or push through"
+            },
+            {
+              "id": "ob-1-b",
+              "dc": 13,
+              "skills": [
+                "Society"
+              ],
+              "description": "follow the flow"
+            }
+          ]
+        },
+        {
+          "id": "ob-2",
+          "name": "Security Drone",
+          "level": 1,
+          "environment": "urban",
+          "chasePoints": 2,
+          "description": "",
+          "revealedToPlayers": false,
+          "sampleId": "security-drone",
+          "options": [
+            {
+              "id": "ob-2-a",
+              "dc": 14,
+              "skills": [
+                "Computers"
+              ],
+              "description": "reprogram"
+            },
+            {
+              "id": "ob-2-b",
+              "dc": 16,
+              "skills": [
+                "Stealth"
+              ],
+              "description": "sneak past"
+            }
+          ]
+        },
+        {
+          "id": "ob-3",
+          "name": "Chain Link Fence",
+          "level": 1,
+          "environment": "urban",
+          "chasePoints": 3,
+          "description": "",
+          "revealedToPlayers": false,
+          "sampleId": "chain-link-fence",
+          "options": [
+            {
+              "id": "ob-3-a",
+              "dc": 13,
+              "skills": [
+                "Athletics"
+              ],
+              "description": "climb"
+            },
+            {
+              "id": "ob-3-b",
+              "dc": 15,
+              "skills": [
+                "Thievery"
+              ],
+              "description": "unlock the gate"
+            }
+          ]
+        }
+      ],
+      "sides": [
+        {
+          "id": "side-party",
+          "name": "Party",
+          "role": "pursued",
+          "control": "checks",
+          "isPlayers": true,
+          "position": 0,
+          "chasePoints": 0,
+          "pace": 1,
+          "rollModifier": 0,
+          "roundsAtObstacle": 0,
+          "members": [],
+          "vehicles": []
+        },
+        {
+          "id": "side-security",
+          "name": "Station Security",
+          "role": "pursuer",
+          "control": "steady",
+          "isPlayers": false,
+          "position": -1,
+          "chasePoints": 0,
+          "pace": 1,
+          "rollModifier": 0,
+          "roundsAtObstacle": 0,
+          "members": [],
+          "vehicles": []
+        }
+      ],
+      "end": {
+        "catchEnds": true,
+        "leadToEscape": 3,
+        "roundLimit": null
+      },
+      "savedAt": 1790000000000
+    }
+  ]
+}

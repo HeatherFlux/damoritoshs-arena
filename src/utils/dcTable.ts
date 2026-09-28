@@ -19,6 +19,34 @@ export function getDCForLevel(level: number): number {
 }
 
 /**
+ * Simple DCs by proficiency rank (GM Core p. 53).
+ */
+export const SIMPLE_DCS = {
+  untrained: 10,
+  trained: 15,
+  expert: 20,
+  master: 30,
+  legendary: 40,
+} as const
+
+export type SimpleDCRank = keyof typeof SIMPLE_DCS
+
+/**
+ * DC adjustments by difficulty (GM Core p. 53).
+ */
+export const DC_ADJUSTMENTS = {
+  'incredibly easy': -10,
+  'very easy': -5,
+  easy: -2,
+  standard: 0,
+  hard: 2,
+  'very hard': 5,
+  'incredibly hard': 10,
+} as const
+
+export type DCDifficulty = keyof typeof DC_ADJUSTMENTS
+
+/**
  * Starship scene XP uses the Complex Hazard XP table from PF2e/SF2e.
  * Key difference from creature XP: +3 diff = 100 (not 120), +4 diff = 120 (not 160).
  */

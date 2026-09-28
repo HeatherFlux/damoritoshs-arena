@@ -1,0 +1,292 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://damoritoshs-arena.pages.dev/schemas/chases.schema.json",
+  "title": "Chases",
+  "description": "Saved chases (Starfinder GM Core pp. 214-217). Exported from the CHASE tab as { version, chases }.",
+  "type": "object",
+  "required": [
+    "chases"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "chases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "obstacles",
+          "sides",
+          "end"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "chase-down",
+              "run-away",
+              "beat-the-clock",
+              "competitive"
+            ]
+          },
+          "length": {
+            "type": "string",
+            "enum": [
+              "short",
+              "medium",
+              "long",
+              "custom"
+            ],
+            "description": "short 6, medium 8, long 10 obstacles"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "roundLength": {
+            "type": "string",
+            "description": "How long a round is in the story"
+          },
+          "description": {
+            "type": "string"
+          },
+          "obstacles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "level",
+                "chasePoints",
+                "options"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer"
+                },
+                "environment": {
+                  "type": "string",
+                  "enum": [
+                    "underground",
+                    "urban",
+                    "vehicle",
+                    "wilderness",
+                    "custom"
+                  ]
+                },
+                "chasePoints": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Chase Points needed to overcome the obstacle"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "skills",
+                      "description"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "dc": {
+                        "type": "integer",
+                        "description": "Leave out for an approach that needs no check"
+                      },
+                      "skills": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Skills, Perception or saves that can be rolled against the DC"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "What the character does, e.g. \"weave or push through\""
+                      }
+                    }
+                  }
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Shown to players once the obstacle is revealed"
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "GM only"
+                },
+                "revealedToPlayers": {
+                  "type": "boolean"
+                },
+                "sampleId": {
+                  "type": "string",
+                  "description": "Id of the GM Core sample obstacle this came from"
+                }
+              }
+            }
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "role",
+                "control",
+                "position"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "pursued",
+                    "pursuer",
+                    "competitor"
+                  ]
+                },
+                "control": {
+                  "type": "string",
+                  "enum": [
+                    "checks",
+                    "steady"
+                  ],
+                  "description": "checks: members roll and earn Chase Points. steady: clears `pace` obstacles each round"
+                },
+                "isPlayers": {
+                  "type": "boolean"
+                },
+                "position": {
+                  "type": "integer",
+                  "minimum": -1,
+                  "description": "Index of the obstacle the side faces. -1 is the start line"
+                },
+                "chasePoints": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "pace": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "rollModifier": {
+                  "type": "integer"
+                },
+                "roundsAtObstacle": {
+                  "type": "integer"
+                },
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "playerId": {
+                        "type": "string"
+                      },
+                      "hasActed": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "vehicles": {
+                  "type": "array",
+                  "description": "Table aid: the chase rules do not use vehicle statistics",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "instanceId",
+                      "label",
+                      "vehicle",
+                      "currentHP"
+                    ],
+                    "properties": {
+                      "instanceId": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "vehicle": {
+                        "type": "object",
+                        "description": "A copy of the vehicle stat block (see vehicles.schema.json)"
+                      },
+                      "currentHP": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "uncontrolled": {
+                        "type": "boolean"
+                      },
+                      "pilotMemberId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "end": {
+            "type": "object",
+            "properties": {
+              "catchEnds": {
+                "type": "boolean"
+              },
+              "leadToEscape": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "roundLimit": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          },
+          "savedAt": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

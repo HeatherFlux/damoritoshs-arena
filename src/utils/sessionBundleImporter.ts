@@ -11,6 +11,7 @@ import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter, Computer, AccessPoint } from '../types/hacking'
 import type { SavedScene, StarshipThreat } from '../types/starship'
 import type { EncounterStarship, EncounterStarshipHazard, NpcStarship, PlayerStarship, StarshipHazard, TscSavedScene } from '../types/tsc'
+import type { SavedChase } from '../types/chase'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import { TSC_HAZARDS } from '../data/tscHazards'
 import { createDefaultStarship, createDefaultThreat, createEmptySavedScene } from '../types/starship'
@@ -187,6 +188,8 @@ export interface SessionBundle {
   tscPlayerShips?: PlayerStarship[]
   /** GM-authored NPC starships — see tsc-starships.schema.json */
   tscCustomStarships?: NpcStarship[]
+  /** Chases (GM Core) — see chases.schema.json */
+  chases?: SavedChase[]
 }
 
 export interface BundleStarshipTemplate {
@@ -232,6 +235,7 @@ export interface ImportResult {
   tscScenes: number
   tscPlayerShips: number
   tscCustomStarships: number
+  chases: number
   warnings: ImportWarning[]
 }
 
@@ -369,6 +373,10 @@ export interface ImportStores {
     getStarshipById: (id: string) => NpcStarship | undefined
     allStarships: { value: NpcStarship[] }
   }
+  /** Optional — present in chaseStore. Required to round-trip chases. */
+  chaseStore?: {
+    importChases: (json: string | unknown) => number
+  }
 }
 
 function resolveStarshipRef(ref: BundleStarshipRef, pool: NpcStarship[]): NpcStarship | undefined {
@@ -421,6 +429,7 @@ export function importSessionBundle(
     tscScenes: 0,
     tscPlayerShips: 0,
     tscCustomStarships: 0,
+    chases: 0,
     shops: 0,
     warnings: [],
   }
@@ -618,6 +627,19 @@ export function importSessionBundle(
         result.tscScenes = bundle.tscScenes.length
       } catch (e) {
         result.warnings.push({ section: 'tsc', message: `Failed to import tactical scenes: ${(e as Error).message}` })
+      }
+    }
+  }
+
+  // 4c. Chases
+  if (bundle.chases && bundle.chases.length > 0) {
+    if (!stores.chaseStore) {
+      result.warnings.push({ section: 'chases', message: 'Bundle contains chases but the store is not available — skipping.' })
+    } else {
+      try {
+        result.chases = stores.chaseStore.importChases({ chases: bundle.chases })
+      } catch (e) {
+        result.warnings.push({ section: 'chases', message: `Failed to import chases: ${(e as Error).message}` })
       }
     }
   }
@@ -857,6 +879,7 @@ export function previewSessionBundle(bundle: SessionBundle): {
   tscScenes: string[]
   tscPlayerShips: string[]
   tscCustomStarships: number
+  chases: string[]
 } {
   return {
     creatures: bundle.creatures?.length ?? 0,
@@ -869,5 +892,6 @@ export function previewSessionBundle(bundle: SessionBundle): {
     tscScenes: bundle.tscScenes?.map(s => s.name) ?? [],
     tscPlayerShips: bundle.tscPlayerShips?.map(s => s.name) ?? [],
     tscCustomStarships: bundle.tscCustomStarships?.length ?? 0,
+    chases: bundle.chases?.map(c => c.name) ?? [],
   }
 }

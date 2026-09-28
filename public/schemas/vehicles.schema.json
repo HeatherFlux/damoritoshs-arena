@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://damoritoshs-arena.pages.dev/schemas/vehicles.schema.json",
   "title": "Vehicles",
-  "description": "Reference format for the bundled Tech Core vehicles (src/data/vehicles.json). Browse-only; vehicles use GM Core vehicle rules (feet, Hardness/HP/BT).",
+  "description": "Reference format for the bundled vehicles: Tech Core (src/data/vehicles.json) and GM Core and later books from Archives of Nethys (src/data/aonVehicles.json). Vehicles use GM Core vehicle rules (feet, Hardness/HP/BT).",
   "type": "array",
   "items": {
     "type": "object",

@@ -9,11 +9,7 @@ import {
   serializeBundle,
   defaultBundleFilename,
 } from '../utils/sessionBundleExporter'
-import {
-  parseSessionBundle,
-  importSessionBundle,
-  type ImportStores,
-} from '../utils/sessionBundleImporter'
+import { parseSessionBundle, importSessionBundle, type ImportStores, previewSessionBundle } from '../utils/sessionBundleImporter'
 import type { Creature } from '../types/creature'
 import type { SavedHackingEncounter } from '../types/hacking'
 import type { SavedScene } from '../types/starship'
@@ -600,6 +596,9 @@ describe('sessionBundleExporter', () => {
 // ============ Tech Core tactical starship combat round-trip ============
 
 import { useTscStore, createEmptyTscScene, __resetTscStore } from '../stores/tscStore'
+import { useChaseStore, __resetChaseStore } from '../stores/chaseStore'
+import { createEmptyChase, obstacleFromSample } from '../utils/chaseRules'
+import { SAMPLE_CHASE_OBSTACLES } from '../data/chaseObstacles'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import { TSC_HAZARDS } from '../data/tscHazards'
 
@@ -615,7 +614,8 @@ describe('session bundle: tactical starship combat', () => {
     const starshipStore = useStarshipStore()
     const shopStore = useShopStore()
     const tscStore = useTscStore()
-    return { encounterStore, partyStore, hackingStore, starshipStore, shopStore, tscStore }
+    const chaseStore = useChaseStore()
+    return { encounterStore, partyStore, hackingStore, starshipStore, shopStore, tscStore, chaseStore }
   }
 
   it('exports TSC scenes, player ships, custom starships and encounter starship refs, and imports them back', () => {
@@ -676,5 +676,62 @@ describe('session bundle: tactical starship combat', () => {
     const enc = stores.encounterStore.state.encounters.find(e => e.name === 'Pirates')!
     expect(enc.starships?.[0].starship.name).toBe('Dread Buccaneer')
     expect(enc.starshipHazards?.[0].hazard.name).toBe('Asteroid Field')
+  })
+})
+
+describe('session bundle: chases', () => {
+  beforeEach(() => {
+    __resetChaseStore()
+  })
+
+  function allStores() {
+    return {
+      encounterStore: useEncounterStore(),
+      partyStore: usePartyStore(),
+      hackingStore: useHackingStore(),
+      starshipStore: useStarshipStore(),
+      shopStore: useShopStore(),
+      chaseStore: useChaseStore(),
+    }
+  }
+
+  function sampleChase() {
+    const chase = createEmptyChase('run-away')
+    chase.name = 'Bundle Chase'
+    chase.obstacles = SAMPLE_CHASE_OBSTACLES.slice(0, 6).map((o, i) => obstacleFromSample(o, i % 2 ? 2 : 3))
+    return chase
+  }
+
+  it('exports saved chases and imports them back', () => {
+    const stores = allStores()
+    stores.chaseStore.saveChase(sampleChase())
+
+    const bundle = buildSessionBundle(stores, { name: 'Chase Bundle' })
+    expect(bundle.chases?.map(c => c.name)).toEqual(['Bundle Chase'])
+    expect(previewSessionBundle(bundle).chases).toEqual(['Bundle Chase'])
+
+    __resetChaseStore()
+    localStorage.clear()
+    const fresh = allStores()
+    expect(fresh.chaseStore.state.savedChases).toHaveLength(0)
+    const result = importSessionBundle(JSON.parse(JSON.stringify(bundle)), fresh)
+    expect(result.chases).toBe(1)
+    const imported = fresh.chaseStore.state.savedChases[0]
+    expect(imported.name).toBe('Bundle Chase')
+    expect(imported.obstacles.map(o => o.name)).toEqual(bundle.chases![0].obstacles.map(o => o.name))
+    expect(imported.obstacles[0].options[0]).toMatchObject({ dc: 13, skills: ['Acrobatics'] })
+  })
+
+  it('leaves the key out when there are no chases', () => {
+    expect(buildSessionBundle(allStores(), { name: 'Empty' }).chases).toBeUndefined()
+  })
+
+  it('warns instead of failing when the chase store is missing', () => {
+    const { chaseStore, ...withoutChase } = allStores()
+    chaseStore.saveChase(sampleChase())
+    const bundle = buildSessionBundle({ ...withoutChase, chaseStore }, { name: 'Chase Bundle' })
+    const result = importSessionBundle(JSON.parse(JSON.stringify(bundle)), withoutChase)
+    expect(result.chases).toBe(0)
+    expect(result.warnings.some(w => w.section === 'chases')).toBe(true)
   })
 })

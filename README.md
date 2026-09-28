@@ -22,6 +22,14 @@ A free encounter builder, combat tracker, cinematic starship-scene runner, and T
 - Expandable statblocks for creatures and hazards
 - Turn advancement with round counter
 
+### Chases (GM Core)
+The chase subsystem from Starfinder GM Core, on its own CHASE tab:
+- **Builder** for Chase Down, Run Away, Beat the Clock and Competitive chases, with short, medium and long presets, suggested Chase Points for your party size, and a simple DC helper
+- **42 sample obstacles** from GM Core, checked record by record against the book
+- **Tracker** that scores checks (+2 / +1 / 0 / −1), moves each side on when it has enough Chase Points, runs the other side at a steady pace or by rolling, and points out when the chase should end
+- **Vehicles** as a table aid: attach any of the 43 bundled vehicles to a side and track Hit Points, broken, uncontrolled and destroyed. The chase rules themselves do not use vehicle statistics
+- **Player view** (`#/chase/view`) with obstacle cards that stay face down until reached or scouted
+
 ### Tactical Starship Combat (Tech Core)
 Starfinder Tech Core's tactical starship combat, in a CSC / TSC toggle on the STARSHIP tab:
 - **Library** of all 74 NPC starships, 32 starship hazards and 30 vehicles from the book, with rollable attacks
@@ -108,6 +116,7 @@ Everything saves to browser localStorage:
 | `sf2e-starship-state` | Current starship scene |
 | `sf2e-starship-saved` | Saved starship scenes |
 | `sf2e-starship-templates` | Reusable PC ship templates |
+| `sf2e-chase` | Saved chases and the chase being run |
 | `sf2e-tsc` | Tactical starship scenes and identified-model memory |
 | `sf2e-tsc-player-ships` | Player starship sheets (Tech Core) |
 | `sf2e-tsc-custom-starships` | Custom NPC starships |

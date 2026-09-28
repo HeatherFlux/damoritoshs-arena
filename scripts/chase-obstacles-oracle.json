@@ -1,0 +1,826 @@
+[
+  {
+    "name": "Crumbling Corridor",
+    "level": 1,
+    "environment": "underground",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Crafting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Quaking Corridor",
+    "level": 11,
+    "environment": "underground",
+    "base": "Crumbling Corridor",
+    "options": [
+      {
+        "dc": 25,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 30,
+        "skills": [
+          "Crafting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Fungal Grotto",
+    "level": 1,
+    "environment": "underground",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Fortitude"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Virulent Fungi",
+    "level": 5,
+    "environment": "underground",
+    "base": "Fungal Grotto",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Fortitude"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Collapsed Tunnel",
+    "level": 5,
+    "environment": "underground",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Ancient Collapse",
+    "level": 12,
+    "environment": "underground",
+    "base": "Collapsed Tunnel",
+    "options": [
+      {
+        "dc": 30,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 28,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mining Drill",
+    "level": 5,
+    "environment": "underground",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Reflex"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Fleet of Drills",
+    "level": 12,
+    "environment": "underground",
+    "base": "Mining Drill",
+    "options": [
+      {
+        "dc": 30,
+        "skills": [
+          "Reflex"
+        ]
+      },
+      {
+        "dc": 28,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Chain Link Fence",
+    "level": 1,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "High Welded Wire Fence",
+    "level": 8,
+    "environment": "urban",
+    "base": "Chain Link Fence",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 25,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Crowd",
+    "level": 1,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Acrobatics",
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Society"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Convention Crowd",
+    "level": 4,
+    "environment": "urban",
+    "base": "Crowd",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Society"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Illegally Parked Vehicle",
+    "level": 1,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Crafting",
+          "Piloting"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Intimidation"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Food Truck",
+    "level": 5,
+    "environment": "urban",
+    "base": "Illegally Parked Vehicle",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Crafting",
+          "Piloting"
+        ]
+      },
+      {
+        "dc": 22,
+        "skills": [
+          "Intimidation"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Rickety Fire Escape",
+    "level": 1,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Athletics"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Crumbling, Steep Fire Escape",
+    "level": 5,
+    "environment": "urban",
+    "base": "Rickety Fire Escape",
+    "options": [
+      {
+        "dc": 18,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Security Drone",
+    "level": 1,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 14,
+        "skills": [
+          "Computers"
+        ]
+      },
+      {
+        "dc": 16,
+        "skills": [
+          "Stealth"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Security Robot",
+    "level": 9,
+    "environment": "urban",
+    "base": "Security Drone",
+    "options": [
+      {
+        "dc": 26,
+        "skills": [
+          "Computers"
+        ]
+      },
+      {
+        "dc": 28,
+        "skills": [
+          "Stealth"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Viral Flash Mob",
+    "level": 2,
+    "environment": "urban",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Performance"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Viral Surprise Concert",
+    "level": 12,
+    "environment": "urban",
+    "base": "Viral Flash Mob",
+    "options": [
+      {
+        "dc": 30,
+        "skills": [
+          "Performance"
+        ]
+      },
+      {
+        "dc": 28,
+        "skills": [
+          "Thievery"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Confusing Side Streets",
+    "level": 1,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Society"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Twisting Back Alleys",
+    "level": 5,
+    "environment": "vehicle",
+    "base": "Confusing Side Streets",
+    "options": [
+      {
+        "dc": 18,
+        "skills": [
+          "Society"
+        ]
+      },
+      {
+        "dc": 20,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Demonstration",
+    "level": 1,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Intimidation"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Performance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Parade",
+    "level": 5,
+    "environment": "vehicle",
+    "base": "Demonstration",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Intimidation"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Performance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Red Light",
+    "level": 1,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Computers"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Piloting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Busy Red Light",
+    "level": 11,
+    "environment": "vehicle",
+    "base": "Red Light",
+    "options": [
+      {
+        "dc": 25,
+        "skills": [
+          "Computers"
+        ]
+      },
+      {
+        "dc": 30,
+        "skills": [
+          "Piloting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Spiked Rail",
+    "level": 1,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Athletics",
+          "Crafting"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Blockaded Street",
+    "level": 5,
+    "environment": "vehicle",
+    "base": "Spiked Rail",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics",
+          "Crafting"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Traffic Jam",
+    "level": 1,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Perception"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Piloting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Rush Hour",
+    "level": 5,
+    "environment": "vehicle",
+    "base": "Traffic Jam",
+    "options": [
+      {
+        "dc": 18,
+        "skills": [
+          "Perception"
+        ]
+      },
+      {
+        "dc": 20,
+        "skills": [
+          "Piloting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Construction Site",
+    "level": 2,
+    "environment": "vehicle",
+    "options": [
+      {
+        "dc": 17,
+        "skills": [
+          "Piloting"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Society"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Demolition Site",
+    "level": 5,
+    "environment": "vehicle",
+    "base": "Construction Site",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Piloting"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Society"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Deep Mud",
+    "level": 1,
+    "environment": "wilderness",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Horrid Bog",
+    "level": 5,
+    "environment": "wilderness",
+    "base": "Deep Mud",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Perception"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Downpour",
+    "level": 1,
+    "environment": "wilderness",
+    "options": [
+      {
+        "dc": 13,
+        "skills": [
+          "Fortitude"
+        ]
+      },
+      {
+        "dc": 15,
+        "skills": [
+          "Nature"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Magical Thunderstorm",
+    "level": 11,
+    "environment": "wilderness",
+    "base": "Downpour",
+    "options": [
+      {
+        "dc": 25,
+        "skills": [
+          "Fortitude"
+        ]
+      },
+      {
+        "dc": 30,
+        "skills": [
+          "Nature"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Rope Bridge",
+    "level": 1,
+    "environment": "wilderness",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Crafting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Solitary Frayed Rope",
+    "level": 11,
+    "environment": "wilderness",
+    "base": "Rope Bridge",
+    "options": [
+      {
+        "dc": 30,
+        "skills": [
+          "Acrobatics"
+        ]
+      },
+      {
+        "dc": 25,
+        "skills": [
+          "Crafting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Rushing River",
+    "level": 1,
+    "environment": "wilderness",
+    "options": [
+      {
+        "dc": 15,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Flash Flood",
+    "level": 5,
+    "environment": "wilderness",
+    "base": "Rushing River",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Athletics"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Tangled Forest",
+    "level": 2,
+    "environment": "wilderness",
+    "options": [
+      {
+        "dc": 17,
+        "skills": [
+          "Perception"
+        ]
+      },
+      {
+        "dc": 13,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Enchanted Forest",
+    "level": 5,
+    "environment": "wilderness",
+    "base": "Tangled Forest",
+    "options": [
+      {
+        "dc": 20,
+        "skills": [
+          "Perception"
+        ]
+      },
+      {
+        "dc": 18,
+        "skills": [
+          "Survival"
+        ]
+      }
+    ]
+  }
+]

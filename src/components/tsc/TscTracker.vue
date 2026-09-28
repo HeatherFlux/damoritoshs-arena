@@ -213,7 +213,7 @@ function entryClass(e: TscInitiativeEntry, i: number) {
 </template>
 
 <style scoped>
-.initiative-chip { display: inline-flex; flex-direction: column; align-items: center; padding: 0.25rem 0.625rem; background: var(--color-elevated); border: 1px solid var(--color-border); font-size: 0.6875rem; line-height: 1.1; cursor: pointer; }
+.initiative-chip { display: inline-flex; flex-direction: column; align-items: center; padding: 0.25rem 0.625rem; background: var(--color-bg-elevated); border: 1px solid var(--color-border); font-size: 0.6875rem; line-height: 1.1; cursor: pointer; }
 .initiative-chip:hover { border-color: var(--color-accent); }
-.initiative-chip.is-current { border-color: var(--color-accent); background: var(--color-accent-subtle, var(--color-elevated)); box-shadow: 0 0 0 1px var(--color-accent); }
+.initiative-chip.is-current { border-color: var(--color-accent); background: var(--color-accent-subtle, var(--color-bg-elevated)); box-shadow: 0 0 0 1px var(--color-accent); }
 </style>

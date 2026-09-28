@@ -5,17 +5,28 @@ import type { StarshipSize, Vehicle } from '../../types/tsc'
 import { sizeLabel } from '../../utils/tscStatBlock'
 import VehicleStatBlock from './VehicleStatBlock.vue'
 
+const props = defineProps<{
+  /** When set, each vehicle gets a button with this label that emits `select`. */
+  selectLabel?: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'select', vehicle: Vehicle): void
+}>()
+
 const searchQuery = ref('')
 const levelFilter = ref<number | null>(null)
 const sizeFilter = ref<'' | StarshipSize>('')
 const terrainFilter = ref<'' | 'land' | 'air' | 'sea' | 'hybrid'>('')
 const expanded = ref<string | null>(null)
 
+const LEVELS = [...new Set(VEHICLES.map(v => v.level))].sort((a, b) => a - b)
 const SIZES: StarshipSize[] = ['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan']
 
 /** Terrain class derived from the printed Speed line. */
 function terrainOf(v: Vehicle): 'land' | 'air' | 'sea' | 'hybrid' {
-  const kinds = new Set(v.speed.map(s => s.kind ?? 'land'))
+  // Climbing and burrowing are ways of crossing land
+  const kinds = new Set(v.speed.map(s => (!s.kind || s.kind === 'climb' || s.kind === 'burrow' ? 'land' : s.kind)))
   const hasFly = kinds.has('fly')
   const hasSwim = kinds.has('swim')
   const hasLand = kinds.has('land')
@@ -67,7 +78,7 @@ function toggle(id: string) {
       <div class="grid grid-cols-2 lg:flex gap-2">
         <select v-model.number="levelFilter" class="input input-sm lg:input select flex-1">
           <option :value="null">Any Level</option>
-          <option v-for="n in 16" :key="n - 1" :value="n - 1">Level {{ n - 1 }}</option>
+          <option v-for="n in LEVELS" :key="n" :value="n">Level {{ n }}</option>
         </select>
         <select v-model="sizeFilter" class="input input-sm lg:input select flex-1">
           <option value="">Any Size</option>
@@ -96,6 +107,11 @@ function toggle(id: string) {
               <span class="text-[0.5625rem] lg:text-[0.6875rem] px-1 lg:px-1.5 py-0.5 rounded bg-elevated text-dim">{{ vehicle.price }}</span>
             </div>
           </div>
+          <button
+            v-if="props.selectLabel"
+            class="btn-primary btn-xs shrink-0 ml-2"
+            @click.stop="emit('select', vehicle)"
+          >{{ props.selectLabel }}</button>
         </div>
         <div v-if="expanded === vehicle.id" class="px-2 lg:px-3 pb-2 lg:pb-3 pt-2 border-t border-[var(--color-border)]">
           <VehicleStatBlock :vehicle="vehicle" />

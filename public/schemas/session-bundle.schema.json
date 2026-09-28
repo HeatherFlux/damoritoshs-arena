@@ -475,6 +475,13 @@
       "items": {
         "type": "object"
       }
+    },
+    "chases": {
+      "type": "array",
+      "description": "Saved chases (see chases.schema.json)",
+      "items": {
+        "type": "object"
+      }
     }
   }
 }

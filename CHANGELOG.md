@@ -1,5 +1,18 @@
 # Damoritosh's Arena - Changelog
 
+## Chases and Vehicles
+- New CHASE tab for the GM Core chase subsystem: builder, tracker, and `#/chase/view` player view with face-down obstacle cards
+- 42 sample obstacles from GM Core, audited against the PDF by `scripts/audit-chase.py`
+- Vehicles can be attached to either side of a chase to track Hit Points, broken, uncontrolled and destroyed (a table aid; the chase rules do not use vehicle statistics)
+- 13 more vehicles from Archives of Nethys (GM Core, Tales from the Vast) via `npm run fetch-vehicles`, 43 in all
+- Session bundles and schemas cover chases
+
+## Readability
+- Theme colors adjust themselves to reach 4.5:1 contrast on every surface; text on filled highlights picks dark or light ink per theme
+- Settings, schema and import dialogs have a proper panel background
+- Button chamfers scale with button size
+- Gradient Wave background rebuilt as a ripple simulation on a single canvas
+
 ## Tech Core: Tactical Starship Combat
 - STARSHIP tab gains a CSC / TSC mode toggle; the cinematic runner is unchanged
 - Bundled Starfinder Tech Core data parsed from the PDF: 74 NPC starships, 32 starship hazards, 30 vehicles, faction common actions

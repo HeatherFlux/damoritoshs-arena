@@ -17,6 +17,9 @@ import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
 import TscPanel from './components/tsc/TscPanel.vue'
 import TscSidebar from './components/tsc/TscSidebar.vue'
 import TscPlayerView from './components/tsc/TscPlayerView.vue'
+import ChasePanel from './components/chase/ChasePanel.vue'
+import ChaseSidebar from './components/chase/ChaseSidebar.vue'
+import ChasePlayerView from './components/chase/ChasePlayerView.vue'
 import CombatPlayerView from './components/combat/CombatPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
 import ShopPanel from './components/shop/ShopPanel.vue'
@@ -28,14 +31,17 @@ import { useSettingsStore, themes } from './stores/settingsStore'
 import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
 import { useStarshipStore } from './stores/starshipStore'
 import { useTscStore } from './stores/tscStore'
+import { useChaseStore } from './stores/chaseStore'
 import { useCustomPanelStore } from './stores/customPanelStore'
 import type { SavedScene } from './types/starship'
 import type { PlayerStarship, TscSavedScene } from './types/tsc'
+import type { SavedChase } from './types/chase'
 
 const store = useEncounterStore()
 const customPanelStore = useCustomPanelStore()
 const starshipStore = useStarshipStore()
 const tscStore = useTscStore()
+const chaseStore = useChaseStore()
 const combatStore = useCombatStore()
 const partyStore = usePartyStore()
 const { settings } = useSettingsStore()
@@ -47,6 +53,7 @@ const currentAccentColor = computed(() => themes[settings.theme].accent)
 const isHackingPlayerView = ref(false)
 const isStarshipPlayerView = ref(false)
 const isTscPlayerView = ref(false)
+const isChasePlayerView = ref(false)
 const isCombatPlayerView = ref(false)
 
 function checkRoute() {
@@ -54,6 +61,7 @@ function checkRoute() {
   isHackingPlayerView.value = hash.includes('/hacking/view')
   isStarshipPlayerView.value = hash.includes('/starship/view')
   isTscPlayerView.value = hash.includes('/tsc/view')
+  isChasePlayerView.value = hash.includes('/chase/view')
   isCombatPlayerView.value = hash.includes('/combat/view')
 }
 
@@ -79,7 +87,7 @@ onUnmounted(() => {
 const showSettingsModal = ref(false)
 const showMobileNav = ref(false)
 
-type Tab = 'builder' | 'combat' | 'hacking' | 'starship' | 'custom' | 'shop'
+type Tab = 'builder' | 'combat' | 'hacking' | 'starship' | 'chase' | 'custom' | 'shop'
 const activeTab = ref<Tab>('builder')
 
 function setTab(tab: Tab) {
@@ -220,6 +228,49 @@ function handleTscFileUpload(event: Event) {
   reader.readAsText(file)
 }
 
+// ============ Chase tab ============
+
+const chasePanelRef = ref<{
+  editChaseFromSidebar: (chase: SavedChase) => void
+  startChaseFromSidebar: (chase: SavedChase) => void
+  newChase: () => void
+} | null>(null)
+
+const showChaseImportModal = ref(false)
+const chaseImportText = ref('')
+const chaseImportError = ref('')
+
+function handleChaseExport() {
+  const json = chaseStore.exportChases()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'chases.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleChaseImport() {
+  try {
+    chaseStore.importChases(chaseImportText.value)
+    showChaseImportModal.value = false
+    chaseImportText.value = ''
+    chaseImportError.value = ''
+  } catch (e) {
+    chaseImportError.value = 'No chases found in that JSON'
+  }
+}
+
+function handleChaseFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => { chaseImportText.value = reader.result as string }
+  reader.readAsText(file)
+}
+
 </script>
 
 <template>
@@ -227,6 +278,7 @@ function handleTscFileUpload(event: Event) {
   <HackingPlayerView v-if="isHackingPlayerView" />
   <StarshipPlayerView v-else-if="isStarshipPlayerView" />
   <TscPlayerView v-else-if="isTscPlayerView" />
+  <ChasePlayerView v-else-if="isChasePlayerView" />
   <CombatPlayerView v-else-if="isCombatPlayerView" />
 
   <!-- Main App -->
@@ -282,6 +334,14 @@ function handleTscFileUpload(event: Event) {
             @click="activeTab = 'starship'"
           >
             <span class="text-accent mr-1">&gt;</span> STARSHIP
+          </button>
+          <button
+            class="nav-tab flex items-center gap-2"
+            :class="{ 'nav-tab-active': activeTab === 'chase', 'nav-tab-live': chaseStore.state.activeScene && activeTab !== 'chase' }"
+            @click="activeTab = 'chase'"
+          >
+            <span class="text-accent mr-1">&gt;</span> CHASE
+            <span v-if="chaseStore.state.activeScene" class="w-2 h-2 bg-success animate-pulse" title="Chase running"></span>
           </button>
           <button
             class="nav-tab"
@@ -356,6 +416,14 @@ function handleTscFileUpload(event: Event) {
           @click="setTab('starship')"
         >
           <span class="text-accent mr-1">&gt;</span> STARSHIP
+        </button>
+        <button
+          class="nav-tab w-full text-left flex items-center gap-2"
+          :class="{ 'nav-tab-active': activeTab === 'chase' }"
+          @click="setTab('chase')"
+        >
+          <span class="text-accent mr-1">&gt;</span> CHASE
+          <span v-if="chaseStore.state.activeScene" class="w-2 h-2 bg-success animate-pulse" title="Chase running"></span>
         </button>
         <button
           class="nav-tab w-full text-left"
@@ -541,6 +609,27 @@ function handleTscFileUpload(event: Event) {
         </div>
       </template>
 
+      <!-- Chase Tab -->
+      <template v-else-if="activeTab === 'chase'">
+        <CollapsibleSidebar side="left" storageKey="chaseLeft">
+          <ChaseSidebar
+            @edit-chase="(chase) => chasePanelRef?.editChaseFromSidebar(chase)"
+            @start-chase="(chase) => chasePanelRef?.startChaseFromSidebar(chase)"
+            @new-chase="chasePanelRef?.newChase()"
+            @import="showChaseImportModal = true"
+            @export="handleChaseExport"
+          />
+        </CollapsibleSidebar>
+
+        <section class="flex-1 overflow-hidden min-w-0">
+          <ChasePanel ref="chasePanelRef" />
+        </section>
+
+        <CollapsibleSidebar side="right" storageKey="chaseRight">
+          <RollHistory />
+        </CollapsibleSidebar>
+      </template>
+
       <!-- Custom Creature/Hazard Builder Tab -->
       <template v-else-if="activeTab === 'custom'">
         <CustomPanel />
@@ -620,6 +709,26 @@ function handleTscFileUpload(event: Event) {
         <div class="flex justify-end gap-2 mt-4">
           <button class="btn btn-secondary" @click="showTscImportModal = false">Cancel</button>
           <button class="btn btn-primary" @click="handleTscImport">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chase Import Modal -->
+    <div v-if="showChaseImportModal" class="modal-overlay" @click.self="showChaseImportModal = false">
+      <div class="modal">
+        <h3 class="mb-2">Import Chases</h3>
+        <p class="text-dim text-sm mb-4">Paste exported chase JSON or upload a file:</p>
+        <input type="file" accept=".json" class="mb-3 text-sm" @change="handleChaseFileUpload" />
+        <textarea
+          v-model="chaseImportText"
+          class="input w-full font-mono text-xs p-3 resize-y"
+          placeholder='{"version": 1, "chases": [...]}'
+          rows="10"
+        ></textarea>
+        <p v-if="chaseImportError" class="text-danger mt-2">{{ chaseImportError }}</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button class="btn btn-secondary" @click="showChaseImportModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="handleChaseImport">Import</button>
         </div>
       </div>
     </div>

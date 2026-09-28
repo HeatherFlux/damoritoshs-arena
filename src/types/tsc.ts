@@ -238,7 +238,10 @@ export interface Vehicle {
   rarity: Rarity
   size: StarshipSize
   traits: string[]
+  /** Printed category, e.g. "Land Vehicle"; only on records that carry one. */
+  vehicleType?: string
   price: string
+  /** Empty for Archives of Nethys records, which carry no flavor text. */
   description: string
   space: string
   crew: string

@@ -214,7 +214,7 @@ function handleFile(event: Event) {
   flex-direction: column;
   height: 100%;
   padding: 0.75rem;
-  background: var(--color-surface);
+  background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }

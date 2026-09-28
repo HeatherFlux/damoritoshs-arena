@@ -1,0 +1,798 @@
+[
+  {
+    "id": "hoverboard",
+    "name": "Hoverboard",
+    "level": 0,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Hover",
+        "effect": "A hoverboard maintains an altitude of 6 inches above other surfaces, such as the ground or water. If driven off a high surface, the hoverboard loses 20 feet of altitude per round, landing without harm to the hoverboard or its pilot."
+      },
+      {
+        "name": "Portable",
+        "effect": "The hoverboard can be carried as an item with 1 Bulk."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Land Vehicle",
+    "price": "90 credits",
+    "description": "",
+    "space": "4 feet long, 1 foot wide, 6 inches high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 14
+      },
+      {
+        "skill": "Acrobatics",
+        "dc": 15
+      },
+      {
+        "skill": "Athletics",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 14), Acrobatics (DC 15), or Athletics (DC 16)",
+    "ac": 11,
+    "saves": {
+      "fort": 5
+    },
+    "hardness": 3,
+    "hp": 14,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 40 feet (motorized)",
+    "collision": {
+      "damage": "1d8",
+      "dc": 14
+    }
+  },
+  {
+    "id": "enercycle",
+    "name": "Enercycle",
+    "level": 1,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Portable",
+        "effect": "The enercycle can be pulled along the ground on its wheel by a Medium creature. The creature is encumbered."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Land Vehicle",
+    "price": "700 credits",
+    "description": "",
+    "space": "10 feet long, 5 feet wide, 3 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 15
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 15)",
+    "ac": 11,
+    "saves": {
+      "fort": 6
+    },
+    "hardness": 5,
+    "hp": 14,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 60,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "60 feet (motorized)",
+    "collision": {
+      "damage": "2d4",
+      "dc": 15
+    }
+  },
+  {
+    "id": "explorer-buggy",
+    "name": "Explorer Buggy",
+    "level": 1,
+    "source": "Tales From the Vast",
+    "page": 15,
+    "immunities": [
+      "critical hits",
+      "object immunities",
+      "precision damage"
+    ],
+    "abilities": [
+      {
+        "name": "All-Terrain",
+        "effect": "An explorer buggy hovers six inches above surfaces, such as the ground or water. If driven off a high surface, the explorer buggy loses 20 feet of altitude per round, landing without harm to the explorer buggy or its pilot."
+      },
+      {
+        "name": "Middle Seat",
+        "effect": "A Small creature can fit in the backseat of an explorer buggy that already has 3 passengers."
+      },
+      {
+        "name": "Turret",
+        "effect": "This explorer buggy is armed with a commercial reaction breacher which can be fired by any passenger."
+      }
+    ],
+    "rarity": "uncommon",
+    "size": "large",
+    "traits": [
+      "tech",
+      "uncommon"
+    ],
+    "vehicleType": "Land Vehicle",
+    "price": "",
+    "description": "",
+    "space": "10 feet long, 10 feet wide, 7 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 15
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 15)",
+    "ac": 12,
+    "saves": {
+      "fort": 7
+    },
+    "hardness": 5,
+    "hp": 20,
+    "bt": 10,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "hover, motorized"
+      }
+    ],
+    "speedText": "50 feet (hover, motorized)",
+    "collision": {
+      "damage": "2d8",
+      "dc": 15
+    },
+    "passengersText": "3",
+    "passengers": 3
+  },
+  {
+    "id": "forklift",
+    "name": "Forklift",
+    "level": 1,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Heavy Load",
+        "effect": "A forklift carries its cargo on its front forks and can carry up to 1,000 Bulk."
+      },
+      {
+        "name": "Lift",
+        "actions": 1,
+        "effect": "The pilot raises the forklift's forks up to 15 feet in the air, or lowers the forklift's forks down to the ground."
+      }
+    ],
+    "rarity": "common",
+    "size": "medium",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Land Vehicle",
+    "price": "100 credits",
+    "description": "",
+    "space": "10 feet long, 5 feet wide, 7 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 15
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 15)",
+    "ac": 11,
+    "saves": {
+      "fort": 7
+    },
+    "hardness": 5,
+    "hp": 18,
+    "bt": 9,
+    "speed": [
+      {
+        "feet": 20,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "20 feet (motorized)",
+    "collision": {
+      "damage": "2d6",
+      "dc": 15
+    }
+  },
+  {
+    "id": "motor-boat",
+    "name": "Motor Boat",
+    "level": 1,
+    "source": "GM Core",
+    "page": 239,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [],
+    "rarity": "uncommon",
+    "size": "large",
+    "traits": [
+      "uncommon"
+    ],
+    "vehicleType": "Sea Vehicle",
+    "price": "110 credits",
+    "description": "",
+    "space": "15 feet long, 5 feet wide, 4 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 15
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 15)",
+    "ac": 11,
+    "saves": {
+      "fort": 7
+    },
+    "hardness": 5,
+    "hp": 20,
+    "bt": 10,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 30 feet (motorized)",
+    "collision": {
+      "damage": "2d6",
+      "dc": 16
+    },
+    "passengersText": "5",
+    "passengers": 5
+  },
+  {
+    "id": "turboglider",
+    "name": "Turboglider",
+    "level": 1,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Cruising Drop",
+        "effect": "The only way to use the wind propulsion of a turboglider is to jump off a steep incline or if you're already in the air. An uncontrolled turboglider using wind propulsion falls 60 feet each round until the pilot successfully Takes Control. A turboglider must be controlled to switch propulsion. If the glider hits the ground before the pilot successfully Takes Control, the pilot and the glider each take falling damage."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Air Vehicle",
+    "price": "100 credits",
+    "description": "",
+    "space": "4 feet long, 10 feet wide, 1 foot high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 14
+      },
+      {
+        "skill": "Nature",
+        "dc": 16
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 14) or Nature (DC 16)",
+    "ac": 12,
+    "saves": {
+      "fort": 6
+    },
+    "hardness": 5,
+    "hp": 15,
+    "bt": 7,
+    "speed": [
+      {
+        "feet": 60,
+        "mode": "motorized",
+        "kind": "fly"
+      },
+      {
+        "feet": 40,
+        "mode": "wind",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 60 feet (motorized) or fly 40 feet (wind)",
+    "collision": {
+      "damage": "1d8",
+      "dc": 15
+    },
+    "passengersText": "1 (motorized only)",
+    "passengers": 1,
+    "weaknesses": [
+      "fire 5"
+    ]
+  },
+  {
+    "id": "skyboat",
+    "name": "Skyboat",
+    "level": 3,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "electricity",
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Harness the Storm",
+        "actions": 3,
+        "traits": [
+          "electricity"
+        ],
+        "requirements": "The skyboat is in a rainstorm",
+        "effect": "The skyboat harnesses the storm's electrical energy through its magical sails, then expels this energy as a bolt of lightning that erupts from the front of the skyboat. The lightning deals 2d8 electricity damage to each creature in a 60-foot line (DC 18 basic Reflex save). Harness the Storm stops working if the skyboat is broken."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "magical",
+      "tech"
+    ],
+    "vehicleType": "Air Vehicle",
+    "price": "1500 credits",
+    "description": "",
+    "space": "15 feet long, 10 feet wide, 3 feet high",
+    "crew": "1 pilot, 1 crew",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 17
+      },
+      {
+        "skill": "Nature",
+        "dc": 19
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 17) or Nature (DC 19)",
+    "ac": 16,
+    "saves": {
+      "fort": 10
+    },
+    "hardness": 10,
+    "hp": 80,
+    "bt": 40,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "magical",
+        "kind": "fly"
+      },
+      {
+        "feet": 60,
+        "mode": "wind",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 40 feet (magical) or fly 60 feet (wind)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 20
+    },
+    "passengersText": "4",
+    "passengers": 4
+  },
+  {
+    "id": "torpedo-minisub",
+    "name": "Torpedo Minisub",
+    "level": 3,
+    "source": "GM Core",
+    "page": 239,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Submersible",
+        "effect": "The torpedo minisub can travel beneath the surface of the water, carrying an air reservoir suitable to sustain 2 Medium creatures for up to 24 hours. The torpedo minisub can safely reach depths of up to 1 mile. If broken, the torpedo minisub loses air from its reservoir, reducing the stored air by 10 minutes per round. A broken torpedo minisub has its maximum depth reduced by half (and rises to that depth when broken, if necessary)."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Sea Vehicle",
+    "price": "1500 credits",
+    "description": "",
+    "space": "10 feet long, 5 feet wide, 3 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 17
+      },
+      {
+        "skill": "Nature",
+        "dc": 19
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 17) or Nature (DC 19)",
+    "ac": 14,
+    "saves": {
+      "fort": 8
+    },
+    "hardness": 5,
+    "hp": 40,
+    "bt": 20,
+    "speed": [
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "swim 40 feet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 18
+    },
+    "passengersText": "1",
+    "passengers": 1
+  },
+  {
+    "id": "drop-pod",
+    "name": "Drop Pod",
+    "level": 4,
+    "source": "GM Core",
+    "page": 239,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Controlled Plummet",
+        "effect": "This vehicle is programmed to deploy from another airborne vehicle or spaceship and fall toward the ground at a rate of 500 feet the first round and 1,500 feet each round thereafter, for a world with normal gravity. One round before impact, antigrav rotors, parachutes, and retrorockets slow the descent to 60 feet per round, allowing for a safe landing (even if uncontrolled)."
+      },
+      {
+        "name": "Enclosed",
+        "effect": "The pilot and passengers of a drop pod are completely enclosed and don't have line of sight or line of effect with any creatures or objects outside the vehicle."
+      },
+      {
+        "name": "Space Vehicle",
+        "effect": "This vehicle protects its users from the dangers of space, including the benefits of basic environmental protection and a commercial filtered rebreather."
+      }
+    ],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Space Vehicle",
+    "price": "2500 credits",
+    "description": "",
+    "space": "12 feet long, 12 feet wide, 15 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 18
+      },
+      {
+        "skill": "Computers",
+        "dc": 20
+      },
+      {
+        "skill": "Survival",
+        "dc": 20
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 18), Computers (DC 20), or Survival (DC 20)",
+    "ac": 16,
+    "saves": {
+      "fort": 11
+    },
+    "hardness": 15,
+    "hp": 70,
+    "bt": 35,
+    "speed": [],
+    "speedText": "controlled plummet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 19
+    },
+    "passengersText": "5",
+    "passengers": 5,
+    "resistances": [
+      "fire 10"
+    ]
+  },
+  {
+    "id": "urban-cruiser",
+    "name": "Urban Cruiser",
+    "level": 4,
+    "source": "GM Core",
+    "page": 239,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Middle Seat",
+        "effect": "A Small creature can fit in the backseat of an urban cruiser that already has 3 passengers."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Land Vehicle",
+    "price": "3000 credits",
+    "description": "",
+    "space": "10 feet long, 10 feet wide, 4 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 19
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 19)",
+    "ac": 16,
+    "saves": {
+      "fort": 11
+    },
+    "hardness": 5,
+    "hp": 60,
+    "bt": 30,
+    "speed": [
+      {
+        "feet": 55,
+        "mode": "motorized"
+      }
+    ],
+    "speedText": "55 feet (motorized)",
+    "collision": {
+      "damage": "2d10",
+      "dc": 19
+    },
+    "passengersText": "3",
+    "passengers": 3
+  },
+  {
+    "id": "enercopter",
+    "name": "Enercopter",
+    "level": 5,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [],
+    "rarity": "common",
+    "size": "huge",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Air Vehicle",
+    "price": "4500 credits",
+    "description": "",
+    "space": "20 feet long, 10 feet wide, 12 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 20
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 20)",
+    "ac": 18,
+    "saves": {
+      "fort": 12
+    },
+    "hardness": 10,
+    "hp": 80,
+    "bt": 40,
+    "speed": [
+      {
+        "feet": 50,
+        "mode": "motorized",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 50 feet (motorized)",
+    "collision": {
+      "damage": "3d10",
+      "dc": 20
+    },
+    "passengersText": "7",
+    "passengers": 7
+  },
+  {
+    "id": "patrol-dirigible",
+    "name": "Patrol Dirigible",
+    "level": 8,
+    "source": "GM Core",
+    "page": 238,
+    "immunities": [
+      "critical hits",
+      "object immunities",
+      "precision damage"
+    ],
+    "abilities": [
+      {
+        "name": "Drifter",
+        "effect": "The patrol dirigible can only be steered using its motorized propulsion, otherwise relying on favorable wind currents to carry it in the right direction. If the pilot fails to maintain control of the dirigible using its wind propulsion, the dirigible drifts whichever way the wind carries it, moving up to four times its Speed each round as determined by the GM."
+      },
+      {
+        "name": "Hangar Bay",
+        "effect": "The patrol dirigible provides a place for up to two Huge or smaller vehicles to be docked."
+      }
+    ],
+    "rarity": "common",
+    "size": "gargantuan",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Air Vehicle",
+    "price": "16000 credits",
+    "description": "",
+    "space": "80 feet long, 60 feet wide, 40 feet high",
+    "crew": "1 pilot, 1 crew",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 23
+      },
+      {
+        "skill": "Nature",
+        "dc": 25,
+        "note": "wind only"
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 23) or Nature (DC 25; wind only)",
+    "ac": 20,
+    "saves": {
+      "fort": 14
+    },
+    "hardness": 10,
+    "hp": 100,
+    "bt": 50,
+    "speed": [
+      {
+        "feet": 30,
+        "mode": "motorized",
+        "kind": "fly"
+      },
+      {
+        "feet": 10,
+        "mode": "wind",
+        "kind": "fly"
+      }
+    ],
+    "speedText": "fly 30 feet (motorized) or fly 10 feet (wind)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 24
+    },
+    "passengersText": "12",
+    "passengers": 12,
+    "weaknesses": [
+      "fire 15"
+    ]
+  },
+  {
+    "id": "wakeskimmer",
+    "name": "Wakeskimmer",
+    "level": 10,
+    "source": "GM Core",
+    "page": 239,
+    "immunities": [
+      "object immunities"
+    ],
+    "abilities": [
+      {
+        "name": "Sea-to-Sky Transference",
+        "actions": 3,
+        "effect": "The pilot engages transference mode, causing the wakeskimmer to launch itself from a body of water (or other fluid) up into orbit or to plummet from space into the sea, at a Speed of 1,500 feet per round."
+      },
+      {
+        "name": "Space Vehicle",
+        "effect": "This vehicle protects its users from the dangers of space, including the benefits of basic environmental protection and a commercial filtered rebreather."
+      }
+    ],
+    "rarity": "common",
+    "size": "large",
+    "traits": [
+      "tech"
+    ],
+    "vehicleType": "Space Vehicle",
+    "price": "28000 credits",
+    "description": "",
+    "space": "15 feet long, 6 feet wide, 6 feet high",
+    "crew": "1 pilot",
+    "pilotingChecks": [
+      {
+        "skill": "Piloting",
+        "dc": 26
+      },
+      {
+        "skill": "Computers",
+        "dc": 28
+      },
+      {
+        "skill": "Survival",
+        "dc": 28
+      }
+    ],
+    "pilotingCheckText": "Piloting (DC 26), Computers (DC 28), or Survival (DC 28)",
+    "ac": 25,
+    "saves": {
+      "fort": 19
+    },
+    "hardness": 15,
+    "hp": 160,
+    "bt": 80,
+    "speed": [
+      {
+        "feet": 60,
+        "mode": "motorized; space only",
+        "kind": "fly"
+      },
+      {
+        "feet": 40,
+        "mode": "motorized",
+        "kind": "swim"
+      }
+    ],
+    "speedText": "fly 60 feet (motorized; space only) or swim 40 feet (motorized)",
+    "collision": {
+      "damage": "6d10",
+      "dc": 27
+    },
+    "passengersText": "3",
+    "passengers": 3,
+    "resistances": [
+      "cold 15",
+      "fire 15"
+    ]
+  }
+]

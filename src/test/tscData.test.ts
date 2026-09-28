@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import { TSC_HAZARDS } from '../data/tscHazards'
-import { VEHICLES } from '../data/vehicles'
+import { TECH_CORE_VEHICLES as VEHICLES } from '../data/vehicles'
 import { TSC_SHARED_ABILITIES, TSC_DEFAULT_ABILITIES } from '../data/tscSharedAbilities'
 import inventory from '../../scripts/techcore-inventory.json'
 import type { TscAbility } from '../types/tsc'

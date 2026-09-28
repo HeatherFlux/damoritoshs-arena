@@ -98,8 +98,15 @@
     {
       "id": "vehicles",
       "name": "Vehicles",
-      "description": "Tech Core vehicles (bundled reference data)",
+      "description": "Vehicles from Tech Core, GM Core and later books (bundled reference data)",
       "schemaUrl": "/schemas/vehicles.schema.json"
+    },
+    {
+      "id": "chases",
+      "name": "Chases",
+      "description": "Saved chases with obstacles, Chase Points, sides and attached vehicles",
+      "schemaUrl": "/schemas/chases.schema.json",
+      "exampleUrl": "/schemas/examples/chases.example.json"
     }
   ]
 }

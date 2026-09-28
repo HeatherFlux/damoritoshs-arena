@@ -6,6 +6,7 @@ import { usePartyStore } from '../stores/partyStore'
 import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
 import { useTscStore } from '../stores/tscStore'
+import { useChaseStore } from '../stores/chaseStore'
 import { useShopStore } from '../stores/shopStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
@@ -18,6 +19,7 @@ const partyStore = usePartyStore()
 const hackingStore = useHackingStore()
 const starshipStore = useStarshipStore()
 const tscStore = useTscStore()
+const chaseStore = useChaseStore()
 const shopStore = useShopStore()
 
 defineEmits<{
@@ -43,7 +45,7 @@ function exportSessionBundle() {
     const partyName = partyStore.activeParty.value?.name
     const baseName = defaultBundleFilename(partyName)
     const bundle = buildSessionBundle(
-      { encounterStore, partyStore, hackingStore, starshipStore, shopStore, tscStore },
+      { encounterStore, partyStore, hackingStore, starshipStore, shopStore, tscStore, chaseStore },
       { name: baseName }
     )
     const { content, mimeType, extension } = serializeBundle(bundle, 'yaml')
