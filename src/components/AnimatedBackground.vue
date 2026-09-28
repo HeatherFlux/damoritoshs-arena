@@ -424,10 +424,10 @@ function drawRipples(time: number) {
   const trough = hexToRgb(root.getPropertyValue('--color-secondary').trim() || props.accentColor)
   const still = hexToRgb(root.getPropertyValue('--color-text-muted').trim() || '#4a5968')
 
-  // Rain: a drop somewhere every few seconds
+  // Rain: a drop somewhere every 7 to 10 seconds
   if (time > rippleNextDrop) {
     disturb(Math.random() * canvas.width, Math.random() * canvas.height, 0.5 + Math.random() * 0.5, 1.4 + Math.random() * 0.8)
-    rippleNextDrop = time + 1800 + Math.random() * 3000
+    rippleNextDrop = time + 7000 + Math.random() * 3000
   }
 
   // Advance in fixed steps; cap catch-up after the tab was in the background
