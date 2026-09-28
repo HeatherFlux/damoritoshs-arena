@@ -209,7 +209,7 @@ function getEntryColor(entry: InitiativeEntry, index: number): string {
 
 .initiative-entry.current {
   border-color: var(--color-accent);
-  background: rgba(var(--color-accent-rgb), 0.1);
+  background: var(--color-accent-subtle);
 }
 
 .initiative-entry.acted {
@@ -299,7 +299,7 @@ function getEntryColor(entry: InitiativeEntry, index: number): string {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 
 .btn-primary:disabled {

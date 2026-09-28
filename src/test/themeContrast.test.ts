@@ -77,12 +77,13 @@ describe('theme contrast', () => {
 
     it(`${id}: colored text reads on its own subtle tint`, () => {
       const failures: string[] = []
-      for (const name of ['accent', 'secondary', 'tertiary', 'quaternary', 'danger', 'success', 'hazard', 'rollable']) {
+      for (const name of ['accent', 'secondary', 'tertiary', 'quaternary', 'danger', 'warning', 'success', 'hazard', 'rollable']) {
         const color = colors[`--color-${name}`]
-        const background = tint(color, colors['--color-bg-elevated'])
+        for (const surface of SURFACES) {
+        const background = tint(color, colors[surface])
         const ratio = contrastRatio(color, background)
-        // Tinted chips carry short bold labels; hold them to 4:1
-        if (ratio < 4) failures.push(`${name} ${color} on tint ${background}: ${ratio.toFixed(2)}`)
+        if (ratio < MIN_TEXT_CONTRAST) failures.push(`${name} ${color} on tint ${background}: ${ratio.toFixed(2)}`)
+        }
       }
       expect(failures).toEqual([])
     })

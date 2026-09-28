@@ -425,7 +425,7 @@ const roleColor = computed(() => getRoleColor(props.roleId))
 }
 
 .roll-btn:hover {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 
 .dc-hint {
@@ -584,6 +584,6 @@ const roleColor = computed(() => getRoleColor(props.roleId))
 }
 
 .log-next-btn:hover {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 </style>

@@ -1100,7 +1100,7 @@ function removeTrait(index: number) {
 }
 
 .btn-save:hover {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 
 .btn-cancel {

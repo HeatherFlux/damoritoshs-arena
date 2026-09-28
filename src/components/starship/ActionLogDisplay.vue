@@ -162,7 +162,7 @@ const emits = defineEmits<{
 .filter-btn.active {
   border-color: var(--color-accent);
   color: var(--color-accent);
-  background: rgba(var(--color-accent-rgb, 99, 102, 241), 0.1);
+  background: var(--color-accent-subtle);
 }
 
 .filter-btn:hover:not(.active) {

@@ -710,7 +710,7 @@ function removeSkill(name: string) {
 
 .threat-card.current-turn {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.2);
+  box-shadow: 0 0 0 2px var(--color-accent-subtle);
 }
 
 .threat-header {

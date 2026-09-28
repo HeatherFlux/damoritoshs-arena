@@ -488,7 +488,7 @@ function skipInitiative() {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 
 .btn-primary:disabled {

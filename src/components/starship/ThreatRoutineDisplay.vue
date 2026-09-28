@@ -592,7 +592,7 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
 }
 
 .execute-btn:hover:not(.disabled) {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-bright);
 }
 
 .execute-btn.disabled {

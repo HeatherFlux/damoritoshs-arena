@@ -279,8 +279,15 @@ export const MIN_TEXT_CONTRAST = 4.5
  * wanted contrast against every background given. Moves away from the
  * backgrounds: lighter on dark surfaces, darker on light ones.
  */
-export function ensureContrast(hex: string, backgrounds: string[], min: number = MIN_TEXT_CONTRAST): string {
-  const passes = (c: string) => backgrounds.every(bg => contrastRatio(c, bg) >= min)
+export function ensureContrast(
+  hex: string,
+  backgrounds: string[],
+  min: number = MIN_TEXT_CONTRAST,
+  /** Also require the contrast on the color's own tint over each background, as the -subtle chips use. */
+  tintAlpha: number = 0,
+): string {
+  const passes = (c: string) => backgrounds.every(bg =>
+    contrastRatio(c, bg) >= min && (tintAlpha <= 0 || contrastRatio(c, blend(c, bg, tintAlpha)) >= min))
   if (passes(hex)) return hex
 
   const avgLuminance = backgrounds.reduce((sum, bg) => sum + relativeLuminance(bg), 0) / backgrounds.length
@@ -292,6 +299,14 @@ export function ensureContrast(hex: string, backgrounds: string[], min: number =
     if (passes(candidate)) return candidate
   }
   return step > 0 ? '#ffffff' : '#000000'
+}
+
+/** A color laid over a background at the given opacity. */
+export function blend(hex: string, background: string, alpha: number): string {
+  const top = hexToRgb(hex)
+  const bottom = hexToRgb(background)
+  const mix = (a: number, b: number) => Math.round(a * alpha + b * (1 - alpha)).toString(16).padStart(2, '0')
+  return `#${mix(top.r, bottom.r)}${mix(top.g, bottom.g)}${mix(top.b, bottom.b)}`
 }
 
 /**

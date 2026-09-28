@@ -1,5 +1,5 @@
 import { reactive, watch } from 'vue'
-import { generateThemePalette, hexToHSL, hslToHex, ensureContrast, readableOn } from '../utils/colors'
+import { generateThemePalette, hexToHSL, hslToHex, ensureContrast, readableOn, MIN_TEXT_CONTRAST } from '../utils/colors'
 
 const STORAGE_KEY = 'sf2e-settings'
 
@@ -198,6 +198,8 @@ export function generateThemeColors(def: ThemeDefinition): Record<string, string
   // Quaternary (+270°) → Success/Green tones
 
   const isDark = def.mode === 'dark'
+  // Opacity of the -subtle tints
+  const subtleAlpha = 0.12
 
   // Base colors depend on mode
   const base: Record<string, string> = isDark ? {
@@ -226,7 +228,8 @@ export function generateThemeColors(def: ThemeDefinition): Record<string, string
   // Every theme color doubles as text somewhere, so each one is nudged
   // lighter (dark mode) or darker (light mode) until it reads on all surfaces.
   const surfaces = [base['--color-bg'], base['--color-bg-surface'], base['--color-bg-elevated'], base['--color-bg-hover']]
-  const legible = (hex: string) => ensureContrast(hex, surfaces)
+  // Colored text also sits on chips tinted with its own color, so it has to read there too
+  const legible = (hex: string) => ensureContrast(hex, surfaces, MIN_TEXT_CONTRAST, subtleAlpha)
   // Hover/pressed variants step away from the surface so they stay legible too
   const dimColor = (hex: string) => shiftLightness(hex, isDark ? -10 : 10)
   const brightColor = (hex: string) => shiftLightness(hex, isDark ? 15 : -10)
@@ -253,10 +256,9 @@ export function generateThemeColors(def: ThemeDefinition): Record<string, string
   // Ink for text sitting on a filled highlight
   const ink = (fill: string) => readableOn(fill, isDark ? base['--color-bg'] : base['--color-text'])
 
-  // Glow/subtle intensity
+  // Glow intensity
   const glowAlpha = 0.4
   const glowAlpha2 = 0.2
-  const subtleAlpha = 0.12
 
   return {
     ...base,

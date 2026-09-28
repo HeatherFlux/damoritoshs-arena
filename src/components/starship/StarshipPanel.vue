@@ -976,17 +976,17 @@ defineExpose({
 }
 
 .section-title-input:hover {
-  background: var(--color-elevated, rgba(255, 255, 255, 0.04));
+  background: var(--color-bg-elevated, rgba(255, 255, 255, 0.04));
 }
 
 .section-title-input:focus {
   outline: none;
   border-color: var(--color-accent);
-  background: var(--color-elevated, rgba(255, 255, 255, 0.04));
+  background: var(--color-bg-elevated, rgba(255, 255, 255, 0.04));
 }
 
 .section-title-input::placeholder {
-  color: var(--color-dim);
+  color: var(--color-text-dim);
   opacity: 0.6;
 }
 

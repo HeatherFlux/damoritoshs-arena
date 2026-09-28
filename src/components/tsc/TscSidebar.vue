@@ -107,17 +107,17 @@ function deletePlayerShip(ship: PlayerStarship) {
 <style scoped>
 .scene-sidebar { display: flex; flex-direction: column; height: 100%; padding: 0.75rem; gap: 0.5rem; overflow-y: auto; }
 .sidebar-header { display: flex; justify-content: space-between; align-items: center; }
-.sidebar-title { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-dim); }
+.sidebar-title { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-dim); }
 .sidebar-actions { display: flex; gap: 0.25rem; }
 .btn-save { width: 100%; }
 .scene-list { display: flex; flex-direction: column; gap: 0.25rem; }
-.scene-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; gap: 0.5rem; }
+.scene-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); cursor: pointer; gap: 0.5rem; }
 .scene-item:hover, .scene-item.active { border-color: var(--color-accent); }
 .scene-info { display: flex; flex-direction: column; min-width: 0; }
 .scene-name { font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.scene-meta { font-size: 0.625rem; color: var(--color-dim); }
+.scene-meta { font-size: 0.625rem; color: var(--color-text-dim); }
 .scene-actions { display: flex; gap: 0.125rem; opacity: 0; }
 .scene-item:hover .scene-actions { opacity: 1; }
-.btn-icon-tiny { width: 1.25rem; height: 1.25rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--color-dim); background: transparent; border: none; cursor: pointer; }
+.btn-icon-tiny { width: 1.25rem; height: 1.25rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--color-text-dim); background: transparent; border: none; cursor: pointer; }
 .btn-icon-tiny:hover { color: var(--color-accent); }
 </style>
