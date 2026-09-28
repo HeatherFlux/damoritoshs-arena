@@ -35,7 +35,7 @@ function downloadSchema(file: string) {
 
 <template>
   <div>
-    <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">&gt; Data Schemas</h3>
+    <h3 class="text-sm font-semibold text-dim uppercase tracking-wide mb-3">Data Schemas</h3>
 
     <div class="p-3 bg-elevated space-y-3">
       <p class="text-xs text-dim">
