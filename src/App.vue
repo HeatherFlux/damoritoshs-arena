@@ -471,7 +471,7 @@ function handleTscFileUpload(event: Event) {
       <!-- Starship Tab: CSC (cinematic scenes) or TSC (tactical combat) -->
       <template v-else-if="activeTab === 'starship'">
         <div class="flex flex-col flex-1 overflow-hidden">
-          <div class="flex items-center gap-2 px-3 py-1.5 border-b border-[var(--color-border)] bg-surface shrink-0">
+          <div class="flex flex-wrap items-center gap-2 px-3 py-1.5 border-b border-[var(--color-border)] bg-surface shrink-0">
             <span class="text-[0.625rem] uppercase tracking-widest text-dim">Mode</span>
             <div class="flex gap-1">
               <button
@@ -479,17 +479,17 @@ function handleTscFileUpload(event: Event) {
                 :class="starshipMode === 'csc' ? 'btn-primary' : 'btn-secondary'"
                 title="Cinematic Starship Combat (GM Core scenes: crew roles and Victory Points)"
                 @click="starshipMode = 'csc'"
-              >CSC</button>
+              >Cinematic Starship Combat</button>
               <button
                 class="btn-xs"
                 :class="starshipMode === 'tsc' ? 'btn-primary' : 'btn-secondary'"
                 title="Tactical Starship Combat (Tech Core: battle stations, sensor map, Hull and Shield Points)"
                 @click="starshipMode = 'tsc'"
-              >TSC</button>
+              >Tactical Starship Combat</button>
               <span class="badge-level badge-level-warning text-[0.5625rem] self-center" title="Tactical starship combat is in beta: rules and data were audited against Tech Core, but please report anything that disagrees with the book">BETA</span>
             </div>
             <span class="text-[0.625rem] text-dim hidden md:inline">
-              {{ starshipMode === 'csc' ? 'Cinematic starship scenes (GM Core)' : 'Tactical starship combat (Tech Core) — beta' }}
+              {{ starshipMode === 'csc' ? 'GM Core scenes: crew roles and Victory Points' : 'Tech Core: battle stations, sensor map, Hull and Shield Points' }}
             </span>
             <a
               v-if="starshipMode === 'tsc'"
@@ -498,8 +498,8 @@ function handleTscFileUpload(event: Event) {
               target="_blank"
               rel="noopener"
             >Report a problem</a>
-            <span v-if="tscStore.state.activeScene && starshipMode === 'csc'" class="text-[0.625rem] text-success ml-auto">TSC scene running</span>
-            <span v-if="starshipStore.state.activeScene && starshipMode === 'tsc'" class="text-[0.625rem] text-success ml-auto">CSC scene running</span>
+            <span v-if="tscStore.state.activeScene && starshipMode === 'csc'" class="text-[0.625rem] text-success ml-auto">Tactical scene running</span>
+            <span v-if="starshipStore.state.activeScene && starshipMode === 'tsc'" class="text-[0.625rem] text-success ml-auto">Cinematic scene running</span>
           </div>
           <div class="flex flex-1 overflow-hidden">
             <template v-if="starshipMode === 'csc'">
