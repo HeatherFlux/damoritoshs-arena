@@ -348,8 +348,8 @@ function drawMatrixRain(time: number) {
 // A grid of dots riding a simulated water surface. Heights follow the
 // discrete wave equation, so ripples spread, cross and bounce off the edges.
 const RIPPLE_CELL = 16           // px between dots
-const RIPPLE_SPEED = 0.10        // wave speed squared, in cells per step (stable below 0.5)
-const RIPPLE_DAMPING = 0.994     // energy kept per step
+const RIPPLE_SPEED = 0.03        // wave speed squared, in cells per step (stable below 0.5)
+const RIPPLE_DAMPING = 0.997     // energy kept per step
 const RIPPLE_STEP_MS = 1000 / 60 // fixed step, so speed is the same on any refresh rate
 const RIPPLE_LIFT = 5            // px a full-height crest lifts its dot
 
@@ -424,10 +424,10 @@ function drawRipples(time: number) {
   const trough = hexToRgb(root.getPropertyValue('--color-secondary').trim() || props.accentColor)
   const still = hexToRgb(root.getPropertyValue('--color-text-muted').trim() || '#4a5968')
 
-  // Rain: a drop somewhere every second or two
+  // Rain: a drop somewhere every few seconds
   if (time > rippleNextDrop) {
     disturb(Math.random() * canvas.width, Math.random() * canvas.height, 0.5 + Math.random() * 0.5, 1.4 + Math.random() * 0.8)
-    rippleNextDrop = time + 900 + Math.random() * 1800
+    rippleNextDrop = time + 1800 + Math.random() * 3000
   }
 
   // Advance in fixed steps; cap catch-up after the tab was in the background
