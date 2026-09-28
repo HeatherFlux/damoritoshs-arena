@@ -222,7 +222,7 @@ function importAnother() {
         <div>
           <h2 class="text-lg lg:text-xl mb-1">{{ combatStore.state.combat?.name }}</h2>
           <div class="flex flex-wrap gap-2 lg:gap-4 text-sm text-dim">
-            <span class="bg-accent text-white px-2 py-0.5 rounded font-semibold">Round {{ combatStore.state.combat?.round }}</span>
+            <span class="bg-accent text-on-accent px-2 py-0.5 rounded font-semibold">Round {{ combatStore.state.combat?.round }}</span>
             <span v-if="combatStore.currentCombatant.value">
               Current: <strong class="text-text">{{ combatStore.currentCombatant.value.name }}</strong>
             </span>
@@ -409,7 +409,7 @@ function importAnother() {
 
         <!-- Success State -->
         <div v-if="importResult?.success" class="text-center py-6">
-          <div class="w-12 h-12 bg-success text-white text-2xl font-bold rounded-full flex items-center justify-center mx-auto mb-4">✓</div>
+          <div class="w-12 h-12 bg-success text-on-success text-2xl font-bold rounded-full flex items-center justify-center mx-auto mb-4">✓</div>
           <div class="text-lg mb-3">
             <strong>{{ importResult.combatant?.name }}</strong> imported successfully!
           </div>

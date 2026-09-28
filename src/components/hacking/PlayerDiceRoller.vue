@@ -146,7 +146,7 @@ function roll() {
 
 .roll-button:hover:not(:disabled) {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   box-shadow: 0 0 20px var(--color-accent-glow, rgba(30, 203, 225, 0.4));
 }
 
@@ -155,7 +155,7 @@ function roll() {
 }
 
 .roll-button:hover:not(:disabled) .roll-mod {
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .roll-button:active:not(:disabled) {

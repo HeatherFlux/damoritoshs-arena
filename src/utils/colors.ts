@@ -249,3 +249,55 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
     b: parseInt(hex.slice(4, 6), 16)
   }
 }
+
+/**
+ * WCAG relative luminance of a hex color (0 = black, 1 = white)
+ */
+export function relativeLuminance(hex: string): number {
+  const { r, g, b } = hexToRgb(hex)
+  const channel = (v: number) => {
+    const c = v / 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+}
+
+/**
+ * WCAG contrast ratio between two hex colors (1 to 21)
+ */
+export function contrastRatio(a: string, b: string): number {
+  const la = relativeLuminance(a)
+  const lb = relativeLuminance(b)
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+}
+
+/** WCAG AA for normal-size text */
+export const MIN_TEXT_CONTRAST = 4.5
+
+/**
+ * Nudge a color's lightness (hue and saturation kept) until it reaches the
+ * wanted contrast against every background given. Moves away from the
+ * backgrounds: lighter on dark surfaces, darker on light ones.
+ */
+export function ensureContrast(hex: string, backgrounds: string[], min: number = MIN_TEXT_CONTRAST): string {
+  const passes = (c: string) => backgrounds.every(bg => contrastRatio(c, bg) >= min)
+  if (passes(hex)) return hex
+
+  const avgLuminance = backgrounds.reduce((sum, bg) => sum + relativeLuminance(bg), 0) / backgrounds.length
+  const step = avgLuminance < 0.5 ? 1 : -1
+  const hsl = hexToHSL(hex)
+
+  for (let l = hsl.l + step; l >= 0 && l <= 100; l += step) {
+    const candidate = hslToHex({ ...hsl, l })
+    if (passes(candidate)) return candidate
+  }
+  return step > 0 ? '#ffffff' : '#000000'
+}
+
+/**
+ * Text color to put on top of a filled background: whichever of the dark
+ * or light ink reads better.
+ */
+export function readableOn(background: string, dark: string = '#050608', light: string = '#ffffff'): string {
+  return contrastRatio(dark, background) >= contrastRatio(light, background) ? dark : light
+}

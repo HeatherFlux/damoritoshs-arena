@@ -719,7 +719,7 @@ function removeAbility(index: number) {
 
 .section-count {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-size: 0.625rem;
   font-weight: bold;
   padding: 0.125rem 0.375rem;
@@ -935,7 +935,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .btn-apply:hover {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 /* Transition */

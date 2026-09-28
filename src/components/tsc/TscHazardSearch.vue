@@ -97,7 +97,7 @@ function levelClass(level: number) {
           <div class="ml-2">
             <button
               v-if="addLabel"
-              class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-white text-lg lg:text-xl font-semibold flex items-center justify-center transition-all duration-150 hover:scale-105"
+              class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-on-accent text-lg lg:text-xl font-semibold flex items-center justify-center transition-all duration-150 hover:scale-105"
               :title="addLabel"
               @click.stop="emit('add', hazard)"
             >+</button>

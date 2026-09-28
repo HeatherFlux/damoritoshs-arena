@@ -78,8 +78,8 @@ function renameLabel(e: Event) {
     <div class="flex flex-wrap items-center gap-2">
       <input :value="instance.label" class="input input-sm font-semibold w-44" title="Label shown to players" @change="renameLabel" />
       <span class="text-[0.625rem] uppercase tracking-widest text-dim">{{ model.name }} · Lvl {{ model.level }} · {{ sizeLabel(model.size) }}</span>
-      <span v-if="instance.destroyed" class="trait border-danger text-danger">DESTROYED</span>
-      <span v-else class="trait" :class="{ 'border-warning text-warning': band === 'damaged', 'border-danger text-danger': band === 'critical' }">{{ band }}</span>
+      <span v-if="instance.destroyed" class="trait bg-danger text-on-danger">DESTROYED</span>
+      <span v-else class="trait" :class="{ 'bg-warning text-on-warning': band === 'damaged', 'bg-danger text-on-danger': band === 'critical' }">{{ band }}</span>
       <div class="ml-auto flex items-center gap-1">
         <button class="btn-xs" :class="instance.hiddenFromPlayers ? 'btn-danger' : 'btn-secondary'" :title="instance.hiddenFromPlayers ? 'Hidden from players (click to reveal)' : 'Visible to players (click to hide)'" @click="store.setHidden({ kind: 'npc', instanceId: instance.instanceId }, !instance.hiddenFromPlayers)">{{ instance.hiddenFromPlayers ? 'hidden' : 'shown' }}</button>
         <button class="btn-xs" :class="instance.detected ? 'btn-secondary' : 'btn-danger'" :title="instance.detected ? 'Detected by the crew' : 'Undetected: not on the player sensor feed'" @click="store.setDetected({ kind: 'npc', instanceId: instance.instanceId }, !instance.detected)">{{ instance.detected ? 'detected' : 'undetected' }}</button>
@@ -113,8 +113,8 @@ function renameLabel(e: Event) {
       <label class="flex items-center gap-1"><input v-model="bypassing" type="checkbox" /> bypassing</label>
       <button v-if="model.sp !== undefined" class="btn-secondary btn-xs" :title="`Fortify Shield Points (+${model.fortify ?? 0} SP, or the amount entered)`" @click="fortify">Fortify</button>
       <button class="btn-secondary btn-xs" :disabled="instance.inoperable" :title="instance.inoperable ? 'Inoperable starships can\'t act' : 'Repair Self (3 actions): fix one malfunctioning station, regain HP equal to level'" @click="store.repairSelf(instance.instanceId)">Repair Self</button>
-      <button class="trait" :class="instance.inoperable ? 'border-warning text-warning' : 'text-dim'" @click="store.setInoperable(target, !instance.inoperable)">inoperable</button>
-      <button class="trait" :class="instance.offKilter ? 'border-warning text-warning' : 'text-dim'" @click="store.setOffKilter(target, !instance.offKilter)">off-kilter</button>
+      <button class="trait" :class="instance.inoperable ? 'bg-warning text-on-warning' : 'bg-elevated text-dim'" @click="store.setInoperable(target, !instance.inoperable)">inoperable</button>
+      <button class="trait" :class="instance.offKilter ? 'bg-warning text-on-warning' : 'bg-elevated text-dim'" @click="store.setOffKilter(target, !instance.offKilter)">off-kilter</button>
     </div>
 
     <!-- Stations: malfunction + identification -->
@@ -124,7 +124,7 @@ function renameLabel(e: Event) {
         v-for="st in model.battleStations"
         :key="st.name"
         class="trait"
-        :class="[instance.stationState[st.name]?.malfunctioning ? 'border-danger text-danger line-through' : '', store.isStationIdentified(model.name, st.name) ? 'bg-accent-subtle' : '']"
+        :class="instance.stationState[st.name]?.malfunctioning ? 'bg-danger text-on-danger line-through' : store.isStationIdentified(model.name, st.name) ? 'bg-accent text-on-accent' : ''"
         :title="`${st.entries.map(e => e.name + (e.shared ? '*' : '')).join(', ')}\nClick: toggle malfunctioning · Shift+click: toggle identified by the crew`"
         @click.exact="store.setStationMalfunction(target, st.name, !instance.stationState[st.name]?.malfunctioning)"
         @click.shift.prevent="toggleIdentified(st.name)"

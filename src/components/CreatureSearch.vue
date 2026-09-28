@@ -147,7 +147,7 @@ function cloneCreature(creature: Creature) {
           @click="toggleStatblock(creature.id)"
         >
           <div class="flex items-center gap-2 lg:gap-3 min-w-0">
-            <span class="inline-flex items-center justify-center w-6 h-6 lg:w-7 lg:h-7 bg-[var(--color-accent)] text-white text-xs font-bold rounded shrink-0">
+            <span class="inline-flex items-center justify-center w-6 h-6 lg:w-7 lg:h-7 bg-[var(--color-accent)] text-on-accent text-xs font-bold rounded shrink-0">
               {{ creature.level }}
             </span>
             <span class="font-medium text-sm lg:text-base truncate">{{ creature.name }}</span>

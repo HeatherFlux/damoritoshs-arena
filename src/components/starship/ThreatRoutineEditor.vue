@@ -895,7 +895,7 @@ function removeTrait(index: number) {
 .action-cost-badge {
   padding: 0.0625rem 0.25rem;
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
   font-size: 0.5625rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
@@ -1096,7 +1096,7 @@ function removeTrait(index: number) {
 .btn-save {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
 }
 
 .btn-save:hover {
@@ -1123,7 +1123,7 @@ function removeTrait(index: number) {
 
 .btn-done:hover {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
 }
 
 .add-action-btn {

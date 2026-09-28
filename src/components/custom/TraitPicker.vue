@@ -264,7 +264,7 @@ const customTraits = computed(() => {
 .trait-chip.selected {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .trait-chip .remove {

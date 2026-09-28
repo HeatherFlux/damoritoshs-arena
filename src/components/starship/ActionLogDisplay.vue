@@ -191,7 +191,7 @@ const emits = defineEmits<{
 .clear-btn.confirm {
   border-color: var(--color-danger);
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
 }
 
 .log-empty {
@@ -266,21 +266,21 @@ const emits = defineEmits<{
 
 .result-crit-success {
   background: rgba(34, 197, 94, 0.2);
-  color: #22C55E;
+  color: var(--color-success);
 }
 
 .result-success {
   background: rgba(59, 130, 246, 0.2);
-  color: #3B82F6;
+  color: var(--color-info);
 }
 
 .result-failure {
   background: rgba(249, 115, 22, 0.2);
-  color: #F97316;
+  color: var(--color-warning);
 }
 
 .result-crit-failure {
   background: rgba(239, 68, 68, 0.2);
-  color: #EF4444;
+  color: var(--color-danger);
 }
 </style>

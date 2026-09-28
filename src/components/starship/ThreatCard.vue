@@ -1123,7 +1123,7 @@ function removeSkill(name: string) {
 .qa-type-tag {
   padding: 0.0625rem 0.375rem;
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   border-radius: var(--radius-sm);
   font-size: 0.5625rem;
   font-weight: 700;
@@ -1202,7 +1202,7 @@ function removeSkill(name: string) {
 
 .objective-eye.active {
   background: var(--color-warning, #f59e0b);
-  color: var(--color-bg);
+  color: var(--color-on-warning);
   border-color: var(--color-warning, #f59e0b);
 }
 
@@ -1266,7 +1266,7 @@ function removeSkill(name: string) {
 .defeat-btn.defeated {
   background: var(--color-danger);
   border-color: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
 }
 
 /* Routine Toggle */

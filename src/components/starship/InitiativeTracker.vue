@@ -256,7 +256,7 @@ function getEntryColor(entry: InitiativeEntry, index: number): string {
 .acted-badge {
   padding: 0.125rem 0.25rem;
   background: var(--color-text-muted);
-  color: var(--color-bg);
+  color: var(--color-on-muted);
   font-size: 0.5rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -295,7 +295,7 @@ function getEntryColor(entry: InitiativeEntry, index: number): string {
 .btn-primary {
   flex: 1;
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {

@@ -805,7 +805,7 @@ function markdownToHtml(md: string): string {
 
 .section-count {
   background: var(--color-secondary);
-  color: var(--color-bg);
+  color: var(--color-on-secondary);
   font-size: 0.625rem;
   font-weight: bold;
   padding: 0.125rem 0.375rem;
@@ -905,7 +905,7 @@ function markdownToHtml(md: string): string {
 .chip.active {
   background: var(--color-secondary);
   border-color: var(--color-secondary);
-  color: var(--color-bg);
+  color: var(--color-on-secondary);
 }
 
 /* Defaults */

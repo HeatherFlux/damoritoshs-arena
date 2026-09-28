@@ -251,7 +251,7 @@ const customItems = computed(() => {
 .item-chip.selected {
   background: var(--color-secondary);
   border-color: var(--color-secondary);
-  color: var(--color-bg);
+  color: var(--color-on-secondary);
 }
 
 .item-chip .remove {

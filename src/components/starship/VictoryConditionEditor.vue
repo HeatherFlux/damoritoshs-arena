@@ -182,7 +182,7 @@ function removeObjective(index: number) {
 
 .condition-btn.active .condition-label,
 .condition-btn.active .condition-desc {
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .condition-label {

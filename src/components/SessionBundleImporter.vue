@@ -154,13 +154,13 @@ function reset() {
 
         <!-- Warnings -->
         <div v-if="importResult.warnings.length > 0" class="space-y-1">
-          <h4 class="text-xs font-semibold text-yellow-400 uppercase">Warnings</h4>
+          <h4 class="text-xs font-semibold text-warning uppercase">Warnings</h4>
           <div
             v-for="(w, i) in importResult.warnings"
             :key="i"
             class="text-xs text-dim p-2 bg-elevated"
           >
-            <span class="text-yellow-400">[{{ w.section }}]</span>
+            <span class="text-warning">[{{ w.section }}]</span>
             <span v-if="w.item" class="text-text"> {{ w.item }}:</span>
             {{ w.message }}
           </div>
@@ -212,7 +212,7 @@ function reset() {
         </div>
 
         <!-- Parse Error -->
-        <div v-if="parseError" class="p-2 bg-elevated border-l-2 border-red-500 text-xs text-red-400 mb-3">
+        <div v-if="parseError" class="p-2 bg-elevated border-l-2 border-red-500 text-xs text-danger mb-3">
           {{ parseError }}
         </div>
 

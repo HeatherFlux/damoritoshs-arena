@@ -610,13 +610,13 @@ function discardForm() {
 }
 
 .mode-btn-active {
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   background: var(--color-accent);
   box-shadow: 0 0 12px var(--color-accent);
 }
 
 .mode-btn-active .mode-icon {
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .mode-icon {

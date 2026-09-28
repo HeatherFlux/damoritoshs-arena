@@ -1298,7 +1298,7 @@ defineExpose({
 .bonus-tag {
   padding: 0.125rem 0.5rem;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-size: 0.75rem;
   border-radius: var(--radius-sm);
 }
@@ -1312,7 +1312,7 @@ defineExpose({
   gap: 0.25rem;
   padding: 0.125rem 0.25rem 0.125rem 0.5rem;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-size: 0.75rem;
   border-radius: var(--radius-sm);
   cursor: text;
@@ -1339,7 +1339,7 @@ defineExpose({
   padding: 0 0.25rem;
   background: none;
   border: none;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   cursor: pointer;
   font-size: 0.875rem;
   line-height: 1;
@@ -1526,7 +1526,7 @@ defineExpose({
 .action-attack-badge {
   padding: 0.0625rem 0.25rem;
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   font-size: 0.5625rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
@@ -1866,19 +1866,19 @@ defineExpose({
 
 .btn-accent {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   border-color: var(--color-accent);
 }
 
 .btn-danger {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   border-color: var(--color-danger);
 }
 
 .btn-success {
   background: var(--color-success);
-  color: white;
+  color: var(--color-on-success);
   border-color: var(--color-success);
 }
 </style>

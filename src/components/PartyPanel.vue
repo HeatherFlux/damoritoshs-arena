@@ -277,7 +277,7 @@ function savePlayerEdit() {
               </div>
               <div class="flex gap-0.5 lg:gap-1 shrink-0">
                 <button
-                  class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-white text-lg lg:text-xl font-semibold flex items-center justify-center hover:scale-105 transition-transform"
+                  class="w-6 h-6 lg:w-7 lg:h-7 rounded bg-[var(--color-accent)] text-on-accent text-lg lg:text-xl font-semibold flex items-center justify-center hover:scale-105 transition-transform"
                   @click="addPlayerToEncounter(player)"
                   title="Add to combat"
                 >

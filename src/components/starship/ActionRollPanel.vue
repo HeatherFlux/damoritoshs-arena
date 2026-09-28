@@ -400,7 +400,7 @@ const roleColor = computed(() => getRoleColor(props.roleId))
   padding: 0.0625rem 0.25rem;
   margin-left: 0.25rem;
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   font-size: 0.5625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -415,7 +415,7 @@ const roleColor = computed(() => getRoleColor(props.roleId))
   background: var(--color-accent);
   border: none;
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--color-on-accent);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -498,25 +498,25 @@ const roleColor = computed(() => getRoleColor(props.roleId))
 
 .outcome-badge.crit-success {
   background: rgba(34, 197, 94, 0.2);
-  color: #22C55E;
+  color: var(--color-success);
   border: 1px solid rgba(34, 197, 94, 0.4);
 }
 
 .outcome-badge.success {
   background: rgba(59, 130, 246, 0.2);
-  color: #3B82F6;
+  color: var(--color-info);
   border: 1px solid rgba(59, 130, 246, 0.4);
 }
 
 .outcome-badge.failure {
   background: rgba(249, 115, 22, 0.2);
-  color: #F97316;
+  color: var(--color-warning);
   border: 1px solid rgba(249, 115, 22, 0.4);
 }
 
 .outcome-badge.crit-failure {
   background: rgba(239, 68, 68, 0.2);
-  color: #EF4444;
+  color: var(--color-danger);
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
@@ -574,7 +574,7 @@ const roleColor = computed(() => getRoleColor(props.roleId))
   background: var(--color-accent);
   border: none;
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--color-on-accent);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;

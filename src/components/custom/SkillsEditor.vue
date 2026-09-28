@@ -253,7 +253,7 @@ function formatBonus(bonus: number): string {
   padding: 0.125rem 0.5rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   background: var(--color-accent);
   border: 1px solid var(--color-accent);
   border-radius: 0.25rem;

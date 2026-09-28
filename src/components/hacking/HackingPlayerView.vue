@@ -138,7 +138,7 @@ onUnmounted(() => {
 .header-level {
   padding: 0.25rem 0.625rem;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.875rem;
   font-weight: 700;

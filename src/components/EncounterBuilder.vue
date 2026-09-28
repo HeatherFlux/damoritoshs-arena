@@ -92,7 +92,7 @@ function getDifficultyBudgets() {
           class="flex-1 text-base lg:text-xl font-semibold bg-transparent border-none border-b-2 border-b-transparent py-1 text-text focus:outline-none focus:border-b-accent min-w-0"
         />
         <button
-          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-success text-white border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:bg-[#16a34a] hover:-translate-y-px disabled:bg-dim disabled:cursor-not-allowed disabled:opacity-50"
+          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-success text-on-success border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:bg-[#16a34a] hover:-translate-y-px disabled:bg-dim disabled:cursor-not-allowed disabled:opacity-50"
           @click="runEncounter"
           :disabled="store.activeEncounter.value.creatures.length === 0 && !store.activeEncounter.value.hazards?.length"
           title="Start combat with this encounter"
@@ -101,7 +101,7 @@ function getDifficultyBudgets() {
         </button>
         <button
           v-if="store.activeEncounter.value.starships?.length || store.activeEncounter.value.starshipHazards?.length"
-          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-accent text-white border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:-translate-y-px"
+          class="px-3 lg:px-4 py-1.5 lg:py-2 bg-accent text-on-accent border-none rounded-md font-semibold text-xs lg:text-sm cursor-pointer transition-all duration-150 whitespace-nowrap hover:-translate-y-px"
           @click="runTacticalStarshipCombat"
           title="Start tactical starship combat with this encounter's starships and starship hazards"
         >
@@ -282,8 +282,8 @@ function getDifficultyBudgets() {
                     <span
                       class="text-[0.5rem] lg:text-[0.625rem] uppercase px-1 py-0.5 rounded mr-1"
                       :class="{
-                        'bg-danger text-white': entry.adjustment === 'elite',
-                        'bg-dim text-white': entry.adjustment === 'weak'
+                        'bg-danger text-on-danger': entry.adjustment === 'elite',
+                        'bg-dim text-on-dim': entry.adjustment === 'weak'
                       }"
                     >{{ entry.adjustment }}</span>
                   </template>

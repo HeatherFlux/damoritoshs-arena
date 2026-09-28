@@ -1053,7 +1053,7 @@ function rollActionDamage(action: StarshipAction) {
   height: 56px;
   border-radius: 50%;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   border: none;
   cursor: pointer;
   display: flex;
@@ -1159,7 +1159,7 @@ function rollActionDamage(action: StarshipAction) {
 .btn-danger {
   background: var(--color-danger);
   border-color: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
 }
 
 /* Defense Stats */
@@ -1305,7 +1305,7 @@ function rollActionDamage(action: StarshipAction) {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background: var(--color-success);
-  color: white;
+  color: var(--color-on-success);
   border-radius: var(--radius-sm);
 }
 
@@ -1564,7 +1564,7 @@ function rollActionDamage(action: StarshipAction) {
 .attack-badge {
   padding: 0.0625rem 0.375rem;
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   border-radius: var(--radius-sm);
   font-size: 0.5625rem;
   font-weight: 700;
@@ -1704,7 +1704,7 @@ function rollActionDamage(action: StarshipAction) {
   margin-top: 0.75rem;
   padding: 0.5rem;
   background: var(--color-success);
-  color: white;
+  color: var(--color-on-success);
   font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1738,7 +1738,7 @@ function rollActionDamage(action: StarshipAction) {
 
 .objective-eye.active {
   background: var(--color-warning, #f59e0b);
-  color: var(--color-bg);
+  color: var(--color-on-warning);
   border-color: var(--color-warning, #f59e0b);
 }
 

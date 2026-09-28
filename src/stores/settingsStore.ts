@@ -1,5 +1,5 @@
 import { reactive, watch } from 'vue'
-import { generateThemePalette, hexToHSL, hslToHex } from '../utils/colors'
+import { generateThemePalette, hexToHSL, hslToHex, ensureContrast, readableOn } from '../utils/colors'
 
 const STORAGE_KEY = 'sf2e-settings'
 
@@ -70,7 +70,7 @@ const defaultSettings: Settings = {
 
 // Theme definitions - simplified to just base color + mode
 // Tetradic palette (4 colors 90° apart) auto-generated from base
-const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
+export const themeDefinitions: Record<ThemeId, ThemeDefinition> = {
   'cyber-cyan': {
     name: 'Eoxian Royal Cyan',
     description: 'Eox royalty vibes',
@@ -181,20 +181,14 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-// Helper: Create dim variant (lower lightness)
-function dimColor(hex: string): string {
+// Helper: move a color's lightness by a number of HSL points
+function shiftLightness(hex: string, delta: number): string {
   const hsl = hexToHSL(hex)
-  return hslToHex({ ...hsl, l: Math.max(0, hsl.l - 10) })
-}
-
-// Helper: Create bright variant (higher lightness)
-function brightColor(hex: string): string {
-  const hsl = hexToHSL(hex)
-  return hslToHex({ ...hsl, l: Math.min(100, hsl.l + 15) })
+  return hslToHex({ ...hsl, l: Math.max(0, Math.min(100, hsl.l + delta)) })
 }
 
 // Generate all CSS variables from a theme definition using tetradic color theory
-function generateThemeColors(def: ThemeDefinition): Record<string, string> {
+export function generateThemeColors(def: ThemeDefinition): Record<string, string> {
   const palette = generateThemePalette(def.baseColor)
 
   // Tetradic mapping:
@@ -206,7 +200,7 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
   const isDark = def.mode === 'dark'
 
   // Base colors depend on mode
-  const base = isDark ? {
+  const base: Record<string, string> = isDark ? {
     '--color-bg': '#050608',
     '--color-bg-surface': '#0a0d10',
     '--color-bg-elevated': '#0f1318',
@@ -229,17 +223,35 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
     '--color-text-muted': '#706c68',   // Muted text
   }
 
+  // Every theme color doubles as text somewhere, so each one is nudged
+  // lighter (dark mode) or darker (light mode) until it reads on all surfaces.
+  const surfaces = [base['--color-bg'], base['--color-bg-surface'], base['--color-bg-elevated'], base['--color-bg-hover']]
+  const legible = (hex: string) => ensureContrast(hex, surfaces)
+  // Hover/pressed variants step away from the surface so they stay legible too
+  const dimColor = (hex: string) => shiftLightness(hex, isDark ? -10 : 10)
+  const brightColor = (hex: string) => shiftLightness(hex, isDark ? 15 : -10)
+
+  base['--color-text-dim'] = ensureContrast(base['--color-text-dim'], surfaces, 5.5)
+  base['--color-text-muted'] = legible(base['--color-text-muted'])
+
   // Use manual overrides if provided, otherwise use generated palette
-  const primary = palette.primary
-  const primaryDim = palette.primaryDim
-  const primaryBright = palette.primaryBright
-  const secondary = def.secondary || palette.secondary
-  const secondaryDim = def.secondary ? dimColor(def.secondary) : palette.secondaryDim
-  const tertiary = def.tertiary || palette.tertiary
-  const tertiaryDim = def.tertiary ? dimColor(def.tertiary) : palette.tertiaryDim
-  const tertiaryBright = def.tertiary ? brightColor(def.tertiary) : palette.tertiaryBright
-  const quaternary = def.quaternary || palette.quaternary
-  const quaternaryDim = def.quaternary ? dimColor(def.quaternary) : palette.quaternaryDim
+  const primary = legible(palette.primary)
+  const primaryDim = legible(dimColor(primary))
+  const primaryBright = brightColor(primary)
+  const secondary = legible(def.secondary || palette.secondary)
+  const secondaryDim = legible(dimColor(secondary))
+  const secondaryBright = brightColor(secondary)
+  const tertiary = legible(def.tertiary || palette.tertiary)
+  const tertiaryDim = legible(dimColor(tertiary))
+  const tertiaryBright = brightColor(tertiary)
+  const quaternary = legible(def.quaternary || palette.quaternary)
+  const quaternaryDim = legible(dimColor(quaternary))
+  const quaternaryBright = brightColor(quaternary)
+  const warning = legible(shiftLightness(def.tertiary || palette.tertiary, 15))
+  const trivial = legible('#64748b')
+
+  // Ink for text sitting on a filled highlight
+  const ink = (fill: string) => readableOn(fill, isDark ? base['--color-bg'] : base['--color-text'])
 
   // Glow/subtle intensity
   const glowAlpha = 0.4
@@ -266,8 +278,9 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
     // SECONDARY (+90°) - Hazard/Purple tones
     '--color-secondary': secondary,
     '--color-secondary-dim': secondaryDim,
-    '--color-secondary-bright': palette.secondaryBright,
+    '--color-secondary-bright': secondaryBright,
     '--color-secondary-subtle': hexToRgba(secondary, subtleAlpha),
+    '--color-info': secondary,
     '--color-hazard': secondary,
     '--color-hazard-dim': secondaryDim,
     '--color-hazard-subtle': hexToRgba(secondary, subtleAlpha),
@@ -280,27 +293,38 @@ function generateThemeColors(def: ThemeDefinition): Record<string, string> {
     '--color-danger': tertiary,
     '--color-danger-dim': tertiaryDim,
     '--color-danger-subtle': hexToRgba(tertiary, subtleAlpha),
-    '--color-warning': brightColor(tertiary),
+    '--color-warning': warning,
     '--color-warning-dim': tertiaryDim,
     '--color-warning-subtle': hexToRgba(tertiary, subtleAlpha),
     '--color-extreme': tertiary,
-    '--color-severe': brightColor(tertiary),
+    '--color-severe': warning,
 
     // QUATERNARY (+270°) - Success/Green tones
     '--color-quaternary': quaternary,
     '--color-quaternary-dim': quaternaryDim,
-    '--color-quaternary-bright': palette.quaternaryBright,
+    '--color-quaternary-bright': quaternaryBright,
     '--color-quaternary-subtle': hexToRgba(quaternary, subtleAlpha),
     '--color-success': quaternary,
     '--color-success-dim': quaternaryDim,
     '--color-success-subtle': hexToRgba(quaternary, subtleAlpha),
     '--color-low': quaternary,
-    '--color-trivial': '#64748b',
+    '--color-trivial': trivial,
 
     // Rollable - use tertiary (opposite) for contrast
     '--color-rollable': tertiary,
     '--color-rollable-hover': tertiaryBright,
     '--color-rollable-subtle': hexToRgba(tertiary, subtleAlpha),
+
+    // Text on filled highlights (buttons, badges, active tabs)
+    '--color-on-fill': ink(primary),
+    '--color-on-accent': ink(primary),
+    '--color-on-secondary': ink(secondary),
+    '--color-on-hazard': ink(secondary),
+    '--color-on-danger': ink(tertiary),
+    '--color-on-warning': ink(warning),
+    '--color-on-success': ink(quaternary),
+    '--color-on-dim': ink(base['--color-text-dim']),
+    '--color-on-muted': ink(base['--color-text-muted']),
 
     // Scrollbar - use primary
     '--color-scrollbar': hexToRgba(primary, 0.3),

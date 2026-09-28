@@ -357,7 +357,7 @@ function importAllParties(mode: 'merge' | 'replace') {
             type="file"
             accept=".json"
             @change="handleFileImport"
-            class="block w-full text-sm text-dim file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-accent file:text-white hover:file:bg-accent/90 file:cursor-pointer"
+            class="block w-full text-sm text-dim file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-accent file:text-on-accent hover:file:bg-accent/90 file:cursor-pointer"
           />
         </div>
 

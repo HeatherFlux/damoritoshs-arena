@@ -463,8 +463,8 @@ function handleFileSelect(event: Event, row: DataRow) {
                     v-if="getImportStatus(row.key).status !== 'idle'"
                     class="text-xs px-1"
                     :class="{
-                      'text-green-400': getImportStatus(row.key).status === 'success',
-                      'text-red-400': getImportStatus(row.key).status === 'error',
+                      'text-success': getImportStatus(row.key).status === 'success',
+                      'text-danger': getImportStatus(row.key).status === 'error',
                     }"
                   >
                     {{ getImportStatus(row.key).message }}
@@ -528,7 +528,7 @@ function handleFileSelect(event: Event, row: DataRow) {
                   <span
                     v-if="getImportStatus('session-bundle').status !== 'idle'"
                     class="text-xs mr-1"
-                    :class="getImportStatus('session-bundle').status === 'success' ? 'text-green-400' : 'text-red-400'"
+                    :class="getImportStatus('session-bundle').status === 'success' ? 'text-success' : 'text-danger'"
                   >
                     {{ getImportStatus('session-bundle').message }}
                   </span>

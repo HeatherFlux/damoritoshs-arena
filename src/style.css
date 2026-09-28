@@ -110,6 +110,19 @@
   --color-rollable-subtle: rgba(255, 204, 0, 0.12);
 
   --color-stat-label: var(--color-primary);
+
+  --color-info: var(--color-secondary);
+
+  /* Text on filled highlights; the theme picks dark or light ink per fill */
+  --color-on-fill: #050608;
+  --color-on-accent: #050608;
+  --color-on-secondary: #050608;
+  --color-on-hazard: #050608;
+  --color-on-danger: #050608;
+  --color-on-warning: #050608;
+  --color-on-success: #050608;
+  --color-on-dim: #050608;
+  --color-on-muted: #050608;
   --color-stat-value: #ffcc00;
 
   --color-hazard: var(--color-secondary);
@@ -576,7 +589,7 @@
   /* Primary button */
   .btn-primary {
     background: var(--color-accent);
-    color: var(--color-bg);
+    color: var(--color-on-accent);
     border-color: var(--color-accent);
   }
 
@@ -627,7 +640,7 @@
   /* Danger button */
   .btn-danger {
     background: var(--color-danger);
-    color: white;
+    color: var(--color-on-danger);
     border-color: var(--color-danger);
   }
 
@@ -647,7 +660,7 @@
   /* Success button */
   .btn-success {
     background: var(--color-success);
-    color: var(--color-bg);
+    color: var(--color-on-success);
     border-color: var(--color-success);
   }
 
@@ -880,7 +893,7 @@
     text-transform: uppercase;
     border-radius: 3px;
     background: var(--color-secondary);
-    color: var(--color-bg);
+    color: var(--color-on-secondary);
     white-space: nowrap;
   }
 
@@ -899,7 +912,7 @@
     font-weight: 600;
     text-transform: uppercase;
     border-radius: var(--radius-sm);
-    color: white;
+    color: var(--color-on-fill);
     letter-spacing: 0.025em;
   }
 
@@ -1042,6 +1055,17 @@
     max-width: 32rem;
     max-height: 90vh;
     overflow: auto;
+    box-shadow: var(--shadow-lg);
+    animation: var(--animate-pop-in);
+  }
+
+  /* Same panel as .modal, sized by the component's own utilities */
+  .modal-content {
+    background: var(--color-bg-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
     box-shadow: var(--shadow-lg);
     animation: var(--animate-pop-in);
   }
@@ -1367,7 +1391,8 @@
   .hp-bar {
     position: relative;
     height: 1.75rem;
-    background: var(--color-bg);
+    /* Always dark: the white label has to read over the empty track in light themes too */
+    background: #050608;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     overflow: hidden;
@@ -1427,7 +1452,7 @@
 
   .hp-btn-damage {
     background: var(--color-danger);
-    color: white;
+    color: var(--color-on-danger);
   }
 
   .hp-btn-damage:hover {
@@ -1436,7 +1461,7 @@
 
   .hp-btn-heal {
     background: var(--color-success);
-    color: white;
+    color: var(--color-on-success);
   }
 
   .hp-btn-heal:hover {
@@ -1710,7 +1735,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-radius: var(--radius-sm);
-    color: white;
+    color: var(--color-on-fill);
   }
 
   .difficulty-trivial { background: var(--color-trivial); }

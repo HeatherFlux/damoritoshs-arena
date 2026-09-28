@@ -663,7 +663,7 @@ function formatDate(timestamp: number): string {
 .focused-dc .dc-label {
   font-size: 0.625rem;
   font-weight: 700;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -677,7 +677,7 @@ function formatDate(timestamp: number): string {
 .focused-dc .dc-value {
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -1094,7 +1094,7 @@ function formatDate(timestamp: number): string {
 /* Buttons */
 .btn-accent {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   border: 1px solid var(--color-accent);
 }
 
@@ -1104,7 +1104,7 @@ function formatDate(timestamp: number): string {
 
 .btn-danger {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
   border: 1px solid var(--color-danger);
 }
 

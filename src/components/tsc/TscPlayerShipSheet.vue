@@ -242,8 +242,8 @@ function resetDamage() {
           <input v-model.number="draft.pilotingDC" type="number" class="input input-sm w-16" placeholder="—" />
           <span class="text-dim">(replaces AC when higher while the pilot's console is helmed)</span>
         </label>
-        <span v-if="draft.wrecked" class="trait border-warning text-warning">wrecked {{ draft.wrecked }}</span>
-        <span v-if="draft.compromised" class="trait border-danger text-danger">compromised {{ draft.compromised }}</span>
+        <span v-if="draft.wrecked" class="trait bg-warning text-on-warning">wrecked {{ draft.wrecked }}</span>
+        <span v-if="draft.compromised" class="trait bg-danger text-on-danger">compromised {{ draft.compromised }}</span>
         <button class="btn-secondary btn-xs ml-auto" @click="resetDamage">Full repair</button>
       </div>
     </div>

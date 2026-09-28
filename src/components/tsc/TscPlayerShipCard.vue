@@ -65,7 +65,7 @@ function addCondition() {
     <div class="flex flex-wrap items-center gap-2">
       <h3 class="font-semibold text-base">{{ ship.name }}</h3>
       <span class="text-[0.625rem] uppercase tracking-widest text-dim">{{ FRAMES[ship.frame].name }} · Lvl {{ ship.level }}</span>
-      <span v-if="scene.playerShipDestroyed" class="trait border-danger text-danger">DESTROYED</span>
+      <span v-if="scene.playerShipDestroyed" class="trait bg-danger text-on-danger">DESTROYED</span>
       <TscPositionEditor class="ml-auto" :position="scene.playerShipPosition" :zones="scene.sensorMap.zones" @update="(p) => store.setPosition({ kind: 'player' }, p)" />
     </div>
 
@@ -115,8 +115,8 @@ function addCondition() {
 
     <!-- Starship conditions -->
     <div class="flex flex-wrap items-center gap-1 text-[0.6875rem]">
-      <button class="trait" :class="ship.inoperable ? 'border-warning text-warning' : 'text-dim'" title="Inoperable: can't act, −4 status to AC/Perception/Reflex, off-guard" @click="store.setInoperable({ kind: 'player' }, !ship.inoperable)">inoperable</button>
-      <button class="trait" :class="ship.offKilter ? 'border-warning text-warning' : 'text-dim'" title="Off-kilter: −2 circumstance to attacks, Area/Auto-Fire DCs, Reflex; no moving station actions" @click="store.setOffKilter({ kind: 'player' }, !ship.offKilter)">off-kilter</button>
+      <button class="trait" :class="ship.inoperable ? 'bg-warning text-on-warning' : 'bg-elevated text-dim'" title="Inoperable: can't act, −4 status to AC/Perception/Reflex, off-guard" @click="store.setInoperable({ kind: 'player' }, !ship.inoperable)">inoperable</button>
+      <button class="trait" :class="ship.offKilter ? 'bg-warning text-on-warning' : 'bg-elevated text-dim'" title="Off-kilter: −2 circumstance to attacks, Area/Auto-Fire DCs, Reflex; no moving station actions" @click="store.setOffKilter({ kind: 'player' }, !ship.offKilter)">off-kilter</button>
       <label class="flex items-center gap-1">wrecked <input :value="ship.wrecked" type="number" min="0" class="input input-sm w-12" @change="store.setWrecked(Number(($event.target as HTMLInputElement).value))" /></label>
       <span v-for="c in ship.conditions" :key="c.name" class="trait border-accent cursor-pointer" :title="CONDITIONS[c.name]?.shortDescription ?? 'Remove'" @click="store.removeCondition({ kind: 'player' }, c.name)">{{ c.name }}<span v-if="c.value"> {{ c.value }}</span> ×</span>
       <select v-model="conditionToAdd" class="input input-sm select w-28">

@@ -33,7 +33,7 @@ const HEADINGS: { value: Heading; label: string; arrow: string }[] = [
         v-for="h in HEADINGS"
         :key="h.value"
         class="w-6 h-6 flex items-center justify-center border border-border text-xs"
-        :class="position.heading === h.value ? 'bg-accent text-white border-accent' : 'bg-elevated text-dim hover:text-text'"
+        :class="position.heading === h.value ? 'bg-accent text-on-accent border-accent' : 'bg-elevated text-dim hover:text-text'"
         :title="`Heading: ${h.label}`"
         @click="emit('update', { heading: h.value })"
       >{{ h.arrow }}</button>

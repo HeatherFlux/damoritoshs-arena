@@ -426,7 +426,7 @@ function handleTscFileUpload(event: Event) {
                   @click="combatStore.addCreature(entry.creature, entry.adjustment)"
                 >
                   <span class="font-bold text-accent">{{ entry.count }}×</span>
-                  <span v-if="entry.adjustment !== 'normal'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">{{ entry.adjustment === 'elite' ? 'E' : 'W' }}</span>
+                  <span v-if="entry.adjustment !== 'normal'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-on-dim">{{ entry.adjustment === 'elite' ? 'E' : 'W' }}</span>
                   {{ entry.creature.name }}
                 </button>
               </div>

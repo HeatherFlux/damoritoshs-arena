@@ -551,6 +551,6 @@ if (!editState.outcomes) {
 
 .btn-done:hover {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
 }
 </style>

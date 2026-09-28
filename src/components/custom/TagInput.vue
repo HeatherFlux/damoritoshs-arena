@@ -140,7 +140,7 @@ function handleBlur() {
   gap: 0.25rem;
   padding: 0.125rem 0.375rem;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -163,7 +163,7 @@ function handleBlur() {
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   font-size: 0.875rem;
   font-weight: bold;
   cursor: pointer;
@@ -220,6 +220,6 @@ function handleBlur() {
 .suggestion:hover,
 .suggestion-selected {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 </style>

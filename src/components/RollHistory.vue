@@ -119,9 +119,9 @@ function formatTime(date: Date): string {
               }"
             >{{ roll.total }}</span>
             <div class="flex flex-col items-start gap-0.5">
-              <span v-if="roll.isCriticalHit" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-danger text-white uppercase">CRIT</span>
-              <span v-if="roll.isNat20" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-success text-white uppercase">NAT 20</span>
-              <span v-if="roll.isNat1" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-danger text-white uppercase">NAT 1</span>
+              <span v-if="roll.isCriticalHit" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-danger text-on-danger uppercase">CRIT</span>
+              <span v-if="roll.isNat20" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-success text-on-success uppercase">NAT 20</span>
+              <span v-if="roll.isNat1" class="text-[0.625rem] font-bold px-1.5 py-0.5 rounded bg-danger text-on-danger uppercase">NAT 1</span>
               <span v-if="roll.damageType && !roll.isCriticalHit && !roll.isNat20 && !roll.isNat1" class="text-xs text-dim">{{ roll.damageType.split(' ')[0] }}</span>
             </div>
           </div>
@@ -182,7 +182,7 @@ function formatTime(date: Date): string {
         </div>
 
         <Transition name="copied">
-          <div v-if="copiedId === roll.id" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-success text-white px-3 py-1 rounded text-xs font-semibold pointer-events-none">
+          <div v-if="copiedId === roll.id" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-success text-on-success px-3 py-1 rounded text-xs font-semibold pointer-events-none">
             Copied!
           </div>
         </Transition>

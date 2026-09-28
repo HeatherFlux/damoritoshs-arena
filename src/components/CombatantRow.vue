@@ -130,9 +130,9 @@ const hasExpandableDetails = computed(() => {
         />
         <div class="flex-1 min-w-0" @click="toggleStatblock">
           <span class="font-medium flex items-center gap-1 text-text text-sm">
-            <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-white">E</span>
-            <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">W</span>
-            <span v-if="combatant.isHazard" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-hazard text-white">H</span>
+            <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-on-danger">E</span>
+            <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-on-dim">W</span>
+            <span v-if="combatant.isHazard" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-hazard text-on-hazard">H</span>
             <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="12" class="text-warning" title="Hidden from player view" />
             <span class="truncate">{{ combatant.name }}</span>
             <span v-if="hasExpandableDetails" class="text-[0.625rem] text-muted">{{ showStatblock ? '▼' : '▶' }}</span>
@@ -147,7 +147,7 @@ const hasExpandableDetails = computed(() => {
         <div class="flex gap-1">
           <button
             class="btn-icon btn-sm"
-            :class="combatant.hiddenFromPlayers ? 'bg-warning text-black' : 'btn-secondary'"
+            :class="combatant.hiddenFromPlayers ? 'bg-warning text-on-warning' : 'btn-secondary'"
             @click="combatStore.toggleHiddenFromPlayers(combatant.id)"
             :title="combatant.hiddenFromPlayers ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
           >
@@ -155,7 +155,7 @@ const hasExpandableDetails = computed(() => {
           </button>
           <button
             class="btn-icon btn-sm"
-            :class="combatant.isDead ? 'bg-success text-white' : 'btn-secondary'"
+            :class="combatant.isDead ? 'bg-success text-on-success' : 'btn-secondary'"
             @click="combatStore.toggleDead(combatant.id)"
           >
             <IconHeart v-if="combatant.isDead" :size="14" /><IconSkull v-else :size="14" />
@@ -190,7 +190,7 @@ const hasExpandableDetails = computed(() => {
           </span>
           <span
             v-else
-            class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize"
+            class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-on-warning rounded cursor-pointer capitalize"
             :title="getConditionTooltip(cond.name) + '\n\nClick to remove'"
             @click="decrementCondition(cond.name)"
           >
@@ -234,8 +234,8 @@ const hasExpandableDetails = computed(() => {
       <!-- Name (clickable for statblock/hazard details) -->
       <div class="flex flex-col" @click="toggleStatblock">
         <span class="font-medium flex items-center gap-1 text-text">
-          <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-white">E</span>
-          <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-white">W</span>
+          <span v-if="combatant.adjustment === 'elite'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-danger text-on-danger">E</span>
+          <span v-if="combatant.adjustment === 'weak'" class="text-[0.625rem] font-bold px-1 py-0.5 rounded bg-dim text-on-dim">W</span>
           <span v-if="combatant.isHazard" class="text-xs text-hazard">⚠</span>
           <IconEyeOff v-if="combatant.hiddenFromPlayers" :size="14" class="text-warning" title="Hidden from player view" />
           {{ combatant.name }}
@@ -291,7 +291,7 @@ const hasExpandableDetails = computed(() => {
             </span>
             <span
               v-else
-              class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-black rounded cursor-pointer capitalize hover:bg-danger hover:text-white"
+              class="text-[0.625rem] px-1.5 py-0.5 bg-warning text-on-warning rounded cursor-pointer capitalize hover:bg-danger hover:text-on-danger"
               :title="getConditionTooltip(cond.name) + '\n\nClick to remove'"
               @click="decrementCondition(cond.name)"
             >
@@ -317,7 +317,7 @@ const hasExpandableDetails = computed(() => {
       <div class="flex gap-1 justify-end">
         <button
           class="btn-icon btn-sm"
-          :class="combatant.hiddenFromPlayers ? 'bg-warning text-black' : 'btn-secondary'"
+          :class="combatant.hiddenFromPlayers ? 'bg-warning text-on-warning' : 'btn-secondary'"
           @click="combatStore.toggleHiddenFromPlayers(combatant.id)"
           :title="combatant.hiddenFromPlayers ? 'Hidden from players — click to reveal' : 'Visible to players — click to hide'"
         >
@@ -325,7 +325,7 @@ const hasExpandableDetails = computed(() => {
         </button>
         <button
           class="btn-icon btn-sm"
-          :class="combatant.isDead ? 'bg-success text-white' : 'btn-secondary'"
+          :class="combatant.isDead ? 'bg-success text-on-success' : 'btn-secondary'"
           @click="combatStore.toggleDead(combatant.id)"
           :title="combatant.isDead ? 'Revive' : 'Mark dead'"
         >
@@ -470,7 +470,7 @@ const hasExpandableDetails = computed(() => {
 
 .condition-badge.valued {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-on-danger);
 }
 
 .condition-badge .condition-label {

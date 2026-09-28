@@ -393,7 +393,7 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
 .used-badge {
   padding: 0.125rem 0.375rem;
   background: var(--color-text-muted);
-  color: var(--color-bg);
+  color: var(--color-on-muted);
   font-size: 0.5rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -540,19 +540,19 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
 }
 
 .inline-roll-value.crit-success {
-  color: #22C55E;
+  color: var(--color-success);
 }
 
 .inline-roll-value.outcome-success {
-  color: #3B82F6;
+  color: var(--color-info);
 }
 
 .inline-roll-value.outcome-failure {
-  color: #F97316;
+  color: var(--color-warning);
 }
 
 .inline-roll-value.crit-failure {
-  color: #EF4444;
+  color: var(--color-danger);
 }
 
 .inline-roll-value.damage-value {
@@ -569,7 +569,7 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
 .inline-executed-badge {
   padding: 0.125rem 0.5rem;
   background: var(--color-text-muted);
-  color: var(--color-bg);
+  color: var(--color-on-muted);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -582,7 +582,7 @@ function getOutcomeClass(outcome?: ActionLogEntry['result']): string {
   background: var(--color-accent);
   border: none;
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--color-on-accent);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;

@@ -472,7 +472,7 @@ function resetScene() {
 
 .condition-btn.active .condition-label,
 .condition-btn.active .condition-desc {
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .condition-label {
@@ -517,7 +517,7 @@ function resetScene() {
   font-weight: 600;
   text-transform: uppercase;
   border-radius: var(--radius-sm);
-  color: var(--color-bg);
+  color: var(--color-on-fill);
 }
 
 /* Threats List */

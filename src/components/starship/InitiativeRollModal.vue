@@ -484,7 +484,7 @@ function skipInitiative() {
 
 .btn-primary {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
