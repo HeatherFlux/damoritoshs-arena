@@ -199,7 +199,6 @@ function resetDamage() {
           <span class="text-[0.625rem] uppercase tracking-widest text-dim">Level</span>
           <input :value="draft.level" type="number" min="1" max="20" class="input input-sm" @change="setLevel(Number(($event.target as HTMLInputElement).value))" />
         </label>
-        <button class="btn-secondary btn-xs" :title="`Match party level (${partyLevel})`" @click="setLevel(partyLevel)">Party Lvl {{ partyLevel }}</button>
         <div class="ml-auto flex gap-1">
           <button class="btn-secondary btn-sm" @click="newShip">New</button>
           <button class="btn-secondary btn-sm" @click="useInScene">Use in scene</button>
