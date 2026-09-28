@@ -329,7 +329,7 @@ function handleFileSelect(event: Event, row: DataRow) {
         <div>
           <button class="section-header" @click="toggleSection('theme')">
             <span class="section-chevron" :class="{ open: isSectionOpen('theme') }">&rsaquo;</span>
-            <span>&gt; Theme</span>
+            <span>Theme</span>
           </button>
 
           <div v-if="isSectionOpen('theme')" class="section-body">
@@ -356,7 +356,7 @@ function handleFileSelect(event: Event, row: DataRow) {
         <div>
           <button class="section-header" @click="toggleSection('bg')">
             <span class="section-chevron" :class="{ open: isSectionOpen('bg') }">&rsaquo;</span>
-            <span>&gt; Background</span>
+            <span>Background</span>
           </button>
 
           <div v-if="isSectionOpen('bg')" class="section-body">
@@ -382,7 +382,7 @@ function handleFileSelect(event: Event, row: DataRow) {
         <div>
           <button class="section-header" @click="toggleSection('discord')">
             <span class="section-chevron" :class="{ open: isSectionOpen('discord') }">&rsaquo;</span>
-            <span>&gt; Discord Webhook</span>
+            <span>Discord Webhook</span>
             <span v-if="settings.discordWebhookEnabled" class="ml-auto text-xs text-accent">ON</span>
           </button>
 
@@ -433,7 +433,7 @@ function handleFileSelect(event: Event, row: DataRow) {
         <div>
           <button class="section-header" @click="toggleSection('homebrew')">
             <span class="section-chevron" :class="{ open: isSectionOpen('homebrew') }">&rsaquo;</span>
-            <span>&gt; Homebrew Upload</span>
+            <span>Homebrew Upload</span>
           </button>
 
           <div v-if="isSectionOpen('homebrew')" class="section-body">
