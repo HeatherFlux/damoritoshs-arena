@@ -349,18 +349,21 @@ function drawMatrixRain(time: number) {
 // discrete wave equation, so ripples spread, cross and bounce off the edges.
 const RIPPLE_CELL = 16           // px between dots
 const RIPPLE_SPEED = 0.03        // wave speed squared, in cells per step (stable below 0.5)
-const RIPPLE_DAMPING = 0.997     // energy kept per step
+const RIPPLE_DAMPING = 0.995     // energy kept per step
 const RIPPLE_STEP_MS = 1000 / 60 // fixed step, so speed is the same on any refresh rate
-const RIPPLE_LIFT = 5            // px a full-height crest lifts its dot
+const RIPPLE_SMOOTHING = 0.15  // evens out fine chatter so only broad swells remain
+const RIPPLE_SHORE = 8           // cells near each edge that soak waves up instead of bouncing them
+const RIPPLE_LIFT = 4            // px a full-height crest lifts its dot
 
 let rippleCols = 0
 let rippleRows = 0
 let rippleHeight = new Float32Array(0)
 let ripplePrev = new Float32Array(0)
+let rippleNext = new Float32Array(0)
 let rippleLastTime = 0
 let rippleAccumulator = 0
 let rippleNextDrop = 0
-let rippleLastWake = 0
+let rippleShore = new Float32Array(0)
 
 function initRipples() {
   if (!canvasRef.value) return
@@ -369,13 +372,24 @@ function initRipples() {
   rippleRows = Math.ceil(canvas.height / RIPPLE_CELL) + 2
   rippleHeight = new Float32Array(rippleCols * rippleRows)
   ripplePrev = new Float32Array(rippleCols * rippleRows)
+  rippleNext = new Float32Array(rippleCols * rippleRows)
   rippleLastTime = 0
   rippleAccumulator = 0
   rippleNextDrop = 0
+
+  // How much of a wave survives each step, fading toward the edges
+  rippleShore = new Float32Array(rippleCols * rippleRows)
+  for (let y = 0; y < rippleRows; y++) {
+    for (let x = 0; x < rippleCols; x++) {
+      const fromEdge = Math.min(x, y, rippleCols - 1 - x, rippleRows - 1 - y)
+      const depth = Math.min(1, fromEdge / RIPPLE_SHORE)
+      rippleShore[y * rippleCols + x] = RIPPLE_DAMPING * (0.92 + 0.08 * depth)
+    }
+  }
 }
 
 // Push the surface down in a small round dent, like a drop landing
-function disturb(px: number, py: number, strength: number, radius: number = 1.6) {
+function disturb(px: number, py: number, strength: number, radius: number = 3) {
   const cx = px / RIPPLE_CELL + 1
   const cy = py / RIPPLE_CELL + 1
   const reach = Math.ceil(radius * 2)
@@ -389,30 +403,28 @@ function disturb(px: number, py: number, strength: number, radius: number = 1.6)
 
 function stepRipples() {
   const cols = rippleCols
-  const next = ripplePrev // reuse the oldest buffer for the new heights
+  const next = rippleNext
   for (let y = 1; y < rippleRows - 1; y++) {
     for (let x = 1; x < cols - 1; x++) {
       const i = y * cols + x
       const h = rippleHeight[i]
       const laplacian = rippleHeight[i - 1] + rippleHeight[i + 1] + rippleHeight[i - cols] + rippleHeight[i + cols] - 4 * h
-      next[i] = (2 * h - ripplePrev[i] + RIPPLE_SPEED * laplacian) * RIPPLE_DAMPING
+      const p = ripplePrev[i]
+      const previousLaplacian = ripplePrev[i - 1] + ripplePrev[i + 1] + ripplePrev[i - cols] + ripplePrev[i + cols] - 4 * p
+      // Viscosity: neighbours drag each other's motion, which settles small ripples first
+      const drag = RIPPLE_SMOOTHING * (laplacian - previousLaplacian)
+      next[i] = (2 * h - p + RIPPLE_SPEED * laplacian + drag) * rippleShore[i]
     }
   }
+  // Rotate the three buffers; the oldest becomes scratch space for the next step
+  rippleNext = ripplePrev
   ripplePrev = rippleHeight
   rippleHeight = next
 }
 
 function handleRipplePointerDown(e: PointerEvent) {
   if (props.style !== 'gradient-wave') return
-  disturb(e.clientX, e.clientY, 0.9, 1.8)
-}
-
-function handleRipplePointerMove(e: PointerEvent) {
-  if (props.style !== 'gradient-wave') return
-  // A faint wake behind the cursor
-  if (e.timeStamp - rippleLastWake < 50) return
-  rippleLastWake = e.timeStamp
-  disturb(e.clientX, e.clientY, 0.08, 1.2)
+  disturb(e.clientX, e.clientY, 0.25, 3)
 }
 
 function drawRipples(time: number) {
@@ -426,7 +438,7 @@ function drawRipples(time: number) {
 
   // Rain: a drop somewhere every 7 to 10 seconds
   if (time > rippleNextDrop) {
-    disturb(Math.random() * canvas.width, Math.random() * canvas.height, 0.5 + Math.random() * 0.5, 1.4 + Math.random() * 0.8)
+    disturb(Math.random() * canvas.width, Math.random() * canvas.height, 0.3 + Math.random() * 0.2, 3 + Math.random() * 1.5)
     rippleNextDrop = time + 7000 + Math.random() * 3000
   }
 
@@ -462,8 +474,8 @@ function drawRipples(time: number) {
       // The slope pushes each dot sideways, the way a wave carries what floats on it
       const slopeX = rippleHeight[i + 1] - rippleHeight[i - 1]
       const slopeY = rippleHeight[i + rippleCols] - rippleHeight[i - rippleCols]
-      const px = (x - 1) * RIPPLE_CELL + RIPPLE_CELL / 2 - slopeX * RIPPLE_CELL * 0.9
-      const py = (y - 1) * RIPPLE_CELL + RIPPLE_CELL / 2 - slopeY * RIPPLE_CELL * 0.9 - h * RIPPLE_LIFT
+      const px = (x - 1) * RIPPLE_CELL + RIPPLE_CELL / 2 - slopeX * RIPPLE_CELL * 0.4
+      const py = (y - 1) * RIPPLE_CELL + RIPPLE_CELL / 2 - slopeY * RIPPLE_CELL * 0.4 - h * RIPPLE_LIFT
 
       const strength = Math.min(1, size * 4)
       const to = h > 0 ? crest : trough
@@ -471,7 +483,7 @@ function drawRipples(time: number) {
       const g = Math.round(still.g + (to.g - still.g) * strength)
       const b = Math.round(still.b + (to.b - still.b) * strength)
       const alpha = 0.22 + strength * (h > 0 ? 0.33 : 0.2)
-      const radius = Math.max(0.5, Math.min(2.6, 1.1 + h * 5))
+      const radius = Math.max(0.6, Math.min(2.2, 1.1 + h * 4))
 
       ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`
       ctx.beginPath()
@@ -549,7 +561,6 @@ watch(() => props.style, (newStyle) => {
 onMounted(() => {
   window.addEventListener('resize', resizeCanvas)
   window.addEventListener('pointerdown', handleRipplePointerDown, { passive: true })
-  window.addEventListener('pointermove', handleRipplePointerMove, { passive: true })
   if (canvasStyles.includes(props.style)) {
     startCanvasAnimation()
   }
@@ -558,7 +569,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', resizeCanvas)
   window.removeEventListener('pointerdown', handleRipplePointerDown)
-  window.removeEventListener('pointermove', handleRipplePointerMove)
   stopAnimation()
 })
 
