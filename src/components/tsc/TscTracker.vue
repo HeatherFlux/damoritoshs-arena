@@ -95,7 +95,6 @@ function entryClass(e: TscInitiativeEntry, i: number) {
           <span class="text-[0.625rem] uppercase tracking-widest text-dim">Scene name</span>
           <input v-model="draftName" class="input input-sm" />
         </label>
-        <span class="text-xs text-dim">Party level {{ partyLevel }}</span>
         <button class="btn btn-primary" @click="startEmptyScene">Start scene</button>
         <button class="btn btn-secondary" @click="emit('open-library')">Add from Library</button>
       </div>
