@@ -36,7 +36,7 @@ export const backgroundStyles: Record<BackgroundStyle, { name: string; descripti
   },
   'gradient-wave': {
     name: 'Gradient Wave',
-    description: 'Flowing color gradient'
+    description: 'Ripples across still water'
   },
   'dot-matrix': {
     name: 'Matrix Rain',
