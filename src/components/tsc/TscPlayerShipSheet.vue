@@ -14,6 +14,8 @@ import { formatMod } from '../../utils/tscStatBlock'
 const props = defineProps<{
   /** Sheet to edit; null starts a new ship. */
   ship: PlayerStarship | null
+  /** Shown in a dialog during scene setup: one action, which saves the sheet and hands it back. */
+  dialog?: boolean
 }>()
 
 const emit = defineEmits<{ (e: 'saved', ship: PlayerStarship): void }>()
@@ -200,9 +202,12 @@ function resetDamage() {
           <input :value="draft.level" type="number" min="1" max="20" class="input input-sm" @change="setLevel(Number(($event.target as HTMLInputElement).value))" />
         </label>
         <div class="ml-auto flex gap-1">
-          <button class="btn-secondary btn-sm" @click="newShip">New</button>
-          <button class="btn-secondary btn-sm" @click="useInScene">Use in scene</button>
-          <button class="btn-primary btn-sm" :disabled="!dirty && !!ship" @click="save">Save</button>
+          <button v-if="dialog" class="btn-primary btn-sm" title="Saves the sheet so you can reuse it" @click="save">Use this ship</button>
+          <template v-else>
+            <button class="btn-secondary btn-sm" @click="newShip">New</button>
+            <button class="btn-secondary btn-sm" @click="useInScene">Use in scene</button>
+            <button class="btn-primary btn-sm" :disabled="!dirty && !!ship" @click="save">Save</button>
+          </template>
         </div>
       </div>
 
@@ -288,16 +293,16 @@ function resetDamage() {
 
         <div class="flex flex-wrap gap-1 items-center text-[0.6875rem]">
           <span class="text-dim">Upgrades {{ station.upgrades.length }}/{{ derivedFor(station)?.upgradeSlots ?? 0 }}</span>
-          <span v-if="defaultUpgradeId(station)" class="trait border-accent text-accent" :title="getStationUpgrade(defaultUpgradeId(station)!)?.summary">{{ getStationUpgrade(defaultUpgradeId(station)!)?.name }} (frame)</span>
+          <span v-if="defaultUpgradeId(station)" class="trait bg-accent text-on-accent" :title="getStationUpgrade(defaultUpgradeId(station)!)?.summary">{{ getStationUpgrade(defaultUpgradeId(station)!)?.name }} (frame)</span>
           <button
             v-for="{ upgrade, type } in availableUpgrades(station)"
             :key="upgrade.id"
             class="trait"
-            :class="station.upgrades.includes(upgrade.id) ? 'border-success text-success' : type ? '' : 'opacity-40'"
+            :class="station.upgrades.includes(upgrade.id) ? 'bg-success text-on-success' : type ? 'bg-surface text-text border border-border' : 'bg-surface text-text border border-border opacity-40'"
             :disabled="!type && !station.upgrades.includes(upgrade.id)"
             :title="`${upgrade.summary}${upgrade.prerequisite ? ` Prerequisite: ${upgrade.prerequisite}.` : ''}${type ? ` (${type.type}, level ${type.level})` : ` (level ${upgrade.level}+)`}`"
             @click="toggleUpgrade(station, upgrade.id)"
-          >{{ upgrade.name }}<span v-if="type && type.type !== 'commercial'" class="text-dim"> · {{ type.type }}</span></button>
+          >{{ upgrade.name }}<span v-if="type && type.type !== 'commercial'" class="opacity-80"> · {{ type.type }}</span></button>
         </div>
 
         <details class="text-[0.6875rem]">
@@ -317,7 +322,7 @@ function resetDamage() {
           v-for="bay in TSC_EXPANSION_BAYS"
           :key="bay.id"
           class="trait"
-          :class="draft.expansionBays.includes(bay.id) ? 'border-success text-success' : bay.universal || bay.slotFree ? 'text-dim' : ''"
+          :class="draft.expansionBays.includes(bay.id) ? 'bg-success text-on-success' : bay.universal || bay.slotFree ? 'bg-surface text-dim border border-border' : 'bg-surface text-text border border-border'"
           :title="bay.summary"
           @click="toggleBay(bay.id)"
         >{{ bay.name }}</button>

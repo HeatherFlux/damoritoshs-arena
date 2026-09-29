@@ -19,6 +19,7 @@ import {
 } from '../../utils/chaseRules'
 import { generateObstacles, type ObstaclePool } from '../../utils/chaseGenerator'
 import CollapsibleSidebar from '../CollapsibleSidebar.vue'
+import ModeSwitch from '../ModeSwitch.vue'
 import RollHistory from '../RollHistory.vue'
 import VehicleSearch from '../tsc/VehicleSearch.vue'
 import ChaseTracker from './ChaseTracker.vue'
@@ -203,12 +204,7 @@ function onImportFile(event: Event) {
     <template v-if="mode === 'setup'">
       <aside class="chase-sidebar" :class="{ 'chase-sidebar-closed': !mobileSetupOpen }">
         <div class="p-4 border-b border-border">
-          <div class="mode-switcher">
-            <button class="mode-btn mode-btn-active">Set up</button>
-            <button class="mode-btn" :disabled="!hasActiveScene" :title="hasActiveScene ? 'Go to the chase that is running' : 'Start a chase first'" @click="mode = 'run'">
-              Run <span v-if="hasActiveScene" class="inline-block w-2 h-2 bg-success animate-pulse"></span>
-            </button>
-          </div>
+          <ModeSwitch v-model="mode" :running="hasActiveScene" idle-hint="Start a chase first" />
           <p v-if="notice" class="text-[0.6875rem] text-success mt-2">{{ notice }}</p>
         </div>
 
@@ -243,10 +239,7 @@ function onImportFile(event: Event) {
     <template v-else>
       <section class="chase-run">
         <div class="run-bar">
-          <div class="mode-switcher run-switcher">
-            <button class="mode-btn" @click="mode = 'setup'">Set up</button>
-            <button class="mode-btn mode-btn-active">Run <span class="inline-block w-2 h-2 bg-success animate-pulse"></span></button>
-          </div>
+          <ModeSwitch v-model="mode" class="run-switcher" :running="hasActiveScene" />
         </div>
         <div class="flex-1 overflow-hidden p-3 min-h-0">
           <ChaseTracker
@@ -394,49 +387,6 @@ function onImportFile(event: Event) {
 
 .run-switcher {
   width: 16rem;
-}
-
-.mode-switcher {
-  display: flex;
-  gap: 0.25rem;
-  background: var(--color-bg);
-  padding: 0.25rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--color-border);
-}
-
-.mode-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-dim);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
-}
-
-.mode-btn:hover:not(:disabled):not(.mode-btn-active) {
-  color: var(--color-text);
-  background: var(--color-bg-elevated);
-}
-
-.mode-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.mode-btn-active {
-  color: var(--color-on-accent);
-  background: var(--color-accent);
 }
 
 .picker-modal {

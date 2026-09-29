@@ -1,5 +1,5 @@
 import { reactive, watch } from 'vue'
-import { generateThemePalette, hexToHSL, hslToHex, ensureContrast, readableOn, MIN_TEXT_CONTRAST } from '../utils/colors'
+import { generateThemePalette, hexToHSL, hslToHex, ensureContrast, readableOn } from '../utils/colors'
 
 const STORAGE_KEY = 'sf2e-settings'
 
@@ -187,6 +187,9 @@ function shiftLightness(hex: string, delta: number): string {
   return hslToHex({ ...hsl, l: Math.max(0, Math.min(100, hsl.l + delta)) })
 }
 
+/** Contrast every theme color is brought up to. WCAG AA asks for 4.5. */
+const LEGIBLE_TARGET = 5
+
 // Generate all CSS variables from a theme definition using tetradic color theory
 export function generateThemeColors(def: ThemeDefinition): Record<string, string> {
   const palette = generateThemePalette(def.baseColor)
@@ -229,7 +232,9 @@ export function generateThemeColors(def: ThemeDefinition): Record<string, string
   // lighter (dark mode) or darker (light mode) until it reads on all surfaces.
   const surfaces = [base['--color-bg'], base['--color-bg-surface'], base['--color-bg-elevated'], base['--color-bg-hover']]
   // Colored text also sits on chips tinted with its own color, so it has to read there too
-  const legible = (hex: string) => ensureContrast(hex, surfaces, MIN_TEXT_CONTRAST, subtleAlpha)
+  // The target sits a little above the 4.5 minimum so text still reads where tints stack,
+  // such as a rollable value inside a selected card
+  const legible = (hex: string) => ensureContrast(hex, surfaces, LEGIBLE_TARGET, subtleAlpha)
   // Hover/pressed variants step away from the surface so they stay legible too
   const dimColor = (hex: string) => shiftLightness(hex, isDark ? -10 : 10)
   const brightColor = (hex: string) => shiftLightness(hex, isDark ? 15 : -10)

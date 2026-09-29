@@ -1,5 +1,11 @@
 # Damoritosh's Arena - Changelog
 
+## Setup Side Panels
+- Chase and tactical starship setup share one shape, modelled on the custom builder: a side panel of three steps with a live preview beside it
+- A new chase or scene arrives already filled in and ready to run
+- Four example chases, one for each type
+- Obstacles, starships, hazards and vehicles are picked in dialogs instead of separate tabs
+
 ## Chases and Vehicles
 - New CHASE tab for the GM Core chase subsystem: builder, tracker, and `#/chase/view` player view with face-down obstacle cards
 - 42 sample obstacles from GM Core, audited against the PDF by `scripts/audit-chase.py`

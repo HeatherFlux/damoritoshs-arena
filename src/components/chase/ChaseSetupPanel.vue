@@ -20,7 +20,7 @@ import {
 } from '../../utils/chaseRules'
 import { dcSummary, generateObstacles, swapObstacle, type ObstaclePool } from '../../utils/chaseGenerator'
 import { EXAMPLE_CHASES } from '../../data/chaseExamples'
-import SetupSection from './SetupSection.vue'
+import SetupSection from '../SetupSection.vue'
 import ChaseObstacleEditor from './ChaseObstacleEditor.vue'
 
 const props = defineProps<{

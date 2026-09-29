@@ -36,6 +36,7 @@ Starfinder Tech Core's tactical starship combat, in a CSC / TSC toggle on the ST
 - **Library** of all 74 NPC starships, 32 starship hazards and 30 vehicles from the book, with rollable attacks
 - **Player starship sheets** derived from frame + level: battle stations with grades, upgrade slots, helmed bonuses, gunnery weapons and expansion bays
 - **Tracker** with initiative for crew, NPC ships and complex hazards, shields-then-hull damage, the compromised / wrecked spiral with hull integrity checks, station malfunctions and identification, sensor-map zones and headings, Discord turn notifications
+- **Setup in three steps**: the party's ship, who's out there, start. Enemy ships are picked for the difficulty you choose, from one faction where possible, with the XP total shown as you change them
 - **Player view** (`#/tsc/view`) that shows only what the crew knows: hull bands instead of numbers, identified stations, detected hazards
 - **Encounter budgeting**: starships count as creatures, starship hazards use the hazard tables, and small crews get the reduced budget
 - **Custom NPC starship builder** with the book's design guidance and faction common actions

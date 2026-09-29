@@ -15,7 +15,6 @@ import StarshipPanel from './components/starship/StarshipPanel.vue'
 import SceneSidebar from './components/starship/SceneSidebar.vue'
 import StarshipPlayerView from './components/starship/StarshipPlayerView.vue'
 import TscPanel from './components/tsc/TscPanel.vue'
-import TscSidebar from './components/tsc/TscSidebar.vue'
 import TscPlayerView from './components/tsc/TscPlayerView.vue'
 import ChasePanel from './components/chase/ChasePanel.vue'
 import ChasePlayerView from './components/chase/ChasePlayerView.vue'
@@ -33,7 +32,6 @@ import { useTscStore } from './stores/tscStore'
 import { useChaseStore } from './stores/chaseStore'
 import { useCustomPanelStore } from './stores/customPanelStore'
 import type { SavedScene } from './types/starship'
-import type { PlayerStarship, TscSavedScene } from './types/tsc'
 
 const store = useEncounterStore()
 const customPanelStore = useCustomPanelStore()
@@ -184,47 +182,6 @@ type StarshipMode = 'csc' | 'tsc'
 const STARSHIP_MODE_KEY = 'sf2e-starship-mode'
 const starshipMode = ref<StarshipMode>((localStorage.getItem(STARSHIP_MODE_KEY) as StarshipMode) || 'csc')
 watch(starshipMode, (mode) => localStorage.setItem(STARSHIP_MODE_KEY, mode))
-
-const tscPanelRef = ref<{
-  loadSceneFromSidebar: (scene: TscSavedScene) => void
-  editShipFromSidebar: (ship: PlayerStarship) => void
-  saveCurrentSetup: () => void
-} | null>(null)
-
-const showTscImportModal = ref(false)
-const tscImportText = ref('')
-const tscImportError = ref('')
-
-function handleTscExport() {
-  const json = tscStore.exportScenes()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'tactical-starship-scenes.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function handleTscImport() {
-  try {
-    tscStore.importScenes(tscImportText.value)
-    showTscImportModal.value = false
-    tscImportText.value = ''
-    tscImportError.value = ''
-  } catch (e) {
-    tscImportError.value = 'Invalid JSON data'
-  }
-}
-
-function handleTscFileUpload(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => { tscImportText.value = reader.result as string }
-  reader.readAsText(file)
-}
 
 </script>
 
@@ -543,24 +500,12 @@ function handleTscFileUpload(event: Event) {
               <section class="flex-1 overflow-hidden">
                 <StarshipPanel ref="starshipPanelRef" />
               </section>
-            </template>
-            <template v-else>
-              <CollapsibleSidebar side="left" storageKey="tscLeft">
-                <TscSidebar
-                  @load-scene="(scene) => tscPanelRef?.loadSceneFromSidebar(scene)"
-                  @edit-ship="(ship) => tscPanelRef?.editShipFromSidebar(ship)"
-                  @save-current="tscPanelRef?.saveCurrentSetup()"
-                  @import="showTscImportModal = true"
-                  @export="handleTscExport"
-                />
+              <CollapsibleSidebar side="right" storageKey="starshipRight">
+                <RollHistory />
               </CollapsibleSidebar>
-              <section class="flex-1 overflow-hidden">
-                <TscPanel ref="tscPanelRef" />
-              </section>
             </template>
-            <CollapsibleSidebar side="right" storageKey="starshipRight">
-              <RollHistory />
-            </CollapsibleSidebar>
+            <!-- Tactical mode lays itself out: setup panel and preview, or tracker and rolls -->
+            <TscPanel v-else />
           </div>
         </div>
       </template>
@@ -629,26 +574,6 @@ function handleTscFileUpload(event: Event) {
         <div class="flex justify-end gap-2 mt-4">
           <button class="btn btn-secondary" @click="showStarshipImportModal = false">Cancel</button>
           <button class="btn btn-primary" @click="handleStarshipImport">Import</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tactical Starship Scene Import Modal -->
-    <div v-if="showTscImportModal" class="modal-overlay" @click.self="showTscImportModal = false">
-      <div class="modal">
-        <h3 class="mb-2">Import Tactical Scenes</h3>
-        <p class="text-dim text-sm mb-4">Paste exported tactical scene JSON or upload a file:</p>
-        <input type="file" accept=".json" class="mb-3 text-sm" @change="handleTscFileUpload" />
-        <textarea
-          v-model="tscImportText"
-          class="input w-full font-mono text-xs p-3 resize-y"
-          placeholder='[{"id": "...", "name": "...", ...}]'
-          rows="10"
-        ></textarea>
-        <p v-if="tscImportError" class="text-danger mt-2">{{ tscImportError }}</p>
-        <div class="flex justify-end gap-2 mt-4">
-          <button class="btn btn-secondary" @click="showTscImportModal = false">Cancel</button>
-          <button class="btn btn-primary" @click="handleTscImport">Import</button>
         </div>
       </div>
     </div>
