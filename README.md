@@ -24,7 +24,7 @@ A free encounter builder, combat tracker, cinematic starship-scene runner, and T
 
 ### Chases (GM Core)
 The chase subsystem from Starfinder GM Core, on its own CHASE tab:
-- **Builder** for Chase Down, Run Away, Beat the Clock and Competitive chases, with short, medium and long presets, suggested Chase Points for your party size, and a simple DC helper
+- **Setup in three steps**: pick the kind of chase, get obstacles filled in for your party's level and environment, start. A live preview shows the chase as you build it, and sides, endings and DCs stay out of the way until you want them
 - **42 sample obstacles** from GM Core, checked record by record against the book
 - **Tracker** that scores checks (+2 / +1 / 0 / −1), moves each side on when it has enough Chase Points, runs the other side at a steady pace or by rolling, and points out when the chase should end
 - **Vehicles** as a table aid: attach any of the 43 bundled vehicles to a side and track Hit Points, broken, uncontrolled and destroyed. The chase rules themselves do not use vehicle statistics

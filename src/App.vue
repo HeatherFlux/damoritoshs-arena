@@ -18,7 +18,6 @@ import TscPanel from './components/tsc/TscPanel.vue'
 import TscSidebar from './components/tsc/TscSidebar.vue'
 import TscPlayerView from './components/tsc/TscPlayerView.vue'
 import ChasePanel from './components/chase/ChasePanel.vue'
-import ChaseSidebar from './components/chase/ChaseSidebar.vue'
 import ChasePlayerView from './components/chase/ChasePlayerView.vue'
 import CombatPlayerView from './components/combat/CombatPlayerView.vue'
 import CustomPanel from './components/custom/CustomPanel.vue'
@@ -35,7 +34,6 @@ import { useChaseStore } from './stores/chaseStore'
 import { useCustomPanelStore } from './stores/customPanelStore'
 import type { SavedScene } from './types/starship'
 import type { PlayerStarship, TscSavedScene } from './types/tsc'
-import type { SavedChase } from './types/chase'
 
 const store = useEncounterStore()
 const customPanelStore = useCustomPanelStore()
@@ -225,49 +223,6 @@ function handleTscFileUpload(event: Event) {
   if (!file) return
   const reader = new FileReader()
   reader.onload = () => { tscImportText.value = reader.result as string }
-  reader.readAsText(file)
-}
-
-// ============ Chase tab ============
-
-const chasePanelRef = ref<{
-  editChaseFromSidebar: (chase: SavedChase) => void
-  startChaseFromSidebar: (chase: SavedChase) => void
-  newChase: () => void
-} | null>(null)
-
-const showChaseImportModal = ref(false)
-const chaseImportText = ref('')
-const chaseImportError = ref('')
-
-function handleChaseExport() {
-  const json = chaseStore.exportChases()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'chases.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function handleChaseImport() {
-  try {
-    chaseStore.importChases(chaseImportText.value)
-    showChaseImportModal.value = false
-    chaseImportText.value = ''
-    chaseImportError.value = ''
-  } catch (e) {
-    chaseImportError.value = 'No chases found in that JSON'
-  }
-}
-
-function handleChaseFileUpload(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => { chaseImportText.value = reader.result as string }
   reader.readAsText(file)
 }
 
@@ -611,23 +566,7 @@ function handleChaseFileUpload(event: Event) {
 
       <!-- Chase Tab -->
       <template v-else-if="activeTab === 'chase'">
-        <CollapsibleSidebar side="left" storageKey="chaseLeft">
-          <ChaseSidebar
-            @edit-chase="(chase) => chasePanelRef?.editChaseFromSidebar(chase)"
-            @start-chase="(chase) => chasePanelRef?.startChaseFromSidebar(chase)"
-            @new-chase="chasePanelRef?.newChase()"
-            @import="showChaseImportModal = true"
-            @export="handleChaseExport"
-          />
-        </CollapsibleSidebar>
-
-        <section class="flex-1 overflow-hidden min-w-0">
-          <ChasePanel ref="chasePanelRef" />
-        </section>
-
-        <CollapsibleSidebar side="right" storageKey="chaseRight">
-          <RollHistory />
-        </CollapsibleSidebar>
+        <ChasePanel />
       </template>
 
       <!-- Custom Creature/Hazard Builder Tab -->
@@ -709,26 +648,6 @@ function handleChaseFileUpload(event: Event) {
         <div class="flex justify-end gap-2 mt-4">
           <button class="btn btn-secondary" @click="showTscImportModal = false">Cancel</button>
           <button class="btn btn-primary" @click="handleTscImport">Import</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chase Import Modal -->
-    <div v-if="showChaseImportModal" class="modal-overlay" @click.self="showChaseImportModal = false">
-      <div class="modal">
-        <h3 class="mb-2">Import Chases</h3>
-        <p class="text-dim text-sm mb-4">Paste exported chase JSON or upload a file:</p>
-        <input type="file" accept=".json" class="mb-3 text-sm" @change="handleChaseFileUpload" />
-        <textarea
-          v-model="chaseImportText"
-          class="input w-full font-mono text-xs p-3 resize-y"
-          placeholder='{"version": 1, "chases": [...]}'
-          rows="10"
-        ></textarea>
-        <p v-if="chaseImportError" class="text-danger mt-2">{{ chaseImportError }}</p>
-        <div class="flex justify-end gap-2 mt-4">
-          <button class="btn btn-secondary" @click="showChaseImportModal = false">Cancel</button>
-          <button class="btn btn-primary" @click="handleChaseImport">Import</button>
         </div>
       </div>
     </div>

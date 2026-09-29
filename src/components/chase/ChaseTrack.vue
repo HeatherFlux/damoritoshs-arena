@@ -27,6 +27,8 @@ const props = defineProps<{
   sides: TrackSide[]
   gm?: boolean
   large?: boolean
+  /** Lay the cards out in rows instead of one scrolling line. */
+  wrap?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -57,7 +59,7 @@ function progressFor(obstacle: TrackObstacle): { side: TrackSide; percent: numbe
 </script>
 
 <template>
-  <div class="chase-track" :class="{ 'chase-track-large': large }">
+  <div class="chase-track" :class="{ 'chase-track-large': large, 'chase-track-wrap': wrap }">
     <div v-if="showStart" class="track-pad">
       <span class="track-pad-label">Start</span>
       <div class="track-markers">
@@ -328,6 +330,11 @@ function progressFor(obstacle: TrackObstacle): { side: TrackSide; percent: numbe
 .marker-others {
   background: var(--color-danger);
   color: var(--color-on-danger);
+}
+
+.chase-track-wrap {
+  flex-wrap: wrap;
+  overflow-x: visible;
 }
 
 /* Player view: bigger cards for a shared screen */
