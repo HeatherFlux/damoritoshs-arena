@@ -76,7 +76,7 @@ function endChase() {
           {{ CHASE_TYPE_LABELS[scene.type] }} · {{ scene.obstacles.length }} obstacles · a round is {{ scene.roundLength || 'not set' }}
         </div>
       </div>
-      <div class="flex items-center gap-3 ml-auto">
+      <div class="flex flex-wrap items-center gap-3 ml-auto">
         <div class="text-center">
           <div class="text-[0.5625rem] uppercase tracking-widest text-dim">Round</div>
           <div class="font-bold text-base">{{ roundText.replace('Round ', '') }}</div>

@@ -174,6 +174,8 @@ function progressFor(obstacle: TrackObstacle): { side: TrackSide; percent: numbe
 <style scoped>
 .chase-track {
   display: flex;
+  /* overflow-x makes its min-height 0, so a flex-column parent would squash it to a sliver */
+  flex-shrink: 0;
   gap: 0.5rem;
   overflow-x: auto;
   padding: 0.25rem 0.125rem 0.75rem;

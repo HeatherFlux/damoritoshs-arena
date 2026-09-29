@@ -203,7 +203,7 @@ function onImportFile(event: Event) {
 </script>
 
 <template>
-  <div class="tsc-layout">
+  <div class="tsc-layout" :class="{ 'tsc-layout-run': mode === 'run' }">
     <!-- Setup: side panel and live preview -->
     <template v-if="mode === 'setup'">
       <aside class="tsc-sidebar">
@@ -314,6 +314,13 @@ function onImportFile(event: Event) {
 
 .tsc-main {
   padding: 1rem;
+}
+
+/* The runner keeps Roll History beside it at every width, like the combat tab.
+   Stacked in a column, the full-height sidebar left the runner no height at all. */
+.tsc-layout-run {
+  flex-direction: row;
+  overflow: hidden;
 }
 
 .tsc-run {

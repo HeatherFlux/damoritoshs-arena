@@ -199,7 +199,7 @@ function onImportFile(event: Event) {
 </script>
 
 <template>
-  <div class="chase-layout">
+  <div class="chase-layout" :class="{ 'chase-layout-run': mode === 'run' }">
     <!-- Setup: side panel and live preview -->
     <template v-if="mode === 'setup'">
       <aside class="chase-sidebar" :class="{ 'chase-sidebar-closed': !mobileSetupOpen }">
@@ -321,6 +321,13 @@ function onImportFile(event: Event) {
 
 .chase-main {
   padding: 1rem;
+}
+
+/* The runner keeps Roll History beside it at every width, like the combat tab.
+   Stacked in a column, the full-height sidebar left the runner no height at all. */
+.chase-layout-run {
+  flex-direction: row;
+  overflow: hidden;
 }
 
 .chase-run {
