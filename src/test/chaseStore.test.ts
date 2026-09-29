@@ -90,6 +90,19 @@ describe('chaseStore', () => {
       expect(store.state.savedChases).toHaveLength(1)
     })
 
+    it('remembers deleted examples across a reload and can restore them', () => {
+      store.hideExample('example-run-away')
+      store.hideExample('example-run-away')
+      expect(store.state.hiddenExamples).toEqual(['example-run-away'])
+      __resetChaseStore()
+      store = useChaseStore()
+      expect(store.state.hiddenExamples).toEqual(['example-run-away'])
+      store.restoreExamples()
+      __resetChaseStore()
+      store = useChaseStore()
+      expect(store.state.hiddenExamples).toEqual([])
+    })
+
     it('rejects a file with no chases', () => {
       expect(() => store.importChases('{"foo":1}')).toThrow()
     })

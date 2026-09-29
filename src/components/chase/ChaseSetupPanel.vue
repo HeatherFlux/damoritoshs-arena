@@ -3,7 +3,7 @@
  * Chase setup as a side panel: pick the kind of chase, get obstacles filled in, start.
  * Everything else has a working default and lives under "Adjust details".
  */
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useChaseStore } from '../../stores/chaseStore'
 import { usePartyStore } from '../../stores/partyStore'
 import type { ChaseLength, ChaseSide, ChaseType, SavedChase } from '../../types/chase'
@@ -51,11 +51,16 @@ const partySize = computed(() => partyStore.partySize.value || 4)
 
 const open = ref({ saved: true, kind: true, obstacles: true, sides: false, ending: false })
 
-/** The GM's own chases first, then the bundled examples that have not been saved over. */
+/** The GM's own chases first, then the bundled examples they have not saved over or deleted. */
 const chaseList = computed(() => {
   const saved = store.state.savedChases
-  return [...saved, ...EXAMPLE_CHASES.filter(e => !saved.some(s => s.id === e.id))]
+  const hidden = store.state.hiddenExamples
+  return [...saved, ...EXAMPLE_CHASES.filter(e => !hidden.includes(e.id) && !saved.some(s => s.id === e.id))]
 })
+
+const missingExamples = computed(() =>
+  EXAMPLE_CHASES.filter(e => !chaseList.value.some(c => c.id === e.id)).length,
+)
 
 function isEditedExample(chase: SavedChase): boolean {
   return !chase.isExample && EXAMPLE_CHASES.some(e => e.id === chase.id)
@@ -136,6 +141,14 @@ function setCount(count: number) {
 
 function setLength(length: Exclude<ChaseLength, 'custom'>) {
   setCount(OBSTACLES_BY_LENGTH[length])
+}
+
+const countInput = ref<HTMLInputElement | null>(null)
+
+async function chooseCustom() {
+  props.chase.length = 'custom'
+  await nextTick()
+  countInput.value?.focus()
 }
 
 /** A cleared or nonsense count is put back rather than wiping out the chase. */
@@ -246,10 +259,9 @@ function formatDate(timestamp: number): string {
 }
 
 function deleteSaved(chase: SavedChase) {
-  const question = isEditedExample(chase)
-    ? `Put "${chase.name}" back the way it came? Your changes to it will be lost.`
-    : `Delete "${chase.name}"?`
-  if (confirm(question)) store.deleteChase(chase.id)
+  if (!confirm(`Delete "${chase.name}"?`)) return
+  if (chase.isExample || isEditedExample(chase)) store.hideExample(chase.id)
+  if (!chase.isExample) store.deleteChase(chase.id)
 }
 
 defineExpose({ refill })
@@ -268,9 +280,13 @@ defineExpose({ refill })
                 {{ CHASE_TYPE_LABELS[saved.type] }} · {{ saved.obstacles.length }} obstacles · {{ saved.isExample ? 'example' : isEditedExample(saved) ? `example, edited ${formatDate(saved.savedAt)}` : formatDate(saved.savedAt) }}
               </div>
             </div>
-            <button v-if="!saved.isExample" class="btn-icon-tiny text-danger" :title="isEditedExample(saved) ? 'Put the original back' : 'Delete'" @click.stop="deleteSaved(saved)">×</button>
+            <button class="btn-icon-tiny text-danger" title="Delete" @click.stop="deleteSaved(saved)">×</button>
           </div>
+          <p v-if="chaseList.length === 0" class="text-[0.75rem] text-dim py-1">Nothing saved yet.</p>
         </div>
+        <button v-if="missingExamples" class="text-[0.6875rem] text-accent text-left" @click="store.restoreExamples()">
+          Bring back the {{ missingExamples === 1 ? 'example' : `${missingExamples} examples` }} you deleted
+        </button>
         <div class="flex gap-1">
           <button class="btn-secondary btn-xs flex-1" @click="emit('import')">Import</button>
           <button class="btn-secondary btn-xs flex-1" :disabled="store.state.savedChases.length === 0" @click="emit('export')">Export</button>
@@ -289,31 +305,33 @@ defineExpose({ refill })
         <p class="text-[0.75rem] text-dim">{{ CHASE_TYPE_SUMMARIES[chase.type] }}</p>
         <div>
           <span class="field-label">Length</span>
-          <div class="grid grid-cols-3 gap-1 mt-1">
+          <div class="grid grid-cols-2 gap-1 mt-1">
             <button
               v-for="l in LENGTHS"
               :key="l"
-              class="btn-xs capitalize"
+              class="btn-xs"
               :class="chase.length === l ? 'btn-primary' : 'btn-secondary'"
               :title="`${OBSTACLES_BY_LENGTH[l]} obstacles, about ${PLAY_TIME_BY_LENGTH[l]} of play`"
               @click="setLength(l)"
             >{{ l }} {{ OBSTACLES_BY_LENGTH[l] }}</button>
+            <!-- Custom is a button until it is chosen, then it holds the number -->
+            <button v-if="chase.length !== 'custom'" class="btn-xs btn-secondary" title="Any number of obstacles" @click="chooseCustom">Custom</button>
+            <label v-else class="length-custom">
+              <span>Custom</span>
+              <input
+                ref="countInput"
+                :value="chase.obstacles.length"
+                type="number"
+                min="1"
+                :max="MAX_OBSTACLES"
+                class="length-custom-input"
+                aria-label="Number of obstacles"
+                @change="onCountInput"
+                @focus="($event.target as HTMLInputElement).select()"
+                @keydown.enter="($event.target as HTMLInputElement).blur()"
+              />
+            </label>
           </div>
-          <label class="flex items-center gap-2 mt-1.5 text-[0.75rem]" :class="chase.length === 'custom' ? 'text-text' : 'text-dim'">
-            or exactly
-            <input
-              :value="chase.obstacles.length"
-              type="number"
-              min="1"
-              :max="MAX_OBSTACLES"
-              class="input input-sm w-14"
-              :class="{ 'count-custom': chase.length === 'custom' }"
-              aria-label="Number of obstacles"
-              @change="onCountInput"
-              @keydown.enter="($event.target as HTMLInputElement).blur()"
-            />
-            obstacles
-          </label>
         </div>
       </SetupSection>
 
@@ -476,9 +494,38 @@ defineExpose({ refill })
   color: var(--color-text-dim);
 }
 
-/* The count is highlighted when it is not one of the three presets */
-.count-custom {
-  border-color: var(--color-accent);
+/* The chosen Custom length: shaped like the buttons beside it, with the number inside */
+.length-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  cursor: text;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%);
+}
+
+.length-custom-input {
+  width: 2.5rem;
+  padding: 0.0625rem 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid transparent;
+}
+
+.length-custom-input:focus {
+  outline: none;
+  border-color: var(--color-on-accent);
 }
 
 /* Four chases show at once; the rest scroll */

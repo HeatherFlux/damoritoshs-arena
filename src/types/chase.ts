@@ -218,6 +218,8 @@ export interface ChaseSyncMessage {
 
 export interface ChaseState {
   savedChases: SavedChase[]
+  /** Ids of bundled example chases the GM has deleted from their list. */
+  hiddenExamples: string[]
   activeScene: ChaseScene | null
   sessionId: string
   isGMView: boolean

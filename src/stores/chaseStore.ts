@@ -66,6 +66,7 @@ function getSessionId(): string {
 
 const state = reactive<ChaseState>({
   savedChases: [],
+  hiddenExamples: [],
   activeScene: null,
   sessionId: '',
   isGMView: true,
@@ -297,6 +298,7 @@ function ensureChannel() {
 function saveToLocalStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     savedChases: state.savedChases,
+    hiddenExamples: state.hiddenExamples,
     activeScene: state.activeScene,
   }))
 }
@@ -307,6 +309,7 @@ function loadFromLocalStorage() {
   try {
     const data = JSON.parse(saved)
     if (Array.isArray(data.savedChases)) state.savedChases = data.savedChases
+    if (Array.isArray(data.hiddenExamples)) state.hiddenExamples = data.hiddenExamples
     if (data.activeScene) state.activeScene = data.activeScene
   } catch (e) {
     console.warn('[Chase] Failed to load saved state:', e)
@@ -326,6 +329,17 @@ function saveChase(chase: SavedChase): void {
 
 function deleteChase(id: string): void {
   state.savedChases = state.savedChases.filter(c => c.id !== id)
+  saveToLocalStorage()
+}
+
+/** Take a bundled example out of the list. It stays out until the examples are restored. */
+function hideExample(id: string): void {
+  if (!state.hiddenExamples.includes(id)) state.hiddenExamples.push(id)
+  saveToLocalStorage()
+}
+
+function restoreExamples(): void {
+  state.hiddenExamples = []
   saveToLocalStorage()
 }
 
@@ -739,6 +753,7 @@ watch(() => state.activeScene, () => {
 /** Test hook: wipe in-memory state (localStorage is mocked per test). */
 export function __resetChaseStore() {
   state.savedChases = []
+  state.hiddenExamples = []
   state.activeScene = null
   state.playerData = null
   state.isGMView = true
@@ -756,6 +771,8 @@ export function useChaseStore() {
     // library
     saveChase,
     deleteChase,
+    hideExample,
+    restoreExamples,
     getSavedChase,
     exportChases,
     importChases,
