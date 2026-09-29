@@ -517,9 +517,10 @@ function handleTscFileUpload(event: Event) {
             <a
               v-if="starshipMode === 'tsc'"
               class="text-[0.625rem] text-accent underline hidden md:inline"
-              href="https://github.com/HeatherFlux/damoritoshs-arena/issues/new?title=TSC%20beta%3A%20&body=Ship%2Fhazard%3A%0AWhat%20I%20did%3A%0AWhat%20happened%3A%0AWhat%20the%20book%20says%20(page)%3A"
+              href="https://discord.gg/ABaEmFuyjs"
               target="_blank"
               rel="noopener"
+              title="Opens the community Discord"
             >Report a problem</a>
             <span v-if="tscStore.state.activeScene && starshipMode === 'csc'" class="text-[0.625rem] text-success ml-auto">Tactical scene running</span>
             <span v-if="starshipStore.state.activeScene && starshipMode === 'tsc'" class="text-[0.625rem] text-success ml-auto">Cinematic scene running</span>
