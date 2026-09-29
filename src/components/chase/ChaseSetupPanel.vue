@@ -119,17 +119,31 @@ function setType(type: ChaseType) {
   c.end = setup.end
 }
 
+const MAX_OBSTACLES = 30
+
 /** A new length adds to or trims the list, so choices already made are kept. */
-function setLength(length: Exclude<ChaseLength, 'custom'>) {
+function setCount(count: number) {
   const c = props.chase
-  c.length = length
-  const target = OBSTACLES_BY_LENGTH[length]
+  const target = Math.max(1, Math.min(MAX_OBSTACLES, Math.floor(count)))
   if (c.obstacles.length < target) {
     c.obstacles.push(...generateObstacles(target - c.obstacles.length, c.obstacles, generateOptions.value))
   } else {
     c.obstacles.splice(target)
   }
+  c.length = lengthForCount(target)
   syncRoundLimit()
+}
+
+function setLength(length: Exclude<ChaseLength, 'custom'>) {
+  setCount(OBSTACLES_BY_LENGTH[length])
+}
+
+/** A cleared or nonsense count is put back rather than wiping out the chase. */
+function onCountInput(event: Event) {
+  const input = event.target as HTMLInputElement
+  const count = Number(input.value)
+  if (input.value.trim() !== '' && Number.isFinite(count) && count >= 1) setCount(count)
+  input.value = String(props.chase.obstacles.length)
 }
 
 function setLevel(level: number) {
@@ -285,6 +299,21 @@ defineExpose({ refill })
               @click="setLength(l)"
             >{{ l }} {{ OBSTACLES_BY_LENGTH[l] }}</button>
           </div>
+          <label class="flex items-center gap-2 mt-1.5 text-[0.75rem]" :class="chase.length === 'custom' ? 'text-text' : 'text-dim'">
+            or exactly
+            <input
+              :value="chase.obstacles.length"
+              type="number"
+              min="1"
+              :max="MAX_OBSTACLES"
+              class="input input-sm w-14"
+              :class="{ 'count-custom': chase.length === 'custom' }"
+              aria-label="Number of obstacles"
+              @change="onCountInput"
+              @keydown.enter="($event.target as HTMLInputElement).blur()"
+            />
+            obstacles
+          </label>
         </div>
       </SetupSection>
 
@@ -445,6 +474,11 @@ defineExpose({ refill })
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-text-dim);
+}
+
+/* The count is highlighted when it is not one of the three presets */
+.count-custom {
+  border-color: var(--color-accent);
 }
 
 /* Four chases show at once; the rest scroll */
