@@ -51,8 +51,15 @@ const partySize = computed(() => partyStore.partySize.value || 4)
 
 const open = ref({ saved: true, kind: true, obstacles: true, sides: false, ending: false })
 
-/** The GM's own chases first, then the bundled examples. */
-const chaseList = computed(() => [...store.state.savedChases, ...EXAMPLE_CHASES])
+/** The GM's own chases first, then the bundled examples that have not been saved over. */
+const chaseList = computed(() => {
+  const saved = store.state.savedChases
+  return [...saved, ...EXAMPLE_CHASES.filter(e => !saved.some(s => s.id === e.id))]
+})
+
+function isEditedExample(chase: SavedChase): boolean {
+  return !chase.isExample && EXAMPLE_CHASES.some(e => e.id === chase.id)
+}
 const editingIndex = ref<number | null>(null)
 
 const TYPES = Object.keys(CHASE_TYPE_LABELS) as ChaseType[]
@@ -225,7 +232,10 @@ function formatDate(timestamp: number): string {
 }
 
 function deleteSaved(chase: SavedChase) {
-  if (confirm(`Delete "${chase.name}"?`)) store.deleteChase(chase.id)
+  const question = isEditedExample(chase)
+    ? `Put "${chase.name}" back the way it came? Your changes to it will be lost.`
+    : `Delete "${chase.name}"?`
+  if (confirm(question)) store.deleteChase(chase.id)
 }
 
 defineExpose({ refill })
@@ -241,10 +251,10 @@ defineExpose({ refill })
             <div class="min-w-0">
               <div class="font-semibold text-[0.8125rem] truncate">{{ saved.name }}</div>
               <div class="text-[0.625rem] text-dim">
-                {{ CHASE_TYPE_LABELS[saved.type] }} · {{ saved.obstacles.length }} obstacles · {{ saved.isExample ? 'example' : formatDate(saved.savedAt) }}
+                {{ CHASE_TYPE_LABELS[saved.type] }} · {{ saved.obstacles.length }} obstacles · {{ saved.isExample ? 'example' : isEditedExample(saved) ? `example, edited ${formatDate(saved.savedAt)}` : formatDate(saved.savedAt) }}
               </div>
             </div>
-            <button v-if="!saved.isExample" class="btn-icon-tiny text-danger" title="Delete" @click.stop="deleteSaved(saved)">×</button>
+            <button v-if="!saved.isExample" class="btn-icon-tiny text-danger" :title="isEditedExample(saved) ? 'Put the original back' : 'Delete'" @click.stop="deleteSaved(saved)">×</button>
           </div>
         </div>
         <div class="flex gap-1">

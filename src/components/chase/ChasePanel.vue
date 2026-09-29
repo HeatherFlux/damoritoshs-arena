@@ -18,7 +18,6 @@ import {
   suggestedChasePoints,
 } from '../../utils/chaseRules'
 import { generateObstacles, type ObstaclePool } from '../../utils/chaseGenerator'
-import { EXAMPLE_CHASES } from '../../data/chaseExamples'
 import CollapsibleSidebar from '../CollapsibleSidebar.vue'
 import RollHistory from '../RollHistory.vue'
 import VehicleSearch from '../tsc/VehicleSearch.vue'
@@ -106,18 +105,12 @@ function flash(text: string) {
   setTimeout(() => { if (notice.value === text) notice.value = '' }, 2000)
 }
 
-/** An example becomes the GM's own chase the first time it is saved. */
-function makeOwn() {
-  const c = draft.value.chase
-  if (!c.isExample) return
-  const original = EXAMPLE_CHASES.find(e => e.id === c.id)
-  c.id = crypto.randomUUID()
-  c.isExample = undefined
-  if (original && c.name === original.name) c.name = `My ${original.name.replace(/ Example$/, '')}`
-}
-
+/**
+ * Saving an example keeps its name and its place in the list: the saved version stands in for
+ * the bundled one, and deleting it brings the original back.
+ */
 function saveDraft() {
-  makeOwn()
+  draft.value.chase.isExample = undefined
   store.saveChase(draft.value.chase)
   flash('Saved')
 }
