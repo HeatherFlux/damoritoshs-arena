@@ -58,10 +58,6 @@ const chaseList = computed(() => {
   return [...saved, ...EXAMPLE_CHASES.filter(e => !hidden.includes(e.id) && !saved.some(s => s.id === e.id))]
 })
 
-const missingExamples = computed(() =>
-  EXAMPLE_CHASES.filter(e => !chaseList.value.some(c => c.id === e.id)).length,
-)
-
 function isEditedExample(chase: SavedChase): boolean {
   return !chase.isExample && EXAMPLE_CHASES.some(e => e.id === chase.id)
 }
@@ -284,9 +280,6 @@ defineExpose({ refill })
           </div>
           <p v-if="chaseList.length === 0" class="text-[0.75rem] text-dim py-1">Nothing saved yet.</p>
         </div>
-        <button v-if="missingExamples" class="text-[0.6875rem] text-accent text-left" @click="store.restoreExamples()">
-          Bring back the {{ missingExamples === 1 ? 'example' : `${missingExamples} examples` }} you deleted
-        </button>
         <div class="flex gap-1">
           <button class="btn-secondary btn-xs flex-1" @click="emit('import')">Import</button>
           <button class="btn-secondary btn-xs flex-1" :disabled="store.state.savedChases.length === 0" @click="emit('export')">Export</button>

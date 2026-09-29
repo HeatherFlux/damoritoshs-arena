@@ -7,6 +7,7 @@ import { useHackingStore } from '../stores/hackingStore'
 import { useStarshipStore } from '../stores/starshipStore'
 import { useTscStore } from '../stores/tscStore'
 import { useChaseStore } from '../stores/chaseStore'
+import { EXAMPLE_CHASES } from '../data/chaseExamples'
 import { useShopStore } from '../stores/shopStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
@@ -20,6 +21,21 @@ const hackingStore = useHackingStore()
 const starshipStore = useStarshipStore()
 const tscStore = useTscStore()
 const chaseStore = useChaseStore()
+
+// Example chases that are in the chase list exactly as they shipped
+const exampleChasesShown = computed(() => EXAMPLE_CHASES.filter(e =>
+  !chaseStore.state.hiddenExamples.includes(e.id) && !chaseStore.state.savedChases.some(s => s.id === e.id),
+).length)
+const examplesRestored = ref(false)
+
+function restoreExampleChases() {
+  const edited = EXAMPLE_CHASES.filter(e => chaseStore.state.savedChases.some(s => s.id === e.id))
+  if (edited.length && !confirm(`This also puts back ${edited.length === 1 ? 'the example' : `the ${edited.length} examples`} you changed, and your changes to ${edited.length === 1 ? 'it' : 'them'} will be lost. Continue?`)) return
+  for (const e of edited) chaseStore.deleteChase(e.id)
+  chaseStore.restoreExamples()
+  examplesRestored.value = true
+  setTimeout(() => { examplesRestored.value = false }, 2000)
+}
 const shopStore = useShopStore()
 
 defineEmits<{
@@ -514,6 +530,29 @@ function handleFileSelect(event: Event, row: DataRow) {
                     @click="row.onClear!()"
                   >
                     &times;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example chases -->
+            <div class="mt-3 pt-3 border-t border-border">
+              <div class="data-row">
+                <div class="data-row-label">
+                  <span class="text-sm font-medium text-text">Example Chases</span>
+                  <span class="data-row-count">{{ exampleChasesShown }} of {{ EXAMPLE_CHASES.length }}</span>
+                </div>
+                <div class="data-row-actions">
+                  <span v-if="examplesRestored" class="text-xs mr-1 text-success">Restored</span>
+                  <button
+                    type="button"
+                    class="data-btn"
+                    :class="{ disabled: exampleChasesShown === EXAMPLE_CHASES.length }"
+                    :disabled="exampleChasesShown === EXAMPLE_CHASES.length"
+                    title="Bring back the example chases you deleted or changed"
+                    @click="restoreExampleChases"
+                  >
+                    Restore
                   </button>
                 </div>
               </div>
