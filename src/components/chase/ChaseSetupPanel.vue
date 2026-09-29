@@ -19,6 +19,7 @@ import {
   suggestedChasePoints,
 } from '../../utils/chaseRules'
 import { dcSummary, generateObstacles, swapObstacle, type ObstaclePool } from '../../utils/chaseGenerator'
+import { EXAMPLE_CHASES } from '../../data/chaseExamples'
 import SetupSection from './SetupSection.vue'
 import ChaseObstacleEditor from './ChaseObstacleEditor.vue'
 
@@ -48,7 +49,10 @@ const store = useChaseStore()
 const partyStore = usePartyStore()
 const partySize = computed(() => partyStore.partySize.value || 4)
 
-const open = ref({ saved: false, kind: true, obstacles: true, sides: false, ending: false })
+const open = ref({ saved: true, kind: true, obstacles: true, sides: false, ending: false })
+
+/** The GM's own chases first, then the bundled examples. */
+const chaseList = computed(() => [...store.state.savedChases, ...EXAMPLE_CHASES])
 const editingIndex = ref<number | null>(null)
 
 const TYPES = Object.keys(CHASE_TYPE_LABELS) as ChaseType[]
@@ -153,13 +157,42 @@ function remove(index: number) {
   afterCountChange()
 }
 
-function move(index: number, delta: number) {
+function move(from: number, to: number) {
   const list = props.chase.obstacles
-  const target = index + delta
-  if (target < 0 || target >= list.length) return
-  const [item] = list.splice(index, 1)
-  list.splice(target, 0, item)
+  if (to < 0 || to >= list.length || to === from) return
+  const [item] = list.splice(from, 1)
+  list.splice(to, 0, item)
   touched()
+}
+
+// Obstacles are reordered by dragging a row by its handle
+const draggingIndex = ref<number | null>(null)
+const dropIndex = ref<number | null>(null)
+
+function onDragStart(event: DragEvent, index: number) {
+  draggingIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', String(index))
+  }
+}
+
+function onDrop(index: number) {
+  if (draggingIndex.value !== null) move(draggingIndex.value, index)
+  onDragEnd()
+}
+
+function onDragEnd() {
+  draggingIndex.value = null
+  dropIndex.value = null
+}
+
+/** Keyboard reordering, for when dragging is not an option. */
+function onHandleKey(event: KeyboardEvent, index: number) {
+  const delta = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0
+  if (!delta) return
+  event.preventDefault()
+  move(index, index + delta)
 }
 
 function addBlank() {
@@ -202,19 +235,22 @@ defineExpose({ refill })
   <div class="flex flex-col h-full min-h-0">
     <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
       <!-- Saved chases -->
-      <SetupSection v-model:open="open.saved" title="Saved chases" :summary="`${store.state.savedChases.length}`">
+      <SetupSection v-model:open="open.saved" title="Saved chases" :summary="`${chaseList.length}`">
+        <div class="saved-list">
+          <div v-for="saved in chaseList" :key="saved.id" class="saved-row" :class="{ 'saved-row-active': saved.id === chase.id }" @click="emit('load', saved)">
+            <div class="min-w-0">
+              <div class="font-semibold text-[0.8125rem] truncate">{{ saved.name }}</div>
+              <div class="text-[0.625rem] text-dim">
+                {{ CHASE_TYPE_LABELS[saved.type] }} · {{ saved.obstacles.length }} obstacles · {{ saved.isExample ? 'example' : formatDate(saved.savedAt) }}
+              </div>
+            </div>
+            <button v-if="!saved.isExample" class="btn-icon-tiny text-danger" title="Delete" @click.stop="deleteSaved(saved)">×</button>
+          </div>
+        </div>
         <div class="flex gap-1">
           <button class="btn-secondary btn-xs flex-1" @click="emit('import')">Import</button>
           <button class="btn-secondary btn-xs flex-1" :disabled="store.state.savedChases.length === 0" @click="emit('export')">Export</button>
         </div>
-        <div v-for="saved in store.state.savedChases" :key="saved.id" class="saved-row" :class="{ 'saved-row-active': saved.id === chase.id }" @click="emit('load', saved)">
-          <div class="min-w-0">
-            <div class="font-semibold text-[0.8125rem] truncate">{{ saved.name }}</div>
-            <div class="text-[0.625rem] text-dim">{{ CHASE_TYPE_LABELS[saved.type] }} · {{ saved.obstacles.length }} obstacles · {{ formatDate(saved.savedAt) }}</div>
-          </div>
-          <button class="btn-icon-tiny text-danger" title="Delete" @click.stop="deleteSaved(saved)">×</button>
-        </div>
-        <p v-if="store.state.savedChases.length === 0" class="text-[0.75rem] text-dim">Nothing saved yet.</p>
       </SetupSection>
 
       <!-- 1. What kind of chase -->
@@ -259,15 +295,29 @@ defineExpose({ refill })
         <p v-if="handEdited" class="text-[0.6875rem] text-dim">You've changed the list, so level and environment now only affect new picks. Reroll all to start over.</p>
 
         <div class="flex flex-col gap-1">
-          <div v-for="(o, index) in chase.obstacles" :key="o.id" class="obstacle-row">
+          <div
+            v-for="(o, index) in chase.obstacles"
+            :key="o.id"
+            class="obstacle-row"
+            :class="{ 'obstacle-row-dragging': draggingIndex === index, 'obstacle-row-target': dropIndex === index && draggingIndex !== index }"
+            @dragover.prevent="dropIndex = index"
+            @drop.prevent="onDrop(index)"
+          >
+            <button
+              class="obstacle-handle"
+              draggable="true"
+              title="Drag to reorder"
+              :aria-label="`Reorder ${o.name}. Use the up and down arrow keys.`"
+              @dragstart="onDragStart($event, index)"
+              @dragend="onDragEnd"
+              @keydown="onHandleKey($event, index)"
+            >⠿</button>
             <span class="obstacle-number">{{ index + 1 }}</span>
             <button class="obstacle-main" title="Edit this obstacle" @click="edit(index)">
               <span class="obstacle-name">{{ o.name }}</span>
               <span class="obstacle-meta">{{ dcSummary(o) }} · {{ o.chasePoints }} point{{ o.chasePoints === 1 ? '' : 's' }}</span>
             </button>
             <div class="obstacle-actions">
-              <button class="btn-icon-tiny" title="Move up" :disabled="index === 0" @click="move(index, -1)">↑</button>
-              <button class="btn-icon-tiny" title="Move down" :disabled="index === chase.obstacles.length - 1" @click="move(index, 1)">↓</button>
               <button class="btn-icon-tiny" title="Swap for a different obstacle" @click="swap(index)">⟳</button>
               <button class="btn-icon-tiny text-danger" title="Remove" @click="remove(index)">×</button>
             </div>
@@ -353,7 +403,7 @@ defineExpose({ refill })
         <button class="btn btn-secondary btn-sm" title="Start a new chase from scratch" @click="emit('new')">✕</button>
         <button class="btn btn-secondary flex-1" :title="isSaved ? 'Save changes' : 'Save to reuse later'" @click="emit('save')">Save</button>
         <button class="btn btn-primary flex-1" :disabled="problems.length > 0" @click="emit('start')">
-          <span class="start-step">3</span> Start
+          Start
         </button>
       </div>
     </div>
@@ -363,6 +413,7 @@ defineExpose({ refill })
       :obstacle="chase.obstacles[editingIndex]"
       :index="editingIndex"
       :party-size="partySize"
+      :party-level="chase.level"
       @close="editingIndex = null"
     />
   </div>
@@ -386,7 +437,19 @@ defineExpose({ refill })
   color: var(--color-text-dim);
 }
 
+/* Four chases show at once; the rest scroll */
+.saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  /* four rows and the three gaps between them */
+  max-height: calc(4 * 3.3125rem + 0.75rem);
+  overflow-y: auto;
+}
+
 .saved-row {
+  flex-shrink: 0;
+  height: 3.3125rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -416,9 +479,38 @@ defineExpose({ refill })
   border-color: var(--color-border-hover);
 }
 
+.obstacle-row-dragging {
+  opacity: 0.4;
+}
+
+.obstacle-row-target {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 2px 0 var(--color-accent);
+}
+
+.obstacle-handle {
+  flex-shrink: 0;
+  padding: 0 0.125rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: grab;
+}
+
+.obstacle-handle:hover,
+.obstacle-handle:focus-visible {
+  color: var(--color-accent);
+}
+
+.obstacle-handle:active {
+  cursor: grabbing;
+}
+
 .obstacle-number {
   flex-shrink: 0;
-  width: 1.25rem;
+  width: 1rem;
   text-align: right;
   font-size: 0.6875rem;
   font-weight: 700;
@@ -473,15 +565,5 @@ defineExpose({ refill })
   .obstacle-row:focus-within .obstacle-actions {
     opacity: 1;
   }
-}
-
-.start-step {
-  display: inline-block;
-  min-width: 1.125rem;
-  margin-right: 0.25rem;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  border: 1px solid currentColor;
-  line-height: 1.1;
 }
 </style>

@@ -18,6 +18,7 @@ import {
   suggestedChasePoints,
 } from '../../utils/chaseRules'
 import { generateObstacles, type ObstaclePool } from '../../utils/chaseGenerator'
+import { EXAMPLE_CHASES } from '../../data/chaseExamples'
 import CollapsibleSidebar from '../CollapsibleSidebar.vue'
 import RollHistory from '../RollHistory.vue'
 import VehicleSearch from '../tsc/VehicleSearch.vue'
@@ -105,7 +106,18 @@ function flash(text: string) {
   setTimeout(() => { if (notice.value === text) notice.value = '' }, 2000)
 }
 
+/** An example becomes the GM's own chase the first time it is saved. */
+function makeOwn() {
+  const c = draft.value.chase
+  if (!c.isExample) return
+  const original = EXAMPLE_CHASES.find(e => e.id === c.id)
+  c.id = crypto.randomUUID()
+  c.isExample = undefined
+  if (original && c.name === original.name) c.name = `My ${original.name.replace(/ Example$/, '')}`
+}
+
 function saveDraft() {
+  makeOwn()
   store.saveChase(draft.value.chase)
   flash('Saved')
 }
@@ -113,7 +125,8 @@ function saveDraft() {
 function startDraft() {
   if (problems.value.length) return
   if (hasActiveScene.value && !confirm('Replace the chase that is running?')) return
-  store.saveChase(draft.value.chase)
+  // Examples can be run as they are without joining the saved list
+  if (!draft.value.chase.isExample) store.saveChase(draft.value.chase)
   store.startChase(draft.value.chase)
   // A chase with no one on the party's side picks up the active party
   const side = store.state.activeScene?.sides.find(s => s.isPlayers)

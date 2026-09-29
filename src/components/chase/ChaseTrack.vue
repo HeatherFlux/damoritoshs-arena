@@ -4,7 +4,7 @@
  * Used by the GM tracker (everything face up, with a reveal toggle) and the player view
  * (unrevealed obstacles face down).
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { ChasePlayerObstacle, ChaseSideRole } from '../../types/chase'
 
 export interface TrackObstacle extends ChasePlayerObstacle {
@@ -37,6 +37,42 @@ const emit = defineEmits<{
 
 const showStart = computed(() => props.sides.some(s => s.position < 0))
 
+// ---- Click, hold and drag to slide the row of cards ----
+const track = ref<HTMLElement | null>(null)
+const panning = ref(false)
+let panStartX = 0
+let panStartScroll = 0
+let panPointer: number | null = null
+/** Pixels of movement before a press counts as a drag rather than a click. */
+const PAN_THRESHOLD = 5
+
+function onPointerDown(event: PointerEvent) {
+  if (props.wrap || !track.value || event.button !== 0) return
+  // Touch already scrolls by itself, and controls keep their own clicks
+  if (event.pointerType === 'touch' || (event.target as HTMLElement).closest('button, input, select, a')) return
+  panPointer = event.pointerId
+  panStartX = event.clientX
+  panStartScroll = track.value.scrollLeft
+}
+
+function onPointerMove(event: PointerEvent) {
+  if (panPointer !== event.pointerId || !track.value) return
+  const moved = event.clientX - panStartX
+  if (!panning.value) {
+    if (Math.abs(moved) < PAN_THRESHOLD) return
+    panning.value = true
+    track.value.setPointerCapture(event.pointerId)
+  }
+  track.value.scrollLeft = panStartScroll - moved
+}
+
+function onPointerUp(event: PointerEvent) {
+  if (panPointer !== event.pointerId) return
+  panPointer = null
+  if (panning.value && track.value?.hasPointerCapture(event.pointerId)) track.value.releasePointerCapture(event.pointerId)
+  panning.value = false
+}
+
 function sidesAt(position: number): TrackSide[] {
   return props.sides.filter(s => s.position === position)
 }
@@ -59,7 +95,15 @@ function progressFor(obstacle: TrackObstacle): { side: TrackSide; percent: numbe
 </script>
 
 <template>
-  <div class="chase-track" :class="{ 'chase-track-large': large, 'chase-track-wrap': wrap }">
+  <div
+    ref="track"
+    class="chase-track"
+    :class="{ 'chase-track-large': large, 'chase-track-wrap': wrap, 'chase-track-pannable': !wrap, 'chase-track-panning': panning }"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerUp"
+  >
     <div v-if="showStart" class="track-pad">
       <span class="track-pad-label">Start</span>
       <div class="track-markers">
@@ -335,6 +379,15 @@ function progressFor(obstacle: TrackObstacle): { side: TrackSide; percent: numbe
 .chase-track-wrap {
   flex-wrap: wrap;
   overflow-x: visible;
+}
+
+.chase-track-pannable {
+  cursor: grab;
+}
+
+.chase-track-panning {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* Player view: bigger cards for a shared screen */

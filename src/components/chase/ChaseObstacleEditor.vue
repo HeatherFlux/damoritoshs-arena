@@ -9,6 +9,7 @@ const props = defineProps<{
   obstacle: ChaseObstacle
   index: number
   partySize: number
+  partyLevel: number
 }>()
 
 const emit = defineEmits<{
@@ -22,9 +23,9 @@ const CHECKS = [
 ]
 const ENVIRONMENTS: ChaseEnvironment[] = ['underground', 'urban', 'vehicle', 'wilderness', 'custom']
 
-const dcBasis = ref<'simple' | 'level'>('simple')
+const dcBasis = ref<'simple' | 'level'>('level')
 const dcRank = ref<SimpleDCRank>('trained')
-const dcLevel = ref(props.obstacle.level)
+const dcLevel = ref(props.partyLevel)
 const dcDifficulty = ref<DCDifficulty>('standard')
 const showHelper = ref(false)
 
@@ -85,8 +86,8 @@ function setNoCheck(index: number, noCheck: boolean) {
       <div v-if="showHelper" class="bg-elevated p-2 mb-2 flex flex-col gap-2 text-[0.75rem]">
         <div class="flex flex-wrap items-center gap-2">
           <select v-model="dcBasis" class="input input-sm select w-36">
-            <option value="simple">Simple DC</option>
             <option value="level">Level-based DC</option>
+            <option value="simple">Simple DC</option>
           </select>
           <select v-if="dcBasis === 'simple'" v-model="dcRank" class="input input-sm select w-36">
             <option v-for="(dc, rank) in SIMPLE_DCS" :key="rank" :value="rank">{{ rank }} ({{ dc }})</option>
@@ -97,7 +98,7 @@ function setNoCheck(index: number, noCheck: boolean) {
           </select>
           <span class="font-mono font-bold text-base text-rollable">DC {{ helperDC }}</span>
         </div>
-        <p class="text-dim">The book uses simple DCs at a rank that fits the party's level. Give one approach an easy or very easy DC and the other a standard or hard one.</p>
+        <p class="text-dim">Give one approach an easy or very easy DC and the other a standard or hard one. The book's own samples use simple DCs at a rank that fits the party's level.</p>
       </div>
 
       <div class="flex flex-col gap-2 text-[0.75rem]">

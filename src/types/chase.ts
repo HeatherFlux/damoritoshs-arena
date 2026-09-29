@@ -143,6 +143,8 @@ export interface SavedChase {
   sides: ChaseSide[]
   end: ChaseEndConditions
   savedAt: number
+  /** Set on the bundled examples. Saving one makes it the GM's own copy. */
+  isExample?: boolean
 }
 
 /** A chase being run. */

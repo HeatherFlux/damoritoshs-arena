@@ -77,6 +77,8 @@ const vehicles = computed(() => props.chase.sides.flatMap(s => s.vehicles.map(v 
       </div>
     </div>
 
+    <p v-if="chase.description" class="text-[0.875rem] text-dim px-1">{{ chase.description }}</p>
+
     <ChaseTrack v-if="chase.obstacles.length" :obstacles="trackObstacles" :sides="trackSides" wrap />
     <div v-else class="card p-8 text-center text-dim">No obstacles yet. Use Reroll all in step 2 to fill the chase.</div>
 
