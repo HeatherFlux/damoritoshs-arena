@@ -25,6 +25,7 @@ import CollapsibleSidebar from './components/CollapsibleSidebar.vue'
 import { useEncounterStore } from './stores/encounterStore'
 import { useCombatStore } from './stores/combatStore'
 import { usePartyStore } from './stores/partyStore'
+import { toJsonText, IMPORT_ACCEPT } from './utils/importText'
 import { useSettingsStore, themes } from './stores/settingsStore'
 import { initDiscordIntegration, destroyDiscordIntegration } from './utils/discordIntegration'
 import { useStarshipStore } from './stores/starshipStore'
@@ -108,12 +109,12 @@ function handleExport() {
 
 function handleImport() {
   try {
-    store.importEncounters(importText.value)
+    store.importEncounters(toJsonText(importText.value))
     showImportModal.value = false
     importText.value = ''
     importError.value = ''
   } catch (e) {
-    importError.value = 'Invalid JSON data'
+    importError.value = 'Could not read that YAML or JSON'
   }
 }
 
@@ -148,12 +149,12 @@ function handleStarshipExport() {
 
 function handleStarshipImport() {
   try {
-    starshipStore.importScenes(starshipImportText.value)
+    starshipStore.importScenes(toJsonText(starshipImportText.value))
     showStarshipImportModal.value = false
     starshipImportText.value = ''
     starshipImportError.value = ''
   } catch (e) {
-    starshipImportError.value = 'Invalid JSON data'
+    starshipImportError.value = 'Could not read that YAML or JSON'
   }
 }
 
@@ -538,7 +539,7 @@ watch(starshipMode, (mode) => localStorage.setItem(STARSHIP_MODE_KEY, mode))
     <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
       <div class="modal">
         <h3 class="mb-2">Import Encounters</h3>
-        <p class="text-dim text-sm mb-4">Paste exported encounter JSON below:</p>
+        <p class="text-dim text-sm mb-4">Paste encounter YAML or exported JSON below:</p>
         <textarea
           v-model="importText"
           class="input w-full font-mono text-xs p-3 resize-y"
@@ -557,10 +558,10 @@ watch(starshipMode, (mode) => localStorage.setItem(STARSHIP_MODE_KEY, mode))
     <div v-if="showStarshipImportModal" class="modal-overlay" @click.self="showStarshipImportModal = false">
       <div class="modal">
         <h3 class="mb-2">Import Starship Scenes</h3>
-        <p class="text-dim text-sm mb-4">Paste exported scene JSON or upload a file:</p>
+        <p class="text-dim text-sm mb-4">Paste scene YAML or exported JSON, or upload a file:</p>
         <input
           type="file"
-          accept=".json"
+          :accept="IMPORT_ACCEPT"
           class="mb-3 text-sm"
           @change="handleStarshipFileUpload"
         />

@@ -18,6 +18,7 @@ import {
   suggestedChasePoints,
 } from '../../utils/chaseRules'
 import { generateObstacles, type ObstaclePool } from '../../utils/chaseGenerator'
+import { parseChasesFile } from '../../utils/sessionBundleImporter'
 import CollapsibleSidebar from '../CollapsibleSidebar.vue'
 import ModeSwitch from '../ModeSwitch.vue'
 import RollHistory from '../RollHistory.vue'
@@ -179,13 +180,15 @@ function exportChases() {
 
 function importChases() {
   try {
-    const count = store.importChases(importText.value)
-    showImport.value = false
+    const { chases, warnings } = parseChasesFile(importText.value, partySize.value)
+    const count = store.importChases({ chases })
     importText.value = ''
-    importError.value = ''
+    // Keep the dialog open to show anything that was skipped.
+    importError.value = warnings.length ? `Imported ${count}. Skipped: ${warnings.join('; ')}` : ''
+    if (!warnings.length) showImport.value = false
     flash(`Imported ${count}`)
   } catch {
-    importError.value = 'No chases found in that JSON'
+    importError.value = 'No chases found in that YAML or JSON'
   }
 }
 
@@ -289,8 +292,8 @@ function onImportFile(event: Event) {
       <div v-if="showImport" class="modal-overlay" @click.self="showImport = false">
         <div class="modal">
           <h3 class="mb-2">Import Chases</h3>
-          <p class="text-dim text-sm mb-4">Paste exported chase JSON or upload a file:</p>
-          <input type="file" accept=".json" class="mb-3 text-sm" @change="onImportFile" />
+          <p class="text-dim text-sm mb-4">Paste chase YAML or exported JSON, or upload a file:</p>
+          <input type="file" accept=".yaml,.yml,.json" class="mb-3 text-sm" @change="onImportFile" />
           <textarea v-model="importText" class="input w-full font-mono text-xs p-3 resize-y" placeholder='{"version": 1, "chases": [...]}' rows="10"></textarea>
           <p v-if="importError" class="text-danger mt-2">{{ importError }}</p>
           <div class="flex justify-end gap-2 mt-4">

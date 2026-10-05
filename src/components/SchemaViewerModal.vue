@@ -16,6 +16,8 @@ const SCHEMA_MAP: Record<string, { file: string; example: string; name: string }
   'encounters': { file: 'encounters.schema.json', example: 'examples/encounters.example.json', name: 'Encounters' },
   'hacking-sessions': { file: 'hacking-sessions.schema.json', example: 'examples/hacking-sessions.example.json', name: 'Hacking Sessions' },
   'starship-scenes': { file: 'starship-scenes.schema.json', example: 'examples/starship-scenes.example.json', name: 'Starship Scenes' },
+  'tsc-scenes': { file: 'tsc-scenes.schema.json', example: 'examples/tsc-encounter.example.yaml', name: 'Tactical Starship Scenes' },
+  'chases': { file: 'chases.schema.json', example: 'examples/chase.example.yaml', name: 'Chases' },
   'session-bundle': { file: 'session-bundle.schema.json', example: 'examples/session-bundle.example.yaml', name: 'Session Bundle' },
 }
 

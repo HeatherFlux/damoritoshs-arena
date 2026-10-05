@@ -10,10 +10,13 @@ import type { Creature, CreatureAdjustment, EncounterCreature } from '../types/c
 import type { Hazard, EncounterHazard } from '../types/hazard'
 import type { SavedHackingEncounter, Computer, AccessPoint } from '../types/hacking'
 import type { SavedScene, StarshipThreat } from '../types/starship'
-import type { EncounterStarship, EncounterStarshipHazard, NpcStarship, PlayerStarship, StarshipHazard, TscSavedScene } from '../types/tsc'
-import type { SavedChase } from '../types/chase'
+import type { EncounterStarship, EncounterStarshipHazard, Heading, NpcStarship, PlayerStarship, SensorMapDescriptor, StarshipHazard, TscHazardInstance, TscNpcShipInstance, TscPc, TscSavedScene } from '../types/tsc'
+import type { ChaseEndConditions, ChaseMember, ChaseObstacle, ChaseOption, ChaseSide, SavedChase } from '../types/chase'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import { TSC_HAZARDS } from '../data/tscHazards'
+import { SAMPLE_CHASE_OBSTACLES } from '../data/chaseObstacles'
+import { createHazardInstance, createNpcShipInstance, defaultPosition, DEFAULT_ZONES } from '../stores/tscStore'
+import { createSide, defaultSetup, lengthForCount, obstacleFromSample, suggestedChasePoints } from '../utils/chaseRules'
 import { createDefaultStarship, createDefaultThreat, createEmptySavedScene } from '../types/starship'
 import type { ShopType, SettlementSize, SavedShop } from '../types/shop'
 
@@ -61,6 +64,43 @@ export interface BundleStarshipHazardRef {
   hazardId?: string
   hazardName?: string
   count?: number
+}
+
+/** Where a referenced ship or hazard starts in a hand-written tactical scene. */
+interface BundleTscPlacement {
+  label?: string
+  zone?: string
+  heading?: Heading
+  hidden?: boolean
+  detected?: boolean
+}
+
+export interface BundleTscShipRef extends BundleStarshipRef, BundleTscPlacement {}
+export interface BundleTscHazardRef extends BundleStarshipHazardRef, BundleTscPlacement {}
+
+/**
+ * A tactical scene as written by hand. Ships and hazards may be references to the bundled
+ * Tech Core data instead of full snapshots, and ids and defaults are filled in on import.
+ */
+export interface BundleTscScene extends Partial<Omit<TscSavedScene, 'name' | 'pcs' | 'npcShips' | 'hazards' | 'sensorMap'>> {
+  name: string
+  /** Id of a player starship in this bundle's tscPlayerShips or already saved in the app. */
+  playerShipId?: string
+  pcs?: Partial<TscPc>[]
+  npcShips?: (TscNpcShipInstance | BundleTscShipRef)[]
+  hazards?: (TscHazardInstance | BundleTscHazardRef)[]
+  sensorMap?: Partial<SensorMapDescriptor>
+}
+
+type BundleChaseObstacle = Partial<Omit<ChaseObstacle, 'options'>> & { options?: Partial<ChaseOption>[] }
+type BundleChaseSide = Partial<Omit<ChaseSide, 'members'>> & { members?: (string | Partial<ChaseMember>)[] }
+
+/** A chase as written by hand. Anything left out gets the default a new chase would have. */
+export interface BundleChase extends Partial<Omit<SavedChase, 'name' | 'obstacles' | 'sides' | 'end'>> {
+  name: string
+  obstacles?: BundleChaseObstacle[]
+  sides?: BundleChaseSide[]
+  end?: Partial<ChaseEndConditions>
 }
 
 export interface BundleEncounter {
@@ -183,13 +223,13 @@ export interface SessionBundle {
   starshipTemplates?: BundleStarshipTemplate[]
   shops?: BundleShop[]
   /** Tech Core tactical starship combat — see tsc-scenes.schema.json */
-  tscScenes?: TscSavedScene[]
+  tscScenes?: BundleTscScene[]
   /** Player starship sheets — see tsc-player-starships.schema.json */
   tscPlayerShips?: PlayerStarship[]
   /** GM-authored NPC starships — see tsc-starships.schema.json */
   tscCustomStarships?: NpcStarship[]
   /** Chases (GM Core) — see chases.schema.json */
-  chases?: SavedChase[]
+  chases?: BundleChase[]
 }
 
 export interface BundleStarshipTemplate {
@@ -372,6 +412,7 @@ export interface ImportStores {
     importCustomStarships: (json: string) => number
     getStarshipById: (id: string) => NpcStarship | undefined
     allStarships: { value: NpcStarship[] }
+    state?: { playerShips: PlayerStarship[] }
   }
   /** Optional — present in chaseStore. Required to round-trip chases. */
   chaseStore?: {
@@ -401,6 +442,154 @@ function resolveStarshipHazardRef(ref: BundleStarshipHazardRef): StarshipHazard 
     return TSC_HAZARDS.find(h => h.name.toLowerCase() === name)
   }
   return undefined
+}
+
+// ============ Hand-written tactical scenes and chases ============
+
+type Warn = (message: string) => void
+
+function placement(ref: BundleTscPlacement, zones: string[]) {
+  return defaultPosition(ref.zone ?? zones[0] ?? '1', ref.heading ?? 'fore')
+}
+
+/** Fill in a tactical scene, turning ship and hazard references into full instances. */
+export function normalizeBundleTscScene(
+  raw: BundleTscScene,
+  starshipPool: NpcStarship[],
+  playerShips: PlayerStarship[],
+  warn: Warn,
+): TscSavedScene {
+  const zones = raw.sensorMap?.zones?.length ? raw.sensorMap.zones : [...DEFAULT_ZONES]
+  const sensorMap: SensorMapDescriptor = { ...raw.sensorMap, kind: raw.sensorMap?.kind ?? 'freeform', zones }
+
+  let playerShip = raw.playerShip ?? null
+  if (!playerShip && raw.playerShipId) {
+    playerShip = playerShips.find(p => p.id === raw.playerShipId) ?? null
+    if (!playerShip) warn(`Could not resolve player starship reference: "${raw.playerShipId}"`)
+  }
+
+  const npcShips: TscNpcShipInstance[] = []
+  for (const entry of raw.npcShips ?? []) {
+    if ('model' in entry) { npcShips.push(entry); continue }
+    const model = resolveStarshipRef(entry, starshipPool)
+    if (!model) { warn(`Could not resolve starship reference: "${entry.starshipId || entry.starshipName || 'unknown'}"`); continue }
+    const count = entry.count ?? 1
+    for (let i = 0; i < count; i++) {
+      const existing = npcShips.filter(n => n.model.id === model.id).length
+      const base = entry.label ?? model.name
+      const label = entry.label && count === 1 ? base : existing === 0 ? base : `${base} ${existing + 1}`
+      const inst = createNpcShipInstance(model, label, placement(entry, zones))
+      inst.hiddenFromPlayers = !!entry.hidden
+      if (entry.detected !== undefined) inst.detected = entry.detected
+      npcShips.push(inst)
+    }
+  }
+
+  const hazards: TscHazardInstance[] = []
+  for (const entry of raw.hazards ?? []) {
+    if ('hazard' in entry) { hazards.push(entry); continue }
+    const hazard = resolveStarshipHazardRef(entry)
+    if (!hazard) { warn(`Could not resolve starship hazard reference: "${entry.hazardId || entry.hazardName || 'unknown'}"`); continue }
+    const inst = createHazardInstance(hazard, entry.label, placement(entry, zones))
+    inst.hiddenFromPlayers = !!entry.hidden
+    if (entry.detected !== undefined) inst.detected = entry.detected
+    hazards.push(inst)
+  }
+
+  return {
+    id: raw.id ?? crypto.randomUUID(),
+    name: raw.name,
+    level: raw.level ?? playerShip?.level ?? 1,
+    description: raw.description,
+    playerShip,
+    pcs: (raw.pcs ?? []).map(pc => ({ ...pc, id: pc.id ?? crypto.randomUUID(), name: pc.name ?? 'PC' })),
+    npcShips,
+    hazards,
+    sensorMap,
+    savedAt: raw.savedAt ?? Date.now(),
+  }
+}
+
+/** Fill in a chase: ids, sample obstacles by id, default sides and end conditions for its type. */
+export function normalizeBundleChase(raw: BundleChase, partySize: number, warn: Warn): SavedChase {
+  const type = raw.type ?? 'run-away'
+  const level = raw.level ?? 1
+  const obstacles: ChaseObstacle[] = []
+  for (const [index, o] of (raw.obstacles ?? []).entries()) {
+    const chasePoints = o.chasePoints ?? suggestedChasePoints(partySize, index)
+    const sample = o.sampleId ? SAMPLE_CHASE_OBSTACLES.find(s => s.id === o.sampleId) : undefined
+    if (o.sampleId && !sample) warn(`Unknown sample obstacle "${o.sampleId}" in chase "${raw.name}"`)
+    const base: ChaseObstacle = sample
+      ? obstacleFromSample(sample, chasePoints)
+      : { id: crypto.randomUUID(), name: 'Obstacle', level, environment: 'custom', chasePoints, options: [], description: '', revealedToPlayers: false }
+    obstacles.push({
+      ...base,
+      ...o,
+      id: o.id ?? base.id,
+      chasePoints,
+      description: o.description ?? base.description,
+      revealedToPlayers: o.revealedToPlayers ?? false,
+      options: o.options
+        ? o.options.map(opt => ({ ...opt, id: opt.id ?? crypto.randomUUID(), skills: opt.skills ?? [], description: opt.description ?? '' }))
+        : base.options,
+    })
+  }
+
+  const defaults = defaultSetup(type, obstacles.length)
+  const sides: ChaseSide[] = raw.sides
+    ? raw.sides.map(side => createSide({
+        ...side,
+        name: side.name ?? 'Side',
+        role: side.role ?? 'competitor',
+        ...(side.id ? { id: side.id } : {}),
+        members: (side.members ?? []).map(m => {
+          const member = typeof m === 'string' ? { name: m } : m
+          return { ...member, id: member.id ?? crypto.randomUUID(), name: member.name ?? 'Member', hasActed: member.hasActed ?? false }
+        }),
+      }))
+    : defaults.sides
+
+  return {
+    id: raw.id ?? crypto.randomUUID(),
+    name: raw.name,
+    type,
+    length: raw.length ?? lengthForCount(obstacles.length),
+    level,
+    roundLength: raw.roundLength ?? '3 actions',
+    description: raw.description ?? '',
+    obstacles,
+    sides,
+    end: { ...defaults.end, ...raw.end },
+    savedAt: raw.savedAt ?? Date.now(),
+  }
+}
+
+/**
+ * Read a standalone tactical scene file (YAML or JSON): an exported array of scenes, or an
+ * object with tscScenes and, optionally, the tscPlayerShips they point at.
+ */
+export function parseTscScenesFile(content: string, starshipPool: NpcStarship[], savedPlayerShips: PlayerStarship[]) {
+  const data = yaml.load(content) as BundleTscScene[] | Pick<SessionBundle, 'tscScenes' | 'tscPlayerShips'>
+  const raw = Array.isArray(data) ? data : data?.tscScenes
+  if (!Array.isArray(raw) || raw.length === 0) throw new Error('No tactical scenes found in the file')
+  const playerShips = Array.isArray(data) ? [] : data.tscPlayerShips ?? []
+  const warnings: string[] = []
+  const scenes = raw.map(sc => normalizeBundleTscScene(sc, starshipPool, [...playerShips, ...savedPlayerShips], m => warnings.push(m)))
+  return { scenes, playerShips, warnings }
+}
+
+/**
+ * Read a standalone chase file (YAML or JSON): an exported { version, chases } file, a plain
+ * array of chases, or an object with chases (and, optionally, a party for Chase Points).
+ */
+export function parseChasesFile(content: string, partySize = 4) {
+  const data = yaml.load(content) as BundleChase[] | Pick<SessionBundle, 'chases' | 'party'>
+  const raw = Array.isArray(data) ? data : data?.chases
+  if (!Array.isArray(raw) || raw.length === 0) throw new Error('No chases found in the file')
+  const size = (!Array.isArray(data) && data.party?.players?.length) || partySize
+  const warnings: string[] = []
+  const chases = raw.map(c => normalizeBundleChase(c, size, m => warnings.push(m)))
+  return { chases, warnings }
 }
 
 // ============ Import Logic ============
@@ -623,7 +812,10 @@ export function importSessionBundle(
     }
     if (bundle.tscScenes && bundle.tscScenes.length > 0) {
       try {
-        stores.tscStore.importScenes(JSON.stringify(bundle.tscScenes))
+        const playerShips = [...(bundle.tscPlayerShips ?? []), ...(stores.tscStore.state?.playerShips ?? [])]
+        const warn: Warn = message => result.warnings.push({ section: 'tsc', message })
+        const scenes = bundle.tscScenes.map(sc => normalizeBundleTscScene(sc, stores.tscStore!.allStarships.value, playerShips, warn))
+        stores.tscStore.importScenes(JSON.stringify(scenes))
         result.tscScenes = bundle.tscScenes.length
       } catch (e) {
         result.warnings.push({ section: 'tsc', message: `Failed to import tactical scenes: ${(e as Error).message}` })
@@ -637,7 +829,9 @@ export function importSessionBundle(
       result.warnings.push({ section: 'chases', message: 'Bundle contains chases but the store is not available — skipping.' })
     } else {
       try {
-        result.chases = stores.chaseStore.importChases({ chases: bundle.chases })
+        const partySize = bundle.party?.players?.length || 4
+        const warn: Warn = message => result.warnings.push({ section: 'chases', message })
+        result.chases = stores.chaseStore.importChases({ chases: bundle.chases.map(c => normalizeBundleChase(c, partySize, warn)) })
       } catch (e) {
         result.warnings.push({ section: 'chases', message: `Failed to import chases: ${(e as Error).message}` })
       }

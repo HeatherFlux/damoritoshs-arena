@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useHackingStore } from '../../stores/hackingStore'
 import type { NodeState } from '../../types/hacking'
 import { isSyncAvailable, getSyncServerUrl } from '../../utils/syncTransport'
+import { toJsonText, IMPORT_ACCEPT } from '../../utils/importText'
 import HackingCanvas from './HackingCanvas.vue'
 import HackingEffectOverlay from './HackingEffectOverlay.vue'
 import AccessPointList from './AccessPointList.vue'
@@ -125,13 +126,13 @@ function handleImportFileSelect(event: Event) {
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
-      const json = e.target?.result as string
+      const json = toJsonText(e.target?.result as string)
       const count = store.importEncounters(json)
       if (count > 0) {
         showSavedList.value = true
       }
     } catch (err) {
-      alert('Invalid JSON file')
+      alert('Could not read that YAML or JSON file')
     }
   }
   reader.readAsText(file)
@@ -209,7 +210,7 @@ function formatDate(timestamp: number): string {
               <input
                 ref="hackingFileInput"
                 type="file"
-                accept=".json"
+                :accept="IMPORT_ACCEPT"
                 class="hidden"
                 @change="handleImportFileSelect"
               />

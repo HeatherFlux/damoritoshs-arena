@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { useEncounterStore } from '../stores/encounterStore'
 import { usePartyStore } from '../stores/partyStore'
 import { useHackingStore } from '../stores/hackingStore'
@@ -9,7 +11,7 @@ import {
   serializeBundle,
   defaultBundleFilename,
 } from '../utils/sessionBundleExporter'
-import { parseSessionBundle, importSessionBundle, type ImportStores, previewSessionBundle } from '../utils/sessionBundleImporter'
+import { parseSessionBundle, importSessionBundle, type ImportStores, previewSessionBundle, parseTscScenesFile, parseChasesFile } from '../utils/sessionBundleImporter'
 import type { Creature } from '../types/creature'
 import type { SavedHackingEncounter } from '../types/hacking'
 import type { SavedScene } from '../types/starship'
@@ -601,6 +603,7 @@ import { createEmptyChase, obstacleFromSample } from '../utils/chaseRules'
 import { SAMPLE_CHASE_OBSTACLES } from '../data/chaseObstacles'
 import { TSC_STARSHIPS } from '../data/tscStarships'
 import { TSC_HAZARDS } from '../data/tscHazards'
+import { createPlayerStarship } from '../utils/tscDerive'
 
 describe('session bundle: tactical starship combat', () => {
   beforeEach(() => {
@@ -677,6 +680,63 @@ describe('session bundle: tactical starship combat', () => {
     expect(enc.starships?.[0].starship.name).toBe('Dread Buccaneer')
     expect(enc.starshipHazards?.[0].hazard.name).toBe('Asteroid Field')
   })
+
+  it('builds a hand-written tactical scene from starship and hazard references', () => {
+    const stores = allStores()
+    const wanderer = { ...createPlayerStarship('explorer', 5, 'Wanderer'), id: 'wanderer' }
+    const bundle = parseSessionBundle(`
+name: Authored TSC
+tscPlayerShips:
+  - ${JSON.stringify(wanderer)}
+tscScenes:
+  - name: Drift Beacon Ambush
+    level: 5
+    playerShipId: wanderer
+    pcs:
+      - name: Iseph
+        initiativeBonus: 9
+    npcShips:
+      - starshipId: raider-trident
+        count: 2
+        zone: "4"
+        heading: aft
+      - starshipName: dread buccaneer
+        label: The Black Maw
+        hidden: true
+    hazards:
+      - hazardName: Asteroid Field
+        zone: "3"
+`)
+    const result = importSessionBundle(bundle, stores as unknown as ImportStores)
+    expect(result.warnings).toEqual([])
+    expect(result.tscScenes).toBe(1)
+    const scene = stores.tscStore.state.savedScenes[0]
+    expect(scene.id).toBeTruthy()
+    expect(scene.playerShip?.name).toBe('Wanderer')
+    expect(scene.pcs).toEqual([expect.objectContaining({ name: 'Iseph', initiativeBonus: 9, id: expect.any(String) })])
+    expect(scene.npcShips.map(n => n.label)).toEqual(['Raider Trident', 'Raider Trident 2', 'The Black Maw'])
+    expect(scene.npcShips[0]).toMatchObject({ currentHP: 10, position: { zone: '4', heading: 'aft' }, hiddenFromPlayers: false, detected: true })
+    expect(scene.npcShips[2]).toMatchObject({ hiddenFromPlayers: true })
+    expect(scene.npcShips[2].model.name).toBe('Dread Buccaneer')
+    expect(scene.hazards[0]).toMatchObject({ label: 'Asteroid Field', position: { zone: '3' }, detected: false })
+    expect(scene.hazards[0].hazard.id).toBe('asteroid-field')
+    expect(scene.sensorMap.zones.length).toBeGreaterThan(0)
+  })
+
+  it('warns about starship references in a tactical scene it cannot resolve', () => {
+    const stores = allStores()
+    const bundle = parseSessionBundle(JSON.stringify({
+      name: 'Bad refs',
+      tscScenes: [{ name: 'Lost', npcShips: [{ starshipId: 'no-such-ship' }], hazards: [{ hazardName: 'Nope' }] }],
+    }))
+    const result = importSessionBundle(bundle, stores as unknown as ImportStores)
+    expect(result.tscScenes).toBe(1)
+    expect(result.warnings.filter(w => w.section === 'tsc').map(w => w.message)).toEqual([
+      'Could not resolve starship reference: "no-such-ship"',
+      'Could not resolve starship hazard reference: "Nope"',
+    ])
+    expect(stores.tscStore.state.savedScenes[0].npcShips).toEqual([])
+  })
 })
 
 describe('session bundle: chases', () => {
@@ -733,5 +793,212 @@ describe('session bundle: chases', () => {
     const result = importSessionBundle(JSON.parse(JSON.stringify(bundle)), withoutChase)
     expect(result.chases).toBe(0)
     expect(result.warnings.some(w => w.section === 'chases')).toBe(true)
+  })
+
+  it('fills in a hand-written chase with ids, sides, end conditions and sample obstacles', () => {
+    const stores = allStores()
+    const bundle = parseSessionBundle(`
+name: Authored Chase
+party:
+  name: Crew
+  players:
+    - { name: A, level: 5 }
+    - { name: B, level: 5 }
+    - { name: C, level: 5 }
+    - { name: D, level: 5 }
+    - { name: E, level: 5 }
+chases:
+  - name: Dock Run
+    type: run-away
+    level: 5
+    obstacles:
+      - sampleId: crowd
+      - name: Collapsing Gantry
+        chasePoints: 2
+        notes: The gantry is rigged to fall.
+        options:
+          - dc: 20
+            skills: [Athletics]
+            description: leap the gap
+          - skills: [Arcana]
+            description: levitate across
+    sides:
+      - name: The Crew
+        role: pursued
+        isPlayers: true
+        members: [Peebles, Poppy]
+      - name: Dock Security
+        role: pursuer
+        control: steady
+        position: -1
+`)
+    const result = importSessionBundle(bundle, stores)
+    expect(result.warnings.filter(w => w.section === 'chases')).toEqual([])
+    expect(result.chases).toBe(1)
+    const chase = stores.chaseStore.state.savedChases[0]
+    expect(chase.id).toBeTruthy()
+    expect(chase.roundLength).toBe('3 actions')
+    expect(chase.length).toBe('custom')
+    expect(chase.end).toEqual({ catchEnds: true, leadToEscape: 3, roundLimit: null })
+
+    const [crowd, gantry] = chase.obstacles
+    expect(crowd).toMatchObject({ name: 'Crowd', sampleId: 'crowd', chasePoints: 4, revealedToPlayers: false })
+    expect(crowd.options.length).toBeGreaterThan(0)
+    expect(gantry).toMatchObject({ name: 'Collapsing Gantry', level: 5, chasePoints: 2, environment: 'custom', description: '', notes: 'The gantry is rigged to fall.' })
+    expect(gantry.options.map(o => o.id).every(Boolean)).toBe(true)
+    expect(gantry.options[1].dc).toBeUndefined()
+
+    const [crew, security] = chase.sides
+    expect(crew).toMatchObject({ name: 'The Crew', role: 'pursued', control: 'checks', isPlayers: true, position: 0, chasePoints: 0, pace: 1, vehicles: [] })
+    expect(crew.members.map(m => [m.name, m.hasActed])).toEqual([['Peebles', false], ['Poppy', false]])
+    expect(security).toMatchObject({ control: 'steady', position: -1, isPlayers: false })
+    expect(new Set(chase.sides.map(s => s.id)).size).toBe(2)
+  })
+
+  it('uses the default sides for the chase type when none are given', () => {
+    const stores = allStores()
+    const bundle = parseSessionBundle(JSON.stringify({ name: 'x', chases: [{ name: 'Race', type: 'competitive', obstacles: [{ sampleId: 'crowd' }] }] }))
+    importSessionBundle(bundle, stores)
+    const chase = stores.chaseStore.state.savedChases[0]
+    expect(chase.sides.map(s => [s.name, s.role])).toEqual([['Party', 'competitor'], ['Rivals', 'competitor']])
+  })
+})
+
+describe('session bundle: example YAML files', () => {
+  beforeEach(() => {
+    __resetTscStore()
+    __resetChaseStore()
+  })
+
+  function allStores() {
+    return {
+      encounterStore: useEncounterStore(),
+      partyStore: usePartyStore(),
+      hackingStore: useHackingStore(),
+      starshipStore: useStarshipStore(),
+      shopStore: useShopStore(),
+      tscStore: useTscStore(),
+      chaseStore: useChaseStore(),
+    }
+  }
+
+  function importExample(file: string) {
+    const content = readFileSync(resolve(__dirname, '../../public/schemas/examples', file), 'utf8')
+    const stores = allStores()
+    const result = importSessionBundle(parseSessionBundle(content), stores as unknown as ImportStores)
+    return { stores, result }
+  }
+
+  it('imports the tactical starship example without warnings', () => {
+    const { stores, result } = importExample('tsc-encounter.example.yaml')
+    expect(result.warnings).toEqual([])
+    expect(result.tscPlayerShips).toBe(1)
+    expect(result.tscScenes).toBe(1)
+    const scene = stores.tscStore.state.savedScenes[0]
+    expect(scene.playerShip?.name).toBe('Wanderer')
+    expect(scene.npcShips.map(n => [n.label, n.hiddenFromPlayers])).toEqual([
+      ['Raider Trident', false], ['Raider Trident 2', false], ['Unknown Contact', true],
+    ])
+    expect(scene.hazards.map(h => h.label)).toEqual(['Asteroid Field'])
+  })
+
+  it('imports the chase example without warnings', () => {
+    const { stores, result } = importExample('chase.example.yaml')
+    expect(result.warnings).toEqual([])
+    expect(result.chases).toBe(1)
+    const chase = stores.chaseStore.state.savedChases[0]
+    expect(chase.length).toBe('short')
+    expect(chase.obstacles.map(o => o.name)).toEqual([
+      'Convention Crowd', 'Food Truck', 'Cargo Lift', 'Security Drone', 'Crumbling, Steep Fire Escape', 'Airlock 7',
+    ])
+    expect(chase.obstacles.map(o => o.chasePoints)).toEqual([3, 2, 3, 2, 3, 2])
+    expect(chase.sides[0].members.map(m => m.name)).toEqual(['Peebles', 'Poppy', 'Alces', 'Basil'])
+  })
+
+  it('imports the session bundle example without tactical or chase warnings', () => {
+    const { result } = importExample('session-bundle.example.yaml')
+    expect(result.warnings.filter(w => w.section === 'tsc' || w.section === 'chases')).toEqual([])
+    expect(result.tscScenes).toBe(1)
+    expect(result.chases).toBe(1)
+  })
+})
+
+describe('standalone tactical scene and chase files', () => {
+  it('reads hand-written YAML tactical scenes, with any player ships in the same file', () => {
+    const { scenes, playerShips, warnings } = parseTscScenesFile(`
+tscPlayerShips:
+  - ${JSON.stringify({ ...createPlayerStarship('explorer', 5, 'Wanderer'), id: 'wanderer' })}
+tscScenes:
+  - name: Picket
+    playerShipId: wanderer
+    npcShips:
+      - starshipId: raider-trident
+`, TSC_STARSHIPS, [])
+    expect(warnings).toEqual([])
+    expect(playerShips.map(p => p.id)).toEqual(['wanderer'])
+    expect(scenes).toHaveLength(1)
+    expect(scenes[0].playerShip?.name).toBe('Wanderer')
+    expect(scenes[0].npcShips[0].model.id).toBe('raider-trident')
+  })
+
+  it('reads a plain array of exported tactical scenes', () => {
+    const exported = [{ ...createEmptyTscScene(), name: 'Exported' }]
+    const { scenes } = parseTscScenesFile(JSON.stringify(exported), TSC_STARSHIPS, [])
+    expect(scenes.map(s => [s.id, s.name])).toEqual([[exported[0].id, 'Exported']])
+  })
+
+  it('reads hand-written YAML chases and exported chase files', () => {
+    const yamlResult = parseChasesFile(`
+chases:
+  - name: Quick Run
+    obstacles:
+      - sampleId: crowd
+      - sampleId: nope
+`)
+    expect(yamlResult.chases.map(c => c.name)).toEqual(['Quick Run'])
+    expect(yamlResult.chases[0].obstacles).toHaveLength(2)
+    expect(yamlResult.warnings).toEqual(['Unknown sample obstacle "nope" in chase "Quick Run"'])
+
+    const exported = { version: 1, chases: [createEmptyChase('competitive')] }
+    expect(parseChasesFile(JSON.stringify(exported)).chases[0].id).toBe(exported.chases[0].id)
+    expect(parseChasesFile(JSON.stringify(exported.chases)).chases).toHaveLength(1)
+  })
+
+  it('rejects files with nothing to import', () => {
+    expect(() => parseChasesFile('name: nothing here')).toThrow()
+    expect(() => parseTscScenesFile('name: nothing here', TSC_STARSHIPS, [])).toThrow()
+  })
+})
+
+describe('re-importing an edited YAML file', () => {
+  beforeEach(() => {
+    __resetTscStore()
+    __resetChaseStore()
+  })
+
+  it('updates a chase and a tactical scene that carry an id instead of duplicating them', () => {
+    const stores = {
+      encounterStore: useEncounterStore(),
+      partyStore: usePartyStore(),
+      hackingStore: useHackingStore(),
+      starshipStore: useStarshipStore(),
+      shopStore: useShopStore(),
+      tscStore: useTscStore(),
+      chaseStore: useChaseStore(),
+    }
+    const write = (title: string) => parseSessionBundle(`
+name: x
+chases:
+  - id: my-chase
+    name: ${title}
+    obstacles: [{ sampleId: crowd }]
+tscScenes:
+  - id: my-scene
+    name: ${title}
+`)
+    importSessionBundle(write('First draft'), stores as unknown as ImportStores)
+    importSessionBundle(write('Second draft'), stores as unknown as ImportStores)
+    expect(stores.chaseStore.state.savedChases.map(c => c.name)).toEqual(['Second draft'])
+    expect(stores.tscStore.state.savedScenes.map(s => s.name)).toEqual(['Second draft'])
   })
 })

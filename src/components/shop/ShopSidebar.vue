@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import type { Directive } from 'vue'
 import { useShopStore } from '../../stores/shopStore'
+import { toJsonText, IMPORT_ACCEPT } from '../../utils/importText'
 import type { SavedShop } from '../../types/shop'
 
 const store = useShopStore()
@@ -103,7 +104,7 @@ function handleFile(event: Event) {
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
-      const text = e.target?.result as string
+      const text = toJsonText(e.target?.result as string)
       const n = store.importShops(text)
       if (n > 0) {
         // No-op; reactive sidebar will update
@@ -130,7 +131,7 @@ function handleFile(event: Event) {
       <input
         ref="fileInput"
         type="file"
-        accept=".json,application/json"
+        :accept="IMPORT_ACCEPT"
         class="hidden-input"
         @change="handleFile"
       />

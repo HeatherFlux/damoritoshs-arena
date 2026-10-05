@@ -12,6 +12,8 @@ import { useShopStore } from '../stores/shopStore'
 import SchemaViewerModal from './SchemaViewerModal.vue'
 import SessionBundleImporter from './SessionBundleImporter.vue'
 import { buildSessionBundle, serializeBundle, defaultBundleFilename } from '../utils/sessionBundleExporter'
+import { parseTscScenesFile, parseChasesFile } from '../utils/sessionBundleImporter'
+import { toJsonText, IMPORT_ACCEPT } from '../utils/importText'
 
 const { settings, toggleSetting, setTheme, setSetting, testDiscordWebhook } = useSettingsStore()
 const encounterStore = useEncounterStore()
@@ -147,6 +149,14 @@ const encounterCount = computed(() => encounterStore.state.encounters.length)
 const hackingCount = computed(() => hackingStore.state.savedEncounters.length)
 const starshipCount = computed(() => starshipStore.state.savedScenes.length)
 const shopCount = computed(() => shopStore.state.savedShops.length)
+const tscSceneCount = computed(() => tscStore.state.savedScenes.length)
+const chaseCount = computed(() => chaseStore.state.savedChases.length)
+
+/** "+2", or "+2 · 1 skipped" when some references could not be resolved. */
+function importMessage(count: number, warnings: string[]) {
+  if (warnings.length) console.warn('[Import]', warnings)
+  return warnings.length ? `+${count} · ${warnings.length} skipped` : `+${count}`
+}
 
 // Data row definitions
 interface DataRow {
@@ -265,6 +275,37 @@ const dataRows = computed<DataRow[]>(() => [
     exportFilename: 'starship-scenes.json',
   },
   {
+    key: 'tsc',
+    label: 'Tactical Starship',
+    count: `${tscSceneCount.value}`,
+    schemaId: 'tsc-scenes',
+    schemaFile: 'tsc-scenes.schema.json',
+    canExport: tscSceneCount.value > 0,
+    onImport: (content: string) => {
+      const { scenes, playerShips, warnings } = parseTscScenesFile(content, tscStore.allStarships.value, tscStore.state.playerShips)
+      if (playerShips.length) tscStore.importPlayerShips(JSON.stringify(playerShips))
+      tscStore.importScenes(JSON.stringify(scenes))
+      setImportResult('tsc', warnings.length ? 'error' : 'success', importMessage(scenes.length, warnings))
+    },
+    onExport: () => downloadJson(tscStore.exportScenes(), 'tsc-scenes.json'),
+    exportFilename: 'tsc-scenes.json',
+  },
+  {
+    key: 'chases',
+    label: 'Chase',
+    count: `${chaseCount.value}`,
+    schemaId: 'chases',
+    schemaFile: 'chases.schema.json',
+    canExport: chaseCount.value > 0,
+    onImport: (content: string) => {
+      const { chases, warnings } = parseChasesFile(content, partyStore.activeParty.value?.players.length || 4)
+      const n = chaseStore.importChases({ chases })
+      setImportResult('chases', warnings.length ? 'error' : 'success', importMessage(n, warnings))
+    },
+    onExport: () => downloadJson(chaseStore.exportChases(), 'chases.json'),
+    exportFilename: 'chases.json',
+  },
+  {
     key: 'shops',
     label: 'Shops',
     count: `${shopCount.value}`,
@@ -294,8 +335,7 @@ function handleFileSelect(event: Event, row: DataRow) {
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
-      const json = e.target?.result as string
-      row.onImport(json)
+      row.onImport(toJsonText(e.target?.result as string))
     } catch (err) {
       setImportResult(row.key, 'error', 'Invalid')
     }
@@ -465,7 +505,7 @@ function handleFileSelect(event: Event, row: DataRow) {
                 <input
                   :id="`file-input-${row.key}`"
                   type="file"
-                  accept=".json"
+                  :accept="IMPORT_ACCEPT"
                   class="hidden"
                   @change="handleFileSelect($event, row)"
                 />
@@ -492,7 +532,7 @@ function handleFileSelect(event: Event, row: DataRow) {
                   <button
                     type="button"
                     class="data-btn"
-                    title="Import JSON"
+                    title="Import YAML or JSON"
                     @click="triggerImport(row.key)"
                   >
                     &uarr;

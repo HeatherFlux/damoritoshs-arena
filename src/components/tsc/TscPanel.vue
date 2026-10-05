@@ -10,6 +10,7 @@ import type { NpcStarship, PlayerStarship, StarshipHazard, TscSavedScene } from 
 import type { Difficulty } from '../../types/encounter'
 import { createPlayerStarship, setPlayerStarshipLevel } from '../../utils/tscDerive'
 import { generateOpposition, labelInstances } from '../../utils/tscGenerator'
+import { parseTscScenesFile } from '../../utils/sessionBundleImporter'
 import CollapsibleSidebar from '../CollapsibleSidebar.vue'
 import ModeSwitch from '../ModeSwitch.vue'
 import RollHistory from '../RollHistory.vue'
@@ -183,13 +184,16 @@ function exportScenes() {
 
 function importScenes() {
   try {
-    store.importScenes(importText.value)
-    showImport.value = false
+    const { scenes, playerShips, warnings } = parseTscScenesFile(importText.value, store.allStarships.value, store.state.playerShips)
+    if (playerShips.length) store.importPlayerShips(JSON.stringify(playerShips))
+    store.importScenes(JSON.stringify(scenes))
     importText.value = ''
-    importError.value = ''
-    flash('Imported')
+    // Keep the dialog open to show anything that was skipped.
+    importError.value = warnings.length ? `Imported ${scenes.length}. Skipped: ${warnings.join('; ')}` : ''
+    if (!warnings.length) showImport.value = false
+    flash(`Imported ${scenes.length}`)
   } catch {
-    importError.value = 'Invalid JSON data'
+    importError.value = 'No tactical scenes found in that YAML or JSON'
   }
 }
 
@@ -282,8 +286,8 @@ function onImportFile(event: Event) {
       <div v-if="showImport" class="modal-overlay" @click.self="showImport = false">
         <div class="modal">
           <h3 class="mb-2">Import Tactical Scenes</h3>
-          <p class="text-dim text-sm mb-4">Paste exported tactical scene JSON or upload a file:</p>
-          <input type="file" accept=".json" class="mb-3 text-sm" @change="onImportFile" />
+          <p class="text-dim text-sm mb-4">Paste tactical scene YAML or exported JSON, or upload a file:</p>
+          <input type="file" accept=".yaml,.yml,.json" class="mb-3 text-sm" @change="onImportFile" />
           <textarea v-model="importText" class="input w-full font-mono text-xs p-3 resize-y" placeholder='[{"id": "...", "name": "...", ...}]' rows="10"></textarea>
           <p v-if="importError" class="text-danger mt-2">{{ importError }}</p>
           <div class="flex justify-end gap-2 mt-4">

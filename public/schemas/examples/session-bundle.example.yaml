@@ -1,5 +1,5 @@
 # Session Bundle Example
-# Import this file via Settings > Homebrew Upload > Session Bundle
+# Import this file via Settings > Data Schemas > Import Session Bundle
 # Supports both YAML and JSON formats
 
 name: "Session 12 - The Vault of Stars"
@@ -540,6 +540,46 @@ starship:
               description: "Fires a heavy laser blast."
               effectOnCriticalSuccess: "Disables one random system (engineer must repair)."
         immunities: ["mental"]
+
+# Tactical starship combat (Tech Core). Ships and hazards can be referenced
+# by id or name; see tsc-encounter.example.yaml for every shorthand field.
+tscScenes:
+  - id: station-picket
+    name: "Station Picket"
+    level: 8
+    description: "GM ONLY - The picket ships were scrambled by the vault's silent alarm."
+    pcs:
+      - name: "Iseph"
+        initiativeBonus: 14
+    npcShips:
+      - starshipName: "Dread Buccaneer"
+        count: 2
+        zone: "3"
+    hazards:
+      - hazardName: "Asteroid Field"
+        zone: "2"
+
+# Chases (GM Core). Only name and obstacles are needed; see
+# chase.example.yaml for defaults and sample obstacle ids.
+chases:
+  - id: out-of-the-vault
+    name: "Out of the Vault"
+    type: run-away
+    level: 8
+    obstacles:
+      - sampleId: collapsed-tunnel
+      - sampleId: security-robot
+      - name: "Sealing Blast Door"
+        level: 8
+        description: "The vault's outer door grinds shut."
+        notes: "If the crew spent 3+ rounds inside, it's already half closed: DCs +2."
+        options:
+          - dc: 26
+            skills: [Athletics]
+            description: "hold it open"
+          - dc: 24
+            skills: [Computers]
+            description: "override the lock"
 
 # Shop
 shops:

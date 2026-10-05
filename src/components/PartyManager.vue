@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { usePartyStore } from '../stores/partyStore'
+import { toJsonText, IMPORT_ACCEPT } from '../utils/importText'
 import type { Player } from '../types/party'
 
 const store = usePartyStore()
@@ -143,7 +144,14 @@ function importAllParties(mode: 'merge' | 'replace') {
   partyImportError.value = ''
   partyImportSuccess.value = null
 
-  const result = store.importParties(partyImportJson.value, mode)
+  let json: string
+  try {
+    json = toJsonText(partyImportJson.value)
+  } catch {
+    partyImportError.value = 'Could not read that YAML or JSON'
+    return
+  }
+  const result = store.importParties(json, mode)
   if (result.success) {
     partyImportSuccess.value = `Imported ${result.imported} ${result.imported === 1 ? 'party' : 'parties'}`
     partyImportJson.value = ''
@@ -355,7 +363,7 @@ function importAllParties(mode: 'merge' | 'replace') {
           <input
             ref="fileInputRef"
             type="file"
-            accept=".json"
+            :accept="IMPORT_ACCEPT"
             @change="handleFileImport"
             class="block w-full text-sm text-dim file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-accent file:text-on-accent hover:file:bg-accent/90 file:cursor-pointer"
           />
@@ -363,7 +371,7 @@ function importAllParties(mode: 'merge' | 'replace') {
 
         <!-- Or paste JSON -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Or paste JSON:</label>
+          <label class="block text-sm font-medium mb-2">Or paste YAML or JSON:</label>
           <textarea
             v-model="partyImportJson"
             placeholder='{"version": 1, "parties": [...]}'

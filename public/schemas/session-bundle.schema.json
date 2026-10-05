@@ -457,7 +457,7 @@
     },
     "tscScenes": {
       "type": "array",
-      "description": "Tactical starship combat scenes (see tsc-scenes.schema.json)",
+      "description": "Tactical starship combat scenes (see tsc-scenes.schema.json). In a bundle, npcShips entries may be references ({starshipId | starshipName, count?, label?, zone?, heading?, hidden?, detected?}) and hazards entries may be ({hazardId | hazardName, label?, zone?, heading?, hidden?, detected?}) instead of full snapshots; playerShipId may name a ship in tscPlayerShips. Ids and other missing fields get the app defaults. Annotated example: /schemas/examples/tsc-encounter.example.yaml",
       "items": {
         "type": "object"
       }
@@ -478,7 +478,7 @@
     },
     "chases": {
       "type": "array",
-      "description": "Saved chases (see chases.schema.json)",
+      "description": "Saved chases (see chases.schema.json). In a bundle only name and obstacles are required: obstacles may use sampleId to pull from the GM Core sample table, side members may be plain names, and ids, sides, end conditions, length, roundLength and chasePoints get the chase builder defaults. Annotated example: /schemas/examples/chase.example.yaml",
       "items": {
         "type": "object"
       }

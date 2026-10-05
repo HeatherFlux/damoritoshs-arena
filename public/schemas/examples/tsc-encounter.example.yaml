@@ -1,0 +1,153 @@
+# =====================================================================
+# TACTICAL STARSHIP COMBAT (TECH CORE) — SESSION BUNDLE
+# =====================================================================
+# Paste this into Settings ▸ Data Schemas ▸ Import Session Bundle to load
+# a player starship sheet and a ready-to-run tactical scene.
+#
+# Scenario: Free Captain raiders jump the crew's explorer near a drift
+# beacon on the edge of an asteroid field. A third raider waits dark
+# behind the rocks until the GM reveals it.
+#
+# SHORTHAND: a scene can name NPC starships and starship hazards by id or
+# name instead of pasting whole stat blocks. The importer looks them up in
+# the Tech Core data (and in tscCustomStarships), then fills in HP, shields,
+# station state and every id. Any field you leave out gets the same default
+# the app gives a new scene.
+#
+#   npcShips:
+#     - starshipId: raider-trident   # or starshipName: Raider Trident
+#       count: 2                     # labelled "Raider Trident", "Raider Trident 2"
+#       zone: "4"                    # sensor-map zone (default: the first zone)
+#       heading: aft                 # fore | aft | port | starboard
+#       label: Red Fang              # optional display name
+#       hidden: true                 # keep off the player view until revealed
+#       detected: false              # the crew hasn't spotted it yet
+#
+#   hazards:
+#     - hazardId: asteroid-field     # or hazardName: Asteroid Field
+#       zone: "3"                    # hazards start undetected unless detected: true
+#
+# Ids for ships and hazards are listed in the Starships and Ship Hazards
+# tabs of the Encounters sidebar, or in /schemas/tsc-starships.schema.json.
+# A full exported scene (with "model" and "hazard" snapshots) also imports.
+#
+# =====================================================================
+# PLAYER VISIBILITY GUIDE
+# =====================================================================
+# The tactical Player View is a shareable screen for the table.
+#
+# PLAYER-VISIBLE:
+#   • scene name
+#   • the player ship: name, frame, level, HP/SP, defenses, stations and
+#     who helms them
+#   • npcShips[].label for ships that are detected and not hidden, plus
+#     size and hull band. The model name only appears after the crew
+#     identifies it with Scan Target, so a label like "Unknown Contact"
+#     keeps the ship's identity a secret.
+#   • hazards[] label and name once detected
+#   • the sensor map zones
+#
+# GM-ONLY:
+#   • scene description
+#   • any npcShip or hazard with hidden: true or detected: false
+#   • NPC stat blocks: attacks, abilities, defenses, exact HP
+#   • player ship notes
+#
+# RULE OF THUMB: put reveals in the scene description and set hidden: true
+# on reinforcements. Use a neutral label until the crew scans the ship.
+# =====================================================================
+
+name: "Tactical Starship Test — Drift Beacon Ambush"
+description: >-
+  A small tactical scene for checking the Tech Core tracker end to end:
+  a player ship with crewed stations, two visible raiders, a hidden third,
+  and an asteroid field hazard.
+
+partyLevel: 5
+
+# ---------------------------------------------------------------------
+# PLAYER STARSHIP SHEETS — reusable across scenes.
+# Scenes can point at one with playerShipId.
+# ---------------------------------------------------------------------
+tscPlayerShips:
+  - id: wanderer
+    name: "Wanderer"
+    frame: explorer
+    level: 5
+    stations:
+      - id: st-pilot
+        kind: "pilot's console"
+        slot: default
+        upgrades: []
+        helmedBy: "Iseph"
+        malfunctioning: false
+      - id: st-gen
+        kind: generator
+        slot: default
+        upgrades: [mechanic-generator-module]
+        malfunctioning: false
+      - id: st-gun
+        kind: gunnery
+        slot: custom
+        upgrades: [secondary-armaments]
+        weaponIds: [light-laser-cannon, farseeker-missiles]
+        helmedBy: "Obozaya"
+        malfunctioning: false
+      - id: st-scan
+        kind: scanners
+        slot: custom
+        upgrades: [communications-overlay]
+        helmedBy: "Navasi"
+        malfunctioning: false
+    expansionBays: [medical-bay, science-lab, crew-quarters-bunks, lounge, mess-bay]
+    pilotingDC: 22
+    currentHP: 77
+    currentSP: 36
+    compromised: 0
+    wrecked: 0
+    inoperable: false
+    offKilter: false
+    conditions: []
+    notes: "Explorer frame. GM note: the science lab holds the stolen beacon key."
+
+# ---------------------------------------------------------------------
+# TACTICAL SCENES
+# ---------------------------------------------------------------------
+tscScenes:
+  # Give each scene an id so importing an edited copy of this file updates it
+  # instead of adding a duplicate.
+  - id: drift-beacon-ambush
+    name: "Ambush at the Drift Beacon"
+    level: 5
+    description: >-
+      GM ONLY — The raiders were tipped off by the beacon's keeper. The
+      hidden third ship is the Red Fang, flagship of the Free Captain who
+      bought the tip. Reveal it when a raider drops below half HP.
+    playerShipId: wanderer
+    pcs:
+      - name: "Iseph"
+        initiativeBonus: 9
+        stationId: st-pilot
+        explorationActivityId: fly-the-ship
+      - name: "Navasi"
+        initiativeBonus: 7
+        stationId: st-scan
+        explorationActivityId: scan-surroundings
+      - name: "Obozaya"
+        initiativeBonus: 6
+        stationId: st-gun
+    npcShips:
+      - starshipId: raider-trident
+        count: 2
+        zone: "4"
+        heading: aft
+      - starshipName: "Dread Buccaneer"
+        label: "Unknown Contact"
+        zone: "6"
+        hidden: true
+    hazards:
+      - hazardId: asteroid-field
+        zone: "3"
+    sensorMap:
+      kind: freeform
+      zones: ["1", "2", "3", "4", "5", "6"]

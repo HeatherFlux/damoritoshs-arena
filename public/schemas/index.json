@@ -46,7 +46,8 @@
       "name": "Starship Scenes",
       "description": "SF2e cinematic starship scene templates",
       "schemaUrl": "/schemas/starship-scenes.schema.json",
-      "exampleUrl": "/schemas/examples/starship-scenes.example.json"
+      "exampleUrl": "/schemas/examples/starship-scenes.example.json",
+      "annotatedExampleUrl": "/schemas/examples/starship-encounter.example.yaml"
     },
     {
       "id": "starship-templates",
@@ -93,7 +94,8 @@
       "name": "TSC Tactical Scenes",
       "description": "Saved tactical starship combat scenes with crew, NPC ships, hazards and sensor map zones",
       "schemaUrl": "/schemas/tsc-scenes.schema.json",
-      "exampleUrl": "/schemas/examples/tsc-scenes.example.json"
+      "exampleUrl": "/schemas/examples/tsc-scenes.example.json",
+      "annotatedExampleUrl": "/schemas/examples/tsc-encounter.example.yaml"
     },
     {
       "id": "vehicles",
@@ -106,7 +108,8 @@
       "name": "Chases",
       "description": "Saved chases with obstacles, Chase Points, sides and attached vehicles",
       "schemaUrl": "/schemas/chases.schema.json",
-      "exampleUrl": "/schemas/examples/chases.example.json"
+      "exampleUrl": "/schemas/examples/chases.example.json",
+      "annotatedExampleUrl": "/schemas/examples/chase.example.yaml"
     }
   ]
 }

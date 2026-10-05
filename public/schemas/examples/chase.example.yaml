@@ -1,0 +1,124 @@
+# =====================================================================
+# CHASE (GM CORE) — SESSION BUNDLE
+# =====================================================================
+# Paste this into Settings ▸ Data Schemas ▸ Import Session Bundle to load
+# a ready-to-run chase into the CHASE tab.
+#
+# Scenario: The crew grabs the navigation core and runs for their ship
+# through the station's cargo district, with dock security on their heels.
+#
+# SHORTHAND: only name and obstacles are really needed. Everything else
+# gets the same default the chase builder uses:
+#
+#   type          run-away (also chase-down, beat-the-clock, competitive)
+#   sides         the default sides for the type (Party vs Pursuers, etc.)
+#   end           the default end conditions for the type
+#   length        short / medium / long from the obstacle count (6 / 8 / 10)
+#   roundLength   "3 actions"
+#   chasePoints   party size − 1 and party size − 2, alternating (GM Core p. 214).
+#                 Party size comes from this bundle's party, or 4.
+#   ids           generated for the chase, obstacles, options, sides, members.
+#                 Set the chase id yourself so re-importing an edited file
+#                 updates the chase instead of adding a duplicate.
+#
+# Obstacles can come from the book's sample table by id, with any field
+# overridden:
+#
+#   - sampleId: crowd              # name, level, environment and options from the table
+#     chasePoints: 3
+#
+# Sample ids: crumbling-corridor, fungal-grotto, collapsed-tunnel,
+# mining-drill, chain-link-fence, crowd, convention-crowd,
+# illegally-parked-vehicle, food-truck, rickety-fire-escape,
+# security-drone, security-robot, viral-flash-mob, confusing-side-streets,
+# demonstration, red-light, spiked-rail, traffic-jam, construction-site,
+# deep-mud, downpour, rope-bridge, rushing-river, tangled-forest, and
+# their higher-level variants (see the obstacle picker in the builder).
+#
+# Side members can be plain names: members: [Peebles, Poppy]
+#
+# =====================================================================
+# PLAYER VISIBILITY GUIDE
+# =====================================================================
+# The Chase Player View is a shareable screen for the table.
+#
+# PLAYER-VISIBLE:
+#   • chase name, type and roundLength
+#   • every side's name, role and position, and its members' names
+#   • obstacles[] as face-down cards. Once an obstacle is revealed (when a
+#     side reaches it, or revealedToPlayers: true) its name, level,
+#     environment, chasePoints, description and options (DC, skills,
+#     description) are shown.
+#   • end.roundLimit
+#
+# GM-ONLY:
+#   • chase description
+#   • obstacles[].notes
+#   • unrevealed obstacles
+#   • Chase Points earned by sides other than the players'
+#
+# RULE OF THUMB: obstacle descriptions are read aloud once revealed.
+# Put traps and twists in notes.
+# =====================================================================
+
+name: "Chase Test — Cargo District Run"
+description: "A six-obstacle run-away chase for checking the CHASE tab."
+partyLevel: 5
+
+party:
+  name: "Test Crew"
+  players:
+    - { name: "Peebles", level: 5, maxHP: 70, ac: 22 }
+    - { name: "Poppy", level: 5, maxHP: 64, ac: 21 }
+    - { name: "Alces", level: 5, maxHP: 58, ac: 22 }
+    - { name: "Basil", level: 5, maxHP: 76, ac: 23 }
+
+chases:
+  - id: cargo-district-run
+    name: "Cargo District Run"
+    type: run-away
+    level: 5
+    roundLength: "3 actions"
+    description: >-
+      GM ONLY — Security captain Orsa was paid to let them go. If the crew
+      is caught, she offers a deal instead of an arrest.
+    obstacles:
+      - sampleId: convention-crowd
+      - sampleId: food-truck
+      - name: "Cargo Lift"
+        level: 5
+        environment: urban
+        description: "A freight lift grinds upward, its safety cage half open."
+        notes: "Security can lock the lift from their office. If the pursuers are adjacent, it stops between floors."
+        options:
+          - dc: 20
+            skills: [Athletics]
+            description: "climb the counterweight cables"
+          - dc: 18
+            skills: [Computers]
+            description: "override the lift controls"
+      - sampleId: security-drone
+      - sampleId: crumbling-steep-fire-escape
+      - name: "Airlock 7"
+        level: 5
+        environment: urban
+        description: "The ship waits beyond a cycling airlock. The inner door is closing."
+        options:
+          - dc: 20
+            skills: [Acrobatics, Athletics]
+            description: "dive through before it seals"
+          - dc: 18
+            skills: [Crafting]
+            description: "jam the door open"
+    sides:
+      - name: "The Crew"
+        role: pursued
+        isPlayers: true
+        members: [Peebles, Poppy, Alces, Basil]
+      - name: "Dock Security"
+        role: pursuer
+        control: steady
+        position: -1
+    end:
+      catchEnds: true
+      leadToEscape: 3
