@@ -65,7 +65,23 @@
         },
         "spells": {
           "type": "array",
+          "description": "Spell names by rank (level 0 = cantrips). Shown on the statblock as e.g. \"Spells DC 22; 3rd heal, sanctuary; Cantrips light\".",
           "items": { "$ref": "#/definitions/SpellEntry" }
+        },
+        "spellcasting": {
+          "type": "object",
+          "description": "Spellcasting as set up in the custom creature builder. Shown on the statblock as e.g. \"Divine Prepared Spells DC 25, attack +17; 4th (3 slots); 1 Focus Point\", followed by notes.",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean", "description": "Shown on the statblock only when true" },
+            "tradition": { "type": "string", "enum": ["arcane", "divine", "occult", "primal", ""] },
+            "type": { "type": "string", "enum": ["prepared", "spontaneous", "innate", ""] },
+            "dc": { "type": "integer", "minimum": 0, "description": "Spell DC (0 leaves it out)" },
+            "attackMod": { "type": "integer", "minimum": 0, "description": "Spell attack modifier (0 leaves it out)" },
+            "focusPoints": { "type": "integer", "minimum": 0, "maximum": 3 },
+            "slots": { "type": "object", "description": "Slots per spell rank, e.g. {\"4\": 3, \"3\": 2}", "additionalProperties": { "type": "integer", "minimum": 0 } },
+            "notes": { "type": "string", "description": "The spells themselves, e.g. \"4th heal, sanctuary; 3rd ...\"" }
+          }
         },
         "specialAbilities": {
           "type": "array",

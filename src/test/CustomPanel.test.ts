@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import CustomPanel from '../components/custom/CustomPanel.vue'
 import { useCustomPanelStore } from '../stores/customPanelStore'
 import type { Creature } from '../types/creature'
+import { useEncounterStore } from '../stores/encounterStore'
 
 function makeCreature(): Creature {
   return {
@@ -92,5 +93,19 @@ describe('CustomPanel', () => {
 
     expect(customPanelStore.state.editingCreatureId).toBeNull()
     expect(customPanelStore.state.pendingCreatureData).toBeNull()
+  })
+
+  it('keeps spellcasting when the creature is saved', async () => {
+    const spellcasting = { enabled: true, tradition: 'arcane' as const, type: 'spontaneous' as const, dc: 20, attackMod: 12, focusPoints: 0, slots: { 2: 3, 1: 3 }, notes: 'fireball' }
+    // Loaded as a copy, so saving adds it as a new custom creature.
+    customPanelStore.startEditing({ ...makeCreature(), name: 'Hex Witch', spellcasting }, true, '')
+    await nextTick()
+    const wrapper = mount(CustomPanel)
+    await nextTick()
+
+    await wrapper.findAll('button').find(b => b.text().includes('Add to Creatures'))!.trigger('click')
+
+    const saved = useEncounterStore().state.creatures.find(c => c.name === 'Hex Witch')
+    expect(saved?.spellcasting).toEqual(spellcasting)
   })
 })

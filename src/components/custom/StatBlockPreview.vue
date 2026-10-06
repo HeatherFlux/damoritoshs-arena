@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Creature } from '../../types/creature'
 import type { Hazard } from '../../types/hazard'
 import ActionIcon from '../ActionIcon.vue'
+import { formatSpellcasting, formatSpellList } from '../../utils/creatureSpellcasting'
 
 const props = defineProps<{
   creature?: Partial<Creature>
@@ -19,6 +20,9 @@ function formatMod(value: number | undefined): string {
 const hasCreatureData = computed(() => {
   return props.creature && props.creature.name?.trim()
 })
+
+const spellcasting = computed(() => formatSpellcasting(props.creature?.spellcasting))
+const spellList = computed(() => formatSpellList(props.creature?.spells))
 
 // Check if hazard has meaningful data
 const hasHazardData = computed(() => {
@@ -158,6 +162,23 @@ const sizeDisplay = computed(() => {
           <span class="attack-bonus">{{ formatMod(attack.bonus) }}</span>
           <span v-if="attack.traits?.length" class="attack-traits">({{ attack.traits.join(', ') }})</span>
           <span class="attack-damage">{{ attack.damage }}</span>
+        </div>
+      </div>
+
+      <!-- Spellcasting -->
+      <div v-if="spellcasting" class="stat-section">
+        <div class="stat-divider"></div>
+        <div class="stat-ability">
+          <span class="ability-name">{{ spellcasting.label }}</span>
+          <span v-if="spellcasting.details" class="ability-traits">{{ spellcasting.details }}</span>
+          <span v-if="spellcasting.notes" class="ability-desc whitespace-pre-line">{{ spellcasting.notes }}</span>
+        </div>
+      </div>
+      <div v-if="spellList" class="stat-section">
+        <div v-if="!spellcasting" class="stat-divider"></div>
+        <div class="stat-ability">
+          <span class="ability-name">Spells</span>
+          <span class="ability-traits">{{ spellList }}</span>
         </div>
       </div>
 

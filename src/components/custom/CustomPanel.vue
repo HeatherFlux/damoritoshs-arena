@@ -147,6 +147,7 @@ function addToList() {
       speed: creatureData.value.speed || '25 feet',
       attacks: creatureData.value.attacks || [],
       specialAbilities: creatureData.value.specialAbilities || [],
+      ...(creatureData.value.spellcasting ? { spellcasting: creatureData.value.spellcasting } : {}),
     }
 
     if (customPanelStore.state.editingCreatureId) {

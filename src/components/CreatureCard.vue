@@ -4,6 +4,7 @@ import type { Creature } from '../types/creature'
 import { rollD20, rollDamage, formatModifier, getRecallKnowledgeDCs, getRecallKnowledgeSkill, cleanDamage, parseDamageExpression } from '../utils/dice'
 import { useSettingsStore } from '../stores/settingsStore'
 import ActionIcon from './ActionIcon.vue'
+import { formatSpellcasting, formatSpellList } from '../utils/creatureSpellcasting'
 
 /**
  * Condition penalties to apply to rolls (from CombatantRow when in combat).
@@ -26,6 +27,9 @@ const props = defineProps<{
 }>()
 
 const { settings } = useSettingsStore()
+
+const spellcasting = computed(() => formatSpellcasting(props.creature.spellcasting))
+const spellList = computed(() => formatSpellList(props.creature.spells))
 
 const penalties = computed(() => props.conditionPenalties ?? {
   attackRolls: 0, perception: 0, fortitude: 0, reflex: 0, will: 0, skillChecks: 0, damage: 0,
@@ -318,6 +322,18 @@ function getMAPPenalties(traits: string[]): { second: number; third: number } {
           {{ parseAttackDamage(attack.damage).type }}
         </span>
       </div>
+    </div>
+
+    <!-- Spellcasting -->
+    <div v-if="spellcasting" class="ability-block mt-2">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <strong>{{ spellcasting.label }}</strong>
+        <span v-if="spellcasting.details" class="text-xs text-dim">{{ spellcasting.details }}</span>
+      </div>
+      <div v-if="spellcasting.notes" class="mt-1 text-[0.8125rem] text-dim whitespace-pre-line">{{ spellcasting.notes }}</div>
+    </div>
+    <div v-if="spellList" class="ability-block mt-2">
+      <strong>Spells</strong> <span class="text-xs text-dim">{{ spellList }}</span>
     </div>
 
     <!-- Special Abilities -->
